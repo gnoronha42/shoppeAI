@@ -148,13 +148,13 @@ export default function Home() {
             <CardDescription>Categorias mais vendidas</CardDescription>
           </CardHeader>
           <CardContent>
-            <PieChart
+            {/* <PieChart
               data={chartData.pie}
               index="name"
               valueFormatter={formatPercentage}
               colors={["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)"]}
               className="h-80"
-            />
+            /> */}
           </CardContent>
         </Card>
       </div>
@@ -165,14 +165,14 @@ export default function Home() {
           <CardDescription>Relação entre visitas e vendas concretizadas</CardDescription>
         </CardHeader>
         <CardContent>
-          <LineChart
+          {/* <LineChart
             data={chartData.line}
             index="name"
             categories={["visitas", "conversoes"]}
             colors={["var(--chart-2)", "var(--chart-1)"]}
             valueFormatter={formatNumber}
             className="h-80"
-          />
+          /> */}
         </CardContent>
       </Card>
     </div>
