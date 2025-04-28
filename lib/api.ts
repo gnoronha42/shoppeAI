@@ -3,7 +3,7 @@ import { Client, Report } from '@/types';
 
 // Base API with mock functionality
 export const api = createApi({
-  baseQuery: fetchBaseQuery({ baseUrl: '/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
   tagTypes: ['Clients', 'Reports'],
   endpoints: (builder) => ({
     getClients: builder.query<Client[], void>({
@@ -20,25 +20,19 @@ export const api = createApi({
       providesTags: ['Clients'],
     }),
     getClient: builder.query<Client, string>({
-      queryFn: (id) => {
-        const clients = [
-          { id: '1', name: 'Loja Fantástica', ownerName: 'João Silva' },
-          { id: '2', name: 'Moda Express', ownerName: 'Maria Oliveira' },
-          { id: '3', name: 'Tech Solutions', ownerName: 'Carlos Santos' },
-        ];
-        const client = clients.find(c => c.id === id);
-        return { data: client || null };
+      query: (id) => `lojas/${id}`,
+      transformResponse: (response: unknown, _meta, _arg): Client => {
+        return response as Client;
       },
       providesTags: (_result, _error, id) => [{ type: 'Clients', id }],
     }),
     getClientReports: builder.query<Report[], string>({
-      queryFn: (clientId) => {
-        // Mock reports data
-        const reports = [
+      queryFn: async (clientId) => {
+        const reports: Report[] = [
           {
             id: '1',
             clientId: '1',
-            type: 'account',
+            type: 'account' as const,
             createdAt: '2025-04-10T14:30:00Z',
             url: '/reports/1.pdf',
             metrics: []
@@ -46,7 +40,7 @@ export const api = createApi({
           {
             id: '2',
             clientId: '1',
-            type: 'ads',
+            type: 'ads' as const,
             createdAt: '2025-04-09T10:15:00Z',
             url: '/reports/2.pdf',
             metrics: []
@@ -54,15 +48,13 @@ export const api = createApi({
           {
             id: '3',
             clientId: '2',
-            type: 'account',
+            type: 'account' as const,
             createdAt: '2025-04-05T16:45:00Z',
             url: '/reports/3.pdf',
             metrics: []
           }
         ];
-        return { 
-          data: reports.filter(report => report.clientId === clientId)
-        };
+        return { data: reports.filter(report => report.clientId === clientId) };
       },
       providesTags: (_result, _error, clientId) => [{ type: 'Reports', id: clientId }],
     }),
