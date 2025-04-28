@@ -6,7 +6,6 @@ const nextConfig = {
   },
   images: { unoptimized: true },
   webpack: (config, { dev, isServer }) => {
-    // Disable webpack cache in development to prevent caching issues
     if (dev && isServer) {
       config.cache = false;
     }
