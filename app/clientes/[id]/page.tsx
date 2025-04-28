@@ -11,28 +11,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 export default function ClientDetailsPage() {
-  const { id } = useParams();
-  const { data: client, isLoading: isLoadingClient } = useGetClientQuery(id as string);
-  const { data: reports = [], isLoading: isLoadingReports } = useGetClientReportsQuery(id as string);
 
-  if (isLoadingClient || isLoadingReports) {
-    return (
-      <div className="space-y-6">
-        <div className="h-8 w-48 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
-        <div className="h-24 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
-        <div className="h-96 bg-gray-200 dark:bg-zinc-800 rounded animate-pulse" />
-      </div>
-    );
-  }
-
-  if (!client) {
-    return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold">Cliente não encontrado</h2>
-        <p className="text-muted-foreground">O cliente solicitado não existe ou foi removido.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -48,13 +27,13 @@ export default function ClientDetailsPage() {
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
-                {client.name.substring(0, 2).toUpperCase()}
+                {/* {client.name.substring(0, 2).toUpperCase()} */}
               </AvatarFallback>
             </Avatar>
             <div>
-              <CardTitle className="text-2xl">{client.name}</CardTitle>
+              <CardTitle className="text-2xl">teste</CardTitle>
               <CardDescription className="text-lg">
-                {client.ownerName}
+                teste
               </CardDescription>
             </div>
           </div>
@@ -63,14 +42,14 @@ export default function ClientDetailsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Relatórios ({reports.length})</CardTitle>
+          <CardTitle>Relatórios (0)</CardTitle>
           <CardDescription>
             Histórico de relatórios gerados para este cliente
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {reports.length === 0 ? (
+              {/* {reports.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">
                   Nenhum relatório foi gerado ainda para este cliente.
@@ -108,7 +87,7 @@ export default function ClientDetailsPage() {
                   </div>
                 </div>
               ))
-            )}
+            )} */}
           </div>
         </CardContent>
       </Card>
