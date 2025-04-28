@@ -132,14 +132,14 @@ export default function Home() {
             <CardDescription>Desempenho de vendas dos últimos 6 meses</CardDescription>
           </CardHeader>
           <CardContent>
-            <BarChart
+            {/* <BarChart
               data={chartData.bar}
               index="name"
               categories={["vendas"]}
               colors={["var(--chart-1)"]}
               valueFormatter={formatCurrency}
               className="h-80"
-            />
+            /> */}
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
