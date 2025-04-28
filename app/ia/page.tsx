@@ -27,7 +27,7 @@ export default function IAPage() {
 
     // Simulação de resposta da IA
     setTimeout(() => {
-      let response;
+      let response:any;
       
       if (query.toLowerCase().includes("venda")) {
         response = "Com base nas tendências atuais da Shopee, para aumentar suas vendas recomendo: 1) Otimizar títulos com palavras-chave relevantes, 2) Oferecer frete grátis quando possível, 3) Responder rapidamente a perguntas dos clientes, e 4) Utilizar promoções relâmpago para impulsionar a visibilidade da loja.";
