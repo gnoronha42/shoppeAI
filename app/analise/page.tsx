@@ -3,17 +3,16 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet } from "lucide-react";
+import { FileSpreadsheet, ArrowRight } from "lucide-react";
 import { ClientSelector } from "@/components/client/client-selector";
 import { AnalysisTypeSelector } from "@/components/analysis/analysis-type-selector";
 import { FileUpload } from "@/components/analysis/file-upload";
-import { ClientForm } from "@/components/client/client-form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSelector } from "react-redux";
 import { selectSelectedClientId } from "@/features/clients/clientSlice";
 import { useGenerateReportMutation } from "@/lib/api";
 import { toast } from "sonner";
 import { AnalysisType } from "@/types";
+import { useRouter } from "next/navigation";
 
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -131,6 +130,7 @@ Com base nesses dados, forneça uma análise detalhada dos anúncios incluindo:
 Inclua métricas objetivas e recomendações práticas que possam ser implementadas imediatamente.`;
 
 export default function AnalisePage() {
+  const router = useRouter();
   const [analysisType, setAnalysisType] = useState<AnalysisType>("account");
   const [files, setFiles] = useState<File[]>([]);
   const selectedClientId = useSelector(selectSelectedClientId);
@@ -242,6 +242,9 @@ export default function AnalisePage() {
           "A análise foi processada com IA e o relatório está disponível para download.",
       });
 
+      // Redirecionar para a página de detalhes do cliente após a análise
+      router.push(`/clientes/${selectedClientId}`);
+
       setFiles([]);
     } catch (error) {
       console.error("Erro completo:", error);
@@ -263,83 +266,74 @@ export default function AnalisePage() {
         </p>
       </div>
 
-      <Tabs defaultValue="analysis">
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-          <TabsTrigger value="analysis">Realizar Análise</TabsTrigger>
-          <TabsTrigger value="register">Cadastrar Cliente</TabsTrigger>
-        </TabsList>
+      <div className="flex justify-between items-center">
+        <p className="text-sm text-muted-foreground">
+          Selecione um cliente e faça upload de capturas de tela para análise automática com IA
+        </p>
+        <Button variant="outline" onClick={() => router.push('/clientes')}>
+          Gerenciar Clientes
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
 
-        <TabsContent value="analysis" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Selecione o Cliente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ClientSelector />
-            </CardContent>
-          </Card>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Selecione o Cliente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ClientSelector />
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Tipo de Análise</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AnalysisTypeSelector
-                value={analysisType}
-                onChange={setAnalysisType}
-              />
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Tipo de Análise</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AnalysisTypeSelector
+              value={analysisType}
+              onChange={setAnalysisType}
+            />
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {analysisType === "account"
-                  ? "Upload de Prints da Conta"
-                  : "Upload de Prints dos Anúncios"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FileUpload
-                onFilesChange={handleFileChange}
-                maxFiles={5}
-                accept="image/*"
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                Faça upload de capturas de tela da sua loja Shopee para análise
-                com IA
-              </p>
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {analysisType === "account"
+                ? "Upload de Prints da Conta"
+                : "Upload de Prints dos Anúncios"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FileUpload
+              onFilesChange={handleFileChange}
+              maxFiles={5}
+              accept="image/*"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Faça upload de capturas de tela da sua loja Shopee para análise detalhada com IA
+            </p>
+          </CardContent>
+        </Card>
 
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              !selectedClientId ||
-              files.length === 0 ||
-              isLoading ||
-              isAnalyzing
-            }
-            className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white"
-          >
-            <FileSpreadsheet className="mr-2 h-4 w-4" />
-            {isLoading || isAnalyzing
-              ? "Analisando com IA..."
-              : "Gerar Relatório com IA"}
-          </Button>
-        </TabsContent>
-
-        <TabsContent value="register" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Cadastrar Novo Cliente</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ClientForm />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <Button
+          onClick={handleSubmit}
+          disabled={
+            !selectedClientId ||
+            files.length === 0 ||
+            isLoading ||
+            isAnalyzing
+          }
+          className="w-full md:w-auto bg-orange-600 hover:bg-orange-700 text-white"
+        >
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          {isLoading || isAnalyzing
+            ? "Analisando com IA..."
+            : "Gerar Relatório com IA"}
+        </Button>
+      </div>
     </div>
   );
 }

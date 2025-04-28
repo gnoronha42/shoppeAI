@@ -6,7 +6,7 @@ import { MainLayout } from '@/components/layout/main-layout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Shopee Analytics - Analise de Contas e Ads',
+  title: 'Shop.AI',
   description: 'Plataforma para análise de contas e ads da Shopee',
 };
 

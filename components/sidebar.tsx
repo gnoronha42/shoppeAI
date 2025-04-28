@@ -4,15 +4,22 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
-import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X } from "lucide-react";
+import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import Image from "next/image";
+import logo from "@/assets/logo.png";
 
 const sidebarItems = [
   {
     title: "Dashboard",
     href: "/",
     icon: <ShoppingBag className="mr-2 h-5 w-5" />,
+  },
+  {
+    title: "Clientes",
+    href: "/clientes",
+    icon: <Users className="mr-2 h-5 w-5" />,
   },
   {
     title: "Análise",
@@ -61,7 +68,9 @@ export function Sidebar() {
           <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
             <div className="flex items-center">
               <ShoppingBag className="h-8 w-8 text-orange-600 mr-2" />
-              <h1 className="text-xl font-bold">ShopeeAI</h1>
+               
+               <Image src={logo} alt="Shop.AI" width={100} height={100} />
+
             </div>
             <ThemeToggle />
           </div>
@@ -74,7 +83,7 @@ export function Sidebar() {
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
                   "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200",
-                  pathname === item.href
+                  pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                     ? "bg-orange-100 text-orange-700 dark:bg-zinc-800 dark:text-orange-400"
                     : "text-gray-700 hover:bg-orange-50 dark:text-gray-300 dark:hover:bg-zinc-800"
                 )}
