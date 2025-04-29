@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../lib/generated/prisma';
 
 // Adiciona interface para definir prisma no tipo global
 declare global {
