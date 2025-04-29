@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && prisma db push && next build",
-    "start": "next start",
-    "lint": "next lint",
-    "vercel-build": "prisma generate && next build",
-    "postinstall": "prisma generate"
-  },
+  "dev": "next dev",
+  "build": "prisma generate && next build",
+  "start": "next start",
+  "lint": "next lint",
+  "vercel-build": "prisma generate && prisma db push && next build",
+  "postinstall": "prisma generate"
+},
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
     "@hookform/resolvers": "^3.9.0",
