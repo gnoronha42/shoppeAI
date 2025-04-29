@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model activity_log {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id     String?   @db.Uuid
+  client_id   String?   @db.Uuid
+  action      String    @db.VarChar(100)
+  entity_type String    @db.VarChar(100)
+  entity_id   String?   @db.Uuid
+  details     Json?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  clients     clients?  @relation(fields: [client_id], references: [id], onUpdate: NoAction)
+  users       users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ad_metrics {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id   String    @db.Uuid
+  product_id  String?   @db.Uuid
+  ad_type     String    @db.VarChar(50)
+  impressions Int?      @default(0)
+  clicks      Int?      @default(0)
+  ctr         Decimal?  @db.Decimal(5, 2)
+  spend       Decimal?  @default(0) @db.Decimal(10, 2)
+  conversions Int?      @default(0)
+  roas        Decimal?  @db.Decimal(10, 2)
+  date        DateTime  @db.Date
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  clients     clients   @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products    products? @relation(fields: [product_id], references: [id], onUpdate: NoAction)
+
+  @@index([client_id], map: "idx_ad_metrics_client_id")
+  @@index([date], map: "idx_ad_metrics_date")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model ai_requests {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String?   @db.Uuid
+  client_id       String?   @db.Uuid
+  prompt          String
+  response        String?
+  model           String?   @default("gemini") @db.VarChar(100)
+  tokens_used     Int?
+  processing_time Int?
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  clients         clients?  @relation(fields: [client_id], references: [id], onUpdate: NoAction)
+  users           users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model analyses {
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id        String             @db.Uuid
+  type             String             @db.VarChar(50)
+  title            String?            @db.VarChar(255)
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  clients          clients            @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  analysis_results analysis_results[]
+  images           images[]
+  reports          reports[]
+
+  @@index([client_id], map: "idx_analyses_client_id")
+  @@index([created_at], map: "idx_analyses_created_at")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model analysis_results {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  analysis_id      String    @db.Uuid
+  content          String
+  source_image_url String?
+  processed_by     String?   @default("gemini") @db.VarChar(100)
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  analyses         analyses  @relation(fields: [analysis_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([analysis_id], map: "idx_analysis_results_analysis_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model chat_conversations {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String?         @db.Uuid
+  client_id     String?         @db.Uuid
+  title         String?         @db.VarChar(255)
+  created_at    DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime?       @default(now()) @db.Timestamptz(6)
+  clients       clients?        @relation(fields: [client_id], references: [id], onUpdate: NoAction)
+  users         users?          @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  chat_messages chat_messages[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model chat_messages {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String?             @db.Uuid
+  client_id          String?             @db.Uuid
+  conversation_id    String?             @db.Uuid
+  content            String
+  is_ai_response     Boolean?            @default(false)
+  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
+  clients            clients?            @relation(fields: [client_id], references: [id], onUpdate: NoAction)
+  chat_conversations chat_conversations? @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users              users?              @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([conversation_id], map: "idx_chat_messages_conversation_id")
+  @@index([created_at], map: "idx_chat_messages_created_at")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model clients {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String               @db.VarChar(255)
+  owner_name         String               @db.VarChar(255)
+  shop_url           String?              @db.VarChar(255)
+  followers          Int?
+  rating             Decimal?             @db.Decimal(3, 2)
+  registration_date  DateTime?            @db.Timestamptz(6)
+  product_count      Int?
+  response_rate      Decimal?             @db.Decimal(5, 2)
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  activity_log       activity_log[]
+  ad_metrics         ad_metrics[]
+  ai_requests        ai_requests[]
+  analyses           analyses[]
+  chat_conversations chat_conversations[]
+  chat_messages      chat_messages[]
+  products           products[]
+  reports            reports[]
+
+  @@index([name], map: "idx_clients_name")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model configurations {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String?   @db.Uuid
+  key        String    @db.VarChar(100)
+  value      String?
+  is_global  Boolean?  @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      users?    @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@unique([user_id, key])
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model images {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  analysis_id       String?   @db.Uuid
+  report_id         String?   @db.Uuid
+  url               String    @db.VarChar(255)
+  original_filename String?   @db.VarChar(255)
+  file_size         Int?
+  mime_type         String?   @db.VarChar(100)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  analyses          analyses? @relation(fields: [analysis_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  reports           reports?  @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model products {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id       String       @db.Uuid
+  product_id      String?      @db.VarChar(100)
+  name            String       @db.VarChar(255)
+  price           Decimal?     @db.Decimal(10, 2)
+  original_price  Decimal?     @db.Decimal(10, 2)
+  stock           Int?
+  views           Int?         @default(0)
+  sales           Int?         @default(0)
+  conversion_rate Decimal?     @db.Decimal(5, 2)
+  category        String?      @db.VarChar(100)
+  created_at      DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?    @default(now()) @db.Timestamptz(6)
+  ad_metrics      ad_metrics[]
+  clients         clients      @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([client_id], map: "idx_products_client_id")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model report_metrics {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  report_id         String    @db.Uuid
+  metric_name       String    @db.VarChar(100)
+  metric_value      String    @db.VarChar(255)
+  previous_value    String?   @db.VarChar(255)
+  change_percentage Decimal?  @db.Decimal(10, 2)
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
+  reports           reports   @relation(fields: [report_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model reports {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id      String           @db.Uuid
+  analysis_id    String?          @db.Uuid
+  type           String           @db.VarChar(50)
+  title          String?          @db.VarChar(255)
+  url            String?          @db.VarChar(255)
+  status         String?          @default("pending") @db.VarChar(50)
+  created_at     DateTime?        @default(now()) @db.Timestamptz(6)
+  images         images[]
+  report_metrics report_metrics[]
+  analyses       analyses?        @relation(fields: [analysis_id], references: [id], onUpdate: NoAction)
+  clients        clients          @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([client_id], map: "idx_reports_client_id")
+  @@index([created_at], map: "idx_reports_created_at")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model users {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String               @db.VarChar(255)
+  email              String               @unique @db.VarChar(255)
+  password           String               @db.VarChar(255)
+  role               String?              @default("user") @db.VarChar(50)
+  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  activity_log       activity_log[]
+  ai_requests        ai_requests[]
+  chat_conversations chat_conversations[]
+  chat_messages      chat_messages[]
+  configurations     configurations[]
+}

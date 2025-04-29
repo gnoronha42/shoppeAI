@@ -22,7 +22,19 @@ export const clientSlice = createSlice({
     addClient: (state, action: PayloadAction<Client>) => {
       state.clients.push(action.payload);
     },
-    selectClient: (state, action: PayloadAction<string>) => {
+    updateClient: (state, action: PayloadAction<Client>) => {
+      const index = state.clients.findIndex(client => client.id === action.payload.id);
+      if (index !== -1) {
+        state.clients[index] = action.payload;
+      }
+    },
+    deleteClient: (state, action: PayloadAction<string>) => {
+      state.clients = state.clients.filter(client => client.id !== action.payload);
+      if (state.selectedClientId === action.payload) {
+        state.selectedClientId = null;
+      }
+    },
+    selectClient: (state, action: PayloadAction<string | null>) => {
       state.selectedClientId = action.payload;
     },
     clearSelectedClient: (state) => {
@@ -31,7 +43,14 @@ export const clientSlice = createSlice({
   },
 });
 
-export const { setClients, addClient, selectClient, clearSelectedClient } = clientSlice.actions;
+export const { 
+  setClients, 
+  addClient, 
+  updateClient, 
+  deleteClient, 
+  selectClient, 
+  clearSelectedClient 
+} = clientSlice.actions;
 
 export const selectAllClients = (state: RootState) => state.clients.clients;
 export const selectSelectedClientId = (state: RootState) => state.clients.selectedClientId;

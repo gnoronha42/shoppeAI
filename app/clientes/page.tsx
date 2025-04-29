@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientForm } from "@/components/client/client-form";
 import { useGetClientsQuery } from "@/lib/api";
 import { Loader2, Plus, User } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { setClients } from "@/features/clients/clientSlice";
 
 export default function ClientesPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { data: clients = [], isLoading, error } = useGetClientsQuery();
+  const [activeTab, setActiveTab] = useState<string>("lista");
+  
+  // Atualizar o estado do Redux quando os clientes forem carregados
+  useEffect(() => {
+    if (clients && clients.length > 0) {
+      dispatch(setClients(clients));
+    }
+  }, [clients, dispatch]);
   
   const navigateToClientDetails = (clientId: string) => {
     router.push(`/clientes/${clientId}`);
+  };
+
+  const handleClientFormSuccess = () => {
+    setActiveTab("lista");
   };
 
   return (
@@ -27,7 +42,7 @@ export default function ClientesPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="lista">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full md:w-[400px] grid-cols-2">
           <TabsTrigger value="lista">Lista de Clientes</TabsTrigger>
           <TabsTrigger value="cadastro">Cadastrar Cliente</TabsTrigger>
@@ -49,7 +64,7 @@ export default function ClientesPage() {
                 <Button 
                   variant="outline" 
                   className="mt-4"
-                  onClick={() => document.querySelector('[data-value="cadastro"]')?.click()}
+                  onClick={() => setActiveTab("cadastro")}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Cadastrar Cliente
@@ -93,7 +108,7 @@ export default function ClientesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClientForm />
+              <ClientForm onSuccess={handleClientFormSuccess} />
             </CardContent>
           </Card>
         </TabsContent>

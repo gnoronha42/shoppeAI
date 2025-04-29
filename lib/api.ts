@@ -4,23 +4,14 @@ import { Client, Report } from '@/types';
 // Base API with mock functionality
 export const api = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
-  tagTypes: ['Clients', 'Reports'],
+  tagTypes: ['Clients', 'Reports', 'Analyses'],
   endpoints: (builder) => ({
     getClients: builder.query<Client[], void>({
-      queryFn: () => {
-        // Mock data
-        return { 
-          data: [
-            { id: '1', name: 'Loja Fantástica', ownerName: 'João Silva' },
-            { id: '2', name: 'Moda Express', ownerName: 'Maria Oliveira' },
-            { id: '3', name: 'Tech Solutions', ownerName: 'Carlos Santos' },
-          ] 
-        };
-      },
+      query: () => 'clientes',
       providesTags: ['Clients'],
     }),
     getClient: builder.query<Client, string>({
-      query: (id) => `lojas/${id}`,
+      query: (id) => `clientes/${id}`,
       transformResponse: (response: unknown, _meta, _arg): Client => {
         return response as Client;
       },
@@ -58,17 +49,31 @@ export const api = createApi({
       },
       providesTags: (_result, _error, clientId) => [{ type: 'Reports', id: clientId }],
     }),
-    addClient: builder.mutation<Client, Omit<Client, 'id'>>({
-      queryFn: (newClient) => {
-        // Mock implementation
-        return { 
-          data: { 
-            id: Date.now().toString(),
-            ...newClient
-          } 
-        };
-      },
+    addClient: builder.mutation<Client, Partial<Client>>({
+      query: (client) => ({
+        url: 'clientes',
+        method: 'POST',
+        body: client,
+      }),
       invalidatesTags: ['Clients'],
+    }),
+    updateClient: builder.mutation<Client, Partial<Client> & { id: string }>({
+      query: ({ id, ...client }) => ({
+        url: `clientes/${id}`,
+        method: 'PUT',
+        body: client,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Clients', id },
+        'Clients'
+      ]
+    }),
+    deleteClient: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `clientes/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Clients']
     }),
     generateReport: builder.mutation<{ url: string }, { clientId: string, type: 'account' | 'ads', files: string[] }>({
       queryFn: (data) => {
@@ -93,5 +98,7 @@ export const {
   useGetClientQuery,
   useGetClientReportsQuery,
   useAddClientMutation,
+  useUpdateClientMutation,
+  useDeleteClientMutation,
   useGenerateReportMutation
 } = api;

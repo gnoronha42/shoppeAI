@@ -11,11 +11,11 @@ import Image from "next/image";
 import logo from "@/assets/logo.png";
 
 const sidebarItems = [
-  {
-    title: "Dashboard",
-    href: "/",
-    icon: <ShoppingBag className="mr-2 h-5 w-5" />,
-  },
+  // {
+  //   title: "Dashboard",
+  //   href: "/",
+  //   icon: <ShoppingBag className="mr-2 h-5 w-5" />,
+  // },
   {
     title: "Clientes",
     href: "/clientes",
@@ -26,21 +26,21 @@ const sidebarItems = [
     href: "/analise",
     icon: <BarChart2 className="mr-2 h-5 w-5" />,
   },
-  {
-    title: "Pergunte a IA",
-    href: "/ia",
-    icon: <BrainCircuit className="mr-2 h-5 w-5" />,
-  },
-  {
-    title: "Configurações",
-    href: "/configuracoes",
-    icon: <Settings className="mr-2 h-5 w-5" />,
-  },
-  {
-    title: "Histórico",
-    href: "/historico",
-    icon: <Clock className="mr-2 h-5 w-5" />,
-  },
+  // {
+  //   title: "Pergunte a IA",
+  //   href: "/ia",
+  //   icon: <BrainCircuit className="mr-2 h-5 w-5" />,
+  // },
+  // {
+  //   title: "Configurações",
+  //   href: "/configuracoes",
+  //   icon: <Settings className="mr-2 h-5 w-5" />,
+  // },
+  // {
+  //   title: "Histórico",
+  //   href: "/historico",
+  //   icon: <Clock className="mr-2 h-5 w-5" />,
+  // },
 ];
 
 export function Sidebar() {

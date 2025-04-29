@@ -2,15 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, BarChart, FileSpreadsheet, ClipboardCheck, ArrowLeft, Loader2 } from "lucide-react";
-import { useGetClientQuery, useGetClientReportsQuery } from "@/lib/api";
+import { ClientForm } from "@/components/client/client-form";
+import { 
+  FileText, 
+  BarChart, 
+  FileSpreadsheet, 
+  ClipboardCheck, 
+  ArrowLeft, 
+  Loader2,
+  Link as LinkIcon,
+  Download,
+  CalendarIcon,
+ 
+} from "lucide-react";
+import { useGetClientQuery, useGetClientReportsQuery, useDeleteClientMutation } from "@/lib/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 
 interface AnalysisResult {
   filename: string;
@@ -25,12 +40,14 @@ interface StoredAnalysis {
 export default function ClientDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const clientId = params.id as string;
   const [storedAnalyses, setStoredAnalyses] = useState<StoredAnalysis[]>([]);
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState("reports");
+  const [selectedTab, setSelectedTab] = useState("info");
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
 
-  const { data: client, isLoading: isClientLoading } = useGetClientQuery(clientId);
+  const { data: client, isLoading: isClientLoading, refetch: refetchClient } = useGetClientQuery(clientId);
   const { data: reports = [], isLoading: isReportsLoading } = useGetClientReportsQuery(clientId);
 
   useEffect(() => {
@@ -57,6 +74,43 @@ export default function ClientDetailsPage() {
     setStoredAnalyses(analyses);
   }, [clientId]);
 
+  const handleDeleteClient = async () => {
+    try {
+      await deleteClient(clientId).unwrap();
+      toast({
+        title: "Cliente excluído com sucesso",
+        description: "O cliente foi removido permanentemente",
+        variant: "default",
+      });
+      router.push('/clientes');
+    } catch (error: any) {
+      console.error("Erro ao excluir cliente:", error);
+      toast({
+        title: "Erro ao excluir cliente",
+        description: error?.data?.error || "Não foi possível excluir o cliente",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClientUpdate = () => {
+    refetchClient();
+    toast({
+      title: "Cliente atualizado",
+      description: "As informações do cliente foram atualizadas com sucesso",
+      variant: "default",
+    });
+    setSelectedTab("info");
+  };
+
+  const generatePDF = (analysis: StoredAnalysis) => {
+    toast({
+      title: "Gerando PDF...",
+      description: "O PDF da análise está sendo gerado",
+      variant: "default",
+    });
+  };
+
   if (isClientLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -79,109 +133,119 @@ export default function ClientDetailsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => router.push('/clientes')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold">{client.name}</h1>
-          <p className="text-muted-foreground">
-            Visualize informações e relatórios do cliente
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => router.push('/clientes')}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">{client.name}</h1>
+            <p className="text-muted-foreground">
+              Visualize e gerencie informações do cliente
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setSelectedTab("edit")}
+          >
+            Editar Cliente
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">Excluir</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso excluirá permanentemente o cliente 
+                  "{client.name}" e todos os dados associados a ele.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDeleteClient}
+                  className="bg-red-600 hover:bg-red-700"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? "Excluindo..." : "Sim, excluir cliente"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
-                {client.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <CardTitle className="text-2xl">{client.name}</CardTitle>
-              <CardDescription className="text-lg">
-                {client.ownerName}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-          <TabsTrigger value="reports">Relatórios</TabsTrigger>
-          <TabsTrigger value="analyses">Análises</TabsTrigger>
+        <TabsList className="grid w-full md:w-[600px] grid-cols-3">
+          <TabsTrigger value="info">Informações</TabsTrigger>
+          <TabsTrigger value="analyses">Análises ({storedAnalyses.length})</TabsTrigger>
+          <TabsTrigger value="edit">Editar</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="reports" className="space-y-4 mt-4">
+        <TabsContent value="info" className="space-y-4 mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Relatórios ({reports.length})</CardTitle>
-              <CardDescription>
-                Relatórios gerados para este cliente
-              </CardDescription>
+            <CardHeader className="pb-2">
+              <CardTitle>Detalhes da Loja</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {isReportsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="flex items-start gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="bg-orange-100 text-orange-800 text-xl">
+                    {client.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-3 w-full">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-semibold">{client.name}</h3>
+                      <p className="text-muted-foreground">{client.ownerName}</p>
+                    </div>
+                  
                   </div>
-                ) : reports.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">
-                      Nenhum relatório foi gerado ainda para este cliente.
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      className="mt-4"
-                      onClick={() => router.push('/analise')}
-                    >
-                      <ClipboardCheck className="mr-2 h-4 w-4" />
-                      Realizar Análise
-                    </Button>
+                  
+                  <Separator />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   
+                    
+                    
+                    
+                    
                   </div>
-                ) : (
-                  reports.map((report) => (
-                    <div
-                      key={report.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <p className="font-medium">
-                            Relatório de {report.type === "account" ? "Conta" : "Anúncios"}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(report.createdAt), "PPpp", { locale: ptBR })}
-                          </p>
-                        </div>
-                        <Badge variant={report.type === "account" ? "outline" : "secondary"}>
-                          {report.type === "account" ? "Conta" : "Anúncios"}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="icon">
-                          <FileText className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <BarChart className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon">
-                          <FileSpreadsheet className="h-4 w-4" />
-                        </Button>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center text-muted-foreground">
+                        <CalendarIcon className="h-4 w-4 mr-1" />
+                        <span className="text-sm">Data de Registro</span>
                       </div>
                     </div>
-                  ))
-                )}
+                    
+                    <div className="space-y-1">
+                     
+                    
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => router.push('/analise')}
+              >
+                <ClipboardCheck className="mr-2 h-4 w-4" />
+                Nova Análise
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         
-        <TabsContent value="analyses" className="space-y-4 mt-4">
+        <TabsContent value="analyses" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Análises IA ({storedAnalyses.length})</CardTitle>
@@ -225,9 +289,21 @@ export default function ClientDetailsPage() {
                                   {analysis.results.length} imagens analisadas
                                 </p>
                               </div>
-                              <Badge variant="outline">
-                                {analysis.results[0]?.filename.includes('account') ? 'Conta' : 'Anúncios'}
-                              </Badge>
+                              <div className="flex flex-col items-end gap-2">
+                                <Badge variant="outline">
+                                  {analysis.results[0]?.filename.includes('account') ? 'Conta' : 'Anúncios'}
+                                </Badge>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    generatePDF(analysis);
+                                  }}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
@@ -257,11 +333,37 @@ export default function ClientDetailsPage() {
                             }
                           </div>
                         </CardContent>
+                        <CardFooter className="flex justify-end">
+                          <Button 
+                            variant="outline"
+                            onClick={() => generatePDF(storedAnalyses.find(a => `${a.date}` === selectedAnalysis)!)}
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Baixar PDF
+                          </Button>
+                        </CardFooter>
                       </Card>
                     )}
                   </>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="edit" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Editar Cliente</CardTitle>
+              <CardDescription>
+                Atualize as informações do cliente
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ClientForm 
+                client={client} 
+                onSuccess={handleClientUpdate} 
+              />
             </CardContent>
           </Card>
         </TabsContent>
