@@ -18,7 +18,6 @@ export default function ClientesPage() {
   const { data: clients = [], isLoading, error } = useGetClientsQuery();
   const [activeTab, setActiveTab] = useState<string>("lista");
   
-  // Atualizar o estado do Redux quando os clientes forem carregados
   useEffect(() => {
     if (clients && clients.length > 0) {
       dispatch(setClients(clients));
