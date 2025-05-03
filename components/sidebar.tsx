@@ -26,21 +26,21 @@ const sidebarItems = [
     href: "/analise",
     icon: <BarChart2 className="mr-2 h-5 w-5" />,
   },
-  // {
-  //   title: "Pergunte a IA",
-  //   href: "/ia",
-  //   icon: <BrainCircuit className="mr-2 h-5 w-5" />,
-  // },
-  // {
-  //   title: "Configurações",
-  //   href: "/configuracoes",
-  //   icon: <Settings className="mr-2 h-5 w-5" />,
-  // },
-  // {
-  //   title: "Histórico",
-  //   href: "/historico",
-  //   icon: <Clock className="mr-2 h-5 w-5" />,
-  // },
+  {
+    title: "Pergunte a IA",
+    href: "/ia",
+    icon: <BrainCircuit className="mr-2 h-5 w-5" />,
+  },
+  {
+    title: "Configurações",
+    href: "/configuracoes",
+    icon: <Settings className="mr-2 h-5 w-5" />,
+  },
+  {
+    title: "Histórico",
+    href: "/historico",
+    icon: <Clock className="mr-2 h-5 w-5" />,
+  },
 ];
 
 export function Sidebar() {
