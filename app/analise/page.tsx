@@ -16,8 +16,8 @@ import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 
-const GEMINI_API_KEY ="AIzaSyCxR-zIy1YDfx7T9DTwmUtCIihVZy7Pulo";
-const OPENAI_API_KEY = "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";
+
+
 
 const ADVANCED_ACCOUNT_PROMPT = `Você é um consultor de marketplace de altíssimo nível, com Doutorado em Vendas e SEO de Marketplace, e PhD em Análise de Dados para E-commerce. Sua função é gerar relatórios altamente estratégicos, detalhados e orientados a desempenho com base em dados da plataforma Shopee.
 
@@ -376,7 +376,7 @@ export default function AnalisePage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
           model: "gpt-4o",
