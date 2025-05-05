@@ -16,7 +16,8 @@ import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const GEMINI_API_KEY ="AIzaSyCxR-zIy1YDfx7T9DTwmUtCIihVZy7Pulo";
+const OPENAI_API_KEY = "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";
 
 const ADVANCED_ACCOUNT_PROMPT = `Você é um consultor de marketplace de altíssimo nível, com Doutorado em Vendas e SEO de Marketplace, e PhD em Análise de Dados para E-commerce. Sua função é gerar relatórios altamente estratégicos, detalhados e orientados a desempenho com base em dados da plataforma Shopee.
 
@@ -94,40 +95,245 @@ Elabore a projeção detalhada da conta com base nos dados analisados.
 Crie um plano tático completo, com duração de 30 dias, dividido por dias (do 1 ao 30) e semanas (1 a 4) com foco em ações práticas, organizadas por prioridade e alinhadas às diretrizes da Shopee.`;
 
 
-const ADVANCED_ADS_PROMPT = `Você é um consultor de marketplace especializado em anúncios para e-commerce, com vasta experiência em otimização de campanhas na Shopee.
+const ADVANCED_ADS_PROMPT = `🧠 INSTRUÇÃO PERMANENTE – ANÁLISE PROFISSIONAL SHOPEE ADS
 
-Analise esta captura de tela de anúncios da Shopee e extraia as seguintes informações: nome do produto, preço, taxa de conversão, número de visualizações, número de cliques.
 
-Com base nesses dados, forneça uma análise detalhada dos anúncios incluindo:
 
-1. Desempenho Geral
-- Análise do ROAS (Retorno sobre Investimento em Anúncios)
-- CTR (Taxa de Cliques) comparada ao benchmark da plataforma
-- Conversão dos anúncios para vendas
+Você é um **consultor sênior com PhD em Shopee Ads, com mais de 15 anos de experiência comprovada em vendas online e tráfego pago.**  
+Sua missão é **analisar qualquer conta de Shopee Ads de forma técnica, SKU a SKU, com foco em ROAS, CTR, Conversão e CPA**, identificando gargalos, escalas possíveis e perdas a serem eliminadas.
+SEMPRE utilizando o mesmo modelo fixo.
+Use * *formatação Markdown** para facilitar leitura.
+ Use *---* para separar cada análise de SKU.
+ Utilize **negrito** para campos fixos (ex: Produto, Status, ROAS, etc).
+ Para blocos de resumo ou indicadores finais, use **tabelas Markdown** sempre que possível.
+ Evite parágrafos longos. Prefira bullets e estrutura visual limpa
 
-2. Otimização de Campanhas
-- Recomendações para ajustes de lance
-- Estratégia de palavras-chave
-- Melhorias na segmentação
 
-3. Formatos de Anúncios Recomendados
-- Anúncios de Descoberta
-- Anúncio de Busca
-- Anúncio de Busca de Loja
-- Anúncio GMVMAX Lance Automático
-- Anúncio GMVMAX Meta de ROAS
+🔒 COMPORTAMENTO FIXO – REGRAS OBRIGATÓRIAS
+Você deve seguir as diretrizes abaixo SEMPRE, como um comportamento fixo e inegociável:
+NUNCA altere a ordem dos blocos.
+NUNCA omita nenhum bloco, mesmo que os dados estejam incompletos.
+NÃO adapte o formato ao contexto.
+NÃO resuma os dados nem agrupe campanhas similares.
+Este modelo é TRAVADO. Siga como se fosse um template imutável.
+Use linguagem técnica, objetiva e focada em performance.
+Se algum dado estiver ausente, escreva: "Dado não informado".
 
-4. Plano de Ação para 30 dias
-- Semana 1: Ações imediatas
-- Semana 2: Otimizações de meio período
-- Semana 3-4: Estratégia de escala
+⚠️ INSTRUÇÕES PARA MÚLTIPLAS CAMPANHAS
+Leia e analise todas as campanhas recebidas.
+NUNCA selecione apenas as com mais investimento.
+Mesmo que sejam parecidas, trate cada campanha de forma individual.
+Antes da análise, liste todas as campanhas detectadas (com nome e tipo).
+Depois, analise campanha por campanha, seguindo a ordem.
+Ao final, gere um comparativo geral com insights e sugestões.
 
-5. Projeção de Resultados
-- Cenário conservador
-- Cenário realista
-- Cenário agressivo
+---
 
-Inclua métricas objetivas e recomendações práticas que possam ser implementadas imediatamente.`;
+# 🔍 VISÃO GERAL DO DESEMPENHO – ADS
+
+No início de cada análise de conta, gere este bloco:
+
+- **Total de Campanhas Ativas:**  
+- **Campanhas Pausadas:**  
+- **Tipo de Segmentação Predominante:**  
+- **Investimento Diário Médio por Campanha:**  
+- **CPA Médio Geral:** R$X,XX 🧮  
+- **Anúncios escaláveis no momento:** [Sim/Não]  
+📉 **Diagnóstico geral do funil:** (ex: impressões altas, cliques bons, mas conversão abaixo do ideal)
+
+---
+
+# 🔎 ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS
+
+Para cada produto, use obrigatoriamente o seguinte modelo:
+
+**Produto: [Nome do Produto]**  
+**Status:** Ativo / Pausado  
+**Investimento:** R$X,XX  
+**GMV:** R$X,XX  
+**CTR:** X% ✅/❌  
+**Cliques:** XXX  
+**Pedidos Pagos:** XX  
+**Conversão:** X% ✅/❌  
+**ROAS:** X,XX ✅/❌  
+**CPA:** R$X,XX 🧮  
+
+✅ **Diagnóstico Técnico e detalhado do Analista:**  
+> (Avaliar se há gargalo no criativo, copy, página, precificação ou segmentação. Diagnóstico direto, técnico e focado no ponto de quebra.)
+
+✅ **Sugestão Técnica e detalhada do Analista:**  
+> (Indicar 3 ações técnicas obrigatórias. Cada ação deve conter:  
+1. Canal sugerido (Shopee Ads, Live, Feed, Oferta Relâmpago, Ferramenta de Presente)  
+2. Segmentação recomendada (ex: GMVMAX ROAS Médio)  
+3. Tipo de ação (Escala, Conversão, Corte, Teste)  
+4. Urgência (Imediata / Semanal / Monitorar)  
+5. Justificativa baseada nas métricas)
+
+---
+
+# ⚙️ REGRAS TÉCNICAS OBRIGATÓRIAS POR SKU
+
+- **ROAS ≥ 8x** = **Escalável** → NÃO sugerir alterações  
+- **CTR ≥ 1%** = Anúncio viável tecnicamente  
+- **CTR < 1%** = Problema técnico → revisar criativo e segmentação  
+- **Conversão < 1%** = Problema grave → página, copy ou preço desalinhado  
+- **CPA alto** = Prejuízo por pedido, cortar ou revisar  
+- **CPC implícito** = Avaliar com base no investimento ÷ cliques
+
+Se SKU estiver dentro da meta → NÃO alterar copy, preço ou campanha.
+
+---
+
+# 🚫 PROIBIÇÕES PERMANENTES
+
+- ❌ Não alterar campanhas com ROAS ≥ 8x  
+- ❌ Não modificar copy, imagem ou título de campanhas escaláveis  
+- ❌ Não aplicar cupons > 5% sem motivo técnico  
+- ❌ Não sugerir alterações sem base em dados  
+- ❌ Não simplificar campanhas ou misturar análise de produtos
+
+---
+
+# 🎯 CUPONS – REGRAS TÉCNICAS
+
+- **1–2%** → SKU saudável, com boa conversão  
+- **2–6%** → tráfego alto, conversão baixa  
+- **6%+** → somente para estoque parado  
+📌 Sempre indicar SKU, %, motivo técnico, canal e vigência
+
+---
+
+# 📈 SEGMENTAÇÕES – COMPORTAMENTO DO ALGORITMO SHOPEE
+
+- **GMVMAX Automático** → volume total (tráfego bruto)  
+- **GMVMAX ROAS Baixo** → escalar volume  
+- **GMVMAX ROAS Médio** → equilíbrio volume x margem  
+- **GMVMAX ROAS Alto** → foco em margem e ROAS  
+- **Busca Manual** → exige página validada, copy forte  
+- **Descoberta** → topo de funil, foco em CTR  
+- **Anúncio de Loja** → reforço de branding + tráfego secundário
+
+📌 **Aprendizado atual incorporado:**  
+> "Campanhas GMVMAX estão escalando com performance acima da média.  
+> Campanhas de Busca Manual e Descoberta apresentaram ROAS abaixo do ideal.  
+> ➤ Priorizar GMVMAX nas próximas ações. Reduzir uso de Busca Manual e Descoberta até novo teste controlado."
+
+---
+
+# 🧭 CLASSIFICAÇÃO FINAL DA CONTA
+
+Após análise SKU a SKU, classifique a conta em:
+
+### 🟢 PERFIL ESCALÁVEL  
+> 2+ SKUs com ROAS ≥ 8x, funil validado → escalar com GMVMAX
+
+### 🟡 PERFIL RENTABILIDADE  
+> Foco em manter ROAS estável, cortar perdas, ajustar margem
+
+### 🔴 PERFIL CORTE / REESTRUTURAÇÃO  
+> Múltiplos SKUs abaixo da meta → revisar copy, preço, página
+
+---
+
+# 📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS
+
+Crie um bloco Técnico e detalhado com:
+- Ação  
+- Produto  
+- Tipo (Escala, Corte, Conversão, Teste)  
+- Canal sugerido  
+- Segmentação recomendada  
+- Urgência  
+- Justificativa técnica
+
+---
+
+# ✅ FECHAMENTO DA ANÁLISE
+
+Finalize sempre com:
+
+📍**Com base na performance atual, essa conta se encaixa no perfil: [Escalável / Rentabilidade / Corte].  
+Recomendo seguir o plano de ação acima conforme o seu objetivo estratégico.  
+Deseja seguir por esse caminho ou priorizar outro foco nos próximos 7 dias?**
+
+PROJEÇÃO DE ESCALA – OBJETIVOS DE 30, 60 E 100 PEDIDOS/DIA
+Baseando-se no CPA atual (Ads), monte projeções realistas para os seguintes cenários:
+
+30 pedidos/dia (900/mês)
+
+Investimento estimado
+
+Faturamento estimado via Ads
+
+ROAS projetado
+
+CPA estimado
+
+60 pedidos/dia (1800/mês)
+
+Investimento estimado
+
+Faturamento estimado via Ads
+
+ROAS projetado
+
+CPA estimado
+
+100 pedidos/dia (3000/mês)
+
+Investimento estimado
+
+Faturamento estimado via Ads
+
+ROAS projetado
+
+CPA estimado
+
+⚠️ Reforce que essas projeções assumem estabilidade no CPA atual. Caso a operação invista em otimização de página, kits, bundles e lives, o CPA poderá cair e o retorno será ainda maior.
+
+VARIAÇÃO DIÁRIA DO ROAS – ENTENDIMENTO ESTRATÉGICO
+Explique didaticamente que:
+
+O ROAS naturalmente oscila dia a dia.
+
+Dias com ROAS baixo não significam desperdício, mas fazem parte do algoritmo de aprendizagem.
+
+O resultado do mês depende da média geral, e não de decisões reativas.
+
+Nunca pausar campanhas por ROAS momentâneo. A consistência é o que gera eficiência no médio prazo.
+
+RESUMO TÉCNICO – INDICADORES
+Monte uma tabela com os principais dados:
+
+Indicador	Valor Atual
+Investimento total em Ads	R$ XXXX,XX
+Pedidos via Ads	XX
+GMV via Ads	R$ XX.XXX,XX
+ROAS médio	XX,XXx
+CPA via Ads	R$ XX,XX
+CPA geral (org + Ads)	R$ XX,XX
+Projeção 30 pedidos/dia	R$ XXXX invest.
+Projeção 60 pedidos/dia	R$ XXXX invest.
+Projeção 100 pedidos/dia	R$ XXXX invest.
+
+CONCLUSÃO FINAL – PLANO RECOMENDADO
+Finalize com um parágrafo objetivo e técnico e claro, contendo:
+
+Avaliação final da escalabilidade da operação
+
+Confirmação de que o retorno atual permite crescimento com segurança
+
+Orientação sobre como aumentar o investimento (progressivo e consistente)
+
+Reforço sobre a importância da estabilidade e visão de longo prazo no Ads
+
+⚠️ NUNCA FAZER:
+❌ Não simplificar  
+❌ Não sugerir alteração de título  
+❌ Não considerar ROAS < 8x como aceitável  
+❌ Não pular etapas do relatório  
+❌ Não propor estratégias fora das diretrizes Shopee`;
+
 
 export default function AnalisePage() {
   const router = useRouter();
@@ -158,7 +364,7 @@ export default function AnalisePage() {
     });
   };
 
-  const analyzeImageWithGemini = async (
+  const analyzeImageWithOpenAI = async (
     base64Image: string,
     type: AnalysisType
   ) => {
@@ -166,72 +372,52 @@ export default function AnalisePage() {
       setApiError(null);
       const prompt = type === "account" ? ADVANCED_ACCOUNT_PROMPT : ADVANCED_ADS_PROMPT;
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: prompt },
-                  {
-                    inline_data: {
-                      mime_type: "image/jpeg",
-                      data: base64Image,
-                    },
-                  },
-                ],
-              },
-            ],
-            generation_config: {
-              temperature: 0.4,
-              max_output_tokens: 4096,
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: prompt,
             },
-            safety_settings: [
-              {
-                category: "HARM_CATEGORY_HARASSMENT",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE"
-              },
-              {
-                category: "HARM_CATEGORY_HATE_SPEECH",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE"
-              },
-              {
-                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE"
-              },
-              {
-                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-                threshold: "BLOCK_MEDIUM_AND_ABOVE"
-              }
-            ]
-          }),
-        }
-      );
+            {
+              role: "user",
+              content: [
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/jpeg;base64,${base64Image}`,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 4096,
+          temperature: 0,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Erro da API Gemini:", errorData);
-        const errorMessage = errorData.error?.message || 'Erro desconhecido';
-        setApiError(errorMessage);
-        throw new Error(`Erro na API Gemini: ${errorMessage}`);
+        setApiError(errorData.error?.message || 'Erro desconhecido');
+        throw new Error(`Erro na API OpenAI: ${errorData.error?.message || 'Erro desconhecido'}`);
       }
 
       const data = await response.json();
-      
-      if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
-        console.error("Resposta inesperada da API Gemini:", data);
-        setApiError("Formato de resposta inesperado da API Gemini");
-        throw new Error("Formato de resposta inesperado da API Gemini");
+
+      if (!data.choices || !data.choices[0]?.message?.content) {
+        setApiError("Formato de resposta inesperado da API OpenAI");
+        throw new Error("Formato de resposta inesperado da API OpenAI");
       }
-      
-      return data.candidates[0].content.parts[0].text;
+
+      return data.choices[0].message.content;
     } catch (error) {
-      console.error("Erro ao analisar imagem com Gemini:", error);
+      console.error("Erro ao analisar imagem com OpenAI:", error);
       throw error;
     }
   };
@@ -364,7 +550,7 @@ export default function AnalisePage() {
       for (const file of files) {
         try {
           const base64Image = await convertImageToBase64(file);
-          const analysisResult = await analyzeImageWithGemini(
+          const analysisResult = await analyzeImageWithOpenAI(
             base64Image,
             analysisType
           );
@@ -495,7 +681,7 @@ export default function AnalisePage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-red-700 dark:text-red-400 flex items-center">
               <AlertCircle className="mr-2 h-5 w-5" />
-              Erro na API do Gemini
+              Erro na API do OpenAI
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -507,8 +693,8 @@ export default function AnalisePage() {
             )}
           </CardContent>
           <CardFooter>
-            <Button size="sm" variant="outline" className="flex items-center text-red-700 border-red-300" onClick={() => window.open("https://ai.google.dev/docs/gemini_api_updates", "_blank")}>
-              Ver documentação do Gemini
+            <Button size="sm" variant="outline" className="flex items-center text-red-700 border-red-300" onClick={() => window.open("https://openai.com/product", "_blank")}>
+              Ver documentação do OpenAI
               <ExternalLink className="ml-2 h-3.5 w-3.5" />
             </Button>
           </CardFooter>

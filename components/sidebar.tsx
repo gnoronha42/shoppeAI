@@ -11,11 +11,11 @@ import Image from "next/image";
 import logo from "@/assets/logo.png";
 
 const sidebarItems = [
-  // {
-  //   title: "Dashboard",
-  //   href: "/",
-  //   icon: <ShoppingBag className="mr-2 h-5 w-5" />,
-  // },
+  {
+    title: "Dashboard",
+    href: "/",
+    icon: <ShoppingBag className="mr-2 h-5 w-5" />,
+  },
   {
     title: "Clientes",
     href: "/clientes",
