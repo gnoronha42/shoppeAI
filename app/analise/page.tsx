@@ -1065,27 +1065,32 @@ export default function AnalisePage() {
                   Visualização do relatório formatado
                 </CardDescription>
               </div>
-              <PDFGenerator
-                markdown={customMarkdown}
-                clientName={selectedClient?.name || "Cliente"}
-                analysisType={analysisType}
-                saveAnalysis={true}
-                onSuccess={() => {
-                  toast({
-                    title: "Análise salva com sucesso",
-                    description:
-                      "O relatório foi gerado e a análise foi salva no histórico do cliente.",
-                    variant: "default",
-                  });
-
-                  // Opcional: redirecionar para a página de detalhes do cliente após salvar
-                  if (selectedClientId) {
-                    setTimeout(() => {
-                      router.push(`/clientes/${selectedClientId}`);
-                    }, 1500);
-                  }
-                }}
-              />
+              <div className="flex items-center gap-2">
+                <PDFGenerator
+                  markdown={customMarkdown}
+                  clientName={selectedClient?.name || "Cliente"}
+                  analysisType={analysisType}
+                  saveAnalysis={true}
+                  onSuccess={() => {
+                    toast({
+                      title: "Análise salva com sucesso",
+                      description:
+                        "O relatório foi gerado e a análise foi salva no histórico do cliente.",
+                      variant: "default",
+                    });
+                    
+                    // Opcional: redirecionar para a página de detalhes do cliente após salvar
+                    if (selectedClientId) {
+                      setTimeout(() => {
+                        router.push(`/clientes/${selectedClientId}`);
+                      }, 1500);
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
+                  Na janela de impressão, <br/>selecione "Salvar como PDF"
+                </p>
+              </div>
             </CardHeader>
             <CardContent>
               <MarkdownReport markdown={customMarkdown} />
