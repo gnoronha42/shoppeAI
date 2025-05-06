@@ -31,6 +31,8 @@ import { AnalysisType } from "@/types";
 import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { MarkdownReport } from "@/components/analysis/markdown-report";
+import { PDFGenerator } from "@/components/analysis/pdf-generator";
 
 const ADVANCED_ACCOUNT_PROMPT = `Você é um consultor de marketplace de altíssimo nível, com Doutorado em Vendas e SEO de Marketplace, e PhD em Análise de Dados para E-commerce. Sua função é gerar relatórios altamente estratégicos, detalhados e orientados a desempenho com base em dados da plataforma Shopee.
 
@@ -339,6 +341,16 @@ Orientação sobre como aumentar o investimento (progressivo e consistente)
 
 Reforço sobre a importância da estabilidade e visão de longo prazo no Ads
 
+
+INSTRUÇÃO ADICIONAL CRÍTICA:
+Você DEVE extrair TODOS os valores numéricos presentes na imagem, mesmo que pareçam incompletos.
+Quando encontrar dados como investimento, GMV, CPA, ROAS, etc., SEMPRE informe os valores exatos visualizados.
+Se um valor não estiver visível, use APENAS "Dado não informado" (nunca deixe valores como R$X,XX ou XX,XXx).
+Para cada produto analisado, liste TODOS os KPIs visíveis exatamente como aparecem na imagem.
+Nos resumos técnicos e projeções, extraia todos os valores numéricos visíveis.
+Não omita nenhuma informação numérica presente na imagem.
+
+
 ⚠️ NUNCA FAZER:
 ❌ Não simplificar  
 ❌ Não sugerir alteração de título  
@@ -357,6 +369,8 @@ export default function AnalisePage() {
   const [analysisResults, setAnalysisResults] = useState<any[]>([]);
   const { toast } = useToast();
   const [apiError, setApiError] = useState<string | null>(null);
+  const [customMarkdown, setCustomMarkdown] = useState<string>("");
+  const [showMarkdownImport, setShowMarkdownImport] = useState<boolean>(false);
 
   const handleFileChange = (newFiles: File[]) => {
     setFiles(newFiles);
@@ -382,7 +396,9 @@ export default function AnalisePage() {
     try {
       setApiError(null);
       const prompt =
-        type === "account" ? ADVANCED_ACCOUNT_PROMPT : ADVANCED_ADS_PROMPT;
+        type === "account"
+          ? `${ADVANCED_ACCOUNT_PROMPT}\n\nIMPORTANTE: Extraia TODOS os valores numéricos visíveis na imagem.`
+          : `${ADVANCED_ADS_PROMPT}\n\nIMPORTANTE: Extraia TODOS os valores numéricos visíveis na imagem.`;
 
       const response = await fetch(
         "https://api.openai.com/v1/chat/completions",
@@ -390,7 +406,7 @@ export default function AnalisePage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer `,
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
           },
           body: JSON.stringify({
             model: "gpt-4o",
@@ -411,7 +427,7 @@ export default function AnalisePage() {
                 ],
               },
             ],
-            max_tokens: 4096,
+            max_tokens: 5000,
             temperature: 0,
           }),
         }
@@ -447,25 +463,6 @@ export default function AnalisePage() {
       const clientName = selectedClient?.name || "Cliente";
       const date = new Date().toLocaleDateString("pt-BR");
 
-      // Função para substituir emojis e caracteres especiais por texto
-      const replaceEmojis = (text: string) => {
-        return text
-          .replace(/📊/g, "[GRÁFICO]")
-          .replace(/📈/g, "[PROJEÇÃO]")
-          .replace(/📌/g, "[NOTA]")
-          .replace(/✅/g, "[OK]")
-          .replace(/⚠️/g, "[ATENÇÃO]")
-          .replace(/🧮/g, "[CÁLCULO]")
-          .replace(/📍/g, "[MARCADOR]")
-          .replace(/🟢/g, "[VERDE]")
-          .replace(/🟡/g, "[AMARELO]")
-          .replace(/🔴/g, "[VERMELHO]")
-          .replace(/➤/g, ">")
-          .replace(/→/g, "->")
-          .replace(/❌/g, "[X]")
-          .replace(/✓/g, "[✓]");
-      };
-
       // Configurar header
       doc.setFillColor(245, 124, 0);
       doc.rect(0, 0, doc.internal.pageSize.width, 25, "F");
@@ -499,11 +496,6 @@ export default function AnalisePage() {
 
         // Processar o conteúdo para remover caracteres especiais e símbolos
         let content = result.analysis;
-        // Substitui emojis por texto
-        content = replaceEmojis(content);
-
-        // Remover caracteres e símbolos problemáticos, mantendo caracteres latinos estendidos
-        content = content.replace(/[^\x20-\x7E\x0A\x0D\u00A0-\u00FF]/g, "");
 
         // Dividir por quebras de linha para preservar formatação
         const lines = content.split("\n");
@@ -511,7 +503,6 @@ export default function AnalisePage() {
 
         // Processar cada linha e preparar para o PDF
         for (let line of lines) {
-          // Remover marcadores Markdown e outros símbolos
           line = line.replace(/^#+ /g, ""); // Remover headers markdown
           line = line.replace(/\*\*/g, ""); // Remover negrito
           line = line.replace(/\*/g, ""); // Remover itálico
@@ -542,15 +533,15 @@ export default function AnalisePage() {
               line.includes("RELATÓRIO") ||
               line.includes("Pontos Positivos") ||
               line.includes("Pontos de Atenção") ||
-              line.startsWith("[OK]") ||
-              line.startsWith("[ATENÇÃO]") ||
-              line.startsWith("[GRÁFICO]") ||
-              line.startsWith("[PROJEÇÃO]") ||
-              line.startsWith("[NOTA]") ||
-              line.startsWith("[MARCADOR]") ||
-              line.startsWith("[VERDE]") ||
-              line.startsWith("[AMARELO]") ||
-              line.startsWith("[VERMELHO]") ||
+              line.startsWith("✅") ||
+              line.startsWith("⚠️") ||
+              line.startsWith("📊") ||
+              line.startsWith("📈") ||
+              line.startsWith("📌") ||
+              line.startsWith("📍") ||
+              line.startsWith("🟢") ||
+              line.startsWith("🟡") ||
+              line.startsWith("🔴") ||
               line.startsWith("-") ||
               line.includes("VISÃO GERAL") ||
               line.includes("ANÁLISE") ||
@@ -567,7 +558,6 @@ export default function AnalisePage() {
               if (currentParagraph === "") {
                 currentParagraph = line;
               } else {
-                // Se a linha anterior terminar com ":, não adicionar espaço
                 if (currentParagraph.endsWith(":")) {
                   currentParagraph += " " + line;
                 } else {
@@ -593,7 +583,6 @@ export default function AnalisePage() {
 
           const paragraph = paragraphs[i].trim();
           if (paragraph.length > 0) {
-            // Identificar seções importantes para destacar
             if (
               paragraph.includes("RELATÓRIO") ||
               paragraph.startsWith("1.") ||
@@ -607,18 +596,18 @@ export default function AnalisePage() {
               paragraph.includes("ANÁLISE") ||
               paragraph.includes("AÇÕES RECOMENDADAS") ||
               paragraph.includes("PROJEÇÃO") ||
-              paragraph.includes("[VERDE]") ||
-              paragraph.includes("[AMARELO]") ||
-              paragraph.includes("[VERMELHO]") ||
+              paragraph.includes("🟢") ||
+              paragraph.includes("🟡") ||
+              paragraph.includes("🔴") ||
               paragraph.includes("PERFIL")
             ) {
               doc.setFontSize(12);
               doc.setTextColor(245, 124, 0);
             } else if (
               paragraph.startsWith("-") ||
-              paragraph.startsWith("[OK]") ||
-              paragraph.startsWith("[ATENÇÃO]") ||
-              paragraph.startsWith("[NOTA]")
+              paragraph.startsWith("✅") ||
+              paragraph.startsWith("⚠️") ||
+              paragraph.startsWith("📌")
             ) {
               doc.setFontSize(10);
               doc.setTextColor(100, 100, 100);
@@ -627,11 +616,9 @@ export default function AnalisePage() {
               doc.setTextColor(60, 60, 60);
             }
 
-            // Limitar tamanho das linhas para não ultrapassar a página
             const maxWidth = 180;
             const splitText = doc.splitTextToSize(paragraph, maxWidth);
 
-            // Verificar se o texto não está fora dos limites da página
             if (yPosition + splitText.length * 6 > 270) {
               doc.addPage();
               yPosition = 20;
@@ -672,6 +659,78 @@ export default function AnalisePage() {
         description: "Não foi possível gerar o arquivo PDF. Tente novamente.",
         variant: "destructive",
       });
+    }
+  };
+
+  const generateMarkdownContent = (results: any[]) => {
+    try {
+      const clientName = selectedClient?.name || "Cliente";
+      const date = new Date().toLocaleDateString("pt-BR");
+      let markdownContent = `# Relatório de Análise - ${clientName}\n\nData: ${date} | Tipo: ${
+        analysisType === "account" ? "Conta" : "Anúncios"
+      }\n\n`;
+
+      results.forEach((result, index) => {
+        markdownContent += `## Análise ${index + 1}: ${result.filename}\n\n`;
+
+        // Limpar formatação Markdown existente, mas manter emojis
+        let content = result.analysis;
+        content = content
+          .replace(/```/g, "") // Remover blocos de código
+          .replace(/\*\*/g, ""); // Remover negrito
+
+        // Dividir por seções principais
+        const sections = [
+          { title: "VISÃO GERAL DO DESEMPENHO", content: "" },
+          { title: "ANÁLISE SKU A SKU", content: "" },
+          { title: "CLASSIFICAÇÃO FINAL DA CONTA", content: "" },
+          { title: "AÇÕES RECOMENDADAS", content: "" },
+          { title: "FECHAMENTO DA ANÁLISE", content: "" },
+          { title: "PROJEÇÃO DE ESCALA", content: "" },
+          { title: "VARIAÇÃO DIÁRIA DO ROAS", content: "" },
+          { title: "RESUMO TÉCNICO", content: "" },
+          { title: "CONCLUSÃO FINAL", content: "" },
+        ];
+
+        // Extrair conteúdo para cada seção
+        let currentSection = "";
+        const lines = content.split("\n");
+
+        lines.forEach((line: string) => {
+          for (const section of sections) {
+            if (line.includes(section.title)) {
+              currentSection = section.title;
+              break;
+            }
+          }
+          if (currentSection) {
+            const section = sections.find((s) => s.title === currentSection);
+            if (section) {
+              section.content += line + "\n";
+            }
+          }
+        });
+
+        // Adicionar seções ao markdown
+        sections.forEach((section) => {
+          if (section.content) {
+            markdownContent += `### ${section.title}\n\n${section.content}\n\n`;
+          }
+        });
+
+        markdownContent += `---\n\n`;
+      });
+
+      return markdownContent;
+    } catch (error) {
+      console.error("Erro ao gerar Markdown:", error);
+      toast({
+        title: "Erro ao gerar Markdown",
+        description:
+          "Não foi possível gerar o relatório em markdown. Tente novamente.",
+        variant: "destructive",
+      });
+      return "";
     }
   };
 
@@ -794,19 +853,18 @@ export default function AnalisePage() {
         JSON.stringify(results)
       );
 
-      // Gerar PDF automaticamente
-      generatePDF(results);
+      // Gerar markdown e exibir no preview
+      const mdContent = generateMarkdownContent(results);
+      setCustomMarkdown(mdContent);
 
       toast({
         title: "Análise concluída com sucesso!",
         description:
-          "A análise foi processada com IA e salva no histórico do cliente.",
+          "A análise foi processada com IA e está pronta para visualização.",
         variant: "default",
       });
 
-      // Redirecionar para a página de detalhes do cliente
-      router.push(`/clientes/${selectedClientId}`);
-
+      setIsAnalyzing(false);
       setFiles([]);
     } catch (error: any) {
       console.error("Erro completo:", error);
@@ -817,8 +875,6 @@ export default function AnalisePage() {
           "Ocorreu um erro ao processar as imagens. Por favor, tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsAnalyzing(false);
     }
   };
 
@@ -957,18 +1013,86 @@ export default function AnalisePage() {
               : "Gerar Relatório com IA"}
           </Button>
 
-          {analysisResults.length > 0 && (
-            <Button
-              onClick={() => generatePDF(analysisResults)}
-              variant="outline"
-              className="flex-none"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Baixar PDF
-            </Button>
-          )}
+          <Button
+            onClick={() => setShowMarkdownImport(!showMarkdownImport)}
+            variant="outline"
+            className="flex-1"
+          >
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            {showMarkdownImport
+              ? "Fechar Editor de Markdown"
+              : "Editar Markdown Manualmente"}
+          </Button>
         </div>
       </div>
+
+      {showMarkdownImport && (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Editor de Markdown</CardTitle>
+            <CardDescription>
+              Edite o conteúdo do relatório em formato Markdown
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <textarea
+                className="w-full h-60 p-3 border rounded"
+                value={customMarkdown}
+                onChange={(e) => setCustomMarkdown(e.target.value)}
+                placeholder="Edite o conteúdo Markdown..."
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowMarkdownImport(false)}
+            >
+              Fechar
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
+
+      {customMarkdown && (
+        <div className="mt-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Relatório de Análise</CardTitle>
+                <CardDescription>
+                  Visualização do relatório formatado
+                </CardDescription>
+              </div>
+              <PDFGenerator
+                markdown={customMarkdown}
+                clientName={selectedClient?.name || "Cliente"}
+                analysisType={analysisType}
+                saveAnalysis={true}
+                onSuccess={() => {
+                  toast({
+                    title: "Análise salva com sucesso",
+                    description:
+                      "O relatório foi gerado e a análise foi salva no histórico do cliente.",
+                    variant: "default",
+                  });
+
+                  // Opcional: redirecionar para a página de detalhes do cliente após salvar
+                  if (selectedClientId) {
+                    setTimeout(() => {
+                      router.push(`/clientes/${selectedClientId}`);
+                    }, 1500);
+                  }
+                }}
+              />
+            </CardHeader>
+            <CardContent>
+              <MarkdownReport markdown={customMarkdown} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
