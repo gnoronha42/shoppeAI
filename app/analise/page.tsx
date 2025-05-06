@@ -389,72 +389,51 @@ export default function AnalisePage() {
     });
   };
 
-  const analyzeImageWithOpenAI = async (
-    base64Image: string,
-    type: AnalysisType
-  ) => {
-    try {
-      setApiError(null);
-      const prompt =
-        type === "account"
-          ? `${ADVANCED_ACCOUNT_PROMPT}\n\nIMPORTANTE: Extraia TODOS os valores numéricos visíveis na imagem.`
-          : `${ADVANCED_ADS_PROMPT}\n\nIMPORTANTE: Extraia TODOS os valores numéricos visíveis na imagem.`;
+  const analyzeImagesWithOpenAI = async (base64Images: string[], type: AnalysisType) => {
+    setApiError(null);
+    const prompt =
+      type === "account"
+        ? `${ADVANCED_ACCOUNT_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.`
+        : `${ADVANCED_ADS_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.`;
 
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "system",
-                content: prompt,
-              },
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:image/jpeg;base64,${base64Image}`,
-                    },
-                  },
-                ],
-              },
-            ],
-            max_tokens: 5000,
-            temperature: 0,
-          }),
-        }
+    // Montar o array de imagens para o chat
+    const imageMessages = base64Images.map((img) => ({
+      type: "image_url",
+      image_url: { url: `data:image/jpeg;base64,${img}` },
+    }));
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: prompt },
+          { role: "user", content: imageMessages },
+        ],
+        max_tokens: 5000,
+        temperature: 0,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      setApiError(errorData.error?.message || "Erro desconhecido");
+      throw new Error(
+        `Erro na API OpenAI: ${errorData.error?.message || "Erro desconhecido"}`
       );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setApiError(errorData.error?.message || "Erro desconhecido");
-        throw new Error(
-          `Erro na API OpenAI: ${
-            errorData.error?.message || "Erro desconhecido"
-          }`
-        );
-      }
-
-      const data = await response.json();
-
-      if (!data.choices || !data.choices[0]?.message?.content) {
-        setApiError("Formato de resposta inesperado da API OpenAI");
-        throw new Error("Formato de resposta inesperado da API OpenAI");
-      }
-
-      return data.choices[0].message.content;
-    } catch (error) {
-      console.error("Erro ao analisar imagem com OpenAI:", error);
-      throw error;
     }
+
+    const data = await response.json();
+    if (!data.choices || !data.choices[0]?.message?.content) {
+      setApiError("Formato de resposta inesperado da API OpenAI");
+      throw new Error("Formato de resposta inesperado da API OpenAI");
+    }
+
+    return data.choices[0].message.content;
   };
 
   const generatePDF = (results: any[]) => {
@@ -756,106 +735,19 @@ export default function AnalisePage() {
     try {
       setIsAnalyzing(true);
 
-      const results = [];
-      for (const file of files) {
-        try {
-          const base64Image = await convertImageToBase64(file);
-          const analysisResult = await analyzeImageWithOpenAI(
-            base64Image,
-            analysisType
-          );
-          results.push({
-            filename: file.name,
-            analysis: analysisResult,
-          });
-        } catch (imageError: any) {
-          console.error(`Erro ao analisar imagem ${file.name}:`, imageError);
-          toast({
-            title: `Erro ao analisar ${file.name}`,
-            description:
-              imageError.message || "Ocorreu um erro ao processar esta imagem",
-            variant: "destructive",
-          });
-        }
-      }
+      const base64Images = await Promise.all(files.map(convertImageToBase64));
+      const analysisResult = await analyzeImagesWithOpenAI(base64Images, analysisType);
 
-      if (results.length === 0) {
-        throw new Error(
-          "Não foi possível analisar nenhuma das imagens selecionadas"
-        );
-      }
+      const clientName = selectedClient?.name || "Cliente";
+      const date = new Date().toLocaleDateString("pt-BR");
+      const markdownContent = `# Relatório de Análise - ${clientName}
 
-      setAnalysisResults(results);
+Data: ${date} | Tipo: ${analysisType === "account" ? "Conta" : "Anúncios"}
 
-      const fileUrls = files.map((file) => URL.createObjectURL(file));
-      const imageData = files.map((file, index) => ({
-        file,
-        url: URL.createObjectURL(file),
-        filename: file.name,
-        fileSize: file.size,
-        mimeType: file.type,
-      }));
+${analysisResult}
+`;
 
-      try {
-        const response = await fetch("/api/analises", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            clientId: selectedClientId,
-            type: analysisType,
-            results: results.map((result, index) => ({
-              analysis: result.analysis,
-              filename: result.filename,
-              imageUrl: imageData[index]?.url || null,
-            })),
-            imageUrls: imageData.map((img) => img.url),
-            title: `Análise de ${
-              analysisType === "account" ? "Conta" : "Anúncios"
-            } - ${new Date().toLocaleDateString("pt-BR")}`,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Erro da API:", errorData);
-          toast({
-            title: "Erro ao salvar a análise",
-            description:
-              errorData.error ||
-              "Não foi possível salvar a análise no banco de dados",
-            variant: "destructive",
-          });
-        }
-      } catch (apiError: any) {
-        console.error("Erro ao chamar a API:", apiError);
-        toast({
-          title: "Erro ao salvar a análise",
-          description:
-            "Não foi possível conectar ao servidor. Os resultados serão salvos localmente.",
-          variant: "destructive",
-        });
-      }
-
-      try {
-        await generateReport({
-          clientId: selectedClientId,
-          type: analysisType,
-          files: fileUrls,
-        }).unwrap();
-      } catch (mockError) {
-        console.error("Erro ao gerar relatório mock:", mockError);
-      }
-
-      localStorage.setItem(
-        `analysis_${selectedClientId}_${Date.now()}`,
-        JSON.stringify(results)
-      );
-
-      // Gerar markdown e exibir no preview
-      const mdContent = generateMarkdownContent(results);
-      setCustomMarkdown(mdContent);
+      setCustomMarkdown(markdownContent);
 
       toast({
         title: "Análise concluída com sucesso!",
@@ -1013,16 +905,16 @@ export default function AnalisePage() {
               : "Gerar Relatório com IA"}
           </Button>
 
-          <Button
+            <Button
             onClick={() => setShowMarkdownImport(!showMarkdownImport)}
-            variant="outline"
+              variant="outline"
             className="flex-1"
           >
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             {showMarkdownImport
               ? "Fechar Editor de Markdown"
               : "Editar Markdown Manualmente"}
-          </Button>
+            </Button>
         </div>
       </div>
 
@@ -1064,7 +956,7 @@ export default function AnalisePage() {
                 <CardDescription>
                   Visualização do relatório formatado
                 </CardDescription>
-              </div>
+        </div>
               <div className="flex items-center gap-2">
                 <PDFGenerator
                   markdown={customMarkdown}
@@ -1090,7 +982,7 @@ export default function AnalisePage() {
                 <p className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
                   Na janela de impressão, <br/>selecione "Salvar como PDF"
                 </p>
-              </div>
+      </div>
             </CardHeader>
             <CardContent>
               <MarkdownReport markdown={customMarkdown} />

@@ -397,7 +397,7 @@ export async function PATCH(request: Request) {
 // Função para extrair métricas específicas de anúncios do conteúdo da análise
 function extractAdsMetrics(content: string) {
   // Valores padrão
-  const metrics = {
+  const metrics:any = {
     roas: null,
     ctr: null,
     cpa: null,

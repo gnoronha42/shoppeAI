@@ -294,8 +294,11 @@ export function PDFGenerator({
 
   // Formatar markdown para HTML
   const formatMarkdownForHTML = (markdownText: string) => {
+    // Suporte a quebras de página manuais
+    let processedMarkdown = markdownText.replace(/<!--\s*pagebreak\s*-->/g, '<div class="page-break"></div>');
+
     // Pré-processamento para tabelas
-    let processedMarkdown = markdownText;
+    
     const tableRegex = /(\|.*\|\n)+/g;
     const tables = markdownText.match(tableRegex);
     
@@ -346,8 +349,8 @@ export function PDFGenerator({
     // Continuar com o restante do processamento
     let html = processedMarkdown
       // Títulos
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gm, '<h1 class="print-section">$1</h1>')
+      .replace(/^## (.*$)/gm, '<h2 class="print-section">$1</h2>')
       .replace(/^### (.*$)/gm, '<h3>$1</h3>')
       
       // Separadores
