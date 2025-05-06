@@ -1,23 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, ArrowRight, Download, AlertCircle, ExternalLink } from "lucide-react";
+import {
+  FileSpreadsheet,
+  ArrowRight,
+  Download,
+  AlertCircle,
+  ExternalLink,
+} from "lucide-react";
 import { ClientSelector } from "@/components/client/client-selector";
 import { AnalysisTypeSelector } from "@/components/analysis/analysis-type-selector";
 import { FileUpload } from "@/components/analysis/file-upload";
 import { useSelector } from "react-redux";
-import { selectSelectedClientId, selectSelectedClient } from "@/features/clients/clientSlice";
+import {
+  selectSelectedClientId,
+  selectSelectedClient,
+} from "@/features/clients/clientSlice";
 import { useGenerateReportMutation } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisType } from "@/types";
 import { useRouter } from "next/navigation";
 import jsPDF from "jspdf";
-import 'jspdf-autotable';
-
-
-
+import "jspdf-autotable";
 
 const ADVANCED_ACCOUNT_PROMPT = `Você é um consultor de marketplace de altíssimo nível, com Doutorado em Vendas e SEO de Marketplace, e PhD em Análise de Dados para E-commerce. Sua função é gerar relatórios altamente estratégicos, detalhados e orientados a desempenho com base em dados da plataforma Shopee.
 
@@ -93,7 +106,6 @@ Elabore a projeção detalhada da conta com base nos dados analisados.
 
 📐 PLANO TÁTICO COMPLETO - 30 DIAS
 Crie um plano tático completo, com duração de 30 dias, dividido por dias (do 1 ao 30) e semanas (1 a 4) com foco em ações práticas, organizadas por prioridade e alinhadas às diretrizes da Shopee.`;
-
 
 const ADVANCED_ADS_PROMPT = `🧠 INSTRUÇÃO PERMANENTE – ANÁLISE PROFISSIONAL SHOPEE ADS
 
@@ -334,7 +346,6 @@ Reforço sobre a importância da estabilidade e visão de longo prazo no Ads
 ❌ Não pular etapas do relatório  
 ❌ Não propor estratégias fora das diretrizes Shopee`;
 
-
 export default function AnalisePage() {
   const router = useRouter();
   const [analysisType, setAnalysisType] = useState<AnalysisType>("account");
@@ -370,42 +381,50 @@ export default function AnalisePage() {
   ) => {
     try {
       setApiError(null);
-      const prompt = type === "account" ? ADVANCED_ACCOUNT_PROMPT : ADVANCED_ADS_PROMPT;
+      const prompt =
+        type === "account" ? ADVANCED_ACCOUNT_PROMPT : ADVANCED_ADS_PROMPT;
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o",
-          messages: [
-            {
-              role: "system",
-              content: prompt,
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:image/jpeg;base64,${base64Image}`,
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer `,
+          },
+          body: JSON.stringify({
+            model: "gpt-4o",
+            messages: [
+              {
+                role: "system",
+                content: prompt,
+              },
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:image/jpeg;base64,${base64Image}`,
+                    },
                   },
-                },
-              ],
-            },
-          ],
-          max_tokens: 4096,
-          temperature: 0,
-        }),
-      });
+                ],
+              },
+            ],
+            max_tokens: 4096,
+            temperature: 0,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        setApiError(errorData.error?.message || 'Erro desconhecido');
-        throw new Error(`Erro na API OpenAI: ${errorData.error?.message || 'Erro desconhecido'}`);
+        setApiError(errorData.error?.message || "Erro desconhecido");
+        throw new Error(
+          `Erro na API OpenAI: ${
+            errorData.error?.message || "Erro desconhecido"
+          }`
+        );
       }
 
       const data = await response.json();
@@ -426,89 +445,221 @@ export default function AnalisePage() {
     try {
       const doc = new jsPDF();
       const clientName = selectedClient?.name || "Cliente";
-      const date = new Date().toLocaleDateString('pt-BR');
-      
+      const date = new Date().toLocaleDateString("pt-BR");
+
+      // Função para substituir emojis e caracteres especiais por texto
+      const replaceEmojis = (text: string) => {
+        return text
+          .replace(/📊/g, "[GRÁFICO]")
+          .replace(/📈/g, "[PROJEÇÃO]")
+          .replace(/📌/g, "[NOTA]")
+          .replace(/✅/g, "[OK]")
+          .replace(/⚠️/g, "[ATENÇÃO]")
+          .replace(/🧮/g, "[CÁLCULO]")
+          .replace(/📍/g, "[MARCADOR]")
+          .replace(/🟢/g, "[VERDE]")
+          .replace(/🟡/g, "[AMARELO]")
+          .replace(/🔴/g, "[VERMELHO]")
+          .replace(/➤/g, ">")
+          .replace(/→/g, "->")
+          .replace(/❌/g, "[X]")
+          .replace(/✓/g, "[✓]");
+      };
+
       // Configurar header
-      doc.setFillColor(245, 124, 0); // Cor laranja da Shopee
-      doc.rect(0, 0, doc.internal.pageSize.width, 25, 'F');
+      doc.setFillColor(245, 124, 0);
+      doc.rect(0, 0, doc.internal.pageSize.width, 25, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(18);
       doc.text(`Relatório de Análise - ${clientName}`, 14, 15);
-      
+
       // Data e tipo de análise
       doc.setTextColor(100, 100, 100);
       doc.setFontSize(10);
-      doc.text(`Data: ${date} | Tipo: ${analysisType === 'account' ? 'Conta' : 'Anúncios'}`, 14, 30);
-      
+      doc.text(
+        `Data: ${date} | Tipo: ${
+          analysisType === "account" ? "Conta" : "Anúncios"
+        }`,
+        14,
+        30
+      );
+
       let yPosition = 40;
-      
-      // Para cada resultado de análise
+
       results.forEach((result, index) => {
         if (yPosition > 250) {
           doc.addPage();
           yPosition = 20;
         }
-        
+
         doc.setFontSize(14);
         doc.setTextColor(0, 0, 0);
         doc.text(`Análise ${index + 1}: ${result.filename}`, 14, yPosition);
         yPosition += 10;
-        
-        // Processar o conteúdo da análise em parágrafos
-        const content = result.analysis;
-        const paragraphs = content.split('\n\n');
-        
+
+        // Processar o conteúdo para remover caracteres especiais e símbolos
+        let content = result.analysis;
+        // Substitui emojis por texto
+        content = replaceEmojis(content);
+
+        // Remover caracteres e símbolos problemáticos, mantendo caracteres latinos estendidos
+        content = content.replace(/[^\x20-\x7E\x0A\x0D\u00A0-\u00FF]/g, "");
+
+        // Dividir por quebras de linha para preservar formatação
+        const lines = content.split("\n");
+        const processedLines = [];
+
+        // Processar cada linha e preparar para o PDF
+        for (let line of lines) {
+          // Remover marcadores Markdown e outros símbolos
+          line = line.replace(/^#+ /g, ""); // Remover headers markdown
+          line = line.replace(/\*\*/g, ""); // Remover negrito
+          line = line.replace(/\*/g, ""); // Remover itálico
+          line = line.replace(/---/g, ""); // Remover separadores
+          line = line.replace(/```/g, ""); // Remover blocos de código
+          line = line.replace(/\|\s*([^|]+)\s*\|\s*([^|]+)\s*\|/g, "$1: $2"); // Converter tabelas simples
+
+          processedLines.push(line.trim());
+        }
+
+        // Juntar linhas em parágrafos lógicos
+        const paragraphs = [];
+        let currentParagraph = "";
+
+        for (let line of processedLines) {
+          if (line === "") {
+            if (currentParagraph !== "") {
+              paragraphs.push(currentParagraph);
+              currentParagraph = "";
+            }
+          } else {
+            if (
+              line.startsWith("1.") ||
+              line.startsWith("2.") ||
+              line.startsWith("3.") ||
+              line.startsWith("4.") ||
+              line.startsWith("5.") ||
+              line.includes("RELATÓRIO") ||
+              line.includes("Pontos Positivos") ||
+              line.includes("Pontos de Atenção") ||
+              line.startsWith("[OK]") ||
+              line.startsWith("[ATENÇÃO]") ||
+              line.startsWith("[GRÁFICO]") ||
+              line.startsWith("[PROJEÇÃO]") ||
+              line.startsWith("[NOTA]") ||
+              line.startsWith("[MARCADOR]") ||
+              line.startsWith("[VERDE]") ||
+              line.startsWith("[AMARELO]") ||
+              line.startsWith("[VERMELHO]") ||
+              line.startsWith("-") ||
+              line.includes("VISÃO GERAL") ||
+              line.includes("ANÁLISE") ||
+              line.includes("AÇÕES RECOMENDADAS") ||
+              line.includes("FECHAMENTO") ||
+              line.includes("CONCLUSÃO") ||
+              line.includes("DIAGNÓSTICO")
+            ) {
+              if (currentParagraph !== "") {
+                paragraphs.push(currentParagraph);
+              }
+              currentParagraph = line;
+            } else {
+              if (currentParagraph === "") {
+                currentParagraph = line;
+              } else {
+                // Se a linha anterior terminar com ":, não adicionar espaço
+                if (currentParagraph.endsWith(":")) {
+                  currentParagraph += " " + line;
+                } else {
+                  currentParagraph += " " + line;
+                }
+              }
+            }
+          }
+        }
+
+        if (currentParagraph !== "") {
+          paragraphs.push(currentParagraph);
+        }
+
         // Limitar a quantidade de texto
-        const maxParagraphs = Math.min(paragraphs.length, 20);
-        
+        const maxParagraphs = Math.min(paragraphs.length, 40);
+
         for (let i = 0; i < maxParagraphs; i++) {
           if (yPosition > 270) {
             doc.addPage();
             yPosition = 20;
           }
-          
+
           const paragraph = paragraphs[i].trim();
           if (paragraph.length > 0) {
-            // Verificar se é um título
-            if (paragraph.includes('RELATÓRIO') || 
-                paragraph.startsWith('1.') || 
-                paragraph.startsWith('2.') || 
-                paragraph.startsWith('3.') || 
-                paragraph.startsWith('4.') || 
-                paragraph.startsWith('5.') ||
-                paragraph.includes('Pontos Positivos') ||
-                paragraph.includes('Pontos de Atenção')) {
-              
+            // Identificar seções importantes para destacar
+            if (
+              paragraph.includes("RELATÓRIO") ||
+              paragraph.startsWith("1.") ||
+              paragraph.startsWith("2.") ||
+              paragraph.startsWith("3.") ||
+              paragraph.startsWith("4.") ||
+              paragraph.startsWith("5.") ||
+              paragraph.includes("Pontos Positivos") ||
+              paragraph.includes("Pontos de Atenção") ||
+              paragraph.includes("VISÃO GERAL") ||
+              paragraph.includes("ANÁLISE") ||
+              paragraph.includes("AÇÕES RECOMENDADAS") ||
+              paragraph.includes("PROJEÇÃO") ||
+              paragraph.includes("[VERDE]") ||
+              paragraph.includes("[AMARELO]") ||
+              paragraph.includes("[VERMELHO]") ||
+              paragraph.includes("PERFIL")
+            ) {
               doc.setFontSize(12);
               doc.setTextColor(245, 124, 0);
+            } else if (
+              paragraph.startsWith("-") ||
+              paragraph.startsWith("[OK]") ||
+              paragraph.startsWith("[ATENÇÃO]") ||
+              paragraph.startsWith("[NOTA]")
+            ) {
+              doc.setFontSize(10);
+              doc.setTextColor(100, 100, 100);
             } else {
               doc.setFontSize(10);
               doc.setTextColor(60, 60, 60);
             }
-            
-            // Quebrar linhas longas
-            const splitText = doc.splitTextToSize(paragraph, 180);
+
+            // Limitar tamanho das linhas para não ultrapassar a página
+            const maxWidth = 180;
+            const splitText = doc.splitTextToSize(paragraph, maxWidth);
+
+            // Verificar se o texto não está fora dos limites da página
+            if (yPosition + splitText.length * 6 > 270) {
+              doc.addPage();
+              yPosition = 20;
+            }
+
             doc.text(splitText, 14, yPosition);
             yPosition += splitText.length * 6;
           }
           yPosition += 4;
         }
-        
+
         yPosition += 10;
       });
-      
-      // Footer
+
       const pageCount = doc.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
-        doc.text(`ShoppeAI - Análise de Desempenho | Página ${i} de ${pageCount}`, 14, 290);
+        doc.text(
+          `ShoppeAI - Análise de Desempenho | Página ${i} de ${pageCount}`,
+          14,
+          290
+        );
       }
-      
-      // Salvar o PDF
-      doc.save(`Analise_${clientName}_${date.replace(/\//g, '-')}.pdf`);
-      
+
+      doc.save(`Analise_${clientName}_${date.replace(/\//g, "-")}.pdf`);
+
       toast({
         title: "PDF gerado com sucesso!",
         description: "O relatório foi salvo no seu dispositivo.",
@@ -562,15 +713,17 @@ export default function AnalisePage() {
           console.error(`Erro ao analisar imagem ${file.name}:`, imageError);
           toast({
             title: `Erro ao analisar ${file.name}`,
-            description: imageError.message || "Ocorreu um erro ao processar esta imagem",
+            description:
+              imageError.message || "Ocorreu um erro ao processar esta imagem",
             variant: "destructive",
           });
-          // Continua com as próximas imagens mesmo se uma falhar
         }
       }
 
       if (results.length === 0) {
-        throw new Error("Não foi possível analisar nenhuma das imagens selecionadas");
+        throw new Error(
+          "Não foi possível analisar nenhuma das imagens selecionadas"
+        );
       }
 
       setAnalysisResults(results);
@@ -581,15 +734,14 @@ export default function AnalisePage() {
         url: URL.createObjectURL(file),
         filename: file.name,
         fileSize: file.size,
-        mimeType: file.type
+        mimeType: file.type,
       }));
 
       try {
-        // Salvar análise na API
-        const response = await fetch('/api/analises', {
-          method: 'POST',
+        const response = await fetch("/api/analises", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             clientId: selectedClientId,
@@ -597,10 +749,12 @@ export default function AnalisePage() {
             results: results.map((result, index) => ({
               analysis: result.analysis,
               filename: result.filename,
-              imageUrl: imageData[index]?.url || null
+              imageUrl: imageData[index]?.url || null,
             })),
-            imageUrls: imageData.map(img => img.url),
-            title: `Análise de ${analysisType === 'account' ? 'Conta' : 'Anúncios'} - ${new Date().toLocaleDateString('pt-BR')}`
+            imageUrls: imageData.map((img) => img.url),
+            title: `Análise de ${
+              analysisType === "account" ? "Conta" : "Anúncios"
+            } - ${new Date().toLocaleDateString("pt-BR")}`,
           }),
         });
 
@@ -609,22 +763,22 @@ export default function AnalisePage() {
           console.error("Erro da API:", errorData);
           toast({
             title: "Erro ao salvar a análise",
-            description: errorData.error || "Não foi possível salvar a análise no banco de dados",
+            description:
+              errorData.error ||
+              "Não foi possível salvar a análise no banco de dados",
             variant: "destructive",
           });
-          // Continua mesmo se falhar ao salvar no banco
         }
       } catch (apiError: any) {
         console.error("Erro ao chamar a API:", apiError);
         toast({
           title: "Erro ao salvar a análise",
-          description: "Não foi possível conectar ao servidor. Os resultados serão salvos localmente.",
+          description:
+            "Não foi possível conectar ao servidor. Os resultados serão salvos localmente.",
           variant: "destructive",
         });
-        // Continua mesmo se falhar ao salvar no banco
       }
 
-      // Mantém a chamada ao mock de API para compatibilidade
       try {
         await generateReport({
           clientId: selectedClientId,
@@ -633,12 +787,10 @@ export default function AnalisePage() {
         }).unwrap();
       } catch (mockError) {
         console.error("Erro ao gerar relatório mock:", mockError);
-        // Continua mesmo se o mock falhar
       }
 
-      // Armazenar no localStorage para recuperação posterior
       localStorage.setItem(
-        `analysis_${selectedClientId}_${Date.now()}`, 
+        `analysis_${selectedClientId}_${Date.now()}`,
         JSON.stringify(results)
       );
 
@@ -647,7 +799,8 @@ export default function AnalisePage() {
 
       toast({
         title: "Análise concluída com sucesso!",
-        description: "A análise foi processada com IA e salva no histórico do cliente.",
+        description:
+          "A análise foi processada com IA e salva no histórico do cliente.",
         variant: "default",
       });
 
@@ -659,7 +812,9 @@ export default function AnalisePage() {
       console.error("Erro completo:", error);
       toast({
         title: "Erro ao gerar relatório",
-        description: error.message || "Ocorreu um erro ao processar as imagens. Por favor, tente novamente.",
+        description:
+          error.message ||
+          "Ocorreu um erro ao processar as imagens. Por favor, tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -688,12 +843,20 @@ export default function AnalisePage() {
             <p className="text-red-700 dark:text-red-300">{apiError}</p>
             {apiError.includes("deprecated") && (
               <p className="text-sm mt-2 text-red-700 dark:text-red-300">
-                Este erro indica que o modelo usado está obsoleto. Entre em contato com o administrador para atualizar o código.
+                Este erro indica que o modelo usado está obsoleto. Entre em
+                contato com o administrador para atualizar o código.
               </p>
             )}
           </CardContent>
           <CardFooter>
-            <Button size="sm" variant="outline" className="flex items-center text-red-700 border-red-300" onClick={() => window.open("https://openai.com/product", "_blank")}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex items-center text-red-700 border-red-300"
+              onClick={() =>
+                window.open("https://openai.com/product", "_blank")
+              }
+            >
               Ver documentação do OpenAI
               <ExternalLink className="ml-2 h-3.5 w-3.5" />
             </Button>
@@ -703,9 +866,10 @@ export default function AnalisePage() {
 
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          Selecione um cliente e faça upload de capturas de tela para análise automática com IA
+          Selecione um cliente e faça upload de capturas de tela para análise
+          automática com IA
         </p>
-        <Button variant="outline" onClick={() => router.push('/clientes')}>
+        <Button variant="outline" onClick={() => router.push("/clientes")}>
           Gerenciar Clientes
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
@@ -736,7 +900,7 @@ export default function AnalisePage() {
               onChange={setAnalysisType}
             />
             <p className="text-xs text-muted-foreground mt-2">
-              {analysisType === "account" 
+              {analysisType === "account"
                 ? "Análise de conta avalia o desempenho geral da loja, conversão, GMV e métricas de desempenho"
                 : "Análise de anúncios avalia as campanhas publicitárias, ROAS, CTR e estratégias de otimização"}
             </p>
@@ -758,11 +922,14 @@ export default function AnalisePage() {
               accept="image/*"
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Faça upload de capturas de tela da sua loja Shopee para análise detalhada com IA (máximo 10 imagens)
+              Faça upload de capturas de tela da sua loja Shopee para análise
+              detalhada com IA (máximo 10 imagens)
             </p>
             {files.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm font-medium">Arquivos selecionados ({files.length}):</p>
+                <p className="text-sm font-medium">
+                  Arquivos selecionados ({files.length}):
+                </p>
                 <ul className="mt-1 text-xs text-muted-foreground">
                   {files.map((file, index) => (
                     <li key={index}>{file.name}</li>
@@ -789,9 +956,9 @@ export default function AnalisePage() {
               ? "Analisando com IA..."
               : "Gerar Relatório com IA"}
           </Button>
-          
+
           {analysisResults.length > 0 && (
-            <Button 
+            <Button
               onClick={() => generatePDF(analysisResults)}
               variant="outline"
               className="flex-none"
