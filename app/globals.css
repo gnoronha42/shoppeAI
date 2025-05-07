@@ -94,4 +94,20 @@
     page-break-inside: avoid;
     break-inside: avoid-page;
   }
+
+
+}
+
+.produto-bloco, table, ul, ol {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+h1, h2, h3 {
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+table, thead, tbody, tr, th, td {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
 }
