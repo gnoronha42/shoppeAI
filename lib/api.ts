@@ -90,6 +90,37 @@ export const api = createApi({
         'Reports'
       ],
     }),
+    getClientAnalyses: builder.query({
+      query: (clientId) => {
+        console.log("Fetching analyses for client:", clientId);
+        return {
+          url: `analises?clientId=${clientId}`,
+          method: 'GET',
+        };
+      },
+      transformResponse: (response) => {
+        console.log("Raw response from analyses API:", response);
+        if (Array.isArray(response)) {
+          return response.map(analysis => ({
+            id: analysis.id,
+            title: analysis.title || `Análise de ${analysis.type === 'account' ? 'Conta' : 'Anúncios'}`,
+            type: analysis.type,
+            created_at: analysis.created_at,
+            content: analysis.analysis_results && analysis.analysis_results.length > 0 
+              ? analysis.analysis_results[0].content 
+              : undefined
+          }));
+        }
+        return [];
+      },
+      providesTags: (result, error, clientId) => 
+        result 
+          ? [
+              ...result.map(({ id }) => ({ type: 'Analyses' as const, id })),
+              { type: 'Analyses', id: clientId }
+            ]
+          : [{ type: 'Analyses', id: clientId }],
+    }),
   }),
 });
 
@@ -100,5 +131,6 @@ export const {
   useAddClientMutation,
   useUpdateClientMutation,
   useDeleteClientMutation,
-  useGenerateReportMutation
+  useGenerateReportMutation,
+  useGetClientAnalysesQuery
 } = api;

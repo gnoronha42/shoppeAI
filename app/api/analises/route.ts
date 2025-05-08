@@ -106,6 +106,8 @@ export async function GET(request: Request) {
     const clientId = searchParams.get('clientId');
     const analysisId = searchParams.get('id');
     
+    console.log("GET /api/analises - Params:", { clientId, analysisId, url: request.url });
+    
     // Verificar cache para análise específica
     if (analysisId) {
       const cacheKey = `analysis_${analysisId}`;
@@ -135,6 +137,8 @@ export async function GET(request: Request) {
       where.client_id = clientId;
     }
     
+    console.log("Database query where clause:", where);
+    
     // Otimização de consulta: limitar a consulta a 100 registros recentes
     const analyses = await prisma.analyses.findMany({
       where,
@@ -147,6 +151,8 @@ export async function GET(request: Request) {
       },
       take: 100
     });
+    
+    console.log(`Found ${analyses.length} analyses in database`);
     
     // Armazenar em cache
     if (analysisId) {

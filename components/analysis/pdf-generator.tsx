@@ -5,21 +5,32 @@ interface PDFGeneratorProps {
   markdown: string;
   clientName: string;
   analysisType: string;
+  onAfterDownload?: () => void;
 }
 
 export function PDFGenerator({
   markdown,
   clientName,
   analysisType,
+  onAfterDownload,
 }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
   const analysisRef = useRef<any>(null);
   useEffect(() => { setIsClient(true); }, []);
   if (!isClient || !markdown) return null;
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (analysisRef.current && analysisRef.current.handleDownloadPDF) {
-      analysisRef.current.handleDownloadPDF();
+      try {
+        await analysisRef.current.handleDownloadPDF();
+        console.log("PDF baixado com sucesso, chamando callback");
+        if (onAfterDownload) {
+          console.log("Executando callback onAfterDownload");
+          onAfterDownload();
+        }
+      } catch (error) {
+        console.error("Erro ao baixar o PDF:", error);
+      }
     }
   };
 

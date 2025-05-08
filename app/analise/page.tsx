@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -51,6 +51,7 @@ export default function AnalisePage() {
   const [customMarkdown, setCustomMarkdown] = useState<string>("");
   const [showMarkdownImport, setShowMarkdownImport] = useState<boolean>(false);
   const [isClient, setIsClient] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -92,7 +93,7 @@ export default function AnalisePage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o",
@@ -101,7 +102,7 @@ export default function AnalisePage() {
           { role: "user", content: imageMessages },
         ],
         max_tokens: 6000,
-        temperature: 2,
+        temperature: 0,
       }),
     });
 
@@ -120,6 +121,53 @@ export default function AnalisePage() {
     }
 
     return data.choices[0].message.content;
+  };
+
+  const saveAnalysisToDatabase = async (markdown: string) => {
+    try {
+      console.log("Salvando análise para cliente:", selectedClientId);
+      setSaveStatus("Salvando...");
+      
+      const response = await fetch("/api/analises/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clientId: selectedClientId,
+          clientName: selectedClient?.name,
+          markdown: markdown,
+          analysisType: analysisType,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Erro ao salvar análise no banco de dados");
+      }
+      
+      const result = await response.json();
+      console.log("Análise salva com sucesso:", result);
+      
+      setSaveStatus("Salva com sucesso!");
+      toast({
+        title: "Análise salva",
+        description: "A análise foi salva e pode ser encontrada na página do cliente",
+        variant: "default",
+      });
+      
+      setTimeout(() => {
+        setSaveStatus(null);
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Erro ao salvar análise:", error);
+      setSaveStatus("Erro ao salvar");
+      toast({
+        title: "Erro ao salvar análise",
+        description: "Não foi possível salvar a análise no banco de dados",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSubmit = async () => {
@@ -167,6 +215,9 @@ ${analysisResult}
           "A análise foi processada com IA e está pronta para visualização.",
         variant: "default",
       });
+
+      // Salvar a análise no banco de dados automaticamente
+      await saveAnalysisToDatabase(markdownContent);
 
       setIsAnalyzing(false);
       setFiles([]);
@@ -374,7 +425,15 @@ ${analysisResult}
                   markdown={customMarkdown}
                   clientName={selectedClient?.name || "Cliente"}
                   analysisType={analysisType}
+                  onAfterDownload={() => {
+                    // Essa função será chamada após o download do PDF
+                    // Como já estamos salvando automaticamente após a análise,
+                    // podemos deixar esse callback vazio ou adicionar outra funcionalidade
+                  }}
                 />
+                {saveStatus && (
+                  <span className="text-sm text-orange-500">{saveStatus}</span>
+                )}
               </div>
             </CardHeader>
             <CardContent>
