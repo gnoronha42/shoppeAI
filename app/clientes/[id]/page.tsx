@@ -50,9 +50,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 // Importar marked dinamicamente para evitar erros de SSR
-const marked = dynamic(() => import("marked").then((mod) => mod.marked), {
-  ssr: false,
-});
+import { marked } from "marked";
 
 interface StoredAnalysis {
   id: string;
@@ -274,7 +272,17 @@ export default function ClientDetailsPage() {
     if (typeof window === "undefined" || !marked) {
       return { __html: "Carregando..." };
     }
-    return { __html: marked(content) };
+    // @ts-ignore
+    if (typeof marked.parse === "function") {
+      // @ts-ignore
+      return { __html: marked.parse(content) };
+    }
+    // @ts-ignore
+    if (typeof marked.default === "function") {
+      // @ts-ignore
+      return { __html: marked.default(content) };
+    }
+    return { __html: "Erro ao renderizar markdown" };
   };
 
   if (isClientLoading) {
