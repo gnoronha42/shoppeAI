@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
         if (isProductStart(p)) {
           const wrapper = document.createElement("div");
           wrapper.className = "product-block";
-          p.parentNode.insertBefore(wrapper, p);
+          p.parentNode?.insertBefore(wrapper, p);
 
           wrapper.appendChild(p);
 
@@ -151,8 +151,7 @@ export async function POST(request: NextRequest) {
           while (
             nextP &&
             nextP.nodeName === "P" &&
-            !isProductStart(nextP) &&
-            !(nextP.nodeName === "HR")
+            !isProductStart(nextP)
           ) {
             const current = nextP;
             nextP = nextP.nextSibling;
