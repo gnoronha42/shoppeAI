@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
       const content = document.getElementById("content");
       if (!content) return;
 
-      const isProductStart = (p) => {
+      const isProductStart = (p:any) => {
         return (
           p &&
           p.textContent &&
