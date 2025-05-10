@@ -80,9 +80,13 @@ export default function AnalisePage() {
   ) => {
     setApiError(null);
     const prompt =
-      type === "account"
-        ? `${ADVANCED_ACCOUNT_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.`
-        : `${ADVANCED_ADS_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.`;
+    type === "account"
+      ? `${ADVANCED_ACCOUNT_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.`
+      : `${ADVANCED_ADS_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.
+        Sempre que gerar blocos de informações importantes, listas de projeção, tabelas ou qualquer conteúdo que não pode ser quebrado entre páginas no PDF, envolva esse conteúdo com <div class="no-break"> ... </div>.
+        Não coloque títulos markdown (#, ##, ###) dentro do <div class="no-break">, deixe os títulos fora para que mantenham o destaque visual.
+        As seções "Conclusão Final – Plano Recomendado", "Resumo Técnico" e "Projeção de Escala" devem sempre ser títulos markdown (## ou ###), com o conteúdo dessas seções dentro de <div class="no-break"> ... </div>.
+      `;
 
     const imageMessages = base64Images.map((img) => ({
       type: "image_url",
@@ -93,7 +97,7 @@ export default function AnalisePage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4o",
@@ -232,6 +236,196 @@ ${analysisResult}
       });
     }
   };
+
+  
+//   const markdownContent = `# 🔍 VISÃO GERAL DO DESEMPENHO – ADS
+// - **Total de Campanhas Ativas:** 5
+// - **Campanhas Pausadas:** Dado não informado
+// - **Tipo de Segmentação Predominante:** GMV Max - Meta de ROAS
+// - **Investimento Diário Médio por Campanha:** R$142,40
+// - **CPA Médio Geral:** R$13,75 🧮
+// - **Anúncios escaláveis no momento:** Sim
+// - 📉 **Diagnóstico geral do funil:** Impressões e cliques altos, conversão e ROAS acima do ideal.
+
+// # 🔎 ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS
+
+// **Produto: Kit 10 pacote de fralda turma mônica tamanho do...**  
+// **Status:** Ativo  
+// **Investimento:** R$308,68  
+// **GMV:** R$3.363,66  
+// **CTR:** 2,88% ✅  
+// **Cliques:** 1.4k  
+// **Pedidos Pagos:** 14  
+// **Conversão:** 1% ✅  
+// **ROAS:** 10,90 ✅  
+// **CPA:** R$22,05 🧮  
+
+// ✅ **Diagnóstico Técnico e detalhado do Analista:**
+
+// O anúncio apresenta um bom desempenho com ROAS acima de 8x. O CTR está acima de 1%, indicando que o criativo e a segmentação estão adequados. A conversão está no limite, mas ainda aceitável.
+
+// ✅ **Sugestão Técnica e detalhada do Analista:**
+
+// Canal sugerido: Shopee Ads  
+// Segmentação recomendada: GMVMAX ROAS Alto  
+// Tipo de ação: Escala  
+// Urgência: Imediata  
+// Justificativa: ROAS e CTR altos indicam potencial de escala sem ajustes.
+
+// **Produto: Kit com 5 Pacotes de Fralda descartáveis Huggies Tripl...**  
+// **Status:** Ativo  
+// **Investimento:** R$166,51  
+// **GMV:** R$2.500,39  
+// **CTR:** 4,36% ✅  
+// **Cliques:** 2.1k  
+// **Pedidos Pagos:** 19  
+// **Conversão:** 0,90% ❌  
+// **ROAS:** 15,02 ✅  
+// **CPA:** R$8,77 🧮  
+
+// ✅ **Diagnóstico Técnico e detalhado do Analista:**
+
+// Excelente ROAS e CTR, mas a conversão está ligeiramente abaixo do ideal. Pode haver um desalinhamento na página ou preço.
+
+// ✅ **Sugestão Técnica e detalhada do Analista:**
+
+// Canal sugerido: Shopee Ads  
+// Segmentação recomendada: GMVMAX ROAS Médio  
+// Tipo de ação: Conversão  
+// Urgência: Semanal  
+// Justificativa: Ajustar página ou preço para melhorar a conversão.
+
+// **Produto: Frauda descartável kit com 5 pacotes +1 sabonete ch...**  
+// **Status:** Ativo  
+// **Investimento:** R$271,59  
+// **GMV:** R$2.338,20  
+// **CTR:** 2,43% ✅  
+// **Cliques:** 1.1k  
+// **Pedidos Pagos:** 16  
+// **Conversão:** 1,45% ✅  
+// **ROAS:** 8,61 ✅  
+// **CPA:** R$16,97 🧮  
+
+// ✅ **Diagnóstico Técnico e detalhado do Analista:**
+
+// Desempenho sólido com ROAS e conversão aceitáveis. O CTR está acima do mínimo, indicando boa segmentação.
+
+// ✅ **Sugestão Técnica e detalhada do Analista:**
+
+// Canal sugerido: Shopee Ads  
+// Segmentação recomendada: GMVMAX ROAS Médio  
+// Tipo de ação: Escala  
+// Urgência: Imediata  
+// Justificativa: Potencial de escala com ROAS acima de 8x.
+
+// **Produto: Frauda descartáveis, chá, kit fralda, fraldas, escolha o...**  
+// **Status:** Ativo  
+// **Investimento:** R$112,56  
+// **GMV:** R$1.164,69  
+// **CTR:** 2,06% ✅  
+// **Cliques:** 633  
+// **Pedidos Pagos:** 14  
+// **Conversão:** 2,21% ✅  
+// **ROAS:** 10,35 ✅  
+// **CPA:** R$8,04 🧮  
+
+// ✅ **Diagnóstico Técnico e detalhado do Analista:**
+
+// Anúncio com excelente conversão e ROAS. O CTR está acima do mínimo, indicando que o criativo está funcionando bem.
+
+// ✅ **Sugestão Técnica e detalhada do Analista:**
+
+// Canal sugerido: Shopee Ads  
+// Segmentação recomendada: GMVMAX ROAS Alto  
+// Tipo de ação: Escala  
+// Urgência: Imediata  
+// Justificativa: Desempenho forte, ideal para escala.
+
+// **Produto: Fraldas descartáveis promoção sabonete escolh...**  
+// **Status:** Ativo  
+// **Investimento:** R$98,55  
+// **GMV:** R$843,49  
+// **CTR:** 2,22% ✅  
+// **Cliques:** 151  
+// **Pedidos Pagos:** 5  
+// **Conversão:** 3,31% ✅  
+// **ROAS:** 8,56 ✅  
+// **CPA:** R$19,71 🧮  
+
+// ✅ **Diagnóstico Técnico e detalhado do Analista:**
+
+// Conversão e ROAS bons, mas o volume de cliques é baixo. O CTR está acima do mínimo.
+
+// ✅ **Sugestão Técnica e detalhada do Analista:**
+
+// Canal sugerido: Shopee Ads  
+// Segmentação recomendada: GMVMAX ROAS Médio  
+// Tipo de ação: Escala  
+// Urgência: Semanal  
+// Justificativa: Melhorar volume de cliques para aumentar vendas.
+
+// # 🧭 CLASSIFICAÇÃO FINAL DA CONTA
+
+// ### 🟢 PERFIL ESCALÁVEL
+// 2+ SKUs com ROAS ≥ 8x, funil validado → escalar com GMVMAX
+
+// # 📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS
+
+// | Ação | Produto | Tipo | Canal sugerido | Segmentação recomendada | Urgência | Justificativa técnica |
+// |------|---------|------|---------------|------------------------|----------|----------------------|
+// | Escala | Kit 10 pacote de fralda turma mônica | Escala | Shopee Ads | GMVMAX ROAS Alto | Imediata | ROAS e CTR altos indicam potencial de escala sem ajustes. |
+// | Conversão | Kit com 5 Pacotes de Fralda descartáveis Huggies | Conversão | Shopee Ads | GMVMAX ROAS Médio | Semanal | Ajustar página ou preço para melhorar a conversão. |
+// | Escala | Frauda descartável kit com 5 pacotes | Escala | Shopee Ads | GMVMAX ROAS Médio | Imediata | Potencial de escala com ROAS acima de 8x. |
+
+// # ✅ FECHAMENTO DA ANÁLISE
+
+// 📍**Com base na performance atual, essa conta se encaixa no perfil: Escalável.  
+// Recomendo seguir o plano de ação acima conforme o seu objetivo estratégico.  
+// Deseja seguir por esse caminho ou priorizar outro foco nos próximos 7 dias?**
+
+// ## PROJEÇÃO DE ESCALA – OBJETIVOS DE 30, 60 E 100 PEDIDOS/DIA
+
+// **30 pedidos/dia (900/mês)**
+// - Investimento estimado: R$2.062,50
+// - Faturamento estimado via Ads: R$20.625,00
+// - ROAS projetado: 10,00
+// - CPA estimado: R$22,92
+
+// **60 pedidos/dia (1800/mês)**
+// - Investimento estimado: R$4.125,00
+// - Faturamento estimado via Ads: R$41.250,00
+// - ROAS projetado: 10,00
+// - CPA estimado: R$22,92
+
+// **100 pedidos/dia (3000/mês)**
+// - Investimento estimado: R$6.875,00
+// - Faturamento estimado via Ads: R$68.750,00
+// - ROAS projetado: 10,00
+// - CPA estimado: R$22,92
+
+// ⚠️ Reforce que essas projeções assumem estabilidade no CPA atual. Caso a operação invista em otimização de página, kits, bundles e lives, o CPA poderá cair e o retorno será ainda maior.
+
+// ## RESUMO TÉCNICO – INDICADORES
+
+// | Indicador | Valor Atual |
+// |-----------|-------------|
+// | Investimento total em Ads | R$1.1k |
+// | Pedidos via Ads | 80 |
+// | GMV via Ads | R$10.8k |
+// | ROAS médio | 10,14x |
+// | CPA via Ads | R$13,75 |
+// | CPA geral (org + Ads) | Dado não informado |
+// | Projeção 30 pedidos/dia | R$2.062,50 |
+// | Projeção 60 pedidos/dia | R$4.125,00 |
+// | Projeção 100 pedidos/dia | R$6.875,00 |
+
+// ## CONCLUSÃO FINAL – PLANO RECOMENDADO
+
+// A operação apresenta um perfil escalável com múltiplos SKUs acima da meta de ROAS. O retorno atual permite crescimento com segurança. Recomenda-se aumentar o investimento de forma progressiva e consistente, mantendo a estabilidade e visão de longo prazo no Ads.`
+
+//   useEffect(() => {
+//     setCustomMarkdown(markdownContent);
+//   }, [selectedClientId]);
 
   return (
     <div className="space-y-6">
