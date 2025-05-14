@@ -204,14 +204,10 @@ export default function AnalisePage() {
 
       const clientName = selectedClient?.name || "Cliente";
       const date = new Date().toLocaleDateString("pt-BR");
-      const markdownContent = `# Relatório de Análise - ${clientName}
-
-Data: ${date} | Tipo: ${analysisType === "account" ? "Conta" : "Anúncios"}
-
-${analysisResult}
+      const markdownContent = `${analysisResult}
 `;
 
-      setCustomMarkdown(markdownContent);
+       setCustomMarkdown(markdownContent);
 
       toast({
         title: "Análise concluída com sucesso!",
@@ -620,9 +616,8 @@ ${analysisResult}
                   clientName={selectedClient?.name || "Cliente"}
                   analysisType={analysisType}
                   onAfterDownload={() => {
-                    // Essa função será chamada após o download do PDF
-                    // Como já estamos salvando automaticamente após a análise,
-                    // podemos deixar esse callback vazio ou adicionar outra funcionalidade
+                    // Se você quiser salvar após download (não necessário se já está salvando antes)
+                    // saveAnalysisToDatabase(customMarkdown);
                   }}
                 />
                 {saveStatus && (

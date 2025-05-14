@@ -17,8 +17,6 @@ export async function POST(request: NextRequest) {
     }
 
     const htmlContent = marked(markdown);
-
-    // Adiciona papel timbrado como background
     const papelTimbradoPath = path.resolve(
       process.cwd(),
       "public/assets/modelorelatoriologo.png"
@@ -35,6 +33,7 @@ export async function POST(request: NextRequest) {
         <meta charset="UTF-8">
         <title>Relatório - ${clientName}</title>
         <style>
+
           body {
             font-family: 'Inter', Arial, sans-serif;
             color: #222;
@@ -45,6 +44,27 @@ export async function POST(request: NextRequest) {
             min-height: 100vh;
             position: relative;
           }
+            /* Adicione estas classes ao seu CSS */
+.kpi-block,
+.analysis-block,
+.trend-block,
+.ads-block,
+.product-block,
+.points-block,
+.projection-block,
+.tactical-block {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.table-wrapper {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+  display: block;
+  margin: 16px 0;
+}
           .papel-timbrado-bg {
             position: fixed;
             top: 0;
@@ -180,7 +200,7 @@ export async function POST(request: NextRequest) {
       <body>
         <img class="papel-timbrado-bg" src="${papelTimbradoUrl}" />
         <div id="content">
-          <div class="header-space"></div>
+          
           ${htmlContent}
         </div>
       </body>
