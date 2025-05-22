@@ -13,6 +13,14 @@ export const AnalysisPDF = forwardRef<any, AnalysisPDFProps>(
   ({ clientName, analysisType, markdown, fileName = "relatorio.pdf" }, ref) => {
     const handleDownloadPDF = async () => {
       try {
+        // Verificar se markdown está vazio ou contém erro
+        if (!markdown.trim() || 
+            markdown.includes("I'm sorry") || 
+            markdown.includes("I cannot") || 
+            markdown.includes("I apologize")) {
+          throw new Error("O modelo de IA retornou uma mensagem de erro ou conteúdo vazio. Por favor, tente novamente.");
+        }
+        
         // Preparar os dados para enviar ao endpoint
         const data = {
           markdown,
@@ -30,12 +38,17 @@ export const AnalysisPDF = forwardRef<any, AnalysisPDFProps>(
         });
 
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Error ${response.status}: ${errorText}`);
+          const errorData = await response.json();
+          throw new Error(`Erro ${response.status}: ${errorData.message || 'Ocorreu um erro desconhecido'}`);
         }
 
         // Obter o blob do PDF
         const blob = await response.blob();
+
+        // Verificar se o blob tem tamanho válido
+        if (blob.size < 1000) { // Se o PDF for muito pequeno, provavelmente ocorreu um erro
+          throw new Error("O PDF gerado parece estar vazio ou corrompido. Por favor, tente novamente.");
+        }
 
         // Criar URL para download
         const url = URL.createObjectURL(blob);
@@ -52,7 +65,7 @@ export const AnalysisPDF = forwardRef<any, AnalysisPDFProps>(
         URL.revokeObjectURL(url);
       } catch (error) {
         console.error("Erro ao gerar PDF:", error);
-        alert("Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.");
+        alert(error instanceof Error ? error.message : "Ocorreu um erro ao gerar o PDF. Por favor, tente novamente.");
       }
     };
 

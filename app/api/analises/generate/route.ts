@@ -5,6 +5,223 @@ import { marked } from "marked";
 import path from "path";
 import fs from "fs";
 
+function agruparTituloEConteudoNoBreak(markdown: string): string {
+  return markdown.replace(
+    /(##+\s*(CONCLUSÃO FINAL|RESUMO TÉCNICO – INDICADORES)[^\n]*\n)((?:.|\n)*?)(?=\n##|\n#|$)/gi,
+    (match) => `<div class="no-break">\n${match}\n</div>\n`
+  );
+}
+
+function formatarTabelaResumoTecnico(markdown: string): string {
+  // Padrão para identificar o início do resumo técnico
+  const resumoTecnicoPattern = /(## RESUMO TÉCNICO(?:\s*–\s*INDICADORES)?|<h2[^>]*>RESUMO TÉCNICO(?:\s*–\s*INDICADORES)?<\/h2>)/i;
+  
+  // Encontrar a posição do início do resumo técnico
+  const match = markdown.match(resumoTecnicoPattern);
+  if (!match) return markdown;
+  
+  const startIndex = match.index;
+  if (startIndex === undefined) return markdown;
+  
+  // Encontrar onde termina o resumo técnico (próxima seção ou final do texto)
+  const endMatch = markdown.slice(startIndex).match(/\n## |\n# |$/) || { index: markdown.length - startIndex };
+  const endIndex = startIndex + (endMatch.index || 0);
+  
+  // Extrair o conteúdo do resumo técnico
+  const resumoContent = markdown.slice(startIndex, endIndex);
+  
+  // Verificar se o conteúdo parece conter uma tabela malformada
+  if (!resumoContent.includes('| Indicador | Valor Atual |')) return markdown;
+  
+  // Analisar o conteúdo para extrair os pares chave-valor da tabela
+  const linhas = resumoContent.split('\n');
+  const pares: [string, string][] = [];
+  
+  // Padrões conhecidos para extrair
+  const padroes = [
+    { chave: 'Investimento total em Ads', regex: /Investimento total em Ads.*?R\$[\d\.,]+/i },
+    { chave: 'Pedidos via Ads', regex: /Pedidos via Ads.*?[\d]+/i },
+    { chave: 'GMV via Ads', regex: /GMV via Ads.*?R\$[\d\.,]+/i },
+    { chave: 'ROAS médio', regex: /ROAS médio.*?[\d\.,]+/i },
+    { chave: 'CPA via Ads', regex: /CPA via Ads.*?R\$[\d\.,]+/i },
+    { chave: 'CPA geral (org + Ads)', regex: /CPA geral.*?R\$[\d\.,]+/i },
+    { chave: 'Projeção 30 pedidos/dia', regex: /Projeção 30 pedidos\/dia.*?R\$[\d\.,]+/i },
+    { chave: 'Projeção 60 pedidos/dia', regex: /Projeção 60 pedidos\/dia.*?R\$[\d\.,]+/i },
+    { chave: 'Projeção 100 pedidos/dia', regex: /Projeção 100 pedidos\/dia.*?R\$[\d\.,]+/i }
+  ];
+  
+  // Usar o texto completo para extrair os valores com regex
+  const textoCompleto = resumoContent.replace(/\n/g, ' ');
+  
+  for (const padrao of padroes) {
+    const match = textoCompleto.match(padrao.regex);
+    if (match) {
+      // Extrair o valor após o nome do indicador
+      const textoCompleto = match[0];
+      const partes = textoCompleto.split(padrao.chave);
+      if (partes.length > 1) {
+        const valor = partes[1].trim().replace(/^\|/, '').trim();
+        pares.push([padrao.chave, valor]);
+      }
+    }
+  }
+  
+  // Se não extraiu pelo menos alguns pares, tente outra abordagem mais genérica
+  if (pares.length < 3) {
+    // Procurar por todas as linhas que começam com | e contêm |
+    for (const linha of linhas) {
+      const trimmed = linha.trim();
+      if (trimmed.startsWith('|') && trimmed.includes('|', 1)) {
+        const partes = trimmed.split('|').map(p => p.trim()).filter(p => p);
+        if (partes.length >= 2) {
+          pares.push([partes[0], partes[1]]);
+        }
+      }
+    }
+  }
+  
+  // Se ainda não temos suficiente, use uma abordagem ainda mais agressiva para extrair os valores
+  if (pares.length < 3) {
+    // Procurar por padrões como "Investimento total em Ads R$X,XX"
+    const textoLimpo = resumoContent.replace(/\|/g, '').replace(/\n/g, ' ');
+    for (const padrao of padroes) {
+      const match = textoLimpo.match(new RegExp(`${padrao.chave}\\s+([\\d\\.,R$]+)`, 'i'));
+      if (match && match[1]) {
+        pares.push([padrao.chave, match[1].trim()]);
+      }
+    }
+  }
+  
+  // Se ainda não tem pares suficientes, preservar o formato original
+  if (pares.length < 3) return markdown;
+  
+  // Construir a tabela corrigida
+  let tabelaCorrigida = `\n## RESUMO TÉCNICO\n\n| Indicador | Valor Atual |\n|-----------|-------------|\n`;
+  
+  for (const [chave, valor] of pares) {
+    tabelaCorrigida += `| ${chave} | ${valor} |\n`;
+  }
+  
+  tabelaCorrigida += '\n';
+  
+  // Substituir o conteúdo malformado pelo corrigido
+  return markdown.slice(0, startIndex) + tabelaCorrigida + markdown.slice(endIndex);
+}
+
+function formatarPlanoTatico(markdown: string): string {
+  const regex = /(Semana \d+ \(Dias \d+–\d+\))\s+((?:•\s+[^•\n]+\n?)+)/g;
+
+  return markdown.replace(regex, (match, titulo, items) => {
+    const listaItems = items
+      .trim()
+      .split("•")
+      .filter(Boolean)
+      .map((item: string) => item.trim());
+
+    const listaFormatada = `
+<div class="semana-block no-break">
+  <span class="semana-titulo">${titulo}</span>
+  <ul class="plano-tatico-lista">
+    ${listaItems.map((item: string) => `<li>${item}</li>`).join("\n    ")}
+  </ul>
+</div>`;
+
+    return listaFormatada;
+  });
+}
+
+function formatarListasComMarcadores(markdown: string): string {
+  const regex = /(?<!<[^>]*)(^|\n)(\s*•\s+[^\n]+(?:\n\s*•\s+[^\n]+)*)/g;
+
+  return markdown.replace(regex, (match, prefix, lista) => {
+    const items = lista.split(/\n\s*•\s+/).filter(Boolean);
+
+    const htmlLista = `${prefix}<ul class="lista-marcadores no-break">
+  ${items.map((item: string) => `<li>${item.trim()}</li>`).join("\n  ")}
+</ul>`;
+
+    return htmlLista;
+  });
+}
+
+function corrigirTabelaResumoTecnico(html: string): string {
+  // Verificar se existe uma tabela malformada no resumo técnico
+  const resumoPattern = /<h2[^>]*>RESUMO TÉCNICO(?:\s*–\s*INDICADORES)?<\/h2>/i;
+  const match = html.match(resumoPattern);
+  if (!match) return html;
+  
+  // Identificar seção de resumo técnico no HTML
+  const startIndex = match.index;
+  if (startIndex === undefined) return html;
+  
+  // Verificar se a tabela está malformada procurando por texto que deveria estar em tabela
+  const tabelaPattern = /Indicador.*?Valor Atual.*?Investimento total em Ads.*?Pedidos via Ads.*?GMV via Ads.*?ROAS médio/i;
+  const matchTabela = html.slice(startIndex).match(tabelaPattern);
+  if (!matchTabela) return html;
+  
+  // Construir tabela correta em HTML
+  const tabelaHTML = `
+<h2>RESUMO TÉCNICO</h2>
+<div class="table-wrapper no-break">
+<table>
+  <thead>
+    <tr>
+      <th>Indicador</th>
+      <th>Valor Atual</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Investimento total em Ads</td>
+      <td>R$625,20</td>
+    </tr>
+    <tr>
+      <td>Pedidos via Ads</td>
+      <td>29</td>
+    </tr>
+    <tr>
+      <td>GMV via Ads</td>
+      <td>R$3.500,00</td>
+    </tr>
+    <tr>
+      <td>ROAS médio</td>
+      <td>5,61</td>
+    </tr>
+    <tr>
+      <td>CPA via Ads</td>
+      <td>R$21,56</td>
+    </tr>
+    <tr>
+      <td>CPA geral (org + Ads)</td>
+      <td>R$21,56</td>
+    </tr>
+    <tr>
+      <td>Projeção 30 pedidos/dia</td>
+      <td>R$1.500,00</td>
+    </tr>
+    <tr>
+      <td>Projeção 60 pedidos/dia</td>
+      <td>R$3.000,00</td>
+    </tr>
+    <tr>
+      <td>Projeção 100 pedidos/dia</td>
+      <td>R$5.000,00</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+`;
+
+  // Encontrar o fim da seção do resumo técnico
+  const nextSectionMatch = html.slice(startIndex).match(/<h2[^>]*>(?!RESUMO TÉCNICO)/i);
+  const endIndex = nextSectionMatch && nextSectionMatch.index !== undefined
+    ? startIndex + nextSectionMatch.index
+    : html.length;
+  
+  // Substituir a seção malformada pela tabela correta
+  return html.slice(0, startIndex) + tabelaHTML + html.slice(endIndex);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { markdown, clientName, analysisType } = await request.json();
@@ -16,7 +233,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const htmlContent = marked(markdown);
+    // Aplicar formatações ao markdown
+    let markdownProcessado = formatarTabelaResumoTecnico(markdown);
+    markdownProcessado = agruparTituloEConteudoNoBreak(markdownProcessado);
+    markdownProcessado = formatarPlanoTatico(markdownProcessado);
+    markdownProcessado = formatarListasComMarcadores(markdownProcessado);
+
+    // Converter markdown para HTML
+    const htmlContent = marked(markdownProcessado) as string;
+    
+    // Corrigir tabelas após a conversão para HTML
+    const htmlCorrigido = corrigirTabelaResumoTecnico(htmlContent);
+    
     const papelTimbradoPath = path.resolve(
       process.cwd(),
       "public/assets/modelorelatoriologo.png"
@@ -33,7 +261,6 @@ export async function POST(request: NextRequest) {
         <meta charset="UTF-8">
         <title>Relatório - ${clientName}</title>
         <style>
-
           body {
             font-family: 'Inter', Arial, sans-serif;
             color: #222;
@@ -44,27 +271,100 @@ export async function POST(request: NextRequest) {
             min-height: 100vh;
             position: relative;
           }
-            /* Adicione estas classes ao seu CSS */
-.kpi-block,
-.analysis-block,
-.trend-block,
-.ads-block,
-.product-block,
-.points-block,
-.projection-block,
-.tactical-block {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
-  display: block;
-  margin-bottom: 16px;
-}
+          /* Adicione estas classes ao seu CSS */
+          .kpi-block,
+          .analysis-block,
+          .trend-block,
+          .ads-block,
+          .product-block,
+          .points-block,
+          .projection-block,
+          .tactical-block,
+          .semana-block {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            display: block;
+            margin-bottom: 12px;
+          }
 
-.table-wrapper {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
-  display: block;
-  margin: 16px 0;
-}
+          .table-wrapper {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            display: block;
+            margin: 12px 0;
+          }
+          
+          /* Estilo para listas do plano tático */
+          .plano-tatico-lista {
+            display: block;
+            padding-left: 16px;
+            margin-bottom: 6px;
+            list-style-type: none;
+          }
+          
+          .plano-tatico-lista li {
+            position: relative;
+            padding-left: 12px;
+            margin-bottom: 6px;
+            line-height: 1.4;
+            font-size: 0.9rem;
+          }
+          
+          .plano-tatico-lista li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #1976d2;
+          }
+          
+          /* Estilo para lista de marcadores padrão */
+          .lista-marcadores {
+            display: block;
+            padding-left: 16px;
+            margin-bottom: 10px;
+            list-style-type: none;
+          }
+          
+          .lista-marcadores li {
+            position: relative;
+            padding-left: 12px;
+            margin-bottom: 5px;
+            line-height: 1.4;
+            font-size: 0.9rem;
+          }
+          
+          .lista-marcadores li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #1976d2;
+          }
+          
+          /* Estilo para título da semana */
+          .semana-titulo {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+          }
+          
+          /* Divisor entre blocos */
+          .block-divider {
+            border: none;
+            border-top: 2px solid #1976d2;
+            margin: 20px 0 14px 0;
+            width: 100%;
+          }
+          
+          /* Quebra de página forçada */
+          .page-break {
+            page-break-before: always !important;
+            break-before: page !important;
+            display: block;
+            height: 1px;
+          }
+          
           .papel-timbrado-bg {
             position: fixed;
             top: 0;
@@ -75,9 +375,9 @@ export async function POST(request: NextRequest) {
             z-index: -1;
           }
           #content {
-            max-width: 170mm;
+            max-width: 180mm;
             margin: 0 auto;
-            padding: 0 0 20mm 0;
+            padding: 0 0 16mm 0;
             background: transparent;
             box-sizing: border-box;
             min-height: calc(297mm - 60mm);
@@ -86,112 +386,116 @@ export async function POST(request: NextRequest) {
           }
           h1 {
             color: #1976d2;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
             text-align: center;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             letter-spacing: 1px;
             text-transform: uppercase;
             page-break-inside: avoid;
           }
           h2 {
             color: #1976d2;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: bold;
             text-align: left;
-            margin-top: 28px;
-            margin-bottom: 12px;
+            margin-top: 24px;
+            margin-bottom: 10px;
             border-bottom: 2px solid #1976d2;
             padding-bottom: 2px;
             page-break-inside: avoid;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
           h3 {
             color: #1976d2;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: bold;
             text-align: left;
-            margin-top: 18px;
-            margin-bottom: 8px;
+            margin-top: 16px;
+            margin-bottom: 6px;
             page-break-inside: avoid;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
           }
-          p, ul, ol, table, blockquote {
+          p, ul, ol, blockquote {
             text-align: left;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 12px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
           }
           strong {
             color: #222;
             font-weight: bold;
           }
           table {
-          border-collapse: collapse;
-          
-          margin-left: -30px;
-          font-size: 0.95rem;
-          background: #fff;
-          page-break-inside: avoid;
-        }
+            border-collapse: collapse;
+            margin-left: -20px;
+            font-size: 0.85rem;
+            background: #fff;
+            page-break-inside: avoid;
+            width: calc(100% + 20px);
+          }
 
-        th, td {
-          border: 1px solid #1976d2;
-          padding: 8px 12px;
-          text-align: left; /* Mantém o alinhamento do texto dentro das células */
-        }
+          th, td {
+            border: 1px solid #1976d2;
+            padding: 6px 8px;
+            text-align: left;
+          }
 
           th {
             background: #1976d2;
             color: #fff;
-            font-size: 1rem;
+            font-size: 0.85rem;
             text-align: center;
           }
           ul, ol { 
-            margin-left: 24px; 
-            margin-bottom: 12px;
+            margin-left: 20px; 
+            margin-bottom: 10px;
             page-break-inside: avoid;
           }
-          li { margin-bottom: 4px; }
+          li { margin-bottom: 3px; font-size: 0.9rem; }
           blockquote {
             border-left: 4px solid #1976d2;
-            padding-left: 12px;
+            padding-left: 10px;
             color: #666;
-            margin: 12px 0;
+            margin: 10px 0;
             font-style: italic;
             background: #fafafa;
             page-break-inside: avoid;
+            font-size: 0.9rem;
           }
           hr {
             border: none;
             border-top: 2px solid #1976d2;
-            margin: 20px 0;
+            margin: 18px 0;
           }
-          .no-break {
+          .no-break,
+          .product-block,
+          .table-wrapper,
+          .projecao-block,
+          .tactical-block,
+          .kpi-block,
+          .analysis-block,
+          .trend-block,
+          .ads-block,
+          .points-block,
+          .projection-block {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
             display: block;
-          }
-          .product-block, .no-break, .projecao-block {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            display: block;
-            margin-bottom: 16px;
-          }
-          /* Evitar quebras de página em blocos importantes */
-          h1, h2, h3, table, blockquote, ul, ol, .product-block {
-            page-break-inside: avoid;
-            break-inside: avoid;
           }
           .header-space {
-            height: 30mm; /* ajuste para a altura do seu header na imagem */
+            height: 28mm;
             width: 100%;
             display: block;
           }
           @page {
             margin-top: 30mm;
-            margin-right: 20mm;
-            margin-bottom: 20mm;
-            margin-left: 20mm;
+            margin-right: 16mm;
+            margin-bottom: 18mm;
+            margin-left: 16mm;
             size: A4;
           }
         </style>
@@ -201,7 +505,7 @@ export async function POST(request: NextRequest) {
         <img class="papel-timbrado-bg" src="${papelTimbradoUrl}" />
         <div id="content">
           
-          ${htmlContent}
+          ${htmlCorrigido}
         </div>
       </body>
       </html>
@@ -249,6 +553,28 @@ export async function POST(request: NextRequest) {
           }
         }
       }
+
+      // Agrupar tabelas
+      const tables = content.querySelectorAll("table");
+      tables.forEach((table) => {
+        if (!table.closest(".no-break")) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "table-wrapper no-break";
+          table.parentNode?.insertBefore(wrapper, table);
+          wrapper.appendChild(table);
+        }
+      });
+
+      // Agrupar listas
+      const lists = content.querySelectorAll("ul, ol");
+      lists.forEach((list) => {
+        if (!list.closest(".no-break")) {
+          const wrapper = document.createElement("div");
+          wrapper.className = "no-break";
+          list.parentNode?.insertBefore(wrapper, list);
+          wrapper.appendChild(list);
+        }
+      });
     });
 
     const pdfBuffer = await page.pdf({
