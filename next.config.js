@@ -10,6 +10,12 @@ const nextConfig = {
     if (dev && isServer) {
       config.cache = false;
     }
+    if (isServer) {
+      config.externals.push({
+        'puppeteer-core': 'puppeteer-core',
+        '@vercel/browserless': '@vercel/browserless',
+      });
+    }
     return config;
   },
 };

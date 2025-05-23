@@ -1,6 +1,6 @@
 // app/api/generate-pdf/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import puppeteer from "puppeteer";
+import puppeteerCore from "puppeteer-core";
 import { marked } from "marked";
 import path from "path";
 import fs from "fs";
@@ -223,6 +223,8 @@ function corrigirTabelaResumoTecnico(html: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  let browser = null;
+  
   try {
     const { markdown, clientName, analysisType } = await request.json();
 
@@ -511,14 +513,21 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    // MODIFICAÇÃO PRINCIPAL: Substituir a configuração do browser
+    browser = await puppeteerCore.connect({
+      browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
     });
 
     const page = await browser.newPage();
+    
+    // Aumentar o timeout da página para evitar problemas com o serviço externo
+    await page.setDefaultNavigationTimeout(0);
+    await page.setDefaultTimeout(0);
 
-    await page.setContent(fullHtml, { waitUntil: "networkidle0" });
+    await page.setContent(fullHtml, { 
+      waitUntil: "networkidle0",
+      timeout: 60000 // adicionar timeout maior para carregamento
+    });
 
     await page.evaluate(() => {
       const content = document.getElementById("content");
@@ -578,16 +587,20 @@ export async function POST(request: NextRequest) {
     });
 
     const pdfBuffer = await page.pdf({
-      format: "A4",
+      format: "a4",
       printBackground: true,
       margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
       displayHeaderFooter: true,
       headerTemplate: "<span></span>",
       footerTemplate: "<span></span>",
       preferCSSPageSize: true,
+      timeout: 60000 // adicionar timeout maior para geração do PDF
     });
 
-    await browser.close();
+    if (browser) {
+      await browser.disconnect(); // Mudar de close para disconnect
+      browser = null;
+    }
 
     const response = new NextResponse(pdfBuffer);
     response.headers.set("Content-Type", "application/pdf");
@@ -603,5 +616,9 @@ export async function POST(request: NextRequest) {
       { message: "Error generating PDF", error: String(error) },
       { status: 500 }
     );
+  } finally {
+    if (browser) {
+      await browser.disconnect(); // Mudar de close para disconnect
+    }
   }
 }
