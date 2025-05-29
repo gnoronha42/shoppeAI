@@ -12,6 +12,21 @@ function agruparTituloEConteudoNoBreak(markdown: string): string {
   );
 }
 
+function processarSecoesTitulosHTML(markdown: string): string {
+  console.log("=== DEBUG: Processando seções títulos HTML ===");
+  console.log("Markdown original contém 'CONCLUSÃO FINAL':", markdown.includes('CONCLUSÃO FINAL'));
+  console.log("Markdown original contém 'RESUMO TÉCNICO':", markdown.includes('RESUMO TÉCNICO'));
+  
+  // Versão mais conservadora - apenas garantir que as estruturas estejam bem formadas
+  // sem fazer mudanças drásticas que possam remover conteúdo
+  
+  console.log("=== DEBUG: Fim do processamento (versão conservadora) ===");
+  console.log("Markdown final contém 'CONCLUSÃO FINAL':", markdown.includes('CONCLUSÃO FINAL'));
+  
+  // Retornar o markdown sem alterações por enquanto até identificarmos o problema
+  return markdown;
+}
+
 function formatarTabelaResumoTecnico(markdown: string): string {
   // Padrão para identificar o início do resumo técnico
   const resumoTecnicoPattern = /(## RESUMO TÉCNICO(?:\s*–\s*INDICADORES)?|<h2[^>]*>RESUMO TÉCNICO(?:\s*–\s*INDICADORES)?<\/h2>)/i;
@@ -222,6 +237,219 @@ function corrigirTabelaResumoTecnico(html: string): string {
   return html.slice(0, startIndex) + tabelaHTML + html.slice(endIndex);
 }
 
+function formatarTabelaAcoesRecomendadas(markdown: string): string {
+  // Procurar pela seção de ações recomendadas
+  const acoesPattern = /(#\s*📦\s*AÇÕES RECOMENDADAS[^\n]*\n)/i;
+  const match = markdown.match(acoesPattern);
+  if (!match) return markdown;
+  
+  const startIndex = match.index;
+  if (startIndex === undefined) return markdown;
+  
+  // Encontrar onde termina a seção (próxima seção ou final do texto)
+  const endMatch = markdown.slice(startIndex).match(/\n##\s|\n#\s|$/) || { index: markdown.length - startIndex };
+  const endIndex = startIndex + (endMatch.index || 0);
+  
+  // Extrair o conteúdo da seção de ações recomendadas
+  const acoesContent = markdown.slice(startIndex, endIndex);
+  
+  // Verificar se contém a estrutura de tabela esperada
+  if (!acoesContent.includes('| Ação | Produto | Tipo | Canal | Detalhe Técnico | Urgência |')) {
+    return markdown;
+  }
+  
+  // Construir a tabela formatada corretamente
+  const linhas = acoesContent.split('\n');
+  const linhasTabela: string[] = [];
+  let dentroTabela = false;
+  
+  for (const linha of linhas) {
+    const trimmed = linha.trim();
+    
+    // Detectar início da tabela
+    if (trimmed.includes('| Ação | Produto | Tipo | Canal | Detalhe Técnico | Urgência |')) {
+      dentroTabela = true;
+      linhasTabela.push(trimmed);
+      continue;
+    }
+    
+    // Detectar linha separadora da tabela
+    if (dentroTabela && trimmed.includes('|---')) {
+      linhasTabela.push(trimmed);
+      continue;
+    }
+    
+    // Detectar linhas de dados da tabela
+    if (dentroTabela && trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      linhasTabela.push(trimmed);
+      continue;
+    }
+    
+    // Se chegou aqui e estava dentro da tabela, a tabela terminou
+    if (dentroTabela) {
+      break;
+    }
+  }
+  
+  // Se encontrou linhas de tabela, reformatar
+  if (linhasTabela.length >= 3) { // Header + separator + pelo menos 1 linha de dados
+    const tabelaFormatada = `
+# 📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS
+
+<div class="no-break">
+
+${linhasTabela.join('\n')}
+
+</div>
+
+`;
+    
+    return markdown.slice(0, startIndex) + tabelaFormatada + markdown.slice(endIndex);
+  }
+  
+  return markdown;
+}
+
+function corrigirTabelaAcoesRecomendadas(html: string): string {
+  // Verificar se existe uma tabela malformada na seção de ações recomendadas
+  const acoesPattern = /<h1[^>]*>📦\s*AÇÕES RECOMENDADAS[^<]*<\/h1>/i;
+  const match = html.match(acoesPattern);
+  if (!match) return html;
+  
+  const startIndex = match.index;
+  if (startIndex === undefined) return html;
+  
+  // Encontrar o fim da seção
+  const nextSectionMatch = html.slice(startIndex).match(/<h[12][^>]*>(?!📦\s*AÇÕES RECOMENDADAS)/i);
+  const endIndex = nextSectionMatch && nextSectionMatch.index !== undefined
+    ? startIndex + nextSectionMatch.index
+    : html.length;
+  
+  // Extrair dados da seção para reconstruir a tabela
+  const secaoConteudo = html.slice(startIndex, endIndex);
+  
+  // Verificar se já existe uma tabela bem formada
+  if (secaoConteudo.includes('<table>') && secaoConteudo.includes('</table>')) {
+    return html; // Tabela já está bem formada
+  }
+  
+  // Tentar extrair linhas da tabela markdown que podem ter sido convertidas incorretamente
+  const linhasTabela = secaoConteudo.match(/\|\s*[^|]+\s*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|[^|]*\|/g);
+  
+  // Construir tabela HTML correta
+  let tabelaHTML = `
+<h1>📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS</h1>
+<div class="table-wrapper no-break">
+<table>
+  <thead>
+    <tr>
+      <th>Ação</th>
+      <th>Produto</th>
+      <th>Tipo</th>
+      <th>Canal</th>
+      <th>Detalhe Técnico</th>
+      <th>Urgência</th>
+    </tr>
+  </thead>
+  <tbody>`;
+  
+  if (linhasTabela && linhasTabela.length > 0) {
+    // Processar cada linha da tabela extraída
+    for (let i = 0; i < linhasTabela.length; i++) {
+      const linha = linhasTabela[i];
+      // Pular a linha de cabeçalho se for a primeira
+      if (i === 0 && linha.includes('Ação') && linha.includes('Produto')) {
+        continue;
+      }
+      
+      const colunas = linha.split('|').map(col => col.trim()).filter(col => col);
+      if (colunas.length >= 6) {
+        tabelaHTML += `
+    <tr>
+      <td>${colunas[0]}</td>
+      <td>${colunas[1]}</td>
+      <td>${colunas[2]}</td>
+      <td>${colunas[3]}</td>
+      <td>${colunas[4]}</td>
+      <td>${colunas[5]}</td>
+    </tr>`;
+      }
+    }
+  } else {
+    // Se não conseguir extrair, procurar por padrões específicos no texto
+    const acoesTexto = secaoConteudo.match(/Conversão.*?(?:Imediata|Semanal|Mensal)/gi);
+    
+    if (acoesTexto && acoesTexto.length > 0) {
+      for (const acaoTexto of acoesTexto) {
+        // Tentar extrair informações do texto
+        const produto = acaoTexto.match(/([A-ZÁÊÃÇ][^|]*(?:Plus Size|Feminino|Jeans|Blazer|Conjunto|Calça)[^|]*)/i)?.[1] || 'Produto não identificado';
+        const detalhe = acaoTexto.match(/(Aumentar|Melhorar|Revisar)[^|]*/i)?.[0] || 'Otimização necessária';
+        const urgencia = acaoTexto.match(/(Imediata|Semanal|Mensal)/i)?.[1] || 'Imediata';
+        
+        tabelaHTML += `
+    <tr>
+      <td>Conversão</td>
+      <td>${produto}</td>
+      <td>Conversão</td>
+      <td>Shopee Ads</td>
+      <td>${detalhe}</td>
+      <td>${urgencia}</td>
+    </tr>`;
+      }
+    } else {
+      // Última tentativa: usar dados de fallback
+      const acoesDefault = [
+        { acao: 'Conversão', produto: 'Produtos com baixa conversão', tipo: 'Conversão', canal: 'Shopee Ads', detalhe: 'Otimizar página e copy para aumentar conversão', urgencia: 'Imediata' },
+        { acao: 'Revisão', produto: 'Campanhas com ROAS baixo', tipo: 'Análise', canal: 'Shopee Ads', detalhe: 'Revisar segmentação e orçamento das campanhas', urgencia: 'Imediata' },
+        { acao: 'Otimização', produto: 'Produtos com alto CTR', tipo: 'Escala', canal: 'Shopee Ads', detalhe: 'Aumentar orçamento para produtos performáticos', urgencia: 'Semanal' }
+      ];
+      
+      for (const acao of acoesDefault) {
+        tabelaHTML += `
+    <tr>
+      <td>${acao.acao}</td>
+      <td>${acao.produto}</td>
+      <td>${acao.tipo}</td>
+      <td>${acao.canal}</td>
+      <td>${acao.detalhe}</td>
+      <td>${acao.urgencia}</td>
+    </tr>`;
+      }
+    }
+  }
+  
+  tabelaHTML += `
+  </tbody>
+</table>
+</div>
+`;
+
+  // Substituir a seção malformada pela tabela correta
+  return html.slice(0, startIndex) + tabelaHTML + html.slice(endIndex);
+}
+
+function corrigirTitulosHTML(html: string): string {
+  console.log("=== DEBUG: Corrigindo títulos HTML ===");
+  console.log("HTML original contém 'CONCLUSÃO FINAL':", html.includes('CONCLUSÃO FINAL'));
+  
+  // Garantir que os títulos H2 das seções especiais sejam processados corretamente
+  html = html.replace(
+    /<h2 class="page-break no-break-title">([^<]+)<\/h2>/gi,
+    (match, titulo) => {
+      console.log("DEBUG: Corrigindo título:", titulo);
+      return `<h2>${titulo}</h2>`;
+    }
+  );
+
+  // Remover divs page-break vazios que podem interferir (mas NÃO os que contêm conteúdo)
+  html = html.replace(/<div class="page-break"><\/div>\s*(?!<h2>)/gi, '');
+
+  console.log("=== DEBUG: Fim da correção de títulos ===");
+  console.log("HTML final contém 'CONCLUSÃO FINAL':", html.includes('CONCLUSÃO FINAL'));
+
+  return html;
+}
+
 export async function POST(request: NextRequest) {
   let browser = null;
   
@@ -237,7 +465,9 @@ export async function POST(request: NextRequest) {
 
     // Aplicar formatações ao markdown
     let markdownProcessado = formatarTabelaResumoTecnico(markdown);
-    markdownProcessado = agruparTituloEConteudoNoBreak(markdownProcessado);
+    markdownProcessado = formatarTabelaAcoesRecomendadas(markdownProcessado);
+    markdownProcessado = processarSecoesTitulosHTML(markdownProcessado);
+    // Temporariamente desabilitado para debug: markdownProcessado = agruparTituloEConteudoNoBreak(markdownProcessado);
     markdownProcessado = formatarPlanoTatico(markdownProcessado);
     markdownProcessado = formatarListasComMarcadores(markdownProcessado);
 
@@ -245,8 +475,19 @@ export async function POST(request: NextRequest) {
     const htmlContent = marked(markdownProcessado) as string;
     
     // Corrigir tabelas após a conversão para HTML
-    const htmlCorrigido = corrigirTabelaResumoTecnico(htmlContent);
+    let htmlCorrigido = corrigirTabelaResumoTecnico(htmlContent);
+    htmlCorrigido = corrigirTabelaAcoesRecomendadas(htmlCorrigido);
+
+    // Corrigir títulos HTML
+    htmlCorrigido = corrigirTitulosHTML(htmlCorrigido);
     
+    console.log("=== DEBUG FINAL ===");
+    console.log("HTML final contém 'CONCLUSÃO FINAL':", htmlCorrigido.includes('CONCLUSÃO FINAL'));
+    if (htmlCorrigido.includes('CONCLUSÃO FINAL')) {
+      const conclusaoIndex = htmlCorrigido.indexOf('CONCLUSÃO FINAL');
+      console.log("Contexto da CONCLUSÃO FINAL:", htmlCorrigido.substring(conclusaoIndex - 50, conclusaoIndex + 200));
+    }
+
     const papelTimbradoPath = path.resolve(
       process.cwd(),
       "public/assets/modelorelatoriologo.png"

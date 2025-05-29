@@ -136,9 +136,13 @@ Após análise SKU a SKU, classifique a conta em:
 
 # 📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS
 
+<div class="no-break">
+
 | Ação | Produto | Tipo | Canal | Detalhe Técnico | Urgência |
 |------|---------|------|-------|----------------|----------|
 | [Ação específica] | [Nome do produto] | [Tipo] | [Canal] | [Detalhe técnico com porcentagens e métricas exatas] | [Urgência] |
+
+</div>
 
 Para cada ação, especifique:
 - Tipo (Escala, Corte, Conversão, Teste)  
@@ -203,7 +207,10 @@ O ROAS naturalmente oscila dia a dia. Dias com ROAS baixo não significam desper
 | Projeção 100 pedidos/dia | R$X.XXX,XX |
 </div>
 
-CONCLUSÃO FINAL – PLANO RECOMENDADO
+<div class="page-break"></div>
+
+<div class="page-break">
+## CONCLUSÃO FINAL – PLANO RECOMENDADO<
 
 A operação demonstra [excepcional/moderado/limitado] potencial de escalabilidade, evidenciado por [X] SKUs com ROAS superior a 8x ([produtos específicos] ultrapassando [X]x), validando tecnicamente o funil de conversão com CTR médio de [X]% e confirmando a viabilidade de expansão [imediata/gradual]. A análise granular dos indicadores revela uma estrutura de custo [sustentável/desafiadora], com CPA médio de R$[X], permitindo crescimento [seguro/cauteloso] sem comprometer a rentabilidade.
 
@@ -212,6 +219,8 @@ Recomendo uma estratégia de expansão bifurcada: (1) escala vertical nos produt
 A solidez dos indicadores atuais (ROAS médio de [X]x) proporciona uma margem de segurança [significativa/adequada/limitada] para investimentos mais [agressivos/moderados/cautelosos], desde que implementados com disciplina metodológica e monitoramento constante. É imperativo manter [3 fatores críticos específicos] para sustentar os níveis de conversão durante a fase de expansão. A implementação deve seguir uma metodologia de [abordagem técnica específica] para garantir consistência nos resultados.
 
 Para maximizar resultados no médio-longo prazo, é fundamental adotar uma visão estratégica no gerenciamento de campanhas, evitando reações impulsivas a oscilações diárias de ROAS, que são inerentes ao processo de aprendizagem algorítmica. A estabilidade operacional e a persistência na execução do plano técnico aqui delineado serão determinantes para o sucesso da escalabilidade, potencialmente [resultado específico] nos próximos [X] dias, atingindo a meta de [Y] pedidos/dia com ROAS projetado de [Z]x.
+</div>
+
 `;
 
 export const ADVANCED_ACCOUNT_PROMPT = `🧠 PROMPT DE COMPORTAMENTO FIXO DA IA – ANÁLISE AVANÇADA DE CONTA SHOPEE
