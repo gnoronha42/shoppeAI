@@ -213,17 +213,28 @@ export default function ClientDetailsPage() {
       }
 
       const data = await response.json();
-      if (
-        !data ||
-        !data.analysis_results ||
-        data.analysis_results.length === 0
-      ) {
-        throw new Error("Conteúdo não encontrado");
+      
+      // Adicionar log para debugar a estrutura dos dados
+      console.log("Dados retornados da API para PDF:", data);
+      
+      let content = null;
+      
+      // Tentar diferentes estruturas de dados possíveis
+      if (data && data.analysis_results && data.analysis_results.length > 0) {
+        content = data.analysis_results[0].content;
+      } else if (data && data.content) {
+        content = data.content;
+      } else if (analysis && analysis.content) {
+        content = analysis.content;
+      }
+      
+      if (!content) {
+        console.error("Estrutura de dados recebida:", data);
+        throw new Error("Conteúdo da análise não encontrado");
       }
 
-      const content = data.analysis_results[0].content;
-
-      const pdfResponse = await fetch("/api/analises/generate", {
+      // NOVA LÓGICA: Primeira tentativa de geração do PDF
+      let pdfResponse = await fetch("/api/analises/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -235,7 +246,40 @@ export default function ClientDetailsPage() {
         }),
       });
 
+      // Verificar se o PDF precisa ser regenerado
+      if (pdfResponse.status === 422) {
+        const errorData = await pdfResponse.json();
+        
+        if (errorData.shouldRegenerate) {
+          console.log("⚠️ Relatório incompleto detectado. Seções faltantes:", errorData.missingSections);
+          
+          toast({
+            title: "Relatório incompleto detectado",
+            description: "Gerando nova versão com todas as seções...",
+            variant: "default",
+          });
+
+          // SEGUNDA TENTATIVA: Tentar novamente após 2 segundos
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          pdfResponse = await fetch("/api/analises/generate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              markdown: content,
+              clientName: client?.name || "Cliente",
+              analysisType: analysis.type,
+              forceComplete: true, // Flag para forçar completude
+            }),
+          });
+        }
+      }
+
       if (!pdfResponse.ok) {
+        const errorText = await pdfResponse.text();
+        console.error("Erro na resposta do PDF:", pdfResponse.status, errorText);
         throw new Error("Erro ao gerar PDF");
       }
 

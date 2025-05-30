@@ -79,52 +79,34 @@ export default function AnalisePage() {
     type: AnalysisType
   ) => {
     setApiError(null);
-    const prompt =
-    type === "account"
-      ? `${ADVANCED_ACCOUNT_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.`
-      : `${ADVANCED_ADS_PROMPT}\n\nIMPORTANTE: Considere todas as imagens abaixo e gere um ÚNICO relatório consolidado, mesclando os dados de todas elas.
-        Sempre que gerar blocos de informações importantes, listas de projeção, tabelas ou qualquer conteúdo que não pode ser quebrado entre páginas no PDF, envolva esse conteúdo com <div class="no-break"> ... </div>.
-        Não coloque títulos markdown (#, ##, ###) dentro do <div class="no-break">, deixe os títulos fora para que mantenham o destaque visual.
-        As seções "Conclusão Final – Plano Recomendado", "Resumo Técnico" e "Projeção de Escala" devem sempre ser títulos markdown (## ou ###), com o conteúdo dessas seções dentro de <div class="no-break"> ... </div>.
-      `;
 
-    const imageMessages = base64Images.map((img) => ({
-      type: "image_url",
-      image_url: { url: `data:image/jpeg;base64,${img}` },
-    }));
-
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("/api/analises/generate-validated", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: prompt },
-          { role: "user", content: imageMessages },
-        ],
-        max_tokens: 6000,
-        temperature: 0,
+        images: base64Images,
+        analysisType: type,
+        clientName: selectedClient?.name || "Cliente"
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      setApiError(errorData.error?.message || "Erro desconhecido");
+      setApiError(errorData.error || errorData.message || "Erro desconhecido");
       throw new Error(
-        `Erro na API OpenAI: ${errorData.error?.message || "Erro desconhecido"}`
+        `Erro na análise: ${errorData.error || errorData.message || "Erro desconhecido"}`
       );
     }
 
     const data = await response.json();
-    if (!data.choices || !data.choices[0]?.message?.content) {
-      setApiError("Formato de resposta inesperado da API OpenAI");
-      throw new Error("Formato de resposta inesperado da API OpenAI");
+    if (!data.analysis) {
+      setApiError("Formato de resposta inesperado do servidor");
+      throw new Error("Formato de resposta inesperado do servidor");
     }
 
-    return data.choices[0].message.content;
+    return data.analysis;
   };
 
   const saveAnalysisToDatabase = async (markdown: string) => {
@@ -232,340 +214,6 @@ export default function AnalisePage() {
       });
     }
   };
-
-
-//     const markdownContent = `
-// # 🔍 VISÃO GERAL DO DESEMPENHO – ADS
-
-// - **Total de Campanhas Ativas:** 9
-// - **Campanhas Pausadas:** 0
-// - **Tipo de Segmentação Predominante:** GMV Max - Meta de ROAS
-// - **Investimento Diário Médio por Campanha:** R$6,95
-// - **CPA Médio Geral:** R$21,56 🧮
-// - **Anúncios escaláveis no momento:** Não  
-// 📉 **Diagnóstico geral do funil:**  
-// O funil apresenta um CTR médio de 3,93%, acima da média de 1%, indicando boa atratividade dos anúncios. No entanto, o ROAS médio de 5,61 está abaixo da meta de 8x, sugerindo necessidade de otimização para melhorar a rentabilidade. O volume de impressões é alto, mas a conversão precisa ser melhorada para aumentar o GMV.
-
-// ---
-
-// # 🔎 ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS
-
-// **Produto: Blazer Plus Size Alfaiataria**  
-// **Status:** Ativo  
-// **Investimento:** R$329,93  
-// **GMV:** R$2.415,86  
-// **CTR:** 5,74% ✅  
-// **Cliques:** 6.9k  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** Dado não informado  
-// **ROAS:** 7,32 ❌  
-// **CPA:** R$11,37 🧮  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O anúncio possui um CTR excelente de 5,74%, indicando forte atratividade. No entanto, o ROAS de 7,32 está abaixo da meta de 8x, sugerindo que, apesar do bom volume de cliques, a conversão não está maximizando o retorno. O investimento é significativo, mas o GMV precisa ser otimizado.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Aumentar a conversão em 10-15% através de otimização de página e copy, monitorando semanalmente para ajustes finos.
-
-// ---
-
-// **Produto: Conjunto Feminino Colete e Short**  
-// **Status:** Ativo  
-// **Investimento:** R$66,55  
-// **GMV:** R$530,10  
-// **CTR:** 3,68% ✅  
-// **Cliques:** 6.7k  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** Dado não informado  
-// **ROAS:** 7,97 ❌  
-// **CPA:** R$9,95 🧮  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 3,68% é positivo, mas o ROAS de 7,97 ainda não atinge a meta. O investimento é moderado, e o GMV precisa ser melhorado para aumentar o retorno.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Semanal  
-// 5. Justificativa: Melhorar a conversão em 5-10% com ajustes na oferta e monitoramento a cada 5 dias.
-
-// ---
-
-// **Produto: Calça Jeans Wide Leg Feminina**  
-// **Status:** Ativo  
-// **Investimento:** R$47,75  
-// **GMV:** R$306,46  
-// **CTR:** 4,37% ✅  
-// **Cliques:** 315  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** Dado não informado  
-// **ROAS:** 6,42 ❌  
-// **CPA:** R$15,16 🧮  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 4,37% é excelente, mas o ROAS de 6,42 precisa ser melhorado. O investimento é baixo, e o GMV não está maximizando o potencial de retorno.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Aumentar a conversão em 10% com foco em otimização de página e copy, monitorando a cada 3 dias.
-
-// ---
-
-// **Produto: Calça Jeans Feminina Mom Algodão**  
-// **Status:** Ativo  
-// **Investimento:** R$33,99  
-// **GMV:** R$128,10  
-// **CTR:** 2,04% ✅  
-// **Cliques:** 536  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** Dado não informado  
-// **ROAS:** 3,77 ❌  
-// **CPA:** R$63,41 🧮  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 2,04% é viável, mas o ROAS de 3,77 é baixo, indicando necessidade de melhorias significativas na conversão e no GMV.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Melhorar a conversão em 15-20% com ajustes na página e copy, monitorando a cada 3 dias.
-
-// ---
-
-// **Produto: Blazer Feminino Alfaiataria Outono**  
-// **Status:** Ativo  
-// **Investimento:** R$24,25  
-// **GMV:** R$0,00  
-// **CTR:** 3,29% ✅  
-// **Cliques:** 2.4k  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** 0% ❌  
-// **ROAS:** 0,00 ❌  
-// **CPA:** Dado não informado  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 3,29% é positivo, mas a conversão é inexistente, resultando em ROAS de 0,00. É crucial revisar a página e a oferta para melhorar a conversão.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Revisar a página e a oferta para aumentar a conversão em 20-30%, monitorando a cada 2 dias.
-
-// ---
-
-// **Produto: Calça Jeans Feminina Reta Lançamento**  
-// **Status:** Ativo  
-// **Investimento:** R$14,66  
-// **GMV:** R$0,00  
-// **CTR:** 3,41% ✅  
-// **Cliques:** 1.5k  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** 0% ❌  
-// **ROAS:** 0,00 ❌  
-// **CPA:** Dado não informado  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 3,41% é bom, mas a conversão é nula, resultando em ROAS de 0,00. A página e a oferta precisam ser revisadas para melhorar a conversão.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Revisar a página e a oferta para aumentar a conversão em 20-30%, monitorando a cada 2 dias.
-
-// ---
-
-// **Produto: Calça Jeans Feminina Mom Cintura Alta**  
-// **Status:** Ativo  
-// **Investimento:** R$38,32  
-// **GMV:** R$0,00  
-// **CTR:** 2,93% ✅  
-// **Cliques:** 743  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** 0% ❌  
-// **ROAS:** 0,00 ❌  
-// **CPA:** Dado não informado  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 2,93% é viável, mas a conversão é inexistente, resultando em ROAS de 0,00. É necessário revisar a página e a oferta para melhorar a conversão.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Revisar a página e a oferta para aumentar a conversão em 20-30%, monitorando a cada 2 dias.
-
-// ---
-
-// **Produto: Calça Jeans Wide Leg Feminina Cintura Alta**  
-// **Status:** Ativo  
-// **Investimento:** R$25,00  
-// **GMV:** R$0,00  
-// **CTR:** 1,64% ✅  
-// **Cliques:** 119  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** 0% ❌  
-// **ROAS:** 0,00 ❌  
-// **CPA:** Dado não informado  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 1,64% é aceitável, mas a conversão é nula, resultando em ROAS de 0,00. A página e a oferta precisam ser revisadas para melhorar a conversão.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Revisar a página e a oferta para aumentar a conversão em 20-30%, monitorando a cada 2 dias.
-
-// ---
-
-// **Produto: Calça Jeans Feminina Wide Leg com Elastano**  
-// **Status:** Ativo  
-// **Investimento:** R$12,93  
-// **GMV:** R$0,00  
-// **CTR:** 2,36% ✅  
-// **Cliques:** 136  
-// **Pedidos Pagos:** Dado não informado  
-// **Conversão:** 0% ❌  
-// **ROAS:** 0,00 ❌  
-// **CPA:** Dado não informado  
-
-// ✅ **Diagnóstico Técnico e detalhado do Analista:**  
-// > O CTR de 2,36% é viável, mas a conversão é inexistente, resultando em ROAS de 0,00. É necessário revisar a página e a oferta para melhorar a conversão.
-
-// ✅ **Sugestão Técnica e detalhada do Analista:**  
-// > 1. Canal sugerido: Shopee Ads  
-// 2. Segmentação recomendada: GMVMAX ROAS Médio  
-// 3. Tipo de ação: Conversão  
-// 4. Urgência: Imediata  
-// 5. Justificativa: Revisar a página e a oferta para aumentar a conversão em 20-30%, monitorando a cada 2 dias.
-
-// ---
-
-// # ⚙️ REGRAS TÉCNICAS OBRIGATÓRIAS POR SKU
-
-// - **ROAS ≥ 8x** = **Escalável** → NÃO sugerir alterações  
-// - **CTR ≥ 1%** = Anúncio viável tecnicamente  
-// - **CTR < 1%** = Problema técnico → revisar criativo e segmentação  
-// - **Conversão < 1%** = Problema grave → página, copy ou preço desalinhado  
-// - **CPA alto** = Prejuízo por pedido, cortar ou revisar  
-// - **CPC implícito** = Avaliar com base no investimento ÷ cliques
-
-// Se SKU estiver dentro da meta → NÃO alterar copy, preço ou campanha.
-
-// ---
-
-// # 🧭 CLASSIFICAÇÃO FINAL DA CONTA
-
-// ### 🔴 PERFIL CORTE / REESTRUTURAÇÃO  
-// > Múltiplos SKUs abaixo da meta → revisar copy, preço, página
-
-// ---
-
-// # 📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS
-
-// <div class="no-break">
-// | Ação | Produto | Tipo | Canal | Detalhe Técnico | Urgência |
-// |------|---------|------|-------|----------------|----------|
-// | Conversão | Blazer Plus Size Alfaiataria | Conversão | Shopee Ads | Aumentar conversão em 10-15%, otimização de página e copy | Imediata |
-// | Conversão | Conjunto Feminino Colete e Short | Conversão | Shopee Ads | Melhorar conversão em 5-10%, ajustes na oferta | Semanal |
-// | Conversão | Calça Jeans Wide Leg Feminina | Conversão | Shopee Ads | Aumentar conversão em 10%, otimização de página e copy | Imediata |
-// | Conversão | Calça Jeans Feminina Mom Algodão | Conversão | Shopee Ads | Melhorar conversão em 15-20%, ajustes na página e copy | Imediata |
-// | Conversão | Blazer Feminino Alfaiataria Outono | Conversão | Shopee Ads | Revisar página e oferta para aumentar conversão em 20-30% | Imediata |
-// | Conversão | Calça Jeans Feminina Reta Lançamento | Conversão | Shopee Ads | Revisar página e oferta para aumentar conversão em 20-30% | Imediata |
-// | Conversão | Calça Jeans Feminina Mom Cintura Alta | Conversão | Shopee Ads | Revisar página e oferta para aumentar conversão em 20-30% | Imediata |
-// | Conversão | Calça Jeans Wide Leg Feminina Cintura Alta | Conversão | Shopee Ads | Revisar página e oferta para aumentar conversão em 20-30% | Imediata |
-// | Conversão | Calça Jeans Feminina Wide Leg com Elastano | Conversão | Shopee Ads | Revisar página e oferta para aumentar conversão em 20-30% | Imediata |
-// </div>
-
-// ---
-
-// # ✅ FECHAMENTO DA ANÁLISE
-
-// 📍**Com base na performance atual, essa conta se encaixa no perfil: Corte / Reestruturação.  
-// Recomendo seguir o plano de ação acima conforme o seu objetivo estratégico.  
-// Deseja seguir por esse caminho ou priorizar outro foco nos próximos 7 dias?**
-
-// ---
-
-// ## PROJEÇÃO DE ESCALA – OBJETIVOS DE 30, 60 E 100 PEDIDOS/DIA
-
-// <div class="no-break">
-// 30 pedidos/dia (900/mês)
-
-// - Investimento estimado: R$1.500,00
-// - Faturamento estimado via Ads: R$8.400,00
-// - ROAS projetado: 5,61
-// - CPA estimado: R$50,00
-
-// 60 pedidos/dia (1800/mês)
-
-// - Investimento estimado: R$3.000,00
-// - Faturamento estimado via Ads: R$16.800,00
-// - ROAS projetado: 5,61
-// - CPA estimado: R$50,00
-
-// 100 pedidos/dia (3000/mês)
-
-// - Investimento estimado: R$5.000,00
-// - Faturamento estimado via Ads: R$28.000,00
-// - ROAS projetado: 5,61
-// - CPA estimado: R$50,00
-// </div>
-
-// ⚠️ Reforce que essas projeções assumem estabilidade no CPA atual. Caso a operação invista em otimização de página, kits, combos e lives, o CPA poderá cair e o retorno será ainda maior.
-
-// ## RESUMO TÉCNICO
-
-// <div class="no-break">
-// | Indicador | Valor Atual |
-// |-----------|-------------|
-// | Investimento total em Ads | R$625,20 |
-// | Pedidos via Ads | 29 |
-// | GMV via Ads | R$3.500,00 |
-// | ROAS médio | 5,61 |
-// | CPA via Ads | R$21,56 |
-// | CPA geral (org + Ads) | Dado não informado |
-// | Projeção 30 pedidos/dia | R$1.500,00 |
-// | Projeção 60 pedidos/dia | R$3.000,00 |
-// | Projeção 100 pedidos/dia | R$5.000,00 |
-// </div>
-
-// <div class="page-break">
-// ## CONCLUSÃO FINAL – PLANO RECOMENDADO
-
-// A operação demonstra potencial limitado de escalabilidade, evidenciado por múltiplos SKUs com ROAS abaixo de 8x, validando tecnicamente a necessidade de reestruturação do funil de conversão. A análise granular dos indicadores revela uma estrutura de custo desafiadora, com CPA médio de R$21,56, permitindo crescimento cauteloso sem comprometer a rentabilidade.
-
-// Recomendo uma estratégia de reestruturação focada em conversão: (1) otimização das páginas de produto e copy para aumentar a conversão em 20-30%; e (2) monitoramento rigoroso das métricas de conversão e CTR para garantir estabilidade.
-
-// A solidez dos indicadores atuais proporciona uma margem de segurança limitada para investimentos mais cautelosos, desde que implementados com disciplina metodológica e monitoramento constante. É imperativo manter a consistência na execução do plano técnico aqui delineado para garantir a viabilidade de expansão futura.
-
-// Para maximizar resultados no médio-longo prazo, é fundamental adotar uma visão estratégica no gerenciamento de campanhas, evitando reações impulsivas a oscilações diárias de ROAS, que são inerentes ao processo de aprendizagem algorítmica. A estabilidade operacional e a persistência na execução do plano técnico aqui delineado serão determinantes para o sucesso da escalabilidade.
-
-// </div>
-// </div>
-
-
-//     `
-//     setCustomMarkdown(markdownContent);
-//   }, [isClient]);
-  
-
 
   return (
     <div className="space-y-6">

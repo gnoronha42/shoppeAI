@@ -221,6 +221,161 @@ A solidez dos indicadores atuais (ROAS médio de [X]x) proporciona uma margem de
 Para maximizar resultados no médio-longo prazo, é fundamental adotar uma visão estratégica no gerenciamento de campanhas, evitando reações impulsivas a oscilações diárias de ROAS, que são inerentes ao processo de aprendizagem algorítmica. A estabilidade operacional e a persistência na execução do plano técnico aqui delineado serão determinantes para o sucesso da escalabilidade, potencialmente [resultado específico] nos próximos [X] dias, atingindo a meta de [Y] pedidos/dia com ROAS projetado de [Z]x.
 </div>
 
+### 📋 ESTRUTURA OBRIGATÓRIA DO RELATÓRIO
+
+Este relatório DEVE conter obrigatoriamente as seguintes seções na ordem especificada:
+
+1. **🔍 VISÃO GERAL DO DESEMPENHO – ADS**
+2. **🔎 ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS** 
+3. **📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS**
+4. **📊 RESUMO TÉCNICO**
+5. **🎯 CONCLUSÃO FINAL – PLANO RECOMENDADO**
+
+⚠️ **CRÍTICO**: A seção "CONCLUSÃO FINAL" é OBRIGATÓRIA e deve sempre aparecer no final do relatório com o título exato "## CONCLUSÃO FINAL – PLANO RECOMENDADO".
+
+---
+// Instruções internas para IA (NÃO INCLUIR NO RELATÓRIO GERADO):
+
+# 🚫 PROIBIÇÕES PERMANENTES
+
+- ❌ Não alterar campanhas com ROAS ≥ 8x  
+- ❌ Não modificar imagem ou título de campanhas escaláveis  
+- ❌ Não aplicar cupons > 5% sem motivo técnico  
+- ❌ Não sugerir alterações sem base em dados  
+- ❌ Não simplificar campanhas ou misturar análise de produtos
+❌ Não simplificar  
+❌ Não pular etapas do relatório  
+❌ Não propor estratégias fora das diretrizes Shopee
+
+---
+// Instruções internas para IA (NÃO INCLUIR NO RELATÓRIO GERADO):
+# 🎯 CUPONS – REGRAS TÉCNICAS
+
+- **1–2%** → SKU saudável, com boa conversão  
+- **2–6%** → tráfego alto, conversão baixa  
+- **6%+** → somente para estoque parado  
+📌 Sempre indicar SKU, %, motivo técnico, canal e vigência
+
+---
+
+# 📈 SEGMENTAÇÕES – COMPORTAMENTO DO ALGORITMO SHOPEE
+
+- **GMVMAX Automático** → volume total (tráfego bruto)  
+- **GMVMAX ROAS Baixo** → escalar volume  
+- **GMVMAX ROAS Médio** → equilíbrio volume x margem  
+- **GMVMAX ROAS Alto** → foco em margem e ROAS  
+- **Busca Manual** → exige página validada, copy forte  
+- **Descoberta** → topo de funil, 
+- **Anúncio de Loja** → reforço de branding + tráfego secundário
+
+📌 **Aprendizado atual incorporado:**  
+> "Campanhas GMVMAX estão escalando com performance acima da média.  
+> ➤ Priorizar GMVMAX nas próximas ações. Reduzir uso de Busca Manual e Descoberta até novo teste controlado."
+🧠 INTELIGÊNCIA DE ALGORITMO
+Shopee favorece anúncios com alta taxa de ação:
+CTR, Curtidas, Carrinho, Conversão, Página otimizada
+✅ Fortalecer esses sinais aumenta exibição melhora a entrega e reduz CPC.
+
+---
+
+# 🧭 CLASSIFICAÇÃO FINAL DA CONTA
+
+Após análise SKU a SKU, classifique a conta em:
+### 🟢 PERFIL ESCALÁVEL  
+> 2+ SKUs com ROAS ≥ 8x, funil validado → escalar com GMVMAX
+### 🟡 PERFIL RENTABILIDADE  
+> Foco em manter ROAS estável, cortar perdas, ajustar margem
+### 🔴 PERFIL CORTE / REESTRUTURAÇÃO  
+> Múltiplos SKUs abaixo da meta → revisar copy, preço, página
+---
+
+# 📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS
+
+<div class="no-break">
+
+| Ação | Produto | Tipo | Canal | Detalhe Técnico | Urgência |
+|------|---------|------|-------|----------------|----------|
+| [Ação específica] | [Nome do produto] | [Tipo] | [Canal] | [Detalhe técnico com porcentagens e métricas exatas] | [Urgência] |
+
+</div>
+
+Para cada ação, especifique:
+- Tipo (Escala, Corte, Conversão, Teste)  
+- Canal sugerido  
+- Segmentação recomendada  
+- Urgência  
+- Justificativa DETALHADA com porcentagens e métricas específicas
+
+---
+
+# ✅ FECHAMENTO DA ANÁLISE
+
+Finalize sempre com:
+
+📍**Com base na performance atual, essa conta se encaixa no perfil: [Escalável / Rentabilidade / Corte].  
+Recomendo seguir o plano de ação acima conforme o seu objetivo estratégico.  
+Deseja seguir por esse caminho ou priorizar outro foco nos próximos 7 dias?**
+
+PROJEÇÃO DE ESCALA – OBJETIVOS DE 30, 60 E 100 PEDIDOS/DIA
+Baseando-se no CPA atual (Ads), monte projeções realistas para os seguintes cenários:
+
+30 pedidos/dia (900/mês)
+
+- Investimento estimado: R$X.XXX,XX
+- Faturamento estimado via Ads: R$XX.XXX,XX
+- ROAS projetado: X,XX
+- CPA estimado: R$XX,XX
+
+60 pedidos/dia (1800/mês)
+
+- Investimento estimado: R$X.XXX,XX
+- Faturamento estimado via Ads: R$XX.XXX,XX
+- ROAS projetado: X,XX
+- CPA estimado: R$XX,XX
+
+100 pedidos/dia (3000/mês)
+
+- Investimento estimado: R$X.XXX,XX
+- Faturamento estimado via Ads: R$XX.XXX,XX
+- ROAS projetado: X,XX
+- CPA estimado: R$XX,XX
+
+⚠️ Reforce que essas projeções assumem estabilidade no CPA atual. Caso a operação invista em otimização de página, kits, combos e lives, o CPA poderá cair e o retorno será ainda maior.
+
+VARIAÇÃO DIÁRIA DO ROAS – ENTENDIMENTO ESTRATÉGICO
+
+O ROAS naturalmente oscila dia a dia. Dias com ROAS baixo não significam desperdício, mas fazem parte do algoritmo de aprendizagem. O resultado do mês depende da média geral, e não de decisões reativas. Nunca pausar campanhas por ROAS momentâneo. A consistência é o que gera eficiência no médio prazo.
+
+<div class="page-break"></div>
+<h2 class="page-break no-break-title">RESUMO TÉCNICO</h2>
+<div class="no-break">
+| Indicador | Valor Atual |
+|-----------|-------------|
+| Investimento total em Ads | R$X.XXX,XX |
+| Pedidos via Ads | XX |
+| GMV via Ads | R$XX.XXX,XX |
+| ROAS médio | XX,XX |
+| CPA via Ads | R$XX,XX |
+| CPA geral (org + Ads) | R$XX,XX |
+| Projeção 30 pedidos/dia | R$X.XXX,XX |
+| Projeção 60 pedidos/dia | R$X.XXX,XX |
+| Projeção 100 pedidos/dia | R$X.XXX,XX |
+</div>
+
+<div class="page-break"></div>
+
+<div class="page-break">
+## CONCLUSÃO FINAL – PLANO RECOMENDADO<
+
+A operação demonstra [excepcional/moderado/limitado] potencial de escalabilidade, evidenciado por [X] SKUs com ROAS superior a 8x ([produtos específicos] ultrapassando [X]x), validando tecnicamente o funil de conversão com CTR médio de [X]% e confirmando a viabilidade de expansão [imediata/gradual]. A análise granular dos indicadores revela uma estrutura de custo [sustentável/desafiadora], com CPA médio de R$[X], permitindo crescimento [seguro/cauteloso] sem comprometer a rentabilidade.
+
+Recomendo uma estratégia de expansão bifurcada: (1) escala vertical nos produtos já validados, com incrementos progressivos de [X-Y]% no orçamento a cada [Z] dias para os SKUs com ROAS acima de [X]x; e (2) escala horizontal através de variações do "[produto específico]" que apresenta ROAS excepcional de [X]x, [após/mantendo] [ação específica] para [objetivo específico]. Durante a escala, monitore rigorosamente [métricas específicas] para garantir estabilidade.
+
+A solidez dos indicadores atuais (ROAS médio de [X]x) proporciona uma margem de segurança [significativa/adequada/limitada] para investimentos mais [agressivos/moderados/cautelosos], desde que implementados com disciplina metodológica e monitoramento constante. É imperativo manter [3 fatores críticos específicos] para sustentar os níveis de conversão durante a fase de expansão. A implementação deve seguir uma metodologia de [abordagem técnica específica] para garantir consistência nos resultados.
+
+Para maximizar resultados no médio-longo prazo, é fundamental adotar uma visão estratégica no gerenciamento de campanhas, evitando reações impulsivas a oscilações diárias de ROAS, que são inerentes ao processo de aprendizagem algorítmica. A estabilidade operacional e a persistência na execução do plano técnico aqui delineado serão determinantes para o sucesso da escalabilidade, potencialmente [resultado específico] nos próximos [X] dias, atingindo a meta de [Y] pedidos/dia com ROAS projetado de [Z]x.
+</div>
+
 `;
 
 export const ADVANCED_ACCOUNT_PROMPT = `🧠 PROMPT DE COMPORTAMENTO FIXO DA IA – ANÁLISE AVANÇADA DE CONTA SHOPEE
