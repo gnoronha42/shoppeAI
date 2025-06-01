@@ -112,7 +112,7 @@ export default function AnalisePage() {
   ) => {
     setApiError(null);
 
-    const response = await fetch("/api/analises/generate-validated", {
+    const response = await fetch("https://analysis-micro.onrender.com/analise", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
