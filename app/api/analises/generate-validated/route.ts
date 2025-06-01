@@ -252,7 +252,7 @@ async function gerarAnaliseComIA(
   imageMessages: any[],
   analysisType: "ads" | "account",
   ocrTexts: string[],
-  maxRetries: number = 3
+  maxRetries: number = 1
 ): Promise<string> {
   const messages = [
     { role: "system", content: basePrompt },
