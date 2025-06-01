@@ -36,6 +36,7 @@ import {
   ADVANCED_ACCOUNT_PROMPT,
   ADVANCED_ADS_PROMPT,
 } from "@/components/analysis/analysis";
+import Tesseract from "tesseract.js";
 
 export default function AnalisePage() {
   const router = useRouter();
@@ -74,9 +75,40 @@ export default function AnalisePage() {
     });
   };
 
+  const ocrImage = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        try {
+          const {
+            data: { text },
+          } = await Tesseract.recognize(
+            reader.result as string,
+            "por", // ou 'eng' se as imagens estiverem em inglês
+            {
+              logger: (m) => {
+                /* opcional: console.log(m) */
+              },
+            }
+          );
+          resolve(text.trim());
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const ocrAllImages = async (files: File[]): Promise<string[]> => {
+    return Promise.all(files.map(ocrImage));
+  };
+
   const analyzeImagesWithOpenAI = async (
     base64Images: string[],
-    type: AnalysisType
+    type: AnalysisType,
+    ocrTexts: string[]
   ) => {
     setApiError(null);
 
@@ -88,7 +120,8 @@ export default function AnalisePage() {
       body: JSON.stringify({
         images: base64Images,
         analysisType: type,
-        clientName: selectedClient?.name || "Cliente"
+        clientName: selectedClient?.name || "Cliente",
+        ocrTexts: ocrTexts,
       }),
     });
 
@@ -96,7 +129,9 @@ export default function AnalisePage() {
       const errorData = await response.json();
       setApiError(errorData.error || errorData.message || "Erro desconhecido");
       throw new Error(
-        `Erro na análise: ${errorData.error || errorData.message || "Erro desconhecido"}`
+        `Erro na análise: ${
+          errorData.error || errorData.message || "Erro desconhecido"
+        }`
       );
     }
 
@@ -113,7 +148,7 @@ export default function AnalisePage() {
     try {
       console.log("Salvando análise para cliente:", selectedClientId);
       setSaveStatus("Salvando...");
-      
+
       const response = await fetch("/api/analises/save", {
         method: "POST",
         headers: {
@@ -126,25 +161,25 @@ export default function AnalisePage() {
           analysisType: analysisType,
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error("Erro ao salvar análise no banco de dados");
       }
-      
+
       const result = await response.json();
       console.log("Análise salva com sucesso:", result);
-      
+
       setSaveStatus("Salva com sucesso!");
       toast({
         title: "Análise salva",
-        description: "A análise foi salva e pode ser encontrada na página do cliente",
+        description:
+          "A análise foi salva e pode ser encontrada na página do cliente",
         variant: "default",
       });
-      
+
       setTimeout(() => {
         setSaveStatus(null);
       }, 3000);
-      
     } catch (error) {
       console.error("Erro ao salvar análise:", error);
       setSaveStatus("Erro ao salvar");
@@ -177,11 +212,13 @@ export default function AnalisePage() {
 
     try {
       setIsAnalyzing(true);
-
+      const ocrTexts = await ocrAllImages(files);
       const base64Images = await Promise.all(files.map(convertImageToBase64));
+
       const analysisResult = await analyzeImagesWithOpenAI(
         base64Images,
-        analysisType
+        analysisType,
+        ocrTexts
       );
 
       const clientName = selectedClient?.name || "Cliente";
@@ -189,7 +226,7 @@ export default function AnalisePage() {
       const markdownContent = `${analysisResult}
 `;
 
-       setCustomMarkdown(markdownContent);
+      setCustomMarkdown(markdownContent);
 
       toast({
         title: "Análise concluída com sucesso!",

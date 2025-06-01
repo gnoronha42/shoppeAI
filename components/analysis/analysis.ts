@@ -23,6 +23,10 @@ Antes da análise, liste todas as campanhas detectadas (com nome e tipo).
 Depois, analise campanha por campanha, seguindo a ordem.
 Ao final, gere um comparativo geral com insights e sugestões.
 
+ATENÇÃO: É OBRIGATÓRIO preencher todos os campos com os dados reais extraídos das imagens abaixo.  
+Só escreva 'Dado não informado' se realmente não houver NENHUM valor correspondente em NENHUMA das imagens.  
+Se houver qualquer valor, mesmo parcial, utilize-o.
+NÃO repita exemplos do template sob nenhuma circunstância.
 ---
 
 # 🔍 VISÃO GERAL DO DESEMPENHO – ADS
@@ -228,8 +232,9 @@ Este relatório DEVE conter obrigatoriamente as seguintes seções na ordem espe
 1. **🔍 VISÃO GERAL DO DESEMPENHO – ADS**
 2. **🔎 ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS** 
 3. **📦 AÇÕES RECOMENDADAS – PRÓXIMOS 7 DIAS**
-4. **📊 RESUMO TÉCNICO**
-5. **🎯 CONCLUSÃO FINAL – PLANO RECOMENDADO**
+4. **📊 RESUMO TÉCNICO** 
+5. **📈 PROJEÇÃO DE ESCALA – OBJETIVOS DE 30, 60 E 100 PEDIDOS/DIA**
+6. **🎯 CONCLUSÃO FINAL – PLANO RECOMENDADO**
 
 ⚠️ **CRÍTICO**: A seção "CONCLUSÃO FINAL" é OBRIGATÓRIA e deve sempre aparecer no final do relatório com o título exato "## CONCLUSÃO FINAL – PLANO RECOMENDADO".
 
