@@ -42,25 +42,25 @@ export const AnalysisPDF = forwardRef<any, AnalysisPDFProps>(
           throw new Error(`Erro ${response.status}: ${errorData.message || 'Ocorreu um erro desconhecido'}`);
         }
 
-        // Obter o blob do PDF
+        
         const blob = await response.blob();
 
-        // Verificar se o blob tem tamanho válido
-        if (blob.size < 1000) { // Se o PDF for muito pequeno, provavelmente ocorreu um erro
+    
+        if (blob.size < 1000) { 
           throw new Error("O PDF gerado parece estar vazio ou corrompido. Por favor, tente novamente.");
         }
 
-        // Criar URL para download
+       
         const url = URL.createObjectURL(blob);
 
-        // Criar link para download e clicar nele
+       
         const link = document.createElement("a");
         link.href = url;
         link.download = fileName || `relatorio_${clientName}.pdf`;
         document.body.appendChild(link);
         link.click();
 
-        // Limpar
+       
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       } catch (error) {
@@ -71,7 +71,7 @@ export const AnalysisPDF = forwardRef<any, AnalysisPDFProps>(
 
     useImperativeHandle(ref, () => ({ handleDownloadPDF }));
 
-    return null; // Este componente não renderiza nada visualmente
+    return null; 
   }
 );
 
