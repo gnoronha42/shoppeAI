@@ -755,15 +755,21 @@ export async function POST(request: NextRequest) {
     `;
 
     // MODIFICAÇÃO PRINCIPAL: Substituir a configuração do browser
-    browser = await puppeteerCore.connect({
-      browserWSEndpoint: `wss://chrome.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
-    });
+    try {
+      browser = await puppeteerCore.connect({
+        browserWSEndpoint: `https://production-sfo.browserless.io/screenshot?token=${process.env.BROWSERLESS_TOKEN}`,
+        defaultViewport: { width: 1200, height: 800 },
+      });
+    } catch (error) {
+      console.error("Erro ao conectar com Browserless:", error);
+      throw new Error("Não foi possível conectar ao serviço de geração de PDF. Por favor, tente novamente mais tarde.");
+    }
 
     const page = await browser.newPage();
     
-    // Aumentar o timeout da página para evitar problemas com o serviço externo
-    await page.setDefaultNavigationTimeout(0);
-    await page.setDefaultTimeout(0);
+    // Configurar timeouts mais longos
+    await page.setDefaultNavigationTimeout(60000);
+    await page.setDefaultTimeout(60000);
 
     await page.setContent(fullHtml, { 
       waitUntil: "networkidle0",
