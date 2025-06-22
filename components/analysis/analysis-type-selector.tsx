@@ -15,7 +15,7 @@ export function AnalysisTypeSelector({ value, onChange }: AnalysisTypeSelectorPr
     <RadioGroup
       value={value}
       onValueChange={(value) => onChange(value as AnalysisType)}
-      className="flex space-x-4"
+      className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4"
     >
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="account" id="account" />
@@ -24,6 +24,10 @@ export function AnalysisTypeSelector({ value, onChange }: AnalysisTypeSelectorPr
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="ads" id="ads" />
         <Label htmlFor="ads" className="cursor-pointer">Análise de Ads</Label>
+      </div>
+      <div className="flex items-center space-x-2">
+        <RadioGroupItem value="express" id="express" />
+        <Label htmlFor="express" className="cursor-pointer">Análise Semanal</Label>
       </div>
     </RadioGroup>
   );

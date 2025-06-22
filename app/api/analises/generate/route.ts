@@ -18,7 +18,37 @@ export async function POST(request: NextRequest) {
     }
 
     // Converte markdown para HTML
-    const htmlContent = marked(markdown);
+    let htmlContent = await marked(markdown);
+    
+    // Pré-processamento para melhorar a formatação
+    htmlContent = htmlContent
+      // Adiciona classes para seções específicas
+      .replace(/<h1>(.*?)🟨(.*?)🚀(.*?)<\/h1>/gi, '<h1 class="titulo-principal">$1🟨$2🚀$3</h1>')
+      .replace(/<p>(Loja:.*?)<\/p>/gi, '<div class="loja-info"><p>$1</p></div>')
+      .replace(/<p>(Período Analisado:.*?)<\/p>/gi, '<div class="loja-info"><p>$1</p></div>')
+      
+      // Seção de métricas (Express)
+      .replace(/<h2>🔢 MÉTRICAS-CHAVE<\/h2>/gi, '<h2>🔢 MÉTRICAS-CHAVE</h2><div class="metricas-chave">')
+      .replace(/<h2>📊 DIAGNÓSTICO TÉCNICO DO FUNIL<\/h2>/gi, '</div><h2>📊 DIAGNÓSTICO TÉCNICO DO FUNIL</h2>')
+      
+      // Seções específicas de ADS
+      .replace(/<h1>🔍 <strong>VISÃO GERAL DO DESEMPENHO – ADS<\/strong><\/h1>/gi, '<h1 class="ads-titulo">🔍 VISÃO GERAL DO DESEMPENHO – ADS</h1><div class="ads-visao-geral">')
+      .replace(/<h1>🔎 <strong>ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS<\/strong><\/h1>/gi, '</div><h1 class="ads-titulo">🔎 ANÁLISE SKU A SKU – CAMPANHAS DE ANÚNCIOS</h1><div class="ads-analise-sku">')
+      .replace(/<h2>CONCLUSÃO FINAL – PLANO RECOMENDADO<\/h2>/gi, '</div><div class="page-break-before"><h2 class="ads-conclusao-titulo">CONCLUSÃO FINAL – PLANO RECOMENDADO</h2><div class="ads-conclusao">')
+      
+      // Produtos ADS (evitar quebras)
+      .replace(/<p><strong>Produto: (.*?)<\/strong><\/p>/gi, '</div><div class="produto-ads no-break"><strong>Produto: $1</strong>')
+      
+      // Alertas críticos
+      .replace(/<p>(.*?📣.*?)<\/p>/gi, '<div class="alerta-critico"><p>$1</p></div>')
+      
+      // Tabelas com classe específica
+      .replace(/<h2>🔍 DIAGNÓSTICO POR PRODUTO – TOP 5 MAIS RELEVANTES<\/h2>\s*<table>/gi, '<h2>🔍 DIAGNÓSTICO POR PRODUTO – TOP 5 MAIS RELEVANTES</h2><div class="table-container"><table class="tabela-analise diagnostico-produto">')
+      .replace(/<table>/gi, '<div class="table-container"><table class="tabela-analise">')
+      .replace(/<\/table>/gi, '</table></div>')
+      
+      // Seções de diagnóstico
+      .replace(/<p>(.*?ANÁLISE FINALIZADA.*?)<\/p>/gi, '<div class="finalizacao"><p>$1</p></div>');
 
     // Lê o papel timbrado como base64
     let papelTimbradoBase64 = "";
@@ -51,6 +81,7 @@ export async function POST(request: NextRequest) {
             color: #222;
             margin: 0;
             padding: 0;
+            font-size: 12px;
           }
           #content {
             max-width: 180mm;
@@ -62,67 +93,445 @@ export async function POST(request: NextRequest) {
             display: block;
             text-align: left;
           }
-          h1, h2, h3 {
-            color: #1976d2;
-            font-weight: bold;
-            page-break-inside: avoid;
-          }
+          
+          /* Títulos principais centralizados */
           h1 {
-            font-size: 1.2rem;
+            color: #ff6b35;
+            font-weight: bold;
+            font-size: 1.4rem;
             text-align: center;
             margin-top: 0;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             text-transform: uppercase;
+            page-break-inside: avoid;
+            page-break-after: avoid;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding: 10px 0;
           }
+          
+          /* Seções principais */
           h2 {
-            font-size: 1rem;
-            margin-top: 24px;
+            color: #1976d2;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-top: 18px;
             margin-bottom: 10px;
             border-bottom: 2px solid #1976d2;
-            padding-bottom: 2px;
+            padding-bottom: 3px;
+            page-break-inside: avoid;
+            page-break-after: avoid;
+            text-align: center;
           }
+          
           h3 {
-            font-size: 0.95rem;
-            margin-top: 16px;
+            color: #1976d2;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 12px;
             margin-bottom: 6px;
+            page-break-inside: avoid;
+            page-break-after: avoid;
           }
-          p, ul, ol, blockquote {
-            text-align: left;
+          
+          /* Parágrafos e listas */
+          p, ul, ol {
+            text-align: justify;
             font-size: 0.9rem;
             line-height: 1.5;
             margin-bottom: 10px;
+            page-break-inside: avoid;
           }
+          
+          /* Métricas em destaque */
+          p:contains("Visitantes:"), p:contains("Pedidos Pagos:"), p:contains("Taxa de Conversão:") {
+            font-weight: 500;
+            color: #333;
+          }
+          
+          /* Alertas críticos */
+          p:contains("📣") {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid #fdcb6e;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #856404;
+            text-align: center;
+            page-break-inside: avoid;
+          }
+          
+          /* Tabelas centralizadas e bem formatadas */
           table {
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             background: #fff;
             width: 100%;
-            margin-bottom: 16px;
+            margin: 20px auto;
+            page-break-inside: avoid;
+            border: 2px solid #1976d2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           }
-          th, td {
-            border: 1px solid #1976d2;
-            padding: 6px 8px;
-            text-align: left;
-          }
+          
           th {
-            background: #1976d2;
+            background: linear-gradient(135deg, #1976d2, #1565c0);
             color: #fff;
             text-align: center;
+            font-weight: bold;
+            padding: 10px 6px;
+            border: 1px solid #0d47a1;
+            font-size: 0.75rem;
           }
+          
+          td {
+            border: 1px solid #bbdefb;
+            padding: 8px 6px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.75rem;
+          }
+          
+          /* Zebra striping para tabelas */
+          tr:nth-child(even) {
+            background-color: #f8f9fa;
+          }
+          
+          tr:hover {
+            background-color: #e3f2fd;
+          }
+          
+          /* Células numéricas alinhadas à direita */
+          td:contains("R$"), td:contains("%"), td:contains("↑"), td:contains("↓") {
+            text-align: right;
+            font-weight: 500;
+          }
+          
+          /* Seções de diagnóstico */
           blockquote {
             border-left: 4px solid #1976d2;
-            padding-left: 10px;
-            color: #666;
-            margin: 10px 0;
+            padding-left: 15px;
+            padding-right: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            color: #555;
+            margin: 15px 0;
             font-style: italic;
-            background: #fafafa;
+            background: #f5f5f5;
             font-size: 0.9rem;
+            border-radius: 0 4px 4px 0;
+            page-break-inside: avoid;
           }
+          
+          /* Separadores */
           hr {
             border: none;
             border-top: 2px solid #1976d2;
-            margin: 18px 0;
+            margin: 25px 0;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
           }
+          
+          /* Evitar quebras de página indesejadas */
+          .no-break {
+            page-break-inside: avoid;
+          }
+          
+          /* Cabeçalho da loja */
+          .loja-info {
+            text-align: center;
+            margin-bottom: 20px;
+            page-break-after: avoid;
+          }
+          
+          .loja-info p {
+            margin: 5px 0;
+            font-size: 1rem;
+            color: #666;
+          }
+          
+          /* Título principal customizado */
+          .titulo-principal {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5rem !important;
+            font-weight: 900;
+            text-align: center;
+            margin: 20px 0 30px 0;
+            padding: 15px 0;
+            border-bottom: 3px solid #ff6b35;
+            page-break-after: avoid;
+          }
+          
+          /* Seção de métricas */
+          .metricas-chave {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.08);
+          }
+          
+          .metricas-chave p {
+            margin: 6px 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #333;
+            line-height: 1.6;
+          }
+          
+          /* Alerta crítico */
+          .alerta-critico {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            border-left: 5px solid #fd7e14;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            text-align: center;
+            page-break-inside: avoid;
+            box-shadow: 0 3px 6px rgba(253, 126, 20, 0.15);
+          }
+          
+          .alerta-critico p {
+            font-weight: 700;
+            color: #856404 !important;
+            font-size: 0.9rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            line-height: 1.4;
+          }
+          
+          /* Container de tabelas */
+          .table-container {
+            margin: 15px 0;
+            page-break-inside: avoid;
+            overflow-x: auto;
+          }
+          
+          .tabela-analise {
+            width: 100%;
+            margin: 0 auto;
+            border: 2px solid #1976d2;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 3px 6px rgba(25, 118, 210, 0.1);
+          }
+          
+          .tabela-analise th {
+            background: linear-gradient(135deg, #1976d2, #1565c0);
+            color: white;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            padding: 8px 4px;
+            text-align: center;
+            line-height: 1.2;
+          }
+          
+          .tabela-analise td {
+            padding: 6px 4px;
+            font-size: 0.65rem;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: top;
+            line-height: 1.3;
+            word-wrap: break-word;
+            max-width: 120px;
+          }
+          
+          .tabela-analise tr:nth-child(even) {
+            background: #f8f9fa;
+          }
+          
+          .tabela-analise tr:hover {
+            background: #e3f2fd;
+            transition: background-color 0.2s ease;
+          }
+          
+          /* Tabela específica para diagnóstico de produtos (mais compacta) */
+          .tabela-analise.diagnostico-produto th {
+            font-size: 0.6rem;
+            padding: 6px 3px;
+          }
+          
+          .tabela-analise.diagnostico-produto td {
+            font-size: 0.6rem;
+            padding: 5px 3px;
+            max-width: 100px;
+          }
+          
+          /* Finalização */
+          .finalizacao {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+            border: 2px solid #4caf50;
+            border-radius: 8px;
+            page-break-inside: avoid;
+          }
+          
+          .finalizacao p {
+            font-weight: 700;
+            color: #2e7d32;
+            font-size: 1.1rem;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          
+          /* ========== ESTILOS ESPECÍFICOS PARA ANÁLISE DE ADS ========== */
+          
+          /* Títulos da análise ADS */
+          .ads-titulo {
+            color: #1976d2 !important;
+            font-size: 1.2rem !important;
+            font-weight: 800;
+            text-align: center;
+            margin: 15px 0 12px 0 !important;
+            padding: 10px 0;
+            border-bottom: 3px solid #1976d2;
+            page-break-after: avoid;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 6px;
+          }
+          
+          /* Seção visão geral ADS */
+          .ads-visao-geral {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            page-break-inside: avoid;
+          }
+          
+          .ads-visao-geral ul, .ads-visao-geral li {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin: 4px 0;
+          }
+          
+          /* Seção análise SKU ADS */
+          .ads-analise-sku {
+            margin: 10px 0;
+            page-break-inside: avoid;
+          }
+          
+          /* Produtos ADS - sem quebra de página */
+          .produto-ads {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-left: 4px solid #1976d2;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            page-break-inside: avoid !important;
+            page-break-before: avoid;
+            page-break-after: avoid;
+          }
+          
+          .produto-ads strong {
+            color: #1976d2;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+          }
+          
+          .produto-ads p {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin: 4px 0;
+            text-align: left;
+          }
+          
+          .produto-ads ul, .produto-ads li {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            margin: 2px 0;
+            text-align: left;
+          }
+          
+          /* Conclusão ADS - página dedicada */
+          .page-break-before {
+            page-break-before: always !important;
+            margin-top: 0;
+          }
+          
+          .ads-conclusao-titulo {
+            color: #1976d2 !important;
+            font-size: 1.4rem !important;
+            font-weight: 900;
+            text-align: center;
+            margin: 20px 0 25px 0 !important;
+            padding: 15px 0;
+            border-bottom: 4px solid #1976d2;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+          }
+          
+          .ads-conclusao {
+            padding: 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            margin: 0;
+            min-height: 400px;
+            page-break-inside: avoid;
+          }
+          
+          .ads-conclusao p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 15px;
+            color: #333;
+          }
+          
+          /* Tabelas ADS mais compactas */
+          .ads-analise-sku table {
+            font-size: 0.75rem;
+            margin: 10px 0;
+          }
+          
+          .ads-analise-sku th {
+            font-size: 0.7rem;
+            padding: 6px 4px;
+          }
+          
+          .ads-analise-sku td {
+            font-size: 0.7rem;
+            padding: 5px 4px;
+          }
+          
+          /* Classe geral para evitar quebras */
+          .no-break {
+            page-break-inside: avoid !important;
+            page-break-before: avoid;
+            page-break-after: avoid;
+          }
+          
+          /* Layout responsivo para tabelas grandes */
+          @media print {
+            table {
+              font-size: 0.7rem;
+            }
+            th, td {
+              padding: 6px 4px;
+            }
+          }
+          
           @page {
             margin-top: 60px;
             margin-right: 16mm;

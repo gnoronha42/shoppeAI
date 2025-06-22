@@ -6,7 +6,7 @@ export interface Client {
 }
 
 // Analysis types
-export type AnalysisType = 'account' | 'ads';
+export type AnalysisType = 'account' | 'ads' | 'express';
 
 export interface Report {
   id: string;

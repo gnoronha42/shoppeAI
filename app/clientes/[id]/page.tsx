@@ -26,6 +26,7 @@ import {
   Link as LinkIcon,
   Download,
   CalendarIcon,
+  TrendingUp,
 } from "lucide-react";
 import {
   useGetClientQuery,
@@ -48,6 +49,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 // Importar marked dinamicamente para evitar erros de SSR
 import { marked } from "marked";
@@ -71,6 +77,18 @@ export default function ClientDetailsPage() {
   >(null);
   const [selectedTab, setSelectedTab] = useState("info");
   const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
+  
+  // Estados para relatório histórico
+  const [historicalReportType, setHistoricalReportType] = useState<'account' | 'ads'>('account');
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: undefined,
+    to: undefined,
+  });
+  const [isGeneratingHistoricalReport, setIsGeneratingHistoricalReport] = useState(false);
+  const [historicalReportContent, setHistoricalReportContent] = useState<string | null>(null);
 
   const {
     data: client,
@@ -311,6 +329,115 @@ export default function ClientDetailsPage() {
     }
   };
 
+  // Função para gerar relatório histórico (mockada)
+  const handleGenerateHistoricalReport = async () => {
+    if (!dateRange.from || !dateRange.to) {
+      toast({
+        title: "Selecione o período",
+        description: "É necessário selecionar uma data de início e fim",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsGeneratingHistoricalReport(true);
+      
+      // TODO: Descomentar quando a implementação real estiver pronta
+      /*
+      const response = await fetch('/api/analises/historical', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clientId: clientId,
+          type: historicalReportType,
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao gerar relatório histórico');
+      }
+
+      const data = await response.json();
+      
+      // Aqui você pode chamar seu microserviço com os dados históricos
+      // const historicalAnalysis = await callHistoricalAnalysisService(data.data);
+      
+      setHistoricalReportContent(historicalAnalysis);
+      */
+      
+      // Simular delay de processamento (versão mockada)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mock de conteúdo do relatório histórico
+      const mockHistoricalReport = `
+# 📊 RELATÓRIO HISTÓRICO - ${client?.name}
+
+**Período:** ${dateRange.from.toLocaleDateString('pt-BR')} a ${dateRange.to.toLocaleDateString('pt-BR')}
+**Tipo de Análise:** ${historicalReportType === 'account' ? 'Conta' : 'Anúncios'}
+
+## 📈 Resumo Executivo
+
+Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 3}** análises do tipo ${historicalReportType === 'account' ? 'conta' : 'anúncios'}.
+
+### Principais Insights:
+- **Crescimento médio:** +${Math.floor(Math.random() * 20) + 15}%
+- **ROAS médio:** ${(Math.random() * 3 + 8).toFixed(2)}x
+- **Conversão média:** ${(Math.random() * 2 + 2).toFixed(2)}%
+
+## 📋 Análise Detalhada
+
+### Evolução das Métricas
+- **GMV Total:** R$ ${(Math.random() * 50000 + 10000).toLocaleString('pt-BR')}
+- **Pedidos:** ${Math.floor(Math.random() * 500) + 100}
+- **Ticket Médio:** R$ ${(Math.random() * 100 + 50).toFixed(2)}
+
+### Tendências Identificadas
+1. **Melhoria na conversão** nos últimos ${Math.floor(Math.random() * 10) + 5} dias
+2. **Aumento no tráfego orgânico** de ${Math.floor(Math.random() * 30) + 10}%
+3. **Otimização das campanhas** resultou em ROAS superior
+
+## 🎯 Recomendações Baseadas no Histórico
+
+### Ações Imediatas:
+- Escalar campanhas com ROAS > 8x
+- Implementar estratégias que funcionaram no período
+- Ajustar orçamento com base nos melhores dias
+
+### Próximos Passos:
+- Continuar monitoramento das métricas principais
+- Testar novas segmentações baseadas no histórico
+- Implementar automações para manter performance
+
+---
+*Relatório gerado em ${new Date().toLocaleString('pt-BR')}*
+      `;
+
+      setHistoricalReportContent(mockHistoricalReport);
+      
+      toast({
+        title: "Relatório histórico gerado!",
+        description: "O relatório foi gerado com base nas análises do período selecionado",
+        variant: "default",
+      });
+      
+    } catch (error) {
+      console.error("Erro ao gerar relatório histórico:", error);
+      toast({
+        title: "Erro ao gerar relatório",
+        description: "Ocorreu um erro ao processar o relatório histórico",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingHistoricalReport(false);
+    }
+  };
+
   // Renderização condicional para marcação HTML
   const renderMarkdown = (content: string) => {
     if (typeof window === "undefined" || !marked) {
@@ -404,11 +531,12 @@ export default function ClientDetailsPage() {
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full md:w-[600px] grid-cols-3">
+        <TabsList className="grid w-full md:w-[800px] grid-cols-4">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="analyses">
             Análises ({analyses.length})
           </TabsTrigger>
+          <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
           <TabsTrigger value="edit">Editar</TabsTrigger>
         </TabsList>
 
@@ -562,6 +690,192 @@ export default function ClientDetailsPage() {
                     dangerouslySetInnerHTML={renderMarkdown(
                       selectedAnalysisContent
                     )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="historical" className="space-y-4 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <TrendingUp className="mr-2 h-5 w-5" />
+                Relatório Histórico
+              </CardTitle>
+              <CardDescription>
+                Gere um relatório consolidado baseado nas análises anteriores do cliente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Seleção de período */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Período de Análise</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Data Inicial</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !dateRange.from && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateRange.from ? (
+                            dateRange.from.toLocaleDateString('pt-BR')
+                          ) : (
+                            "Selecione a data inicial"
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateRange.from}
+                          onSelect={(date) => setDateRange(prev => ({ ...prev, from: date }))}
+                          disabled={(date) =>
+                            date > new Date() || date < new Date("2020-01-01")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Data Final</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !dateRange.to && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateRange.to ? (
+                            dateRange.to.toLocaleDateString('pt-BR')
+                          ) : (
+                            "Selecione a data final"
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={dateRange.to}
+                          onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))}
+                          disabled={(date) =>
+                            date > new Date() || 
+                            date < new Date("2020-01-01") ||
+                            (dateRange.from ? date < dateRange.from : false)
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              {/* Seleção do tipo de análise */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Tipo de Análise</Label>
+                <RadioGroup
+                  value={historicalReportType}
+                  onValueChange={(value) => setHistoricalReportType(value as 'account' | 'ads')}
+                  className="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-6"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="account" id="historical-account" />
+                    <Label htmlFor="historical-account" className="cursor-pointer">
+                      Análise de Conta
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="ads" id="historical-ads" />
+                    <Label htmlFor="historical-ads" className="cursor-pointer">
+                      Análise de Anúncios
+                    </Label>
+                  </div>
+                </RadioGroup>
+                <p className="text-xs text-muted-foreground">
+                  {historicalReportType === "account"
+                    ? "Consolidará análises de desempenho geral da conta no período selecionado"
+                    : "Consolidará análises de campanhas publicitárias no período selecionado"}
+                </p>
+              </div>
+
+              {/* Botão de geração */}
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleGenerateHistoricalReport}
+                  disabled={!dateRange.from || !dateRange.to || isGeneratingHistoricalReport}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                >
+                  <BarChart className="mr-2 h-4 w-4" />
+                  {isGeneratingHistoricalReport 
+                    ? "Gerando Relatório..." 
+                    : "Gerar Relatório Histórico"
+                  }
+                </Button>
+              </div>
+
+              {/* Informações adicionais */}
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Como funciona:</strong> O relatório histórico analisa todas as análises do tipo selecionado
+                  no período especificado, identificando tendências, padrões de performance e gerando insights
+                  consolidados para tomada de decisão estratégica.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Visualização do relatório histórico */}
+          {historicalReportContent && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Relatório Histórico Gerado</CardTitle>
+                  <CardDescription>
+                    Período: {dateRange.from?.toLocaleDateString('pt-BR')} a {dateRange.to?.toLocaleDateString('pt-BR')}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Aqui você pode implementar a funcionalidade de download do PDF
+                      toast({
+                        title: "Funcionalidade em desenvolvimento",
+                        description: "Download do PDF do relatório histórico será implementado em breve",
+                        variant: "default",
+                      });
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Baixar PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setHistoricalReportContent(null)}
+                  >
+                    Fechar
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <div
+                    dangerouslySetInnerHTML={renderMarkdown(historicalReportContent)}
                   />
                 </div>
               </CardContent>

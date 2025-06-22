@@ -85,10 +85,10 @@ export default function AnalisePage() {
             data: { text },
           } = await Tesseract.recognize(
             reader.result as string,
-            "por", // ou 'eng' se as imagens estiverem em inglês
+            "por", 
             {
               logger: (m) => {
-                /* opcional: console.log(m) */
+                
               },
             }
           );
@@ -112,21 +112,31 @@ export default function AnalisePage() {
   ) => {
     setApiError(null);
 
-    const response = await fetch("https://analysis-micro.onrender.com/analise", {
+    console.log(`Iniciando análise do tipo: ${type}`);
+    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
+    console.log(`Número de imagens: ${base64Images.length}`);
+    console.log(`Textos OCR: ${ocrTexts.length} extraídos`);
+
+    const requestBody = {
+      images: base64Images,
+      analysisType: type,
+      clientName: selectedClient?.name || "Cliente",
+      ocrTexts: ocrTexts,
+    };
+
+    console.log("Enviando requisição para microserviço...");
+
+    const response = await fetch("http://localhost:3001/analise", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        images: base64Images,
-        analysisType: type,
-        clientName: selectedClient?.name || "Cliente",
-        ocrTexts: ocrTexts,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
+      console.error("Erro da API:", errorData);
       setApiError(errorData.error || errorData.message || "Erro desconhecido");
       throw new Error(
         `Erro na análise: ${
@@ -136,6 +146,8 @@ export default function AnalisePage() {
     }
 
     const data = await response.json();
+    console.log("Resposta recebida do microserviço:", data);
+    
     if (!data.analysis) {
       setApiError("Formato de resposta inesperado do servidor");
       throw new Error("Formato de resposta inesperado do servidor");
@@ -331,8 +343,10 @@ export default function AnalisePage() {
             />
             <p className="text-xs text-muted-foreground mt-2">
               {analysisType === "account"
-                ? "Análise de conta avalia o desempenho geral da loja, conversão, GMV e métricas de desempenho"
-                : "Análise de anúncios avalia as campanhas publicitárias, ROAS, CTR e estratégias de otimização"}
+                ? "Análise completa da conta com KPIs detalhados, ranking de produtos, projeções de crescimento e plano tático de 30 dias"
+                : analysisType === "ads"
+                ? "Análise técnica de campanhas Shopee Ads com foco em ROAS, CTR, conversão, CPA e estratégias de escalabilidade"
+                : "Análise semanal expressa com diagnóstico técnico do funil, gargalos identificados e ações estratégicas prioritárias"}
             </p>
           </CardContent>
         </Card>
@@ -342,7 +356,9 @@ export default function AnalisePage() {
             <CardTitle>
               {analysisType === "account"
                 ? "Upload de Prints da Conta"
-                : "Upload de Prints dos Anúncios"}
+                : analysisType === "ads"
+                ? "Upload de Prints dos Anúncios"
+                : "Upload de Prints para Análise Semanal"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -352,8 +368,11 @@ export default function AnalisePage() {
               accept="image/*"
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Faça upload de capturas de tela da sua loja Shopee para análise
-              detalhada com IA (máximo 10 imagens)
+              {analysisType === "account"
+                ? "Faça upload de prints da sua conta Shopee: dashboard, visitantes, vendas, produtos e métricas gerais (máximo 10 imagens)"
+                : analysisType === "ads"
+                ? "Faça upload de prints das suas campanhas Shopee Ads: performance, ROAS, CTR, investimento e resultados (máximo 10 imagens)"
+                : "Faça upload de prints da sua loja Shopee para análise semanal: métricas principais, vendas e performance geral (máximo 10 imagens)"}
             </p>
             {files.length > 0 && (
               <div className="mt-4">
@@ -444,10 +463,6 @@ export default function AnalisePage() {
                   markdown={customMarkdown}
                   clientName={selectedClient?.name || "Cliente"}
                   analysisType={analysisType}
-                  onAfterDownload={() => {
-                    // Se você quiser salvar após download (não necessário se já está salvando antes)
-                    // saveAnalysisToDatabase(customMarkdown);
-                  }}
                 />
                 {saveStatus && (
                   <span className="text-sm text-orange-500">{saveStatus}</span>
