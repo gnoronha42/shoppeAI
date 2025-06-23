@@ -516,6 +516,11 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
     return { __html: "Erro ao renderizar markdown" };
   };
 
+  const isComparison = (report: any) => {
+    return report.title?.includes('COMPARAÇÃO') || 
+           report.analysis_results?.[0]?.processed_by === 'comparison-service';
+  };
+
   if (isClientLoading) {
     return (
       <div className="flex items-center justify-center h-64">

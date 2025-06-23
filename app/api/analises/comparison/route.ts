@@ -316,24 +316,24 @@ ${analysis.content}
 
     console.log("✅ Análise comparativa recebida do microserviço");
 
-    // 6. Salvar como report de comparação
+    // 6. Salvar como report de análise com título identificador
     console.log('💾 Salvando relatório de comparação...');
     const savedReport = await prisma.reports.create({
       data: {
         client_id: clientId,
-        type: "comparison",
-        title: `Comparação ${analysisType} - ${new Date(startDate).toLocaleDateString('pt-BR')} a ${new Date(endDate).toLocaleDateString('pt-BR')}`,
+        type: "analysis", // Tipo existente
+        title: `COMPARAÇÃO ${analysisType.toUpperCase()} - ${new Date(startDate).toLocaleDateString('pt-BR')} a ${new Date(endDate).toLocaleDateString('pt-BR')}`,
         status: "completed",
         url: null,
-        analysis_id: null // Comparação não está vinculada a uma análise específica
+        analysis_id: null
       }
     });
 
-    // 7. Salvar conteúdo da comparação como analysis_result
+    // 7. Salvar conteúdo com identificador de comparação
     await prisma.analysis_results.create({
       data: {
-        analysis_id: savedReport.id, // Usando report_id como referência
-        content: comparison,
+        analysis_id: savedReport.id,
+        content: `<!-- ANÁLISE COMPARATIVA -->\n${comparison}`, // Prefixo para identificar
         processed_by: "comparison-service"
       }
     });
