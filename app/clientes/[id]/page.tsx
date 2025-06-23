@@ -90,6 +90,11 @@ export default function ClientDetailsPage() {
   const [isGeneratingHistoricalReport, setIsGeneratingHistoricalReport] = useState(false);
   const [historicalReportContent, setHistoricalReportContent] = useState<string | null>(null);
 
+  // Adicionar estes estados no componente (após os estados existentes)
+  const [comparisonContent, setComparisonContent] = useState<string | null>(null);
+  const [isGeneratingComparison, setIsGeneratingComparison] = useState(false);
+  const [comparisonReportId, setComparisonReportId] = useState<string | null>(null);
+
   const {
     data: client,
     isLoading: isClientLoading,
@@ -435,6 +440,61 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
       });
     } finally {
       setIsGeneratingHistoricalReport(false);
+    }
+  };
+
+  // Adicionar esta função após handleGenerateHistoricalReport
+  const handleGenerateComparison = async () => {
+    if (!dateRange.from || !dateRange.to) {
+      toast({
+        title: "Selecione o período",
+        description: "É necessário selecionar uma data de início e fim",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsGeneratingComparison(true);
+      
+      const response = await fetch('/api/analises/comparison', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clientId: clientId,
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+          analysisType: historicalReportType,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao gerar comparação');
+      }
+
+      const { comparison, reportId, analysesCount, period } = await response.json();
+      
+      setComparisonContent(comparison);
+      setComparisonReportId(reportId);
+      
+      toast({
+        title: "Análise comparativa gerada!",
+        description: `Relatório baseado em ${analysesCount} análises do período ${period}`,
+        variant: "default",
+      });
+      
+    } catch (error: any) {
+      console.error("Erro ao gerar comparação:", error);
+      toast({
+        title: "Erro ao gerar comparação",
+        description: error.message || "Ocorreu um erro ao processar a comparação histórica",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingComparison(false);
     }
   };
 
@@ -811,8 +871,8 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
                 </p>
               </div>
 
-              {/* Botão de geração */}
-              <div className="flex justify-end">
+              {/* Botões de geração - AQUI É O LOCAL CORRETO */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-end">
                 <Button
                   onClick={handleGenerateHistoricalReport}
                   disabled={!dateRange.from || !dateRange.to || isGeneratingHistoricalReport}
@@ -821,7 +881,19 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
                   <BarChart className="mr-2 h-4 w-4" />
                   {isGeneratingHistoricalReport 
                     ? "Gerando Relatório..." 
-                    : "Gerar Relatório Histórico"
+                    : "Relatório Histórico (Mock)"
+                  }
+                </Button>
+
+                <Button
+                  onClick={handleGenerateComparison}
+                  disabled={!dateRange.from || !dateRange.to || isGeneratingComparison}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                  {isGeneratingComparison 
+                    ? "Gerando Comparação..." 
+                    : "Comparar Análises"
                   }
                 </Button>
               </div>
@@ -829,9 +901,8 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
               {/* Informações adicionais */}
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Como funciona:</strong> O relatório histórico analisa todas as análises do tipo selecionado
-                  no período especificado, identificando tendências, padrões de performance e gerando insights
-                  consolidados para tomada de decisão estratégica.
+                  <strong>Relatório Histórico:</strong> Mock simulando análise consolidada. <br/>
+                  <strong>Comparar Análises:</strong> Analisa múltiplas análises do período usando IA para identificar tendências e insights evolutivos.
                 </p>
               </div>
             </CardContent>
@@ -876,6 +947,85 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
                 <div className="prose prose-sm max-w-none dark:prose-invert">
                   <div
                     dangerouslySetInnerHTML={renderMarkdown(historicalReportContent)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Adicionar após o card do relatório histórico */}
+          {comparisonContent && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Análise Comparativa Histórica</CardTitle>
+                  <CardDescription>
+                    Comparação baseada nas análises do período selecionado
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch("/api/analises/generate", {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            markdown: comparisonContent,
+                            clientName: client?.name || "Cliente",
+                            analysisType: "comparison",
+                          }),
+                        });
+
+                        if (!response.ok) {
+                          throw new Error("Erro ao gerar PDF");
+                        }
+
+                        const blob = await response.blob();
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = `comparacao_${client?.name || "Cliente"}.pdf`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+
+                        toast({
+                          title: "PDF gerado com sucesso",
+                          description: "A comparação foi baixada em PDF",
+                          variant: "default",
+                        });
+                      } catch (error) {
+                        console.error("Erro ao gerar PDF:", error);
+                        toast({
+                          title: "Erro ao gerar PDF",
+                          description: "Ocorreu um erro ao gerar o PDF da comparação",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Baixar PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setComparisonContent(null)}
+                  >
+                    Fechar
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none dark:prose-invert">
+                  <div
+                    dangerouslySetInnerHTML={renderMarkdown(comparisonContent)}
                   />
                 </div>
               </CardContent>

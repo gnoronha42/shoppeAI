@@ -48,7 +48,11 @@ export async function POST(request: NextRequest) {
       .replace(/<\/table>/gi, '</table></div>')
       
       // Seções de diagnóstico
-      .replace(/<p>(.*?ANÁLISE FINALIZADA.*?)<\/p>/gi, '<div class="finalizacao"><p>$1</p></div>');
+      .replace(/<p>(.*?ANÁLISE FINALIZADA.*?)<\/p>/gi, '<div class="finalizacao"><p>$1</p></div>')
+
+      // Adicionar ao pré-processamento do HTML:
+      .replace(/<h2>✅ CHECKLIST OPERACIONAL SEMANAL<\/h2>/gi, '<h2>✅ CHECKLIST OPERACIONAL SEMANAL</h2><div class="checklist-container">')
+      .replace(/<p>Observações:<\/p>/gi, '</div><div class="observacoes-container"><p><strong>Observações:</strong></p>')
 
     // Lê o papel timbrado como base64
     let papelTimbradoBase64 = "";
@@ -538,6 +542,72 @@ export async function POST(request: NextRequest) {
             margin-bottom: 18mm;
             margin-left: 16mm;
             size: A4;
+          }
+
+          /* ========== CHECKLIST OPERACIONAL - ANÁLISE EXPRESS ========== */
+
+          /* Container do checklist */
+          .checklist-container {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+            box-shadow: 0 3px 6px rgba(40, 167, 69, 0.1);
+          }
+
+          /* Cada item do checklist */
+          .checklist-container p {
+            display: block;
+            margin: 6px 0;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-left: 4px solid #28a745;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            page-break-inside: avoid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+          }
+
+          /* Destaque para itens com checkbox */
+          .checklist-container p:contains("☐") {
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            font-weight: 500;
+          }
+
+          /* Destaque para status */
+          .checklist-container p:contains("Status:") {
+            border-left-color: #007bff;
+          }
+
+          /* Container de observações */
+          .observacoes-container {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 15px 0;
+            page-break-inside: avoid;
+            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+          }
+
+          .observacoes-container p {
+            font-size: 0.85rem;
+            color: #856404;
+            margin: 5px 0;
+            line-height: 1.5;
+            background: transparent;
+            border: none;
+            padding: 0;
+            box-shadow: none;
+          }
+
+          .observacoes-container strong {
+            color: #856404;
+            font-weight: 700;
           }
         </style>
       </head>
