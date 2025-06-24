@@ -50,8 +50,20 @@ export async function POST(request: NextRequest) {
       // Seções de diagnóstico
       .replace(/<p>(.*?ANÁLISE FINALIZADA.*?)<\/p>/gi, '<div class="finalizacao"><p>$1</p></div>')
 
-      // Adicionar ao pré-processamento do HTML:
-      .replace(/<h2>✅ CHECKLIST OPERACIONAL SEMANAL<\/h2>/gi, '<h2>✅ CHECKLIST OPERACIONAL SEMANAL</h2><div class="checklist-container">')
+      // CHECKLIST: Remover ☐ do texto e substituir por div estruturada
+      .replace(/✅ CHECKLIST OPERACIONAL SEMANAL/gi, '<h2>✅ CHECKLIST OPERACIONAL SEMANAL</h2><div class="checklist-container">')
+      .replace(/☐ (.*?)(?=☐|Observações:|$)/gs, (match, content) => {
+        // Remover o ☐ inicial e processar o conteúdo
+        const cleanContent = content.trim();
+        
+        // Separar Status: ☐Sim ☐Não em checkboxes individuais
+        const processedContent = cleanContent
+          .replace(/Status:\s*☐Sim\s*☐Não/gi, 'Status: <span class="status-checkboxes"><label class="checkbox-sim"><input type="checkbox"> Sim</label><label class="checkbox-nao"><input type="checkbox"> Não</label></span>')
+          .replace(/☐Sim/gi, '<label class="checkbox-sim"><input type="checkbox"> Sim</label>')
+          .replace(/☐Não/gi, '<label class="checkbox-nao"><input type="checkbox"> Não</label>');
+        
+        return `<div class="checklist-item">${processedContent}</div>`;
+      })
       .replace(/<p>Observações:<\/p>/gi, '</div><div class="observacoes-container"><p><strong>Observações:</strong></p>')
 
     // Lê o papel timbrado como base64
@@ -550,55 +562,146 @@ export async function POST(request: NextRequest) {
           .checklist-container {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border: 2px solid #28a745;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 15px 0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
             page-break-inside: avoid;
-            box-shadow: 0 3px 6px rgba(40, 167, 69, 0.1);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.15);
           }
 
           /* Cada item do checklist */
-          .checklist-container p {
+          .checklist-item {
             display: block;
-            margin: 6px 0;
-            padding: 10px 12px;
+            margin: 12px 0;
+            padding: 15px 20px;
             background: white;
             border: 1px solid #dee2e6;
-            border-left: 4px solid #28a745;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            line-height: 1.4;
+            border-left: 5px solid #28a745;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            line-height: 1.7;
             page-break-inside: avoid;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            position: relative;
+            transition: all 0.2s ease;
           }
 
-          /* Destaque para itens com checkbox */
-          .checklist-container p:contains("☐") {
-            background: linear-gradient(135deg, #fff, #f8f9fa);
-            font-weight: 500;
+          /* Checkbox principal do item */
+          .checklist-item::before {
+            content: "☐";
+            font-size: 1.4rem;
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 12px;
+            vertical-align: middle;
+            line-height: 1;
           }
 
-          /* Destaque para status */
-          .checklist-container p:contains("Status:") {
-            border-left-color: #007bff;
+          /* Hover effect */
+          .checklist-item:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+          }
+
+          /* Container para checkboxes de Status */
+          .status-checkboxes {
+            display: inline-block;
+            margin-left: 10px;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+          }
+
+          /* Labels dos checkboxes Sim/Não */
+          .checkbox-sim, .checkbox-nao {
+            display: inline-block;
+            margin: 0 8px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+          }
+
+          /* Checkbox Sim */
+          .checkbox-sim {
+            color: #28a745;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 1px solid #28a745;
+          }
+
+          .checkbox-sim:hover {
+            background: linear-gradient(135deg, #c3e6cb, #b1dfbb);
+            transform: scale(1.05);
+          }
+
+          /* Checkbox Não */
+          .checkbox-nao {
+            color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border: 1px solid #dc3545;
+          }
+
+          .checkbox-nao:hover {
+            background: linear-gradient(135deg, #f5c6cb, #f1b0b7);
+            transform: scale(1.05);
+          }
+
+          /* Input checkboxes ocultos (para impressão) */
+          .checkbox-sim input, .checkbox-nao input {
+            margin-right: 5px;
+            transform: scale(1.2);
+            accent-color: #28a745;
+          }
+
+          .checkbox-nao input {
+            accent-color: #dc3545;
+          }
+
+          /* Destaque para diferentes tipos de ferramentas */
+          .checklist-item:contains("Oferta Relâmpago") {
+            border-left-color: #ff6b35;
+            background: linear-gradient(135deg, #fff, #fff8f5);
+          }
+
+          .checklist-item:contains("Shopee Ads") {
+            border-left-color: #1976d2;
+            background: linear-gradient(135deg, #fff, #f3f8ff);
+          }
+
+          .checklist-item:contains("Combo") {
+            border-left-color: #9c27b0;
+            background: linear-gradient(135deg, #fff, #faf5ff);
+          }
+
+          .checklist-item:contains("Live") {
+            border-left-color: #f44336;
+            background: linear-gradient(135deg, #fff, #fff5f5);
+          }
+
+          .checklist-item:contains("Afiliado") {
+            border-left-color: #ff9800;
+            background: linear-gradient(135deg, #fff, #fff8f0);
           }
 
           /* Container de observações */
           .observacoes-container {
             background: linear-gradient(135deg, #fff3cd, #ffeaa7);
             border: 2px solid #ffc107;
-            border-radius: 6px;
-            padding: 12px;
-            margin: 15px 0;
+            border-radius: 8px;
+            padding: 18px;
+            margin: 20px 0;
             page-break-inside: avoid;
-            box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+            box-shadow: 0 3px 6px rgba(255, 193, 7, 0.2);
           }
 
           .observacoes-container p {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #856404;
-            margin: 5px 0;
-            line-height: 1.5;
+            margin: 8px 0;
+            line-height: 1.6;
             background: transparent;
             border: none;
             padding: 0;
@@ -608,6 +711,50 @@ export async function POST(request: NextRequest) {
           .observacoes-container strong {
             color: #856404;
             font-weight: 700;
+            font-size: 1.1rem;
+            display: block;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ffc107;
+            padding-bottom: 5px;
+          }
+
+          /* Quebra de linha forçada para cada item */
+          .checklist-item {
+            display: block !important;
+            width: 100%;
+            clear: both;
+          }
+
+          /* Responsivo para impressão */
+          @media print {
+            .checklist-item {
+              font-size: 0.85rem;
+              padding: 12px 15px;
+              margin: 8px 0;
+            }
+            
+            .checklist-container {
+              padding: 15px;
+              margin: 15px 0;
+            }
+            
+            .status-checkboxes {
+              background: #f8f9fa !important;
+              -webkit-print-color-adjust: exact;
+            }
+            
+            .checkbox-sim, .checkbox-nao {
+              -webkit-print-color-adjust: exact;
+            }
+          }
+
+          /* Espaçamento específico */
+          .checklist-container .checklist-item:first-child {
+            margin-top: 0;
+          }
+
+          .checklist-container .checklist-item:last-child {
+            margin-bottom: 10px;
           }
         </style>
       </head>
@@ -621,7 +768,7 @@ export async function POST(request: NextRequest) {
 
     // Conecta ao Browserless via WebSocket
     browser = await puppeteerCore.connect({
-      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
+      browserWSEndpoint: `wss://production-sfo.browserless.io?token=2SMeMHeMnTN3Fyz72b29ba077cc24d3169a4438ff91d8886e`,
       defaultViewport: { width: 1200, height: 800 },
     });
 

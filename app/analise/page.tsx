@@ -126,7 +126,7 @@ export default function AnalisePage() {
 
     console.log("Enviando requisição para microserviço...");
 
-    const response = await fetch("http://localhost:3001/analise", {
+    const response = await fetch("https://analysis-micro.onrender.com/analise", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
