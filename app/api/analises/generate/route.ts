@@ -768,7 +768,7 @@ export async function POST(request: NextRequest) {
 
     // Conecta ao Browserless via WebSocket
     browser = await puppeteerCore.connect({
-      browserWSEndpoint: `wss://production-sfo.browserless.io?token=2SMeMHeMnTN3Fyz72b29ba077cc24d3169a4438ff91d8886e`,
+      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
       defaultViewport: { width: 1200, height: 800 },
     });
 

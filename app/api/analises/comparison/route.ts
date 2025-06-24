@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
     console.log('🚀 Enviando para microserviço de comparação...');
 
     // 4. Chamar microserviço
-    const microserviceResponse = await fetch('http://localhost:3001/comparison', {
+    const microserviceResponse = await fetch('https://analysis-micro.onrender.com/comparison', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
