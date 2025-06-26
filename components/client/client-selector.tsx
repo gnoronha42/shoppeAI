@@ -1,22 +1,37 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGetClientsQuery } from "@/lib/api";
 import { useDispatch, useSelector } from "react-redux";
 import { selectClient, selectSelectedClientId, setClients } from "@/features/clients/clientSlice";
+import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Client } from "@/types";
 
 export function ClientSelector() {
   const { data: clients = [], isLoading } = useGetClientsQuery();
   const selectedClientId = useSelector(selectSelectedClientId);
   const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+
+  // Os clientes já vêm ordenados alfabeticamente do backend
+  const sortedClients = clients;
+
+  const selectedClient = sortedClients.find(client => client.id === selectedClientId);
 
   useEffect(() => {
     if (clients.length > 0) {
@@ -24,26 +39,60 @@ export function ClientSelector() {
     }
   }, [clients, dispatch]);
 
-  const handleClientChange = (value: string) => {
-    dispatch(selectClient(value));
+  const handleClientSelect = (currentValue: string) => {
+    dispatch(selectClient(currentValue === selectedClientId ? "" : currentValue));
+    setOpen(false);
   };
 
   return (
-    <Select
-      disabled={isLoading || clients.length === 0}
-      value={selectedClientId || ""}
-      onValueChange={handleClientChange}
-    >
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Selecione um cliente" />
-      </SelectTrigger>
-      <SelectContent>
-        {clients.map((client: Client) => (
-          <SelectItem key={client.id} value={client.id}>
-            {client.name} ({client.ownerName})
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between"
+          disabled={isLoading || clients.length === 0}
+        >
+          {selectedClient
+            ? `${selectedClient.name} (${selectedClient.ownerName})`
+            : "Selecione um cliente..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0" side="bottom" align="start">
+        <Command>
+          <CommandInput 
+            placeholder="Buscar cliente..." 
+            className="h-9" 
+          />
+          <CommandList>
+            <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+            <CommandGroup>
+              {sortedClients.map((client: Client) => (
+                <CommandItem
+                  key={client.id}
+                  value={`${client.name} ${client.ownerName}`.toLowerCase()}
+                  onSelect={() => handleClientSelect(client.id)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedClientId === client.id ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-medium">{client.name}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {client.ownerName}
+                    </span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

@@ -3,10 +3,20 @@ import prisma from '@/lib/prisma';
 
 export async function POST(request: Request) {
   try {
+    console.log('🔄 Recebida requisição para salvar análise');
+    
     const body = await request.json();
+    console.log('📋 Dados recebidos:', {
+      hasMarkdown: !!body.markdown,
+      markdownLength: body.markdown?.length,
+      clientId: body.clientId,
+      clientName: body.clientName,
+      analysisType: body.analysisType
+    });
     
     // Validar campos obrigatórios
     if (!body.markdown) {
+      console.log('❌ Erro: Campo markdown obrigatório não fornecido');
       return NextResponse.json(
         { error: 'Campo obrigatório: markdown' },
         { status: 400 }
@@ -18,6 +28,7 @@ export async function POST(request: Request) {
     
     // Se não tiver o ID mas tiver o nome, buscar o cliente pelo nome
     if (!clientId && body.clientName) {
+      console.log('🔍 Buscando cliente pelo nome:', body.clientName);
       const client = await prisma.clients.findFirst({
         where: {
           name: body.clientName
@@ -25,6 +36,7 @@ export async function POST(request: Request) {
       });
       
       if (!client) {
+        console.log('❌ Cliente não encontrado:', body.clientName);
         return NextResponse.json(
           { error: 'Cliente não encontrado' },
           { status: 404 }
@@ -32,20 +44,31 @@ export async function POST(request: Request) {
       }
       
       clientId = client.id;
+      console.log('✅ Cliente encontrado:', clientId);
     }
     
     // Se ainda não tiver o ID do cliente, retornar erro
     if (!clientId) {
+      console.log('❌ Erro: ID do cliente não fornecido');
       return NextResponse.json(
         { error: 'É necessário fornecer o ID ou o nome do cliente' },
         { status: 400 }
       );
     }
     
-    // Criar a análise no banco de dados
-    const analysisType = body.analysisType || 'account';
-    const title = `Análise de ${analysisType === 'account' ? 'Conta' : 'Anúncios'} - ${new Date().toLocaleDateString('pt-BR')}`;
-    
+        // Criar a análise no banco de dados
+    // Mapear 'express' para 'account' pois o banco não aceita 'express'
+    const originalAnalysisType = body.analysisType || 'account';
+    const analysisType = originalAnalysisType === 'express' ? 'account' : originalAnalysisType;
+    const title = `Análise de ${originalAnalysisType === 'account' ? 'Conta' : originalAnalysisType === 'ads' ? 'Anúncios' : 'Express'} - ${new Date().toLocaleDateString('pt-BR')}`;
+
+    console.log('💾 Criando análise no banco:', {
+      clientId,
+      originalAnalysisType,
+      analysisType,
+      title
+    });
+
     const analysis = await prisma.analyses.create({
       data: {
         client_id: clientId,
@@ -53,8 +76,11 @@ export async function POST(request: Request) {
         title: title
       },
     });
-    
+
+    console.log('✅ Análise criada:', analysis.id);
+
     // Salvar o conteúdo markdown como resultado de análise
+    console.log('💾 Salvando resultado da análise...');
     const analysisResult = await prisma.analysis_results.create({
       data: {
         analysis_id: analysis.id,
@@ -62,16 +88,18 @@ export async function POST(request: Request) {
         processed_by: 'markdown-pdf'
       }
     });
-    
+
+    console.log('✅ Resultado salvo:', analysisResult.id);
+
     // Retornar os IDs da análise e do resultado
-    return NextResponse.json(
-      { 
-        id: analysis.id,
-        result: analysisResult,
-        message: 'Análise markdown salva com sucesso'
-      }, 
-      { status: 201 }
-    );
+    const response = {
+      id: analysis.id,
+      result: analysisResult,
+      message: 'Análise markdown salva com sucesso'
+    };
+    
+    console.log('🎉 Salvamento concluído com sucesso');
+    return NextResponse.json(response, { status: 201 });
     
   } catch (error) {
     console.error('Erro ao salvar análise markdown:', error);

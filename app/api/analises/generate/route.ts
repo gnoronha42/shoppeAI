@@ -799,11 +799,31 @@ export async function POST(request: NextRequest) {
 
     await browser.disconnect();
 
+    // Sanitizar o nome do cliente para o nome do arquivo (somente ASCII)
+    const sanitizedClientName = clientName
+      .replace(/ã/g, 'a').replace(/á/g, 'a').replace(/à/g, 'a').replace(/â/g, 'a')
+      .replace(/é/g, 'e').replace(/ê/g, 'e').replace(/è/g, 'e')
+      .replace(/í/g, 'i').replace(/î/g, 'i').replace(/ì/g, 'i')
+      .replace(/ó/g, 'o').replace(/ô/g, 'o').replace(/õ/g, 'o').replace(/ò/g, 'o')
+      .replace(/ú/g, 'u').replace(/û/g, 'u').replace(/ù/g, 'u')
+      .replace(/ñ/g, 'n').replace(/ç/g, 'c')
+      .replace(/Ã/g, 'A').replace(/Á/g, 'A').replace(/À/g, 'A').replace(/Â/g, 'A')
+      .replace(/É/g, 'E').replace(/Ê/g, 'E').replace(/È/g, 'E')
+      .replace(/Í/g, 'I').replace(/Î/g, 'I').replace(/Ì/g, 'I')
+      .replace(/Ó/g, 'O').replace(/Ô/g, 'O').replace(/Õ/g, 'O').replace(/Ò/g, 'O')
+      .replace(/Ú/g, 'U').replace(/Û/g, 'U').replace(/Ù/g, 'U')
+      .replace(/Ñ/g, 'N').replace(/Ç/g, 'C')
+      .replace(/[()]/g, '') // Remover parênteses
+      .replace(/[^a-zA-Z0-9\s]/g, '') // Remover outros caracteres especiais
+      .replace(/\s+/g, '_') // Substituir espaços por underscore
+      .substring(0, 50) // Limitar tamanho
+      .trim();
+
     const response = new NextResponse(pdfBuffer);
     response.headers.set("Content-Type", "application/pdf");
     response.headers.set(
       "Content-Disposition",
-      `attachment; filename="relatorio_${clientName}.pdf"`
+      `attachment; filename="relatorio_${sanitizedClientName}.pdf"`
     );
 
     return response;

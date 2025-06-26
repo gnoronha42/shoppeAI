@@ -158,28 +158,43 @@ export default function AnalisePage() {
 
   const saveAnalysisToDatabase = async (markdown: string) => {
     try {
-      console.log("Salvando análise para cliente:", selectedClientId);
+      console.log("🔄 Iniciando salvamento da análise...");
+      console.log("📋 Dados para salvar:", {
+        clientId: selectedClientId,
+        clientName: selectedClient?.name,
+        analysisType: analysisType,
+        markdownLength: markdown.length
+      });
+      
       setSaveStatus("Salvando...");
+
+      const requestBody = {
+        clientId: selectedClientId,
+        clientName: selectedClient?.name,
+        markdown: markdown,
+        analysisType: analysisType,
+      };
+
+      console.log("📤 Enviando requisição para /api/analises/save");
 
       const response = await fetch("/api/analises/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          clientId: selectedClientId,
-          clientName: selectedClient?.name,
-          markdown: markdown,
-          analysisType: analysisType,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log("📡 Status da resposta:", response.status);
+
       if (!response.ok) {
-        throw new Error("Erro ao salvar análise no banco de dados");
+        const errorText = await response.text();
+        console.error("❌ Erro da API:", errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log("Análise salva com sucesso:", result);
+      console.log("✅ Análise salva com sucesso:", result);
 
       setSaveStatus("Salva com sucesso!");
       toast({
@@ -192,14 +207,22 @@ export default function AnalisePage() {
       setTimeout(() => {
         setSaveStatus(null);
       }, 3000);
+
+      return result;
     } catch (error) {
-      console.error("Erro ao salvar análise:", error);
+      console.error("❌ Erro ao salvar análise:", error);
       setSaveStatus("Erro ao salvar");
       toast({
         title: "Erro ao salvar análise",
-        description: "Não foi possível salvar a análise no banco de dados",
+        description: error instanceof Error ? error.message : "Não foi possível salvar a análise no banco de dados",
         variant: "destructive",
       });
+      
+      setTimeout(() => {
+        setSaveStatus(null);
+      }, 5000);
+      
+      throw error; 
     }
   };
 
@@ -247,13 +270,29 @@ export default function AnalisePage() {
         variant: "default",
       });
 
-      // Salvar a análise no banco de dados automaticamente
-      await saveAnalysisToDatabase(markdownContent);
+
+      console.log('🗄️ Tentando salvar análise no banco...');
+      console.log('📊 Markdown content length:', markdownContent.length);
+      console.log('👤 Selected client ID:', selectedClientId);
+      console.log('📋 Analysis type:', analysisType);
+      
+      try {
+        await saveAnalysisToDatabase(markdownContent);
+      } catch (saveError) {
+        console.error("❌ Erro ao salvar no banco (análise gerada com sucesso):", saveError);
+      
+        toast({
+          title: "Análise gerada com sucesso",
+          description: "A análise foi gerada mas houve um problema ao salvar. Você pode baixar o PDF normalmente.",
+          variant: "default",
+        });
+      }
 
       setIsAnalyzing(false);
       setFiles([]);
     } catch (error: any) {
-      console.error("Erro completo:", error);
+      console.error("❌ Erro completo na geração da análise:", error);
+      setIsAnalyzing(false); 
       toast({
         title: "Erro ao gerar relatório",
         description:

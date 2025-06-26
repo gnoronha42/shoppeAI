@@ -1,28 +1,64 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { ClientForm } from "@/components/client/client-form";
 import { useGetClientsQuery } from "@/lib/api";
-import { Loader2, Plus, User } from "lucide-react";
+import { Loader2, Plus, User, Search } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setClients } from "@/features/clients/clientSlice";
+
+const CLIENTS_PER_PAGE = 10;
 
 export default function ClientesPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { data: clients = [], isLoading, error } = useGetClientsQuery();
   const [activeTab, setActiveTab] = useState<string>("lista");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
   
   useEffect(() => {
     if (clients && clients.length > 0) {
       dispatch(setClients(clients));
     }
   }, [clients, dispatch]);
+
+  // Filtrar clientes baseado no termo de busca
+  const filteredClients = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return clients;
+    }
+
+    return clients.filter((client) => 
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [clients, searchTerm]);
+
+  // Calcular dados da paginação
+  const totalPages = Math.ceil(filteredClients.length / CLIENTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * CLIENTS_PER_PAGE;
+  const endIndex = startIndex + CLIENTS_PER_PAGE;
+  const currentClients = filteredClients.slice(startIndex, endIndex);
+
+  // Resetar para primeira página quando buscar
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
   
   const navigateToClientDetails = (clientId: string) => {
     router.push(`/clientes/${clientId}`);
@@ -30,6 +66,14 @@ export default function ClientesPage() {
 
   const handleClientFormSuccess = () => {
     setActiveTab("lista");
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
 
   return (
@@ -48,6 +92,44 @@ export default function ClientesPage() {
         </TabsList>
         
         <TabsContent value="lista" className="space-y-6 mt-6">
+          {/* Campo de busca */}
+          <div className="flex items-center space-x-2">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Buscar clientes..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="pl-8"
+              />
+            </div>
+            <Button 
+              variant="outline"
+              onClick={() => setActiveTab("cadastro")}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Cliente
+            </Button>
+          </div>
+
+          {/* Informações da busca/paginação */}
+          {!isLoading && !error && (
+            <div className="flex justify-between items-center text-sm text-muted-foreground">
+              <span>
+                {filteredClients.length === 0 
+                  ? "Nenhum cliente encontrado" 
+                  : `Mostrando ${startIndex + 1}-${Math.min(endIndex, filteredClients.length)} de ${filteredClients.length} cliente${filteredClients.length !== 1 ? 's' : ''}`
+                }
+                {searchTerm && ` para "${searchTerm}"`}
+              </span>
+              {totalPages > 1 && (
+                <span>Página {currentPage} de {totalPages}</span>
+              )}
+            </div>
+          )}
+
+          {/* Lista de clientes */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {isLoading ? (
               <div className="col-span-full flex justify-center py-10">
@@ -57,20 +139,36 @@ export default function ClientesPage() {
               <div className="col-span-full text-center py-10">
                 <p className="text-red-500">Erro ao carregar clientes</p>
               </div>
-            ) : clients.length === 0 ? (
+            ) : currentClients.length === 0 ? (
               <div className="col-span-full text-center py-10">
-                <p className="text-muted-foreground">Nenhum cliente cadastrado</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4"
-                  onClick={() => setActiveTab("cadastro")}
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Cadastrar Cliente
-                </Button>
+                {searchTerm ? (
+                  <div>
+                    <p className="text-muted-foreground mb-2">
+                      Nenhum cliente encontrado para "{searchTerm}"
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSearchTerm("")}
+                    >
+                      Limpar busca
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-muted-foreground">Nenhum cliente cadastrado</p>
+                    <Button 
+                      variant="outline" 
+                      className="mt-4"
+                      onClick={() => setActiveTab("cadastro")}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Cadastrar Cliente
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
-              clients.map((client) => (
+              currentClients.map((client) => (
                 <Card 
                   key={client.id} 
                   className="cursor-pointer hover:shadow-md transition-shadow"
@@ -96,6 +194,57 @@ export default function ClientesPage() {
               ))
             )}
           </div>
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage > 1) {
+                          handlePageChange(currentPage - 1);
+                        }
+                      }}
+                      className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(page);
+                        }}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (currentPage < totalPages) {
+                          handlePageChange(currentPage + 1);
+                        }
+                      }}
+                      className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="cadastro" className="mt-6">
