@@ -140,6 +140,7 @@ model clients {
   chat_messages      chat_messages[]
   products           products[]
   reports            reports[]
+  checklist_items    checklist_items[]
 
   @@index([name], map: "idx_clients_name")
 }
@@ -240,4 +241,36 @@ model users {
   chat_conversations chat_conversations[]
   chat_messages      chat_messages[]
   configurations     configurations[]
+}
+
+/// This model stores the checklist blocks and their items
+model checklist_blocks {
+  id         String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title      String            @db.VarChar(255)
+  order      Int               @default(0)
+  created_at DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at DateTime?         @default(now()) @db.Timestamptz(6)
+  items      checklist_items[]
+
+  @@index([order], map: "idx_checklist_blocks_order")
+}
+
+/// This model stores the checklist items and their status per client
+model checklist_items {
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  block_id     String           @db.Uuid
+  client_id    String           @db.Uuid
+  title        String           @db.VarChar(255)
+  description  String?
+  order        Int              @default(0)
+  is_completed Boolean          @default(false)
+  completed_at DateTime?        @db.Timestamptz(6)
+  created_at   DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime?        @default(now()) @db.Timestamptz(6)
+  block        checklist_blocks @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  client       clients          @relation(fields: [client_id], references: [id], onDelete: Cascade)
+
+  @@index([block_id], map: "idx_checklist_items_block")
+  @@index([client_id], map: "idx_checklist_items_client")
+  @@index([order], map: "idx_checklist_items_order")
 }

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientForm } from "@/components/client/client-form";
+import { ClientChecklist } from "@/components/client/client-checklist";
 import dynamic from "next/dynamic";
 import {
   FileText,
@@ -467,6 +468,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
           startDate: dateRange.from.toISOString(),
           endDate: dateRange.to.toISOString(),
           analysisType: historicalReportType,
+          maxAnalyses: 100, // Permitir até 100 análises por comparação
         }),
       });
 
@@ -475,15 +477,40 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         throw new Error(errorData.error || 'Erro ao gerar comparação');
       }
 
-      const { comparison, reportId, analysesCount, period } = await response.json();
+      const { 
+        comparison, 
+        reportId, 
+        analysesCount,
+        totalAnalysesFound,
+        period,
+        optimization,
+        insightsUsed,
+        fullAnalysesUsed,
+        warning,
+        tokenLimitReached
+      } = await response.json();
       
       setComparisonContent(comparison);
       setComparisonReportId(reportId);
       
+      let toastMessage = `Baseado em ${analysesCount} análises`;
+      if (totalAnalysesFound && totalAnalysesFound > analysesCount) {
+        toastMessage += ` de ${totalAnalysesFound} encontradas`;
+      }
+      toastMessage += ` (${insightsUsed} otimizadas, ${fullAnalysesUsed} completas)`;
+      
+      if (optimization?.reductionPercentage) {
+        toastMessage += `. ${optimization.reductionPercentage}% tokens economizados`;
+      }
+      
+      if (warning) {
+        toastMessage += `. ${warning}`;
+      }
+
       toast({
-        title: "Análise comparativa gerada!",
-        description: `Relatório baseado em ${analysesCount} análises do período ${period}`,
-        variant: "default",
+        title: tokenLimitReached ? "Comparação gerada com limitações" : "Análise comparativa gerada!",
+        description: toastMessage,
+        variant: tokenLimitReached ? "destructive" : "default",
       });
       
     } catch (error: any) {
@@ -596,12 +623,13 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full md:w-[800px] grid-cols-4">
+        <TabsList className="grid w-full md:w-[800px] grid-cols-5">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="analyses">
             Análises ({analyses.length})
           </TabsTrigger>
           <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
+          <TabsTrigger value="checklist">Checklist</TabsTrigger>
           <TabsTrigger value="edit">Editar</TabsTrigger>
         </TabsList>
 
@@ -878,18 +906,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
 
               {/* Botões de geração - AQUI É O LOCAL CORRETO */}
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
-                <Button
-                  onClick={handleGenerateHistoricalReport}
-                  disabled={!dateRange.from || !dateRange.to || isGeneratingHistoricalReport}
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
-                >
-                  <BarChart className="mr-2 h-4 w-4" />
-                  {isGeneratingHistoricalReport 
-                    ? "Gerando Relatório..." 
-                    : "Relatório Histórico (Mock)"
-                  }
-                </Button>
-
+    
                 <Button
                   onClick={handleGenerateComparison}
                   disabled={!dateRange.from || !dateRange.to || isGeneratingComparison}
@@ -906,7 +923,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
               {/* Informações adicionais */}
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Relatório Histórico:</strong> Mock simulando análise consolidada. <br/>
+                
                   <strong>Comparar Análises:</strong> Analisa múltiplas análises do período usando IA para identificar tendências e insights evolutivos.
                 </p>
               </div>
@@ -1050,6 +1067,10 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
               <ClientForm client={client} onSuccess={handleClientUpdate} />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="checklist" className="mt-6">
+          <ClientChecklist clientId={clientId} />
         </TabsContent>
       </Tabs>
     </div>
