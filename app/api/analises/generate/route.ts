@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
       // CHECKLIST: Remover ☐ do texto e substituir por div estruturada
       .replace(/✅ CHECKLIST OPERACIONAL SEMANAL/gi, '<h2>✅ CHECKLIST OPERACIONAL SEMANAL</h2><div class="checklist-container">')
-      .replace(/☐ (.*?)(?=☐|Observações:|$)/gs, (match, content) => {
+      .replace(/☐ ([^☐]*?)(?=☐|Observações:|$)/gi, (match, content) => {
         // Remover o ☐ inicial e processar o conteúdo
         const cleanContent = content.trim();
         
