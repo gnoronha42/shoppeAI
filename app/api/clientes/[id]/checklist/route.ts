@@ -9,18 +9,40 @@ export async function GET(
   try {
     const clientId = params.id;
 
-    // Busca todos os blocos e seus itens para o cliente
+    // Busca todos os blocos e seus itens
     const blocks = await prisma.checklist_blocks.findMany({
       orderBy: { order: "asc" },
       include: {
         items: {
-          where: { client_id: clientId },
           orderBy: { order: "asc" },
-        },
-      },
+          include: {
+            // Inclui o progresso do cliente específico
+            progress: {
+              where: {
+                client_id: clientId
+              }
+            }
+          }
+        }
+      }
     });
 
-    return NextResponse.json({ blocks });
+    // Formata a resposta para incluir is_completed e completed_at
+    const formattedBlocks = blocks.map(block => ({
+      id: block.id,
+      title: block.title,
+      order: block.order,
+      items: block.items.map(item => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        order: item.order,
+        is_completed: item.progress[0]?.is_completed || false,
+        completed_at: item.progress[0]?.completed_at || null
+      }))
+    }));
+
+    return NextResponse.json({ blocks: formattedBlocks });
   } catch (error) {
     console.error("Erro ao buscar checklist:", error);
     return NextResponse.json(
@@ -39,20 +61,31 @@ export async function POST(
     const clientId = params.id;
     const { itemId, isCompleted } = await request.json();
 
-    const updatedItem = await prisma.checklist_items.update({
-      where: { id: itemId },
-      data: {
-        is_completed: isCompleted,
-        completed_at: isCompleted ? new Date() : null,
-        updated_at: new Date(),
+    // Atualiza ou cria o progresso do item
+    const progress = await prisma.checklist_progress.upsert({
+      where: {
+        client_id_item_id: {
+          client_id: clientId,
+          item_id: itemId
+        }
       },
+      update: {
+        is_completed: isCompleted,
+        completed_at: isCompleted ? new Date() : null
+      },
+      create: {
+        client_id: clientId,
+        item_id: itemId,
+        is_completed: isCompleted,
+        completed_at: isCompleted ? new Date() : null
+      }
     });
 
-    return NextResponse.json({ item: updatedItem });
+    return NextResponse.json(progress);
   } catch (error) {
-    console.error("Erro ao atualizar item do checklist:", error);
+    console.error("Erro ao atualizar checklist:", error);
     return NextResponse.json(
-      { error: "Erro ao atualizar item do checklist" },
+      { error: "Erro ao atualizar checklist" },
       { status: 500 }
     );
   }

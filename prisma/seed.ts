@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../lib/generated/prisma';
 const prisma = new PrismaClient();
 
 const checklistData = [
@@ -437,39 +437,30 @@ async function main() {
   await prisma.checklist_items.deleteMany();
   await prisma.checklist_blocks.deleteMany();
 
-  // Buscar todos os clientes
-  const clients = await prisma.clients.findMany();
-  if (clients.length === 0) {
-    console.log('Nenhum cliente encontrado. Crie clientes antes de rodar o seed do checklist.');
-    return;
-  }
+  // Criar blocos e itens (modelo global, sem client_id)
+  for (let i = 0; i < checklistData.length; i++) {
+    const block = checklistData[i];
+    console.log(`Criando bloco: ${block.title}`);
 
-  for (const client of clients) {
-    for (let i = 0; i < checklistData.length; i++) {
-      const block = checklistData[i];
-      console.log(`Criando bloco: ${block.title} para cliente ${client.name}`);
+    const createdBlock = await prisma.checklist_blocks.create({
+      data: {
+        title: block.title,
+        order: i,
+      },
+    });
 
-      const createdBlock = await prisma.checklist_blocks.create({
+    for (let j = 0; j < block.items.length; j++) {
+      const item = block.items[j];
+      console.log(`Criando item: ${item.title}`);
+
+      await prisma.checklist_items.create({
         data: {
-          title: block.title,
-          order: i,
+          block_id: createdBlock.id,
+          title: item.title,
+          description: item.description,
+          order: j,
         },
       });
-
-      for (let j = 0; j < block.items.length; j++) {
-        const item = block.items[j];
-        console.log(`Criando item: ${item.title} para cliente ${client.name}`);
-
-        await prisma.checklist_items.create({
-          data: {
-            block_id: createdBlock.id,
-            client_id: client.id, // Associar ao cliente
-            title: item.title,
-            description: item.description,
-            order: j,
-          },
-        });
-      }
     }
   }
 

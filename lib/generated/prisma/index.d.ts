@@ -97,6 +97,11 @@ export type checklist_blocks = $Result.DefaultSelection<Prisma.$checklist_blocks
  * This model stores the checklist items and their status per client
  */
 export type checklist_items = $Result.DefaultSelection<Prisma.$checklist_itemsPayload>
+/**
+ * Model checklist_progress
+ * 
+ */
+export type checklist_progress = $Result.DefaultSelection<Prisma.$checklist_progressPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -382,6 +387,16 @@ export class PrismaClient<
     * ```
     */
   get checklist_items(): Prisma.checklist_itemsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.checklist_progress`: Exposes CRUD operations for the **checklist_progress** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Checklist_progresses
+    * const checklist_progresses = await prisma.checklist_progress.findMany()
+    * ```
+    */
+  get checklist_progress(): Prisma.checklist_progressDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -440,8 +455,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.6.0
-   * Query Engine version: f676762280b54cd07c770017ed3711ddde35f37a
+   * Prisma Client JS version: 6.11.1
+   * Query Engine version: f40f79ec31188888a2e33acda0ecc8fd10a853a9
    */
   export type PrismaVersion = {
     client: string
@@ -837,7 +852,8 @@ export namespace Prisma {
     reports: 'reports',
     users: 'users',
     checklist_blocks: 'checklist_blocks',
-    checklist_items: 'checklist_items'
+    checklist_items: 'checklist_items',
+    checklist_progress: 'checklist_progress'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -856,7 +872,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "activity_log" | "ad_metrics" | "ai_requests" | "analyses" | "analysis_results" | "chat_conversations" | "chat_messages" | "clients" | "configurations" | "images" | "products" | "report_metrics" | "reports" | "users" | "checklist_blocks" | "checklist_items"
+      modelProps: "activity_log" | "ad_metrics" | "ai_requests" | "analyses" | "analysis_results" | "chat_conversations" | "chat_messages" | "clients" | "configurations" | "images" | "products" | "report_metrics" | "reports" | "users" | "checklist_blocks" | "checklist_items" | "checklist_progress"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2044,6 +2060,80 @@ export namespace Prisma {
           }
         }
       }
+      checklist_progress: {
+        payload: Prisma.$checklist_progressPayload<ExtArgs>
+        fields: Prisma.checklist_progressFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.checklist_progressFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.checklist_progressFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>
+          }
+          findFirst: {
+            args: Prisma.checklist_progressFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.checklist_progressFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>
+          }
+          findMany: {
+            args: Prisma.checklist_progressFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>[]
+          }
+          create: {
+            args: Prisma.checklist_progressCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>
+          }
+          createMany: {
+            args: Prisma.checklist_progressCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.checklist_progressCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>[]
+          }
+          delete: {
+            args: Prisma.checklist_progressDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>
+          }
+          update: {
+            args: Prisma.checklist_progressUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>
+          }
+          deleteMany: {
+            args: Prisma.checklist_progressDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.checklist_progressUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.checklist_progressUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>[]
+          }
+          upsert: {
+            args: Prisma.checklist_progressUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$checklist_progressPayload>
+          }
+          aggregate: {
+            args: Prisma.Checklist_progressAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateChecklist_progress>
+          }
+          groupBy: {
+            args: Prisma.checklist_progressGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Checklist_progressGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.checklist_progressCountArgs<ExtArgs>
+            result: $Utils.Optional<Checklist_progressCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2144,6 +2234,7 @@ export namespace Prisma {
     users?: usersOmit
     checklist_blocks?: checklist_blocksOmit
     checklist_items?: checklist_itemsOmit
+    checklist_progress?: checklist_progressOmit
   }
 
   /* Types for Logging */
@@ -2327,6 +2418,7 @@ export namespace Prisma {
     products: number
     reports: number
     checklist_items: number
+    checklist_progress: number
   }
 
   export type ClientsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2339,6 +2431,7 @@ export namespace Prisma {
     products?: boolean | ClientsCountOutputTypeCountProductsArgs
     reports?: boolean | ClientsCountOutputTypeCountReportsArgs
     checklist_items?: boolean | ClientsCountOutputTypeCountChecklist_itemsArgs
+    checklist_progress?: boolean | ClientsCountOutputTypeCountChecklist_progressArgs
   }
 
   // Custom InputTypes
@@ -2413,6 +2506,13 @@ export namespace Prisma {
    */
   export type ClientsCountOutputTypeCountChecklist_itemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: checklist_itemsWhereInput
+  }
+
+  /**
+   * ClientsCountOutputType without action
+   */
+  export type ClientsCountOutputTypeCountChecklist_progressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: checklist_progressWhereInput
   }
 
 
@@ -2582,6 +2682,37 @@ export namespace Prisma {
    */
   export type Checklist_blocksCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: checklist_itemsWhereInput
+  }
+
+
+  /**
+   * Count Type Checklist_itemsCountOutputType
+   */
+
+  export type Checklist_itemsCountOutputType = {
+    progress: number
+  }
+
+  export type Checklist_itemsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    progress?: boolean | Checklist_itemsCountOutputTypeCountProgressArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * Checklist_itemsCountOutputType without action
+   */
+  export type Checklist_itemsCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Checklist_itemsCountOutputType
+     */
+    select?: Checklist_itemsCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * Checklist_itemsCountOutputType without action
+   */
+  export type Checklist_itemsCountOutputTypeCountProgressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: checklist_progressWhereInput
   }
 
 
@@ -10938,6 +11069,7 @@ export namespace Prisma {
     products?: boolean | clients$productsArgs<ExtArgs>
     reports?: boolean | clients$reportsArgs<ExtArgs>
     checklist_items?: boolean | clients$checklist_itemsArgs<ExtArgs>
+    checklist_progress?: boolean | clients$checklist_progressArgs<ExtArgs>
     _count?: boolean | ClientsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["clients"]>
 
@@ -10994,6 +11126,7 @@ export namespace Prisma {
     products?: boolean | clients$productsArgs<ExtArgs>
     reports?: boolean | clients$reportsArgs<ExtArgs>
     checklist_items?: boolean | clients$checklist_itemsArgs<ExtArgs>
+    checklist_progress?: boolean | clients$checklist_progressArgs<ExtArgs>
     _count?: boolean | ClientsCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type clientsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -11011,6 +11144,7 @@ export namespace Prisma {
       products: Prisma.$productsPayload<ExtArgs>[]
       reports: Prisma.$reportsPayload<ExtArgs>[]
       checklist_items: Prisma.$checklist_itemsPayload<ExtArgs>[]
+      checklist_progress: Prisma.$checklist_progressPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11427,6 +11561,7 @@ export namespace Prisma {
     products<T extends clients$productsArgs<ExtArgs> = {}>(args?: Subset<T, clients$productsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$productsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     reports<T extends clients$reportsArgs<ExtArgs> = {}>(args?: Subset<T, clients$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$reportsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     checklist_items<T extends clients$checklist_itemsArgs<ExtArgs> = {}>(args?: Subset<T, clients$checklist_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    checklist_progress<T extends clients$checklist_progressArgs<ExtArgs> = {}>(args?: Subset<T, clients$checklist_progressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12068,6 +12203,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Checklist_itemsScalarFieldEnum | Checklist_itemsScalarFieldEnum[]
+  }
+
+  /**
+   * clients.checklist_progress
+   */
+  export type clients$checklist_progressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    where?: checklist_progressWhereInput
+    orderBy?: checklist_progressOrderByWithRelationInput | checklist_progressOrderByWithRelationInput[]
+    cursor?: checklist_progressWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Checklist_progressScalarFieldEnum | Checklist_progressScalarFieldEnum[]
   }
 
   /**
@@ -20250,40 +20409,34 @@ export namespace Prisma {
   export type Checklist_itemsMinAggregateOutputType = {
     id: string | null
     block_id: string | null
-    client_id: string | null
     title: string | null
     description: string | null
     order: number | null
-    is_completed: boolean | null
-    completed_at: Date | null
     created_at: Date | null
     updated_at: Date | null
+    clientsId: string | null
   }
 
   export type Checklist_itemsMaxAggregateOutputType = {
     id: string | null
     block_id: string | null
-    client_id: string | null
     title: string | null
     description: string | null
     order: number | null
-    is_completed: boolean | null
-    completed_at: Date | null
     created_at: Date | null
     updated_at: Date | null
+    clientsId: string | null
   }
 
   export type Checklist_itemsCountAggregateOutputType = {
     id: number
     block_id: number
-    client_id: number
     title: number
     description: number
     order: number
-    is_completed: number
-    completed_at: number
     created_at: number
     updated_at: number
+    clientsId: number
     _all: number
   }
 
@@ -20299,40 +20452,34 @@ export namespace Prisma {
   export type Checklist_itemsMinAggregateInputType = {
     id?: true
     block_id?: true
-    client_id?: true
     title?: true
     description?: true
     order?: true
-    is_completed?: true
-    completed_at?: true
     created_at?: true
     updated_at?: true
+    clientsId?: true
   }
 
   export type Checklist_itemsMaxAggregateInputType = {
     id?: true
     block_id?: true
-    client_id?: true
     title?: true
     description?: true
     order?: true
-    is_completed?: true
-    completed_at?: true
     created_at?: true
     updated_at?: true
+    clientsId?: true
   }
 
   export type Checklist_itemsCountAggregateInputType = {
     id?: true
     block_id?: true
-    client_id?: true
     title?: true
     description?: true
     order?: true
-    is_completed?: true
-    completed_at?: true
     created_at?: true
     updated_at?: true
+    clientsId?: true
     _all?: true
   }
 
@@ -20425,14 +20572,12 @@ export namespace Prisma {
   export type Checklist_itemsGroupByOutputType = {
     id: string
     block_id: string
-    client_id: string
     title: string
     description: string | null
     order: number
-    is_completed: boolean
-    completed_at: Date | null
     created_at: Date | null
     updated_at: Date | null
+    clientsId: string | null
     _count: Checklist_itemsCountAggregateOutputType | null
     _avg: Checklist_itemsAvgAggregateOutputType | null
     _sum: Checklist_itemsSumAggregateOutputType | null
@@ -20457,92 +20602,87 @@ export namespace Prisma {
   export type checklist_itemsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     block_id?: boolean
-    client_id?: boolean
     title?: boolean
     description?: boolean
     order?: boolean
-    is_completed?: boolean
-    completed_at?: boolean
     created_at?: boolean
     updated_at?: boolean
+    clientsId?: boolean
     block?: boolean | checklist_blocksDefaultArgs<ExtArgs>
-    client?: boolean | clientsDefaultArgs<ExtArgs>
+    progress?: boolean | checklist_items$progressArgs<ExtArgs>
+    clients?: boolean | checklist_items$clientsArgs<ExtArgs>
+    _count?: boolean | Checklist_itemsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["checklist_items"]>
 
   export type checklist_itemsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     block_id?: boolean
-    client_id?: boolean
     title?: boolean
     description?: boolean
     order?: boolean
-    is_completed?: boolean
-    completed_at?: boolean
     created_at?: boolean
     updated_at?: boolean
+    clientsId?: boolean
     block?: boolean | checklist_blocksDefaultArgs<ExtArgs>
-    client?: boolean | clientsDefaultArgs<ExtArgs>
+    clients?: boolean | checklist_items$clientsArgs<ExtArgs>
   }, ExtArgs["result"]["checklist_items"]>
 
   export type checklist_itemsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     block_id?: boolean
-    client_id?: boolean
     title?: boolean
     description?: boolean
     order?: boolean
-    is_completed?: boolean
-    completed_at?: boolean
     created_at?: boolean
     updated_at?: boolean
+    clientsId?: boolean
     block?: boolean | checklist_blocksDefaultArgs<ExtArgs>
-    client?: boolean | clientsDefaultArgs<ExtArgs>
+    clients?: boolean | checklist_items$clientsArgs<ExtArgs>
   }, ExtArgs["result"]["checklist_items"]>
 
   export type checklist_itemsSelectScalar = {
     id?: boolean
     block_id?: boolean
-    client_id?: boolean
     title?: boolean
     description?: boolean
     order?: boolean
-    is_completed?: boolean
-    completed_at?: boolean
     created_at?: boolean
     updated_at?: boolean
+    clientsId?: boolean
   }
 
-  export type checklist_itemsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "block_id" | "client_id" | "title" | "description" | "order" | "is_completed" | "completed_at" | "created_at" | "updated_at", ExtArgs["result"]["checklist_items"]>
+  export type checklist_itemsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "block_id" | "title" | "description" | "order" | "created_at" | "updated_at" | "clientsId", ExtArgs["result"]["checklist_items"]>
   export type checklist_itemsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     block?: boolean | checklist_blocksDefaultArgs<ExtArgs>
-    client?: boolean | clientsDefaultArgs<ExtArgs>
+    progress?: boolean | checklist_items$progressArgs<ExtArgs>
+    clients?: boolean | checklist_items$clientsArgs<ExtArgs>
+    _count?: boolean | Checklist_itemsCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type checklist_itemsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     block?: boolean | checklist_blocksDefaultArgs<ExtArgs>
-    client?: boolean | clientsDefaultArgs<ExtArgs>
+    clients?: boolean | checklist_items$clientsArgs<ExtArgs>
   }
   export type checklist_itemsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     block?: boolean | checklist_blocksDefaultArgs<ExtArgs>
-    client?: boolean | clientsDefaultArgs<ExtArgs>
+    clients?: boolean | checklist_items$clientsArgs<ExtArgs>
   }
 
   export type $checklist_itemsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "checklist_items"
     objects: {
       block: Prisma.$checklist_blocksPayload<ExtArgs>
-      client: Prisma.$clientsPayload<ExtArgs>
+      progress: Prisma.$checklist_progressPayload<ExtArgs>[]
+      clients: Prisma.$clientsPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       block_id: string
-      client_id: string
       title: string
       description: string | null
       order: number
-      is_completed: boolean
-      completed_at: Date | null
       created_at: Date | null
       updated_at: Date | null
+      clientsId: string | null
     }, ExtArgs["result"]["checklist_items"]>
     composites: {}
   }
@@ -20938,7 +21078,8 @@ export namespace Prisma {
   export interface Prisma__checklist_itemsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     block<T extends checklist_blocksDefaultArgs<ExtArgs> = {}>(args?: Subset<T, checklist_blocksDefaultArgs<ExtArgs>>): Prisma__checklist_blocksClient<$Result.GetResult<Prisma.$checklist_blocksPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    client<T extends clientsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, clientsDefaultArgs<ExtArgs>>): Prisma__clientsClient<$Result.GetResult<Prisma.$clientsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    progress<T extends checklist_items$progressArgs<ExtArgs> = {}>(args?: Subset<T, checklist_items$progressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    clients<T extends checklist_items$clientsArgs<ExtArgs> = {}>(args?: Subset<T, checklist_items$clientsArgs<ExtArgs>>): Prisma__clientsClient<$Result.GetResult<Prisma.$clientsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20970,14 +21111,12 @@ export namespace Prisma {
   interface checklist_itemsFieldRefs {
     readonly id: FieldRef<"checklist_items", 'String'>
     readonly block_id: FieldRef<"checklist_items", 'String'>
-    readonly client_id: FieldRef<"checklist_items", 'String'>
     readonly title: FieldRef<"checklist_items", 'String'>
     readonly description: FieldRef<"checklist_items", 'String'>
     readonly order: FieldRef<"checklist_items", 'Int'>
-    readonly is_completed: FieldRef<"checklist_items", 'Boolean'>
-    readonly completed_at: FieldRef<"checklist_items", 'DateTime'>
     readonly created_at: FieldRef<"checklist_items", 'DateTime'>
     readonly updated_at: FieldRef<"checklist_items", 'DateTime'>
+    readonly clientsId: FieldRef<"checklist_items", 'String'>
   }
     
 
@@ -21374,6 +21513,49 @@ export namespace Prisma {
   }
 
   /**
+   * checklist_items.progress
+   */
+  export type checklist_items$progressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    where?: checklist_progressWhereInput
+    orderBy?: checklist_progressOrderByWithRelationInput | checklist_progressOrderByWithRelationInput[]
+    cursor?: checklist_progressWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Checklist_progressScalarFieldEnum | Checklist_progressScalarFieldEnum[]
+  }
+
+  /**
+   * checklist_items.clients
+   */
+  export type checklist_items$clientsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the clients
+     */
+    select?: clientsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the clients
+     */
+    omit?: clientsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: clientsInclude<ExtArgs> | null
+    where?: clientsWhereInput
+  }
+
+  /**
    * checklist_items without action
    */
   export type checklist_itemsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -21389,6 +21571,1098 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: checklist_itemsInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model checklist_progress
+   */
+
+  export type AggregateChecklist_progress = {
+    _count: Checklist_progressCountAggregateOutputType | null
+    _min: Checklist_progressMinAggregateOutputType | null
+    _max: Checklist_progressMaxAggregateOutputType | null
+  }
+
+  export type Checklist_progressMinAggregateOutputType = {
+    id: string | null
+    client_id: string | null
+    item_id: string | null
+    is_completed: boolean | null
+    completed_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Checklist_progressMaxAggregateOutputType = {
+    id: string | null
+    client_id: string | null
+    item_id: string | null
+    is_completed: boolean | null
+    completed_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Checklist_progressCountAggregateOutputType = {
+    id: number
+    client_id: number
+    item_id: number
+    is_completed: number
+    completed_at: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type Checklist_progressMinAggregateInputType = {
+    id?: true
+    client_id?: true
+    item_id?: true
+    is_completed?: true
+    completed_at?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Checklist_progressMaxAggregateInputType = {
+    id?: true
+    client_id?: true
+    item_id?: true
+    is_completed?: true
+    completed_at?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Checklist_progressCountAggregateInputType = {
+    id?: true
+    client_id?: true
+    item_id?: true
+    is_completed?: true
+    completed_at?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type Checklist_progressAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which checklist_progress to aggregate.
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of checklist_progresses to fetch.
+     */
+    orderBy?: checklist_progressOrderByWithRelationInput | checklist_progressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: checklist_progressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` checklist_progresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` checklist_progresses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned checklist_progresses
+    **/
+    _count?: true | Checklist_progressCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Checklist_progressMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Checklist_progressMaxAggregateInputType
+  }
+
+  export type GetChecklist_progressAggregateType<T extends Checklist_progressAggregateArgs> = {
+        [P in keyof T & keyof AggregateChecklist_progress]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateChecklist_progress[P]>
+      : GetScalarType<T[P], AggregateChecklist_progress[P]>
+  }
+
+
+
+
+  export type checklist_progressGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: checklist_progressWhereInput
+    orderBy?: checklist_progressOrderByWithAggregationInput | checklist_progressOrderByWithAggregationInput[]
+    by: Checklist_progressScalarFieldEnum[] | Checklist_progressScalarFieldEnum
+    having?: checklist_progressScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Checklist_progressCountAggregateInputType | true
+    _min?: Checklist_progressMinAggregateInputType
+    _max?: Checklist_progressMaxAggregateInputType
+  }
+
+  export type Checklist_progressGroupByOutputType = {
+    id: string
+    client_id: string
+    item_id: string
+    is_completed: boolean
+    completed_at: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+    _count: Checklist_progressCountAggregateOutputType | null
+    _min: Checklist_progressMinAggregateOutputType | null
+    _max: Checklist_progressMaxAggregateOutputType | null
+  }
+
+  type GetChecklist_progressGroupByPayload<T extends checklist_progressGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Checklist_progressGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Checklist_progressGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Checklist_progressGroupByOutputType[P]>
+            : GetScalarType<T[P], Checklist_progressGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type checklist_progressSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    client_id?: boolean
+    item_id?: boolean
+    is_completed?: boolean
+    completed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    client?: boolean | clientsDefaultArgs<ExtArgs>
+    item?: boolean | checklist_itemsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["checklist_progress"]>
+
+  export type checklist_progressSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    client_id?: boolean
+    item_id?: boolean
+    is_completed?: boolean
+    completed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    client?: boolean | clientsDefaultArgs<ExtArgs>
+    item?: boolean | checklist_itemsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["checklist_progress"]>
+
+  export type checklist_progressSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    client_id?: boolean
+    item_id?: boolean
+    is_completed?: boolean
+    completed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    client?: boolean | clientsDefaultArgs<ExtArgs>
+    item?: boolean | checklist_itemsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["checklist_progress"]>
+
+  export type checklist_progressSelectScalar = {
+    id?: boolean
+    client_id?: boolean
+    item_id?: boolean
+    is_completed?: boolean
+    completed_at?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type checklist_progressOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "client_id" | "item_id" | "is_completed" | "completed_at" | "created_at" | "updated_at", ExtArgs["result"]["checklist_progress"]>
+  export type checklist_progressInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | clientsDefaultArgs<ExtArgs>
+    item?: boolean | checklist_itemsDefaultArgs<ExtArgs>
+  }
+  export type checklist_progressIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | clientsDefaultArgs<ExtArgs>
+    item?: boolean | checklist_itemsDefaultArgs<ExtArgs>
+  }
+  export type checklist_progressIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | clientsDefaultArgs<ExtArgs>
+    item?: boolean | checklist_itemsDefaultArgs<ExtArgs>
+  }
+
+  export type $checklist_progressPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "checklist_progress"
+    objects: {
+      client: Prisma.$clientsPayload<ExtArgs>
+      item: Prisma.$checklist_itemsPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      client_id: string
+      item_id: string
+      is_completed: boolean
+      completed_at: Date | null
+      created_at: Date | null
+      updated_at: Date | null
+    }, ExtArgs["result"]["checklist_progress"]>
+    composites: {}
+  }
+
+  type checklist_progressGetPayload<S extends boolean | null | undefined | checklist_progressDefaultArgs> = $Result.GetResult<Prisma.$checklist_progressPayload, S>
+
+  type checklist_progressCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<checklist_progressFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Checklist_progressCountAggregateInputType | true
+    }
+
+  export interface checklist_progressDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['checklist_progress'], meta: { name: 'checklist_progress' } }
+    /**
+     * Find zero or one Checklist_progress that matches the filter.
+     * @param {checklist_progressFindUniqueArgs} args - Arguments to find a Checklist_progress
+     * @example
+     * // Get one Checklist_progress
+     * const checklist_progress = await prisma.checklist_progress.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends checklist_progressFindUniqueArgs>(args: SelectSubset<T, checklist_progressFindUniqueArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Checklist_progress that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {checklist_progressFindUniqueOrThrowArgs} args - Arguments to find a Checklist_progress
+     * @example
+     * // Get one Checklist_progress
+     * const checklist_progress = await prisma.checklist_progress.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends checklist_progressFindUniqueOrThrowArgs>(args: SelectSubset<T, checklist_progressFindUniqueOrThrowArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Checklist_progress that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {checklist_progressFindFirstArgs} args - Arguments to find a Checklist_progress
+     * @example
+     * // Get one Checklist_progress
+     * const checklist_progress = await prisma.checklist_progress.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends checklist_progressFindFirstArgs>(args?: SelectSubset<T, checklist_progressFindFirstArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Checklist_progress that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {checklist_progressFindFirstOrThrowArgs} args - Arguments to find a Checklist_progress
+     * @example
+     * // Get one Checklist_progress
+     * const checklist_progress = await prisma.checklist_progress.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends checklist_progressFindFirstOrThrowArgs>(args?: SelectSubset<T, checklist_progressFindFirstOrThrowArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Checklist_progresses that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {checklist_progressFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Checklist_progresses
+     * const checklist_progresses = await prisma.checklist_progress.findMany()
+     * 
+     * // Get first 10 Checklist_progresses
+     * const checklist_progresses = await prisma.checklist_progress.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const checklist_progressWithIdOnly = await prisma.checklist_progress.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends checklist_progressFindManyArgs>(args?: SelectSubset<T, checklist_progressFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Checklist_progress.
+     * @param {checklist_progressCreateArgs} args - Arguments to create a Checklist_progress.
+     * @example
+     * // Create one Checklist_progress
+     * const Checklist_progress = await prisma.checklist_progress.create({
+     *   data: {
+     *     // ... data to create a Checklist_progress
+     *   }
+     * })
+     * 
+     */
+    create<T extends checklist_progressCreateArgs>(args: SelectSubset<T, checklist_progressCreateArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Checklist_progresses.
+     * @param {checklist_progressCreateManyArgs} args - Arguments to create many Checklist_progresses.
+     * @example
+     * // Create many Checklist_progresses
+     * const checklist_progress = await prisma.checklist_progress.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends checklist_progressCreateManyArgs>(args?: SelectSubset<T, checklist_progressCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Checklist_progresses and returns the data saved in the database.
+     * @param {checklist_progressCreateManyAndReturnArgs} args - Arguments to create many Checklist_progresses.
+     * @example
+     * // Create many Checklist_progresses
+     * const checklist_progress = await prisma.checklist_progress.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Checklist_progresses and only return the `id`
+     * const checklist_progressWithIdOnly = await prisma.checklist_progress.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends checklist_progressCreateManyAndReturnArgs>(args?: SelectSubset<T, checklist_progressCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Checklist_progress.
+     * @param {checklist_progressDeleteArgs} args - Arguments to delete one Checklist_progress.
+     * @example
+     * // Delete one Checklist_progress
+     * const Checklist_progress = await prisma.checklist_progress.delete({
+     *   where: {
+     *     // ... filter to delete one Checklist_progress
+     *   }
+     * })
+     * 
+     */
+    delete<T extends checklist_progressDeleteArgs>(args: SelectSubset<T, checklist_progressDeleteArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Checklist_progress.
+     * @param {checklist_progressUpdateArgs} args - Arguments to update one Checklist_progress.
+     * @example
+     * // Update one Checklist_progress
+     * const checklist_progress = await prisma.checklist_progress.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends checklist_progressUpdateArgs>(args: SelectSubset<T, checklist_progressUpdateArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Checklist_progresses.
+     * @param {checklist_progressDeleteManyArgs} args - Arguments to filter Checklist_progresses to delete.
+     * @example
+     * // Delete a few Checklist_progresses
+     * const { count } = await prisma.checklist_progress.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends checklist_progressDeleteManyArgs>(args?: SelectSubset<T, checklist_progressDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Checklist_progresses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {checklist_progressUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Checklist_progresses
+     * const checklist_progress = await prisma.checklist_progress.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends checklist_progressUpdateManyArgs>(args: SelectSubset<T, checklist_progressUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Checklist_progresses and returns the data updated in the database.
+     * @param {checklist_progressUpdateManyAndReturnArgs} args - Arguments to update many Checklist_progresses.
+     * @example
+     * // Update many Checklist_progresses
+     * const checklist_progress = await prisma.checklist_progress.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Checklist_progresses and only return the `id`
+     * const checklist_progressWithIdOnly = await prisma.checklist_progress.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends checklist_progressUpdateManyAndReturnArgs>(args: SelectSubset<T, checklist_progressUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Checklist_progress.
+     * @param {checklist_progressUpsertArgs} args - Arguments to update or create a Checklist_progress.
+     * @example
+     * // Update or create a Checklist_progress
+     * const checklist_progress = await prisma.checklist_progress.upsert({
+     *   create: {
+     *     // ... data to create a Checklist_progress
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Checklist_progress we want to update
+     *   }
+     * })
+     */
+    upsert<T extends checklist_progressUpsertArgs>(args: SelectSubset<T, checklist_progressUpsertArgs<ExtArgs>>): Prisma__checklist_progressClient<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Checklist_progresses.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {checklist_progressCountArgs} args - Arguments to filter Checklist_progresses to count.
+     * @example
+     * // Count the number of Checklist_progresses
+     * const count = await prisma.checklist_progress.count({
+     *   where: {
+     *     // ... the filter for the Checklist_progresses we want to count
+     *   }
+     * })
+    **/
+    count<T extends checklist_progressCountArgs>(
+      args?: Subset<T, checklist_progressCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Checklist_progressCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Checklist_progress.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Checklist_progressAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Checklist_progressAggregateArgs>(args: Subset<T, Checklist_progressAggregateArgs>): Prisma.PrismaPromise<GetChecklist_progressAggregateType<T>>
+
+    /**
+     * Group by Checklist_progress.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {checklist_progressGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends checklist_progressGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: checklist_progressGroupByArgs['orderBy'] }
+        : { orderBy?: checklist_progressGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, checklist_progressGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChecklist_progressGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the checklist_progress model
+   */
+  readonly fields: checklist_progressFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for checklist_progress.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__checklist_progressClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    client<T extends clientsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, clientsDefaultArgs<ExtArgs>>): Prisma__clientsClient<$Result.GetResult<Prisma.$clientsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    item<T extends checklist_itemsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, checklist_itemsDefaultArgs<ExtArgs>>): Prisma__checklist_itemsClient<$Result.GetResult<Prisma.$checklist_itemsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the checklist_progress model
+   */
+  interface checklist_progressFieldRefs {
+    readonly id: FieldRef<"checklist_progress", 'String'>
+    readonly client_id: FieldRef<"checklist_progress", 'String'>
+    readonly item_id: FieldRef<"checklist_progress", 'String'>
+    readonly is_completed: FieldRef<"checklist_progress", 'Boolean'>
+    readonly completed_at: FieldRef<"checklist_progress", 'DateTime'>
+    readonly created_at: FieldRef<"checklist_progress", 'DateTime'>
+    readonly updated_at: FieldRef<"checklist_progress", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * checklist_progress findUnique
+   */
+  export type checklist_progressFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * Filter, which checklist_progress to fetch.
+     */
+    where: checklist_progressWhereUniqueInput
+  }
+
+  /**
+   * checklist_progress findUniqueOrThrow
+   */
+  export type checklist_progressFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * Filter, which checklist_progress to fetch.
+     */
+    where: checklist_progressWhereUniqueInput
+  }
+
+  /**
+   * checklist_progress findFirst
+   */
+  export type checklist_progressFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * Filter, which checklist_progress to fetch.
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of checklist_progresses to fetch.
+     */
+    orderBy?: checklist_progressOrderByWithRelationInput | checklist_progressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for checklist_progresses.
+     */
+    cursor?: checklist_progressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` checklist_progresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` checklist_progresses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of checklist_progresses.
+     */
+    distinct?: Checklist_progressScalarFieldEnum | Checklist_progressScalarFieldEnum[]
+  }
+
+  /**
+   * checklist_progress findFirstOrThrow
+   */
+  export type checklist_progressFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * Filter, which checklist_progress to fetch.
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of checklist_progresses to fetch.
+     */
+    orderBy?: checklist_progressOrderByWithRelationInput | checklist_progressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for checklist_progresses.
+     */
+    cursor?: checklist_progressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` checklist_progresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` checklist_progresses.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of checklist_progresses.
+     */
+    distinct?: Checklist_progressScalarFieldEnum | Checklist_progressScalarFieldEnum[]
+  }
+
+  /**
+   * checklist_progress findMany
+   */
+  export type checklist_progressFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * Filter, which checklist_progresses to fetch.
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of checklist_progresses to fetch.
+     */
+    orderBy?: checklist_progressOrderByWithRelationInput | checklist_progressOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing checklist_progresses.
+     */
+    cursor?: checklist_progressWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` checklist_progresses from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` checklist_progresses.
+     */
+    skip?: number
+    distinct?: Checklist_progressScalarFieldEnum | Checklist_progressScalarFieldEnum[]
+  }
+
+  /**
+   * checklist_progress create
+   */
+  export type checklist_progressCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * The data needed to create a checklist_progress.
+     */
+    data: XOR<checklist_progressCreateInput, checklist_progressUncheckedCreateInput>
+  }
+
+  /**
+   * checklist_progress createMany
+   */
+  export type checklist_progressCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many checklist_progresses.
+     */
+    data: checklist_progressCreateManyInput | checklist_progressCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * checklist_progress createManyAndReturn
+   */
+  export type checklist_progressCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * The data used to create many checklist_progresses.
+     */
+    data: checklist_progressCreateManyInput | checklist_progressCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * checklist_progress update
+   */
+  export type checklist_progressUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * The data needed to update a checklist_progress.
+     */
+    data: XOR<checklist_progressUpdateInput, checklist_progressUncheckedUpdateInput>
+    /**
+     * Choose, which checklist_progress to update.
+     */
+    where: checklist_progressWhereUniqueInput
+  }
+
+  /**
+   * checklist_progress updateMany
+   */
+  export type checklist_progressUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update checklist_progresses.
+     */
+    data: XOR<checklist_progressUpdateManyMutationInput, checklist_progressUncheckedUpdateManyInput>
+    /**
+     * Filter which checklist_progresses to update
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * Limit how many checklist_progresses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * checklist_progress updateManyAndReturn
+   */
+  export type checklist_progressUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * The data used to update checklist_progresses.
+     */
+    data: XOR<checklist_progressUpdateManyMutationInput, checklist_progressUncheckedUpdateManyInput>
+    /**
+     * Filter which checklist_progresses to update
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * Limit how many checklist_progresses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * checklist_progress upsert
+   */
+  export type checklist_progressUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * The filter to search for the checklist_progress to update in case it exists.
+     */
+    where: checklist_progressWhereUniqueInput
+    /**
+     * In case the checklist_progress found by the `where` argument doesn't exist, create a new checklist_progress with this data.
+     */
+    create: XOR<checklist_progressCreateInput, checklist_progressUncheckedCreateInput>
+    /**
+     * In case the checklist_progress was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<checklist_progressUpdateInput, checklist_progressUncheckedUpdateInput>
+  }
+
+  /**
+   * checklist_progress delete
+   */
+  export type checklist_progressDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
+    /**
+     * Filter which checklist_progress to delete.
+     */
+    where: checklist_progressWhereUniqueInput
+  }
+
+  /**
+   * checklist_progress deleteMany
+   */
+  export type checklist_progressDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which checklist_progresses to delete
+     */
+    where?: checklist_progressWhereInput
+    /**
+     * Limit how many checklist_progresses to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * checklist_progress without action
+   */
+  export type checklist_progressDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the checklist_progress
+     */
+    select?: checklist_progressSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the checklist_progress
+     */
+    omit?: checklist_progressOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: checklist_progressInclude<ExtArgs> | null
   }
 
 
@@ -21618,17 +22892,28 @@ export namespace Prisma {
   export const Checklist_itemsScalarFieldEnum: {
     id: 'id',
     block_id: 'block_id',
-    client_id: 'client_id',
     title: 'title',
     description: 'description',
     order: 'order',
+    created_at: 'created_at',
+    updated_at: 'updated_at',
+    clientsId: 'clientsId'
+  };
+
+  export type Checklist_itemsScalarFieldEnum = (typeof Checklist_itemsScalarFieldEnum)[keyof typeof Checklist_itemsScalarFieldEnum]
+
+
+  export const Checklist_progressScalarFieldEnum: {
+    id: 'id',
+    client_id: 'client_id',
+    item_id: 'item_id',
     is_completed: 'is_completed',
     completed_at: 'completed_at',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
 
-  export type Checklist_itemsScalarFieldEnum = (typeof Checklist_itemsScalarFieldEnum)[keyof typeof Checklist_itemsScalarFieldEnum]
+  export type Checklist_progressScalarFieldEnum = (typeof Checklist_progressScalarFieldEnum)[keyof typeof Checklist_progressScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -22304,6 +23589,7 @@ export namespace Prisma {
     products?: ProductsListRelationFilter
     reports?: ReportsListRelationFilter
     checklist_items?: Checklist_itemsListRelationFilter
+    checklist_progress?: Checklist_progressListRelationFilter
   }
 
   export type clientsOrderByWithRelationInput = {
@@ -22327,6 +23613,7 @@ export namespace Prisma {
     products?: productsOrderByRelationAggregateInput
     reports?: reportsOrderByRelationAggregateInput
     checklist_items?: checklist_itemsOrderByRelationAggregateInput
+    checklist_progress?: checklist_progressOrderByRelationAggregateInput
   }
 
   export type clientsWhereUniqueInput = Prisma.AtLeast<{
@@ -22353,6 +23640,7 @@ export namespace Prisma {
     products?: ProductsListRelationFilter
     reports?: ReportsListRelationFilter
     checklist_items?: Checklist_itemsListRelationFilter
+    checklist_progress?: Checklist_progressListRelationFilter
   }, "id">
 
   export type clientsOrderByWithAggregationInput = {
@@ -22918,31 +24206,29 @@ export namespace Prisma {
     NOT?: checklist_itemsWhereInput | checklist_itemsWhereInput[]
     id?: UuidFilter<"checklist_items"> | string
     block_id?: UuidFilter<"checklist_items"> | string
-    client_id?: UuidFilter<"checklist_items"> | string
     title?: StringFilter<"checklist_items"> | string
     description?: StringNullableFilter<"checklist_items"> | string | null
     order?: IntFilter<"checklist_items"> | number
-    is_completed?: BoolFilter<"checklist_items"> | boolean
-    completed_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
     created_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
+    clientsId?: UuidNullableFilter<"checklist_items"> | string | null
     block?: XOR<Checklist_blocksScalarRelationFilter, checklist_blocksWhereInput>
-    client?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
+    progress?: Checklist_progressListRelationFilter
+    clients?: XOR<ClientsNullableScalarRelationFilter, clientsWhereInput> | null
   }
 
   export type checklist_itemsOrderByWithRelationInput = {
     id?: SortOrder
     block_id?: SortOrder
-    client_id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     order?: SortOrder
-    is_completed?: SortOrder
-    completed_at?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
+    clientsId?: SortOrderInput | SortOrder
     block?: checklist_blocksOrderByWithRelationInput
-    client?: clientsOrderByWithRelationInput
+    progress?: checklist_progressOrderByRelationAggregateInput
+    clients?: clientsOrderByWithRelationInput
   }
 
   export type checklist_itemsWhereUniqueInput = Prisma.AtLeast<{
@@ -22951,29 +24237,26 @@ export namespace Prisma {
     OR?: checklist_itemsWhereInput[]
     NOT?: checklist_itemsWhereInput | checklist_itemsWhereInput[]
     block_id?: UuidFilter<"checklist_items"> | string
-    client_id?: UuidFilter<"checklist_items"> | string
     title?: StringFilter<"checklist_items"> | string
     description?: StringNullableFilter<"checklist_items"> | string | null
     order?: IntFilter<"checklist_items"> | number
-    is_completed?: BoolFilter<"checklist_items"> | boolean
-    completed_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
     created_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
+    clientsId?: UuidNullableFilter<"checklist_items"> | string | null
     block?: XOR<Checklist_blocksScalarRelationFilter, checklist_blocksWhereInput>
-    client?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
+    progress?: Checklist_progressListRelationFilter
+    clients?: XOR<ClientsNullableScalarRelationFilter, clientsWhereInput> | null
   }, "id">
 
   export type checklist_itemsOrderByWithAggregationInput = {
     id?: SortOrder
     block_id?: SortOrder
-    client_id?: SortOrder
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     order?: SortOrder
-    is_completed?: SortOrder
-    completed_at?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
+    clientsId?: SortOrderInput | SortOrder
     _count?: checklist_itemsCountOrderByAggregateInput
     _avg?: checklist_itemsAvgOrderByAggregateInput
     _max?: checklist_itemsMaxOrderByAggregateInput
@@ -22987,14 +24270,81 @@ export namespace Prisma {
     NOT?: checklist_itemsScalarWhereWithAggregatesInput | checklist_itemsScalarWhereWithAggregatesInput[]
     id?: UuidWithAggregatesFilter<"checklist_items"> | string
     block_id?: UuidWithAggregatesFilter<"checklist_items"> | string
-    client_id?: UuidWithAggregatesFilter<"checklist_items"> | string
     title?: StringWithAggregatesFilter<"checklist_items"> | string
     description?: StringNullableWithAggregatesFilter<"checklist_items"> | string | null
     order?: IntWithAggregatesFilter<"checklist_items"> | number
-    is_completed?: BoolWithAggregatesFilter<"checklist_items"> | boolean
-    completed_at?: DateTimeNullableWithAggregatesFilter<"checklist_items"> | Date | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"checklist_items"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"checklist_items"> | Date | string | null
+    clientsId?: UuidNullableWithAggregatesFilter<"checklist_items"> | string | null
+  }
+
+  export type checklist_progressWhereInput = {
+    AND?: checklist_progressWhereInput | checklist_progressWhereInput[]
+    OR?: checklist_progressWhereInput[]
+    NOT?: checklist_progressWhereInput | checklist_progressWhereInput[]
+    id?: UuidFilter<"checklist_progress"> | string
+    client_id?: UuidFilter<"checklist_progress"> | string
+    item_id?: UuidFilter<"checklist_progress"> | string
+    is_completed?: BoolFilter<"checklist_progress"> | boolean
+    completed_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    client?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
+    item?: XOR<Checklist_itemsScalarRelationFilter, checklist_itemsWhereInput>
+  }
+
+  export type checklist_progressOrderByWithRelationInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    item_id?: SortOrder
+    is_completed?: SortOrder
+    completed_at?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    updated_at?: SortOrderInput | SortOrder
+    client?: clientsOrderByWithRelationInput
+    item?: checklist_itemsOrderByWithRelationInput
+  }
+
+  export type checklist_progressWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    client_id_item_id?: checklist_progressClient_idItem_idCompoundUniqueInput
+    AND?: checklist_progressWhereInput | checklist_progressWhereInput[]
+    OR?: checklist_progressWhereInput[]
+    NOT?: checklist_progressWhereInput | checklist_progressWhereInput[]
+    client_id?: UuidFilter<"checklist_progress"> | string
+    item_id?: UuidFilter<"checklist_progress"> | string
+    is_completed?: BoolFilter<"checklist_progress"> | boolean
+    completed_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    client?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
+    item?: XOR<Checklist_itemsScalarRelationFilter, checklist_itemsWhereInput>
+  }, "id" | "client_id_item_id">
+
+  export type checklist_progressOrderByWithAggregationInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    item_id?: SortOrder
+    is_completed?: SortOrder
+    completed_at?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    updated_at?: SortOrderInput | SortOrder
+    _count?: checklist_progressCountOrderByAggregateInput
+    _max?: checklist_progressMaxOrderByAggregateInput
+    _min?: checklist_progressMinOrderByAggregateInput
+  }
+
+  export type checklist_progressScalarWhereWithAggregatesInput = {
+    AND?: checklist_progressScalarWhereWithAggregatesInput | checklist_progressScalarWhereWithAggregatesInput[]
+    OR?: checklist_progressScalarWhereWithAggregatesInput[]
+    NOT?: checklist_progressScalarWhereWithAggregatesInput | checklist_progressScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"checklist_progress"> | string
+    client_id?: UuidWithAggregatesFilter<"checklist_progress"> | string
+    item_id?: UuidWithAggregatesFilter<"checklist_progress"> | string
+    is_completed?: BoolWithAggregatesFilter<"checklist_progress"> | boolean
+    completed_at?: DateTimeNullableWithAggregatesFilter<"checklist_progress"> | Date | string | null
+    created_at?: DateTimeNullableWithAggregatesFilter<"checklist_progress"> | Date | string | null
+    updated_at?: DateTimeNullableWithAggregatesFilter<"checklist_progress"> | Date | string | null
   }
 
   export type activity_logCreateInput = {
@@ -23538,7 +24888,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateInput = {
@@ -23561,7 +24912,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsUpdateInput = {
@@ -23584,7 +24936,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateInput = {
@@ -23607,7 +24960,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type clientsCreateManyInput = {
@@ -24218,25 +25572,23 @@ export namespace Prisma {
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     block: checklist_blocksCreateNestedOneWithoutItemsInput
-    client: clientsCreateNestedOneWithoutChecklist_itemsInput
+    progress?: checklist_progressCreateNestedManyWithoutItemInput
+    clients?: clientsCreateNestedOneWithoutChecklist_itemsInput
   }
 
   export type checklist_itemsUncheckedCreateInput = {
     id?: string
     block_id: string
-    client_id: string
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    clientsId?: string | null
+    progress?: checklist_progressUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type checklist_itemsUpdateInput = {
@@ -24244,38 +25596,34 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
-    is_completed?: BoolFieldUpdateOperationsInput | boolean
-    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     block?: checklist_blocksUpdateOneRequiredWithoutItemsNestedInput
-    client?: clientsUpdateOneRequiredWithoutChecklist_itemsNestedInput
+    progress?: checklist_progressUpdateManyWithoutItemNestedInput
+    clients?: clientsUpdateOneWithoutChecklist_itemsNestedInput
   }
 
   export type checklist_itemsUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     block_id?: StringFieldUpdateOperationsInput | string
-    client_id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
-    is_completed?: BoolFieldUpdateOperationsInput | boolean
-    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientsId?: NullableStringFieldUpdateOperationsInput | string | null
+    progress?: checklist_progressUncheckedUpdateManyWithoutItemNestedInput
   }
 
   export type checklist_itemsCreateManyInput = {
     id?: string
     block_id: string
-    client_id: string
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    clientsId?: string | null
   }
 
   export type checklist_itemsUpdateManyMutationInput = {
@@ -24283,8 +25631,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
-    is_completed?: BoolFieldUpdateOperationsInput | boolean
-    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -24292,10 +25638,76 @@ export namespace Prisma {
   export type checklist_itemsUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     block_id?: StringFieldUpdateOperationsInput | string
-    client_id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientsId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type checklist_progressCreateInput = {
+    id?: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    client: clientsCreateNestedOneWithoutChecklist_progressInput
+    item: checklist_itemsCreateNestedOneWithoutProgressInput
+  }
+
+  export type checklist_progressUncheckedCreateInput = {
+    id?: string
+    client_id: string
+    item_id: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type checklist_progressUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    is_completed?: BoolFieldUpdateOperationsInput | boolean
+    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    client?: clientsUpdateOneRequiredWithoutChecklist_progressNestedInput
+    item?: checklist_itemsUpdateOneRequiredWithoutProgressNestedInput
+  }
+
+  export type checklist_progressUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    client_id?: StringFieldUpdateOperationsInput | string
+    item_id?: StringFieldUpdateOperationsInput | string
+    is_completed?: BoolFieldUpdateOperationsInput | boolean
+    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type checklist_progressCreateManyInput = {
+    id?: string
+    client_id: string
+    item_id: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type checklist_progressUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    is_completed?: BoolFieldUpdateOperationsInput | boolean
+    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type checklist_progressUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    client_id?: StringFieldUpdateOperationsInput | string
+    item_id?: StringFieldUpdateOperationsInput | string
     is_completed?: BoolFieldUpdateOperationsInput | boolean
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -24953,6 +26365,12 @@ export namespace Prisma {
     none?: checklist_itemsWhereInput
   }
 
+  export type Checklist_progressListRelationFilter = {
+    every?: checklist_progressWhereInput
+    some?: checklist_progressWhereInput
+    none?: checklist_progressWhereInput
+  }
+
   export type activity_logOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -24978,6 +26396,10 @@ export namespace Prisma {
   }
 
   export type checklist_itemsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type checklist_progressOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -25374,11 +26796,6 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type Checklist_blocksScalarRelationFilter = {
     is?: checklist_blocksWhereInput
     isNot?: checklist_blocksWhereInput
@@ -25387,14 +26804,12 @@ export namespace Prisma {
   export type checklist_itemsCountOrderByAggregateInput = {
     id?: SortOrder
     block_id?: SortOrder
-    client_id?: SortOrder
     title?: SortOrder
     description?: SortOrder
     order?: SortOrder
-    is_completed?: SortOrder
-    completed_at?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
+    clientsId?: SortOrder
   }
 
   export type checklist_itemsAvgOrderByAggregateInput = {
@@ -25404,31 +26819,72 @@ export namespace Prisma {
   export type checklist_itemsMaxOrderByAggregateInput = {
     id?: SortOrder
     block_id?: SortOrder
-    client_id?: SortOrder
     title?: SortOrder
     description?: SortOrder
     order?: SortOrder
-    is_completed?: SortOrder
-    completed_at?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
+    clientsId?: SortOrder
   }
 
   export type checklist_itemsMinOrderByAggregateInput = {
     id?: SortOrder
     block_id?: SortOrder
-    client_id?: SortOrder
     title?: SortOrder
     description?: SortOrder
     order?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    clientsId?: SortOrder
+  }
+
+  export type checklist_itemsSumOrderByAggregateInput = {
+    order?: SortOrder
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type Checklist_itemsScalarRelationFilter = {
+    is?: checklist_itemsWhereInput
+    isNot?: checklist_itemsWhereInput
+  }
+
+  export type checklist_progressClient_idItem_idCompoundUniqueInput = {
+    client_id: string
+    item_id: string
+  }
+
+  export type checklist_progressCountOrderByAggregateInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    item_id?: SortOrder
     is_completed?: SortOrder
     completed_at?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
 
-  export type checklist_itemsSumOrderByAggregateInput = {
-    order?: SortOrder
+  export type checklist_progressMaxOrderByAggregateInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    item_id?: SortOrder
+    is_completed?: SortOrder
+    completed_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type checklist_progressMinOrderByAggregateInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    item_id?: SortOrder
+    is_completed?: SortOrder
+    completed_at?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -25901,11 +27357,18 @@ export namespace Prisma {
     connect?: reportsWhereUniqueInput | reportsWhereUniqueInput[]
   }
 
-  export type checklist_itemsCreateNestedManyWithoutClientInput = {
-    create?: XOR<checklist_itemsCreateWithoutClientInput, checklist_itemsUncheckedCreateWithoutClientInput> | checklist_itemsCreateWithoutClientInput[] | checklist_itemsUncheckedCreateWithoutClientInput[]
-    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientInput | checklist_itemsCreateOrConnectWithoutClientInput[]
-    createMany?: checklist_itemsCreateManyClientInputEnvelope
+  export type checklist_itemsCreateNestedManyWithoutClientsInput = {
+    create?: XOR<checklist_itemsCreateWithoutClientsInput, checklist_itemsUncheckedCreateWithoutClientsInput> | checklist_itemsCreateWithoutClientsInput[] | checklist_itemsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientsInput | checklist_itemsCreateOrConnectWithoutClientsInput[]
+    createMany?: checklist_itemsCreateManyClientsInputEnvelope
     connect?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
+  }
+
+  export type checklist_progressCreateNestedManyWithoutClientInput = {
+    create?: XOR<checklist_progressCreateWithoutClientInput, checklist_progressUncheckedCreateWithoutClientInput> | checklist_progressCreateWithoutClientInput[] | checklist_progressUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutClientInput | checklist_progressCreateOrConnectWithoutClientInput[]
+    createMany?: checklist_progressCreateManyClientInputEnvelope
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
   }
 
   export type activity_logUncheckedCreateNestedManyWithoutClientsInput = {
@@ -25964,11 +27427,18 @@ export namespace Prisma {
     connect?: reportsWhereUniqueInput | reportsWhereUniqueInput[]
   }
 
-  export type checklist_itemsUncheckedCreateNestedManyWithoutClientInput = {
-    create?: XOR<checklist_itemsCreateWithoutClientInput, checklist_itemsUncheckedCreateWithoutClientInput> | checklist_itemsCreateWithoutClientInput[] | checklist_itemsUncheckedCreateWithoutClientInput[]
-    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientInput | checklist_itemsCreateOrConnectWithoutClientInput[]
-    createMany?: checklist_itemsCreateManyClientInputEnvelope
+  export type checklist_itemsUncheckedCreateNestedManyWithoutClientsInput = {
+    create?: XOR<checklist_itemsCreateWithoutClientsInput, checklist_itemsUncheckedCreateWithoutClientsInput> | checklist_itemsCreateWithoutClientsInput[] | checklist_itemsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientsInput | checklist_itemsCreateOrConnectWithoutClientsInput[]
+    createMany?: checklist_itemsCreateManyClientsInputEnvelope
     connect?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
+  }
+
+  export type checklist_progressUncheckedCreateNestedManyWithoutClientInput = {
+    create?: XOR<checklist_progressCreateWithoutClientInput, checklist_progressUncheckedCreateWithoutClientInput> | checklist_progressCreateWithoutClientInput[] | checklist_progressUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutClientInput | checklist_progressCreateOrConnectWithoutClientInput[]
+    createMany?: checklist_progressCreateManyClientInputEnvelope
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
   }
 
   export type activity_logUpdateManyWithoutClientsNestedInput = {
@@ -26083,18 +27553,32 @@ export namespace Prisma {
     deleteMany?: reportsScalarWhereInput | reportsScalarWhereInput[]
   }
 
-  export type checklist_itemsUpdateManyWithoutClientNestedInput = {
-    create?: XOR<checklist_itemsCreateWithoutClientInput, checklist_itemsUncheckedCreateWithoutClientInput> | checklist_itemsCreateWithoutClientInput[] | checklist_itemsUncheckedCreateWithoutClientInput[]
-    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientInput | checklist_itemsCreateOrConnectWithoutClientInput[]
-    upsert?: checklist_itemsUpsertWithWhereUniqueWithoutClientInput | checklist_itemsUpsertWithWhereUniqueWithoutClientInput[]
-    createMany?: checklist_itemsCreateManyClientInputEnvelope
+  export type checklist_itemsUpdateManyWithoutClientsNestedInput = {
+    create?: XOR<checklist_itemsCreateWithoutClientsInput, checklist_itemsUncheckedCreateWithoutClientsInput> | checklist_itemsCreateWithoutClientsInput[] | checklist_itemsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientsInput | checklist_itemsCreateOrConnectWithoutClientsInput[]
+    upsert?: checklist_itemsUpsertWithWhereUniqueWithoutClientsInput | checklist_itemsUpsertWithWhereUniqueWithoutClientsInput[]
+    createMany?: checklist_itemsCreateManyClientsInputEnvelope
     set?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
     disconnect?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
     delete?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
     connect?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
-    update?: checklist_itemsUpdateWithWhereUniqueWithoutClientInput | checklist_itemsUpdateWithWhereUniqueWithoutClientInput[]
-    updateMany?: checklist_itemsUpdateManyWithWhereWithoutClientInput | checklist_itemsUpdateManyWithWhereWithoutClientInput[]
+    update?: checklist_itemsUpdateWithWhereUniqueWithoutClientsInput | checklist_itemsUpdateWithWhereUniqueWithoutClientsInput[]
+    updateMany?: checklist_itemsUpdateManyWithWhereWithoutClientsInput | checklist_itemsUpdateManyWithWhereWithoutClientsInput[]
     deleteMany?: checklist_itemsScalarWhereInput | checklist_itemsScalarWhereInput[]
+  }
+
+  export type checklist_progressUpdateManyWithoutClientNestedInput = {
+    create?: XOR<checklist_progressCreateWithoutClientInput, checklist_progressUncheckedCreateWithoutClientInput> | checklist_progressCreateWithoutClientInput[] | checklist_progressUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutClientInput | checklist_progressCreateOrConnectWithoutClientInput[]
+    upsert?: checklist_progressUpsertWithWhereUniqueWithoutClientInput | checklist_progressUpsertWithWhereUniqueWithoutClientInput[]
+    createMany?: checklist_progressCreateManyClientInputEnvelope
+    set?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    disconnect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    delete?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    update?: checklist_progressUpdateWithWhereUniqueWithoutClientInput | checklist_progressUpdateWithWhereUniqueWithoutClientInput[]
+    updateMany?: checklist_progressUpdateManyWithWhereWithoutClientInput | checklist_progressUpdateManyWithWhereWithoutClientInput[]
+    deleteMany?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
   }
 
   export type activity_logUncheckedUpdateManyWithoutClientsNestedInput = {
@@ -26209,18 +27693,32 @@ export namespace Prisma {
     deleteMany?: reportsScalarWhereInput | reportsScalarWhereInput[]
   }
 
-  export type checklist_itemsUncheckedUpdateManyWithoutClientNestedInput = {
-    create?: XOR<checklist_itemsCreateWithoutClientInput, checklist_itemsUncheckedCreateWithoutClientInput> | checklist_itemsCreateWithoutClientInput[] | checklist_itemsUncheckedCreateWithoutClientInput[]
-    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientInput | checklist_itemsCreateOrConnectWithoutClientInput[]
-    upsert?: checklist_itemsUpsertWithWhereUniqueWithoutClientInput | checklist_itemsUpsertWithWhereUniqueWithoutClientInput[]
-    createMany?: checklist_itemsCreateManyClientInputEnvelope
+  export type checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput = {
+    create?: XOR<checklist_itemsCreateWithoutClientsInput, checklist_itemsUncheckedCreateWithoutClientsInput> | checklist_itemsCreateWithoutClientsInput[] | checklist_itemsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: checklist_itemsCreateOrConnectWithoutClientsInput | checklist_itemsCreateOrConnectWithoutClientsInput[]
+    upsert?: checklist_itemsUpsertWithWhereUniqueWithoutClientsInput | checklist_itemsUpsertWithWhereUniqueWithoutClientsInput[]
+    createMany?: checklist_itemsCreateManyClientsInputEnvelope
     set?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
     disconnect?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
     delete?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
     connect?: checklist_itemsWhereUniqueInput | checklist_itemsWhereUniqueInput[]
-    update?: checklist_itemsUpdateWithWhereUniqueWithoutClientInput | checklist_itemsUpdateWithWhereUniqueWithoutClientInput[]
-    updateMany?: checklist_itemsUpdateManyWithWhereWithoutClientInput | checklist_itemsUpdateManyWithWhereWithoutClientInput[]
+    update?: checklist_itemsUpdateWithWhereUniqueWithoutClientsInput | checklist_itemsUpdateWithWhereUniqueWithoutClientsInput[]
+    updateMany?: checklist_itemsUpdateManyWithWhereWithoutClientsInput | checklist_itemsUpdateManyWithWhereWithoutClientsInput[]
     deleteMany?: checklist_itemsScalarWhereInput | checklist_itemsScalarWhereInput[]
+  }
+
+  export type checklist_progressUncheckedUpdateManyWithoutClientNestedInput = {
+    create?: XOR<checklist_progressCreateWithoutClientInput, checklist_progressUncheckedCreateWithoutClientInput> | checklist_progressCreateWithoutClientInput[] | checklist_progressUncheckedCreateWithoutClientInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutClientInput | checklist_progressCreateOrConnectWithoutClientInput[]
+    upsert?: checklist_progressUpsertWithWhereUniqueWithoutClientInput | checklist_progressUpsertWithWhereUniqueWithoutClientInput[]
+    createMany?: checklist_progressCreateManyClientInputEnvelope
+    set?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    disconnect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    delete?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    update?: checklist_progressUpdateWithWhereUniqueWithoutClientInput | checklist_progressUpdateWithWhereUniqueWithoutClientInput[]
+    updateMany?: checklist_progressUpdateManyWithWhereWithoutClientInput | checklist_progressUpdateManyWithWhereWithoutClientInput[]
+    deleteMany?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
   }
 
   export type usersCreateNestedOneWithoutConfigurationsInput = {
@@ -26721,14 +28219,24 @@ export namespace Prisma {
     connect?: checklist_blocksWhereUniqueInput
   }
 
+  export type checklist_progressCreateNestedManyWithoutItemInput = {
+    create?: XOR<checklist_progressCreateWithoutItemInput, checklist_progressUncheckedCreateWithoutItemInput> | checklist_progressCreateWithoutItemInput[] | checklist_progressUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutItemInput | checklist_progressCreateOrConnectWithoutItemInput[]
+    createMany?: checklist_progressCreateManyItemInputEnvelope
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+  }
+
   export type clientsCreateNestedOneWithoutChecklist_itemsInput = {
     create?: XOR<clientsCreateWithoutChecklist_itemsInput, clientsUncheckedCreateWithoutChecklist_itemsInput>
     connectOrCreate?: clientsCreateOrConnectWithoutChecklist_itemsInput
     connect?: clientsWhereUniqueInput
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
+  export type checklist_progressUncheckedCreateNestedManyWithoutItemInput = {
+    create?: XOR<checklist_progressCreateWithoutItemInput, checklist_progressUncheckedCreateWithoutItemInput> | checklist_progressCreateWithoutItemInput[] | checklist_progressUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutItemInput | checklist_progressCreateOrConnectWithoutItemInput[]
+    createMany?: checklist_progressCreateManyItemInputEnvelope
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
   }
 
   export type checklist_blocksUpdateOneRequiredWithoutItemsNestedInput = {
@@ -26739,12 +28247,74 @@ export namespace Prisma {
     update?: XOR<XOR<checklist_blocksUpdateToOneWithWhereWithoutItemsInput, checklist_blocksUpdateWithoutItemsInput>, checklist_blocksUncheckedUpdateWithoutItemsInput>
   }
 
-  export type clientsUpdateOneRequiredWithoutChecklist_itemsNestedInput = {
+  export type checklist_progressUpdateManyWithoutItemNestedInput = {
+    create?: XOR<checklist_progressCreateWithoutItemInput, checklist_progressUncheckedCreateWithoutItemInput> | checklist_progressCreateWithoutItemInput[] | checklist_progressUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutItemInput | checklist_progressCreateOrConnectWithoutItemInput[]
+    upsert?: checklist_progressUpsertWithWhereUniqueWithoutItemInput | checklist_progressUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: checklist_progressCreateManyItemInputEnvelope
+    set?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    disconnect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    delete?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    update?: checklist_progressUpdateWithWhereUniqueWithoutItemInput | checklist_progressUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: checklist_progressUpdateManyWithWhereWithoutItemInput | checklist_progressUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
+  }
+
+  export type clientsUpdateOneWithoutChecklist_itemsNestedInput = {
     create?: XOR<clientsCreateWithoutChecklist_itemsInput, clientsUncheckedCreateWithoutChecklist_itemsInput>
     connectOrCreate?: clientsCreateOrConnectWithoutChecklist_itemsInput
     upsert?: clientsUpsertWithoutChecklist_itemsInput
+    disconnect?: clientsWhereInput | boolean
+    delete?: clientsWhereInput | boolean
     connect?: clientsWhereUniqueInput
     update?: XOR<XOR<clientsUpdateToOneWithWhereWithoutChecklist_itemsInput, clientsUpdateWithoutChecklist_itemsInput>, clientsUncheckedUpdateWithoutChecklist_itemsInput>
+  }
+
+  export type checklist_progressUncheckedUpdateManyWithoutItemNestedInput = {
+    create?: XOR<checklist_progressCreateWithoutItemInput, checklist_progressUncheckedCreateWithoutItemInput> | checklist_progressCreateWithoutItemInput[] | checklist_progressUncheckedCreateWithoutItemInput[]
+    connectOrCreate?: checklist_progressCreateOrConnectWithoutItemInput | checklist_progressCreateOrConnectWithoutItemInput[]
+    upsert?: checklist_progressUpsertWithWhereUniqueWithoutItemInput | checklist_progressUpsertWithWhereUniqueWithoutItemInput[]
+    createMany?: checklist_progressCreateManyItemInputEnvelope
+    set?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    disconnect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    delete?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+    update?: checklist_progressUpdateWithWhereUniqueWithoutItemInput | checklist_progressUpdateWithWhereUniqueWithoutItemInput[]
+    updateMany?: checklist_progressUpdateManyWithWhereWithoutItemInput | checklist_progressUpdateManyWithWhereWithoutItemInput[]
+    deleteMany?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
+  }
+
+  export type clientsCreateNestedOneWithoutChecklist_progressInput = {
+    create?: XOR<clientsCreateWithoutChecklist_progressInput, clientsUncheckedCreateWithoutChecklist_progressInput>
+    connectOrCreate?: clientsCreateOrConnectWithoutChecklist_progressInput
+    connect?: clientsWhereUniqueInput
+  }
+
+  export type checklist_itemsCreateNestedOneWithoutProgressInput = {
+    create?: XOR<checklist_itemsCreateWithoutProgressInput, checklist_itemsUncheckedCreateWithoutProgressInput>
+    connectOrCreate?: checklist_itemsCreateOrConnectWithoutProgressInput
+    connect?: checklist_itemsWhereUniqueInput
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type clientsUpdateOneRequiredWithoutChecklist_progressNestedInput = {
+    create?: XOR<clientsCreateWithoutChecklist_progressInput, clientsUncheckedCreateWithoutChecklist_progressInput>
+    connectOrCreate?: clientsCreateOrConnectWithoutChecklist_progressInput
+    upsert?: clientsUpsertWithoutChecklist_progressInput
+    connect?: clientsWhereUniqueInput
+    update?: XOR<XOR<clientsUpdateToOneWithWhereWithoutChecklist_progressInput, clientsUpdateWithoutChecklist_progressInput>, clientsUncheckedUpdateWithoutChecklist_progressInput>
+  }
+
+  export type checklist_itemsUpdateOneRequiredWithoutProgressNestedInput = {
+    create?: XOR<checklist_itemsCreateWithoutProgressInput, checklist_itemsUncheckedCreateWithoutProgressInput>
+    connectOrCreate?: checklist_itemsCreateOrConnectWithoutProgressInput
+    upsert?: checklist_itemsUpsertWithoutProgressInput
+    connect?: checklist_itemsWhereUniqueInput
+    update?: XOR<XOR<checklist_itemsUpdateToOneWithWhereWithoutProgressInput, checklist_itemsUpdateWithoutProgressInput>, checklist_itemsUncheckedUpdateWithoutProgressInput>
   }
 
   export type NestedUuidFilter<$PrismaModel = never> = {
@@ -27080,7 +28650,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutActivity_logInput = {
@@ -27102,7 +28673,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutActivity_logInput = {
@@ -27173,7 +28745,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutActivity_logInput = {
@@ -27195,7 +28768,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type usersUpsertWithoutActivity_logInput = {
@@ -27256,7 +28830,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutAd_metricsInput = {
@@ -27278,7 +28853,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutAd_metricsInput = {
@@ -27353,7 +28929,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutAd_metricsInput = {
@@ -27375,7 +28952,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type productsUpsertWithoutAd_metricsInput = {
@@ -27440,7 +29018,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutAi_requestsInput = {
@@ -27462,7 +29041,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutAi_requestsInput = {
@@ -27533,7 +29113,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutAi_requestsInput = {
@@ -27555,7 +29136,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type usersUpsertWithoutAi_requestsInput = {
@@ -27616,7 +29198,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutAnalysesInput = {
@@ -27638,7 +29221,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutAnalysesInput = {
@@ -27766,7 +29350,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutAnalysesInput = {
@@ -27788,7 +29373,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type analysis_resultsUpsertWithWhereUniqueWithoutAnalysesInput = {
@@ -27954,7 +29540,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutChat_conversationsInput = {
@@ -27976,7 +29563,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutChat_conversationsInput = {
@@ -28075,7 +29663,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChat_conversationsInput = {
@@ -28097,7 +29686,8 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type usersUpsertWithoutChat_conversationsInput = {
@@ -28187,7 +29777,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutChat_messagesInput = {
@@ -28209,7 +29800,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutChat_messagesInput = {
@@ -28303,7 +29895,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChat_messagesInput = {
@@ -28325,7 +29918,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type chat_conversationsUpsertWithoutChat_messagesInput = {
@@ -28658,37 +30252,63 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type checklist_itemsCreateWithoutClientInput = {
+  export type checklist_itemsCreateWithoutClientsInput = {
     id?: string
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     block: checklist_blocksCreateNestedOneWithoutItemsInput
+    progress?: checklist_progressCreateNestedManyWithoutItemInput
   }
 
-  export type checklist_itemsUncheckedCreateWithoutClientInput = {
+  export type checklist_itemsUncheckedCreateWithoutClientsInput = {
     id?: string
     block_id: string
     title: string
     description?: string | null
     order?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    progress?: checklist_progressUncheckedCreateNestedManyWithoutItemInput
+  }
+
+  export type checklist_itemsCreateOrConnectWithoutClientsInput = {
+    where: checklist_itemsWhereUniqueInput
+    create: XOR<checklist_itemsCreateWithoutClientsInput, checklist_itemsUncheckedCreateWithoutClientsInput>
+  }
+
+  export type checklist_itemsCreateManyClientsInputEnvelope = {
+    data: checklist_itemsCreateManyClientsInput | checklist_itemsCreateManyClientsInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type checklist_progressCreateWithoutClientInput = {
+    id?: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    item: checklist_itemsCreateNestedOneWithoutProgressInput
+  }
+
+  export type checklist_progressUncheckedCreateWithoutClientInput = {
+    id?: string
+    item_id: string
     is_completed?: boolean
     completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
 
-  export type checklist_itemsCreateOrConnectWithoutClientInput = {
-    where: checklist_itemsWhereUniqueInput
-    create: XOR<checklist_itemsCreateWithoutClientInput, checklist_itemsUncheckedCreateWithoutClientInput>
+  export type checklist_progressCreateOrConnectWithoutClientInput = {
+    where: checklist_progressWhereUniqueInput
+    create: XOR<checklist_progressCreateWithoutClientInput, checklist_progressUncheckedCreateWithoutClientInput>
   }
 
-  export type checklist_itemsCreateManyClientInputEnvelope = {
-    data: checklist_itemsCreateManyClientInput | checklist_itemsCreateManyClientInput[]
+  export type checklist_progressCreateManyClientInputEnvelope = {
+    data: checklist_progressCreateManyClientInput | checklist_progressCreateManyClientInput[]
     skipDuplicates?: boolean
   }
 
@@ -28909,20 +30529,20 @@ export namespace Prisma {
     data: XOR<reportsUpdateManyMutationInput, reportsUncheckedUpdateManyWithoutClientsInput>
   }
 
-  export type checklist_itemsUpsertWithWhereUniqueWithoutClientInput = {
+  export type checklist_itemsUpsertWithWhereUniqueWithoutClientsInput = {
     where: checklist_itemsWhereUniqueInput
-    update: XOR<checklist_itemsUpdateWithoutClientInput, checklist_itemsUncheckedUpdateWithoutClientInput>
-    create: XOR<checklist_itemsCreateWithoutClientInput, checklist_itemsUncheckedCreateWithoutClientInput>
+    update: XOR<checklist_itemsUpdateWithoutClientsInput, checklist_itemsUncheckedUpdateWithoutClientsInput>
+    create: XOR<checklist_itemsCreateWithoutClientsInput, checklist_itemsUncheckedCreateWithoutClientsInput>
   }
 
-  export type checklist_itemsUpdateWithWhereUniqueWithoutClientInput = {
+  export type checklist_itemsUpdateWithWhereUniqueWithoutClientsInput = {
     where: checklist_itemsWhereUniqueInput
-    data: XOR<checklist_itemsUpdateWithoutClientInput, checklist_itemsUncheckedUpdateWithoutClientInput>
+    data: XOR<checklist_itemsUpdateWithoutClientsInput, checklist_itemsUncheckedUpdateWithoutClientsInput>
   }
 
-  export type checklist_itemsUpdateManyWithWhereWithoutClientInput = {
+  export type checklist_itemsUpdateManyWithWhereWithoutClientsInput = {
     where: checklist_itemsScalarWhereInput
-    data: XOR<checklist_itemsUpdateManyMutationInput, checklist_itemsUncheckedUpdateManyWithoutClientInput>
+    data: XOR<checklist_itemsUpdateManyMutationInput, checklist_itemsUncheckedUpdateManyWithoutClientsInput>
   }
 
   export type checklist_itemsScalarWhereInput = {
@@ -28931,14 +30551,41 @@ export namespace Prisma {
     NOT?: checklist_itemsScalarWhereInput | checklist_itemsScalarWhereInput[]
     id?: UuidFilter<"checklist_items"> | string
     block_id?: UuidFilter<"checklist_items"> | string
-    client_id?: UuidFilter<"checklist_items"> | string
     title?: StringFilter<"checklist_items"> | string
     description?: StringNullableFilter<"checklist_items"> | string | null
     order?: IntFilter<"checklist_items"> | number
-    is_completed?: BoolFilter<"checklist_items"> | boolean
-    completed_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
     created_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"checklist_items"> | Date | string | null
+    clientsId?: UuidNullableFilter<"checklist_items"> | string | null
+  }
+
+  export type checklist_progressUpsertWithWhereUniqueWithoutClientInput = {
+    where: checklist_progressWhereUniqueInput
+    update: XOR<checklist_progressUpdateWithoutClientInput, checklist_progressUncheckedUpdateWithoutClientInput>
+    create: XOR<checklist_progressCreateWithoutClientInput, checklist_progressUncheckedCreateWithoutClientInput>
+  }
+
+  export type checklist_progressUpdateWithWhereUniqueWithoutClientInput = {
+    where: checklist_progressWhereUniqueInput
+    data: XOR<checklist_progressUpdateWithoutClientInput, checklist_progressUncheckedUpdateWithoutClientInput>
+  }
+
+  export type checklist_progressUpdateManyWithWhereWithoutClientInput = {
+    where: checklist_progressScalarWhereInput
+    data: XOR<checklist_progressUpdateManyMutationInput, checklist_progressUncheckedUpdateManyWithoutClientInput>
+  }
+
+  export type checklist_progressScalarWhereInput = {
+    AND?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
+    OR?: checklist_progressScalarWhereInput[]
+    NOT?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
+    id?: UuidFilter<"checklist_progress"> | string
+    client_id?: UuidFilter<"checklist_progress"> | string
+    item_id?: UuidFilter<"checklist_progress"> | string
+    is_completed?: BoolFilter<"checklist_progress"> | boolean
+    completed_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
   }
 
   export type usersCreateWithoutConfigurationsInput = {
@@ -29190,7 +30837,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsCreateNestedManyWithoutClientsInput
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutProductsInput = {
@@ -29212,7 +30860,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutClientsInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutProductsInput = {
@@ -29266,7 +30915,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUpdateManyWithoutClientsNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutProductsInput = {
@@ -29288,7 +30938,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutClientsNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type reportsCreateWithoutReport_metricsInput = {
@@ -29457,7 +31108,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsCreateNestedManyWithoutClientsInput
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutReportsInput = {
@@ -29479,7 +31131,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutClientsInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
-    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutReportsInput = {
@@ -29593,7 +31246,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUpdateManyWithoutClientsNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutReportsInput = {
@@ -29615,7 +31269,8 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutClientsNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
-    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type activity_logCreateWithoutUsersInput = {
@@ -29862,23 +31517,21 @@ export namespace Prisma {
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
-    client: clientsCreateNestedOneWithoutChecklist_itemsInput
+    progress?: checklist_progressCreateNestedManyWithoutItemInput
+    clients?: clientsCreateNestedOneWithoutChecklist_itemsInput
   }
 
   export type checklist_itemsUncheckedCreateWithoutBlockInput = {
     id?: string
-    client_id: string
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    clientsId?: string | null
+    progress?: checklist_progressUncheckedCreateNestedManyWithoutItemInput
   }
 
   export type checklist_itemsCreateOrConnectWithoutBlockInput = {
@@ -29928,6 +31581,34 @@ export namespace Prisma {
     create: XOR<checklist_blocksCreateWithoutItemsInput, checklist_blocksUncheckedCreateWithoutItemsInput>
   }
 
+  export type checklist_progressCreateWithoutItemInput = {
+    id?: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    client: clientsCreateNestedOneWithoutChecklist_progressInput
+  }
+
+  export type checklist_progressUncheckedCreateWithoutItemInput = {
+    id?: string
+    client_id: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type checklist_progressCreateOrConnectWithoutItemInput = {
+    where: checklist_progressWhereUniqueInput
+    create: XOR<checklist_progressCreateWithoutItemInput, checklist_progressUncheckedCreateWithoutItemInput>
+  }
+
+  export type checklist_progressCreateManyItemInputEnvelope = {
+    data: checklist_progressCreateManyItemInput | checklist_progressCreateManyItemInput[]
+    skipDuplicates?: boolean
+  }
+
   export type clientsCreateWithoutChecklist_itemsInput = {
     id?: string
     name: string
@@ -29948,6 +31629,7 @@ export namespace Prisma {
     chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
   }
 
   export type clientsUncheckedCreateWithoutChecklist_itemsInput = {
@@ -29970,6 +31652,7 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
   }
 
   export type clientsCreateOrConnectWithoutChecklist_itemsInput = {
@@ -30004,6 +31687,22 @@ export namespace Prisma {
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type checklist_progressUpsertWithWhereUniqueWithoutItemInput = {
+    where: checklist_progressWhereUniqueInput
+    update: XOR<checklist_progressUpdateWithoutItemInput, checklist_progressUncheckedUpdateWithoutItemInput>
+    create: XOR<checklist_progressCreateWithoutItemInput, checklist_progressUncheckedCreateWithoutItemInput>
+  }
+
+  export type checklist_progressUpdateWithWhereUniqueWithoutItemInput = {
+    where: checklist_progressWhereUniqueInput
+    data: XOR<checklist_progressUpdateWithoutItemInput, checklist_progressUncheckedUpdateWithoutItemInput>
+  }
+
+  export type checklist_progressUpdateManyWithWhereWithoutItemInput = {
+    where: checklist_progressScalarWhereInput
+    data: XOR<checklist_progressUpdateManyMutationInput, checklist_progressUncheckedUpdateManyWithoutItemInput>
+  }
+
   export type clientsUpsertWithoutChecklist_itemsInput = {
     update: XOR<clientsUpdateWithoutChecklist_itemsInput, clientsUncheckedUpdateWithoutChecklist_itemsInput>
     create: XOR<clientsCreateWithoutChecklist_itemsInput, clientsUncheckedCreateWithoutChecklist_itemsInput>
@@ -30035,6 +31734,7 @@ export namespace Prisma {
     chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChecklist_itemsInput = {
@@ -30057,6 +31757,175 @@ export namespace Prisma {
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+  }
+
+  export type clientsCreateWithoutChecklist_progressInput = {
+    id?: string
+    name: string
+    owner_name: string
+    shop_url?: string | null
+    followers?: number | null
+    rating?: Decimal | DecimalJsLike | number | string | null
+    registration_date?: Date | string | null
+    product_count?: number | null
+    response_rate?: Decimal | DecimalJsLike | number | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    activity_log?: activity_logCreateNestedManyWithoutClientsInput
+    ad_metrics?: ad_metricsCreateNestedManyWithoutClientsInput
+    ai_requests?: ai_requestsCreateNestedManyWithoutClientsInput
+    analyses?: analysesCreateNestedManyWithoutClientsInput
+    chat_conversations?: chat_conversationsCreateNestedManyWithoutClientsInput
+    chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
+    products?: productsCreateNestedManyWithoutClientsInput
+    reports?: reportsCreateNestedManyWithoutClientsInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+  }
+
+  export type clientsUncheckedCreateWithoutChecklist_progressInput = {
+    id?: string
+    name: string
+    owner_name: string
+    shop_url?: string | null
+    followers?: number | null
+    rating?: Decimal | DecimalJsLike | number | string | null
+    registration_date?: Date | string | null
+    product_count?: number | null
+    response_rate?: Decimal | DecimalJsLike | number | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
+    ad_metrics?: ad_metricsUncheckedCreateNestedManyWithoutClientsInput
+    ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutClientsInput
+    analyses?: analysesUncheckedCreateNestedManyWithoutClientsInput
+    chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutClientsInput
+    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
+    products?: productsUncheckedCreateNestedManyWithoutClientsInput
+    reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+  }
+
+  export type clientsCreateOrConnectWithoutChecklist_progressInput = {
+    where: clientsWhereUniqueInput
+    create: XOR<clientsCreateWithoutChecklist_progressInput, clientsUncheckedCreateWithoutChecklist_progressInput>
+  }
+
+  export type checklist_itemsCreateWithoutProgressInput = {
+    id?: string
+    title: string
+    description?: string | null
+    order?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    block: checklist_blocksCreateNestedOneWithoutItemsInput
+    clients?: clientsCreateNestedOneWithoutChecklist_itemsInput
+  }
+
+  export type checklist_itemsUncheckedCreateWithoutProgressInput = {
+    id?: string
+    block_id: string
+    title: string
+    description?: string | null
+    order?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    clientsId?: string | null
+  }
+
+  export type checklist_itemsCreateOrConnectWithoutProgressInput = {
+    where: checklist_itemsWhereUniqueInput
+    create: XOR<checklist_itemsCreateWithoutProgressInput, checklist_itemsUncheckedCreateWithoutProgressInput>
+  }
+
+  export type clientsUpsertWithoutChecklist_progressInput = {
+    update: XOR<clientsUpdateWithoutChecklist_progressInput, clientsUncheckedUpdateWithoutChecklist_progressInput>
+    create: XOR<clientsCreateWithoutChecklist_progressInput, clientsUncheckedCreateWithoutChecklist_progressInput>
+    where?: clientsWhereInput
+  }
+
+  export type clientsUpdateToOneWithWhereWithoutChecklist_progressInput = {
+    where?: clientsWhereInput
+    data: XOR<clientsUpdateWithoutChecklist_progressInput, clientsUncheckedUpdateWithoutChecklist_progressInput>
+  }
+
+  export type clientsUpdateWithoutChecklist_progressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    owner_name?: StringFieldUpdateOperationsInput | string
+    shop_url?: NullableStringFieldUpdateOperationsInput | string | null
+    followers?: NullableIntFieldUpdateOperationsInput | number | null
+    rating?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    product_count?: NullableIntFieldUpdateOperationsInput | number | null
+    response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    activity_log?: activity_logUpdateManyWithoutClientsNestedInput
+    ad_metrics?: ad_metricsUpdateManyWithoutClientsNestedInput
+    ai_requests?: ai_requestsUpdateManyWithoutClientsNestedInput
+    analyses?: analysesUpdateManyWithoutClientsNestedInput
+    chat_conversations?: chat_conversationsUpdateManyWithoutClientsNestedInput
+    chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
+    products?: productsUpdateManyWithoutClientsNestedInput
+    reports?: reportsUpdateManyWithoutClientsNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+  }
+
+  export type clientsUncheckedUpdateWithoutChecklist_progressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    owner_name?: StringFieldUpdateOperationsInput | string
+    shop_url?: NullableStringFieldUpdateOperationsInput | string | null
+    followers?: NullableIntFieldUpdateOperationsInput | number | null
+    rating?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    product_count?: NullableIntFieldUpdateOperationsInput | number | null
+    response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
+    ad_metrics?: ad_metricsUncheckedUpdateManyWithoutClientsNestedInput
+    ai_requests?: ai_requestsUncheckedUpdateManyWithoutClientsNestedInput
+    analyses?: analysesUncheckedUpdateManyWithoutClientsNestedInput
+    chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutClientsNestedInput
+    chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
+    products?: productsUncheckedUpdateManyWithoutClientsNestedInput
+    reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+  }
+
+  export type checklist_itemsUpsertWithoutProgressInput = {
+    update: XOR<checklist_itemsUpdateWithoutProgressInput, checklist_itemsUncheckedUpdateWithoutProgressInput>
+    create: XOR<checklist_itemsCreateWithoutProgressInput, checklist_itemsUncheckedCreateWithoutProgressInput>
+    where?: checklist_itemsWhereInput
+  }
+
+  export type checklist_itemsUpdateToOneWithWhereWithoutProgressInput = {
+    where?: checklist_itemsWhereInput
+    data: XOR<checklist_itemsUpdateWithoutProgressInput, checklist_itemsUncheckedUpdateWithoutProgressInput>
+  }
+
+  export type checklist_itemsUpdateWithoutProgressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    block?: checklist_blocksUpdateOneRequiredWithoutItemsNestedInput
+    clients?: clientsUpdateOneWithoutChecklist_itemsNestedInput
+  }
+
+  export type checklist_itemsUncheckedUpdateWithoutProgressInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    block_id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientsId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type analysis_resultsCreateManyAnalysesInput = {
@@ -30295,12 +32164,19 @@ export namespace Prisma {
     created_at?: Date | string | null
   }
 
-  export type checklist_itemsCreateManyClientInput = {
+  export type checklist_itemsCreateManyClientsInput = {
     id?: string
     block_id: string
     title: string
     description?: string | null
     order?: number
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type checklist_progressCreateManyClientInput = {
+    id?: string
+    item_id: string
     is_completed?: boolean
     completed_at?: Date | string | null
     created_at?: Date | string | null
@@ -30573,36 +32449,59 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type checklist_itemsUpdateWithoutClientInput = {
+  export type checklist_itemsUpdateWithoutClientsInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
-    is_completed?: BoolFieldUpdateOperationsInput | boolean
-    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     block?: checklist_blocksUpdateOneRequiredWithoutItemsNestedInput
+    progress?: checklist_progressUpdateManyWithoutItemNestedInput
   }
 
-  export type checklist_itemsUncheckedUpdateWithoutClientInput = {
+  export type checklist_itemsUncheckedUpdateWithoutClientsInput = {
     id?: StringFieldUpdateOperationsInput | string
     block_id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    progress?: checklist_progressUncheckedUpdateManyWithoutItemNestedInput
+  }
+
+  export type checklist_itemsUncheckedUpdateManyWithoutClientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    block_id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type checklist_progressUpdateWithoutClientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    is_completed?: BoolFieldUpdateOperationsInput | boolean
+    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    item?: checklist_itemsUpdateOneRequiredWithoutProgressNestedInput
+  }
+
+  export type checklist_progressUncheckedUpdateWithoutClientInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    item_id?: StringFieldUpdateOperationsInput | string
     is_completed?: BoolFieldUpdateOperationsInput | boolean
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type checklist_itemsUncheckedUpdateManyWithoutClientInput = {
+  export type checklist_progressUncheckedUpdateManyWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
-    block_id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
+    item_id?: StringFieldUpdateOperationsInput | string
     is_completed?: BoolFieldUpdateOperationsInput | boolean
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -30933,14 +32832,12 @@ export namespace Prisma {
 
   export type checklist_itemsCreateManyBlockInput = {
     id?: string
-    client_id: string
     title: string
     description?: string | null
     order?: number
-    is_completed?: boolean
-    completed_at?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
+    clientsId?: string | null
   }
 
   export type checklist_itemsUpdateWithoutBlockInput = {
@@ -30948,31 +32845,63 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
-    is_completed?: BoolFieldUpdateOperationsInput | boolean
-    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    client?: clientsUpdateOneRequiredWithoutChecklist_itemsNestedInput
+    progress?: checklist_progressUpdateManyWithoutItemNestedInput
+    clients?: clientsUpdateOneWithoutChecklist_itemsNestedInput
   }
 
   export type checklist_itemsUncheckedUpdateWithoutBlockInput = {
     id?: StringFieldUpdateOperationsInput | string
-    client_id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientsId?: NullableStringFieldUpdateOperationsInput | string | null
+    progress?: checklist_progressUncheckedUpdateManyWithoutItemNestedInput
+  }
+
+  export type checklist_itemsUncheckedUpdateManyWithoutBlockInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    order?: IntFieldUpdateOperationsInput | number
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientsId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type checklist_progressCreateManyItemInput = {
+    id?: string
+    client_id: string
+    is_completed?: boolean
+    completed_at?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type checklist_progressUpdateWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    is_completed?: BoolFieldUpdateOperationsInput | boolean
+    completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    client?: clientsUpdateOneRequiredWithoutChecklist_progressNestedInput
+  }
+
+  export type checklist_progressUncheckedUpdateWithoutItemInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    client_id?: StringFieldUpdateOperationsInput | string
     is_completed?: BoolFieldUpdateOperationsInput | boolean
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type checklist_itemsUncheckedUpdateManyWithoutBlockInput = {
+  export type checklist_progressUncheckedUpdateManyWithoutItemInput = {
     id?: StringFieldUpdateOperationsInput | string
     client_id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    order?: IntFieldUpdateOperationsInput | number
     is_completed?: BoolFieldUpdateOperationsInput | boolean
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

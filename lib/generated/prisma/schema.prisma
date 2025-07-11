@@ -141,6 +141,7 @@ model clients {
   products           products[]
   reports            reports[]
   checklist_items    checklist_items[]
+  checklist_progress checklist_progress[]
 
   @@index([name], map: "idx_clients_name")
 }
@@ -257,20 +258,32 @@ model checklist_blocks {
 
 /// This model stores the checklist items and their status per client
 model checklist_items {
-  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  block_id     String           @db.Uuid
-  client_id    String           @db.Uuid
-  title        String           @db.VarChar(255)
-  description  String?
-  order        Int              @default(0)
-  is_completed Boolean          @default(false)
-  completed_at DateTime?        @db.Timestamptz(6)
-  created_at   DateTime?        @default(now()) @db.Timestamptz(6)
-  updated_at   DateTime?        @default(now()) @db.Timestamptz(6)
-  block        checklist_blocks @relation(fields: [block_id], references: [id], onDelete: Cascade)
-  client       clients          @relation(fields: [client_id], references: [id], onDelete: Cascade)
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  block_id    String               @db.Uuid
+  title       String               @db.VarChar(255)
+  description String?
+  order       Int                  @default(0)
+  created_at  DateTime?            @default(now())
+  updated_at  DateTime?            @default(now())
+  block       checklist_blocks     @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  progress    checklist_progress[]
+  clients     clients?             @relation(fields: [clientsId], references: [id])
+  clientsId   String?              @db.Uuid
 
   @@index([block_id], map: "idx_checklist_items_block")
-  @@index([client_id], map: "idx_checklist_items_client")
   @@index([order], map: "idx_checklist_items_order")
+}
+
+model checklist_progress {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id    String          @db.Uuid
+  item_id      String          @db.Uuid
+  is_completed Boolean         @default(false)
+  completed_at DateTime?
+  created_at   DateTime?       @default(now())
+  updated_at   DateTime?       @default(now())
+  client       clients         @relation(fields: [client_id], references: [id], onDelete: Cascade)
+  item         checklist_items @relation(fields: [item_id], references: [id], onDelete: Cascade)
+
+  @@unique([client_id, item_id])
 }
