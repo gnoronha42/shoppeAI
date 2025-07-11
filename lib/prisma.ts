@@ -2,7 +2,8 @@ import { PrismaClient } from '../lib/generated/prisma';
 
 // Adiciona interface para definir prisma no tipo global
 declare global {
-  var prisma: PrismaClient | undefined
+  // eslint-disable-next-line no-var
+  var prismaGlobal: PrismaClient | undefined
 }
 
 let prisma: PrismaClient
@@ -10,10 +11,10 @@ let prisma: PrismaClient
 if (process.env.NODE_ENV === 'production') {
   prisma = new PrismaClient()
 } else {
-  if (!global.prisma) {
-    global.prisma = new PrismaClient()
+  if (!global.prismaGlobal) {
+    global.prismaGlobal = new PrismaClient()
   }
-  prisma = global.prisma
+  prisma = global.prismaGlobal
 }
 
 export default prisma
