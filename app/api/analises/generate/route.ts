@@ -1,29 +1,70 @@
 import { NextRequest, NextResponse } from "next/server";
-import puppeteerCore from "puppeteer-core";
+import puppeteer from "puppeteer";
 import { marked } from "marked";
 import path from "path";
 import fs from "fs";
 
+const TIMEOUT = 120000; // 2 minutos
+
+const launchBrowser = async (retryCount = 0) => {
+  const maxRetries = 3;
+  try {
+    return await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--font-render-hinting=none'
+      ]
+    });
+  } catch (error) {
+    if (retryCount < maxRetries) {
+      await delay(2000);
+      return launchBrowser(retryCount + 1);
+    }
+    throw error;
+  }
+};
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const isPageHealthy = async (page: any) => {
+  try {
+    await page.evaluate(() => document.readyState);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export async function POST(request: NextRequest) {
   let browser = null;
+  let page = null;
 
   try {
     const { markdown, clientName } = await request.json();
 
-    if (!markdown || !clientName) {
+    if (!markdown || typeof markdown !== 'string') {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "Invalid markdown content" },
         { status: 400 }
       );
     }
 
-    // Converte markdown para HTML
+    if (!clientName || typeof clientName !== 'string') {
+      return NextResponse.json(
+        { message: "Invalid client name" },
+        { status: 400 }
+      );
+    }
+
     let htmlContent = await marked(markdown);
     
-    // Pré-processamento para melhorar a formatação
+    // Seu código de pré-processamento HTML existente
     htmlContent = htmlContent
-      // Adiciona classes para seções específicas
-      .replace(/<h1>(.*?)🟨(.*?)🚀(.*?)<\/h1>/gi, '<h1 class="titulo-principal">$1🟨$2🚀$3</h1>')
+      .replace(/<h1>(.*?)🟨(.*?)🚀(.*?)<\/h1>/gi, '<h1 class="titulo-principal">$1��$2🚀$3</h1>')
       .replace(/<p>(Loja:.*?)<\/p>/gi, '<div class="loja-info"><p>$1</p></div>')
       .replace(/<p>(Período Analisado:.*?)<\/p>/gi, '<div class="loja-info"><p>$1</p></div>')
       
@@ -84,7 +125,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Monta o HTML final
     const fullHtml = `
       <!DOCTYPE html>
       <html>
@@ -766,76 +806,111 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    // Conecta ao Browserless via WebSocket
-    browser = await puppeteerCore.connect({
-      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${process.env.BROWSERLESS_TOKEN}`,
-      defaultViewport: { width: 1200, height: 800 },
-    });
+    // Inicia o browser com retry
+    browser = await launchBrowser();
+    
+    // Configura a página
+    page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 1 });
+    await page.setDefaultNavigationTimeout(TIMEOUT);
 
-    const page = await browser.newPage();
-    await page.setDefaultNavigationTimeout(60000);
-    await page.setDefaultTimeout(60000);
+    // Sistema de retry para renderização da página
+    let pageContent = null;
+    let retryCount = 0;
+    const maxRetries = 3;
 
-    await page.setContent(fullHtml, {
-      waitUntil: "networkidle0",
-      timeout: 60000,
-    });
+    while (retryCount < maxRetries && !pageContent) {
+      try {
+        await page.setContent(fullHtml, {
+          waitUntil: ['networkidle0', 'load', 'domcontentloaded'],
+          timeout: TIMEOUT
+        });
 
-    // Gera o PDF com headerTemplate para o papel timbrado
-    const pdfBuffer = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "60px",
-        right: "16mm",
-        bottom: "18mm",
-        left: "16mm",
-      },
-      displayHeaderFooter: true,
-      footerTemplate: "<span></span>",
-      preferCSSPageSize: true,
-      timeout: 60000,
-    });
+        await page.waitForSelector('#content', { timeout: TIMEOUT });
+        await delay(2000);
 
-    await browser.disconnect();
+        if (await isPageHealthy(page)) {
+          pageContent = true;
+        } else {
+          throw new Error('Page not healthy after load');
+        }
+      } catch (error) {
+        retryCount++;
+        console.error(`Tentativa ${retryCount} de renderizar página falhou:`, error);
+        if (retryCount === maxRetries) throw error;
+        await delay(2000);
+        
+        // Tenta criar uma nova página se houver erro
+        if (page) await page.close().catch(() => {});
+        page = await browser.newPage();
+        await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 1 });
+      }
+    }
 
-    // Sanitizar o nome do cliente para o nome do arquivo (somente ASCII)
+    // Gera o PDF com retry
+    let pdfBuffer = null;
+    retryCount = 0;
+
+    while (retryCount < maxRetries && !pdfBuffer) {
+      try {
+        pdfBuffer = await page.pdf({
+          format: 'A4',
+          printBackground: true,
+          margin: {
+            top: '60px',
+            right: '16mm',
+            bottom: '18mm',
+            left: '16mm'
+          },
+          displayHeaderFooter: true,
+          footerTemplate: '<span></span>',
+          preferCSSPageSize: true,
+          timeout: TIMEOUT
+        });
+      } catch (error) {
+        retryCount++;
+        console.error(`Tentativa ${retryCount} de gerar PDF falhou:`, error);
+        if (retryCount === maxRetries) throw error;
+        await delay(2000);
+      }
+    }
+
+    // Sanitiza o nome do arquivo
     const sanitizedClientName = clientName
-      .replace(/ã/g, 'a').replace(/á/g, 'a').replace(/à/g, 'a').replace(/â/g, 'a')
-      .replace(/é/g, 'e').replace(/ê/g, 'e').replace(/è/g, 'e')
-      .replace(/í/g, 'i').replace(/î/g, 'i').replace(/ì/g, 'i')
-      .replace(/ó/g, 'o').replace(/ô/g, 'o').replace(/õ/g, 'o').replace(/ò/g, 'o')
-      .replace(/ú/g, 'u').replace(/û/g, 'u').replace(/ù/g, 'u')
-      .replace(/ñ/g, 'n').replace(/ç/g, 'c')
-      .replace(/Ã/g, 'A').replace(/Á/g, 'A').replace(/À/g, 'A').replace(/Â/g, 'A')
-      .replace(/É/g, 'E').replace(/Ê/g, 'E').replace(/È/g, 'E')
-      .replace(/Í/g, 'I').replace(/Î/g, 'I').replace(/Ì/g, 'I')
-      .replace(/Ó/g, 'O').replace(/Ô/g, 'O').replace(/Õ/g, 'O').replace(/Ò/g, 'O')
-      .replace(/Ú/g, 'U').replace(/Û/g, 'U').replace(/Ù/g, 'U')
-      .replace(/Ñ/g, 'N').replace(/Ç/g, 'C')
-      .replace(/[()]/g, '') // Remover parênteses
-      .replace(/[^a-zA-Z0-9\s]/g, '') // Remover outros caracteres especiais
-      .replace(/\s+/g, '_') // Substituir espaços por underscore
-      .substring(0, 50) // Limitar tamanho
+      .replace(/[áàãâä]/gi, 'a')
+      .replace(/[éèêë]/gi, 'e')
+      .replace(/[íìîï]/gi, 'i')
+      .replace(/[óòõôö]/gi, 'o')
+      .replace(/[úùûü]/gi, 'u')
+      .replace(/[ç]/gi, 'c')
+      .replace(/[^a-z0-9]/gi, '_')
+      .substring(0, 50)
       .trim();
 
     const response = new NextResponse(pdfBuffer);
-    response.headers.set("Content-Type", "application/pdf");
+    response.headers.set('Content-Type', 'application/pdf');
     response.headers.set(
-      "Content-Disposition",
+      'Content-Disposition',
       `attachment; filename="relatorio_${sanitizedClientName}.pdf"`
     );
 
     return response;
-  } catch (error) {
-    console.error("Error generating PDF:", error);
+  } catch (error: unknown) {
+    console.error('Error generating PDF:', error);
     return NextResponse.json(
-      { message: "Error generating PDF", error: String(error) },
+      { 
+        message: 'Error generating PDF', 
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   } finally {
-    if (browser) {
-      await browser.disconnect();
+    try {
+      if (page) await page.close().catch(() => {});
+      if (browser) await browser.close().catch(() => {});
+    } catch (closeError) {
+      console.error('Error closing browser:', closeError);
     }
   }
 }
