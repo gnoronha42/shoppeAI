@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { AnalysisPDF } from "./AnalysisPDF";
+import html2canvas from "html2canvas";
 
 interface PDFGeneratorProps {
   markdown: string;
   clientName: string;
   analysisType: string;
+  images: string[]; // <- adicione isso
+  ocrTexts: string[]; // <- se usado na geração
   onAfterDownload?: () => void;
 }
 
@@ -12,52 +15,72 @@ export function PDFGenerator({
   markdown,
   clientName,
   analysisType,
+  images,
+  ocrTexts = [],
   onAfterDownload,
 }: PDFGeneratorProps) {
   const [isClient, setIsClient] = useState(false);
   const analysisRef = useRef<any>(null);
-  useEffect(() => { setIsClient(true); }, []);
-  if (!isClient || !markdown) return null;
 
-  const handleDownload = async () => {
-    if (analysisRef.current && analysisRef.current.handleDownloadPDF) {
-      try {
-        await analysisRef.current.handleDownloadPDF();
-        console.log("PDF baixado com sucesso, chamando callback");
-        if (onAfterDownload) {
-          console.log("Executando callback onAfterDownload");
-          onAfterDownload();
-        }
-      } catch (error) {
-        console.error("Erro ao baixar o PDF:", error);
-      }
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const baixarPdf = async () => {
+    const response = await fetch('https://analysis-micro.onrender.com/analisepdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markdown, analysisType, clientName }),
+    });
+  
+    if (!response.ok) {
+      alert('Erro ao gerar PDF');
+      return;
     }
+  
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${clientName}-${analysisType}-relatorio.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
   };
+  
+  
+  
+
+  if (!isClient) return null; // Evita SSR
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <button
-        onClick={handleDownload}
+        onClick={baixarPdf}
         style={{
           background: "#f57c00",
           color: "#fff",
           padding: "8px 16px",
           borderRadius: 4,
-          textDecoration: "none",
           fontWeight: 600,
           cursor: "pointer",
-          border: 'none',
+          border: "none",
         }}
       >
         Baixar PDF
       </button>
-      <AnalysisPDF
-        ref={analysisRef}
-        clientName={clientName}
-        analysisType={analysisType}
-        markdown={markdown}
-        fileName={`relatorio_${clientName}.pdf`}
-      />
+
+      {/* Elemento invisível para captura, se quiser usar */}
+      <div style={{ position: "absolute", top: -9999, left: -9999 }}>
+        <AnalysisPDF
+          ref={analysisRef}
+          clientName={clientName}
+          analysisType={analysisType}
+          markdown={markdown}
+          fileName={`relatorio_${clientName}.pdf`}
+        />
+      </div>
     </div>
   );
 }
