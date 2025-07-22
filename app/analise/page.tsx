@@ -501,8 +501,7 @@ export default function AnalisePage() {
                 <PDFGenerator
                   markdown={customMarkdown}
                   clientName={selectedClient?.name || "Cliente"}
-                  analysisType={analysisType}
-                />
+                  analysisType={analysisType} images={[]} ocrTexts={[]}                />
                 {saveStatus && (
                   <span className="text-sm text-orange-500">{saveStatus}</span>
                 )}
