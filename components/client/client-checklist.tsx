@@ -223,58 +223,8 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
     }
   };
 
-  // Gerar PDF apenas dos blocos com pelo menos um item concluído
-  const handleGenerateCompletedPDF = async () => {
-    try {
-      const completedBlocks = filtrarBlocosComAlgumConcluido(blocks);
+  
 
-      if (completedBlocks.length === 0) {
-        toast({
-          title: "Nenhum item concluído",
-          description: "Não há itens marcados como concluídos para gerar o PDF.",
-          variant: "default"
-        });
-        return;
-      }
-
-      const markdown = generateCompletedChecklistMarkdown(completedBlocks, clientName);
-
-      const response = await fetch("http://localhost:3001/checklist-completed-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          blocks: completedBlocks,
-          clientName: clientName,
-          markdown: markdown
-        }),
-      });
-
-      if (!response.ok) throw new Error("Erro ao gerar PDF dos itens concluídos");
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `checklist_concluidos_${clientName}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      const totalConcluidos = completedBlocks.reduce((total:any, block:any) => total + block.items.length, 0);
-      toast({
-        title: "PDF gerado!",
-        description: `PDF com ${totalConcluidos} itens concluídos baixado com sucesso.`,
-        variant: "default"
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao gerar PDF",
-        description: "Não foi possível gerar o PDF dos itens concluídos.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const calculateBlockProgress = (items: ChecklistItem[]) => {
     if (!items.length) return 0;
