@@ -1070,7 +1070,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         </TabsContent>
 
         <TabsContent value="checklist" className="mt-6">
-          <ClientChecklist clientId={clientId} />
+          <ClientChecklist clientId={clientId} clientName={client.name} />
         </TabsContent>
       </Tabs>
     </div>

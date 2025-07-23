@@ -35,9 +35,10 @@ interface ChecklistBlock {
 
 interface ClientChecklistProps {
   clientId: string;
+  clientName: string; // novo campo
 }
 
-export function ClientChecklist({ clientId }: ClientChecklistProps) {
+export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) {
   const [blocks, setBlocks] = useState<ChecklistBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -68,11 +69,15 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
     setBlocks(blocks.map(block =>
       block.id === blockId
         ? {
-            ...block,
-            items: block.items.map(item =>
-              item.id === itemId ? { ...item, is_completed: isCompleted } : item
-            ),
-          }
+          ...block,
+          items: block.items.map(item =>
+            item.id === itemId ? {
+              ...item,
+              is_completed: isCompleted,
+              completed_at: isCompleted ? new Date().toISOString() : undefined
+            } : item
+          ),
+        }
         : block
     ));
     setChangedItems(prev => ({ ...prev, [itemId]: isCompleted }));
@@ -88,7 +93,7 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
         setSaving(false);
         return;
       }
-      // Salvar cada item alterado
+
       await Promise.all(
         changed.map(([itemId, isCompleted]) =>
           fetch(`/api/clientes/${clientId}/checklist`, {
@@ -107,7 +112,17 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
     }
   };
 
-  // Gerar markdown do checklist
+  // Filtrar blocos com pelo menos um item concluído (e manter apenas os itens concluídos)
+  const filtrarBlocosComAlgumConcluido = (blocks: ChecklistBlock[]) => {
+    return blocks
+      .map(block => ({
+        ...block,
+        items: block.items.filter(item => item.is_completed === true)
+      }))
+      .filter(block => block.items.length > 0);
+  };
+
+  // Gerar markdown completo do checklist
   const generateChecklistMarkdown = () => {
     let md = `# ✅ CHECKLIST OPERACIONAL\n\n`;
     blocks.forEach((block, i) => {
@@ -121,29 +136,143 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
     return md;
   };
 
-  // Gerar PDF
+  // Gerar markdown apenas dos blocos com pelo menos um item concluído
+  const generateCompletedChecklistMarkdown = (blocks: ChecklistBlock[], clientName: string) => {
+    const completedBlocks = filtrarBlocosComAlgumConcluido(blocks);
+
+    if (completedBlocks.length === 0) {
+      return `# ✅ CHECKLIST OPERACIONAL - ITENS CONCLUÍDOS\n\n**Cliente:** ${clientName}\n\n*Nenhum item foi concluído ainda.*`;
+    }
+
+    let md = `# ✅ CHECKLIST OPERACIONAL - ITENS CONCLUÍDOS\n\n`;
+    md += `**Cliente:** ${clientName}\n`;
+    md += `**Data do Relatório:** ${new Date().toLocaleDateString('pt-BR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}\n\n`;
+
+    let totalConcluidos = 0;
+
+    completedBlocks.forEach((block, i) => {
+      md += `## ${block.title}\n`;
+      md += `**Itens Concluídos:** ${block.items.length}\n\n`;
+
+      block.items.forEach((item, idx) => {
+        totalConcluidos++;
+        md += `### ✓ ${item.title}\n`;
+
+        if (item.description) {
+          md += `**Descrição:** ${item.description}\n\n`;
+        }
+
+        if (item.completed_at) {
+          const dataFormatada = new Date(item.completed_at).toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          });
+          md += `**✅ Concluído em:** ${dataFormatada}\n\n`;
+        } else {
+          md += `**✅ Status:** Concluído\n\n`;
+        }
+
+        md += `---\n\n`;
+      });
+    });
+
+    md += `## 📊 RESUMO EXECUTIVO\n\n`;
+    md += `- **Total de Itens Concluídos:** ${totalConcluidos}\n`;
+    md += `- **Blocos com Atividades Finalizadas:** ${completedBlocks.length}\n`;
+    md += `- **Taxa de Progresso:** Blocos com pelo menos um item concluído\n\n`;
+
+    return md;
+  };
+
+  // Gerar PDF completo
   const handleGeneratePDF = async () => {
     try {
       const markdown = generateChecklistMarkdown();
-      const clientName = blocks[0]?.items[0]?.title ? "Cliente" : ""; // Ajuste se quiser pegar o nome real
-      const response = await fetch("/api/analises/generate", {
+      const response = await fetch("https://analysis-micro.onrender.com/checklist-completed-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ markdown, clientName, analysisType: "checklist" }),
+        body: JSON.stringify({
+          blocks: blocks, // Envie os blocos completos
+          clientName: "Cliente",
+          markdown: markdown
+        }),
       });
       if (!response.ok) throw new Error("Erro ao gerar PDF");
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `checklist_${clientName}.pdf`;
+      link.download = `checklist_completo_Cliente.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      toast({ title: "PDF gerado!", description: "Checklist baixado em PDF.", variant: "default" });
+      toast({ title: "PDF gerado!", description: "Checklist completo baixado em PDF.", variant: "default" });
     } catch (error) {
       toast({ title: "Erro ao gerar PDF", description: "Não foi possível gerar o PDF do checklist.", variant: "destructive" });
+    }
+  };
+
+  // Gerar PDF apenas dos blocos com pelo menos um item concluído
+  const handleGenerateCompletedPDF = async () => {
+    try {
+      const completedBlocks = filtrarBlocosComAlgumConcluido(blocks);
+
+      if (completedBlocks.length === 0) {
+        toast({
+          title: "Nenhum item concluído",
+          description: "Não há itens marcados como concluídos para gerar o PDF.",
+          variant: "default"
+        });
+        return;
+      }
+
+      const markdown = generateCompletedChecklistMarkdown(completedBlocks, clientName);
+
+      const response = await fetch("http://localhost:3001/checklist-completed-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blocks: completedBlocks,
+          clientName: clientName,
+          markdown: markdown
+        }),
+      });
+
+      if (!response.ok) throw new Error("Erro ao gerar PDF dos itens concluídos");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `checklist_concluidos_${clientName}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      const totalConcluidos = completedBlocks.reduce((total:any, block:any) => total + block.items.length, 0);
+      toast({
+        title: "PDF gerado!",
+        description: `PDF com ${totalConcluidos} itens concluídos baixado com sucesso.`,
+        variant: "default"
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Não foi possível gerar o PDF dos itens concluídos.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -151,6 +280,12 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
     if (!items.length) return 0;
     const completed = items.filter(item => item.is_completed).length;
     return (completed / items.length) * 100;
+  };
+
+  const getTotalCompletedItems = () => {
+    return blocks.reduce((total, block) => {
+      return total + block.items.filter(item => item.is_completed).length;
+    }, 0);
   };
 
   if (loading) {
@@ -164,6 +299,8 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
       </Card>
     );
   }
+
+  const totalCompletedItems = getTotalCompletedItems();
 
   return (
     <Card>
@@ -215,9 +352,8 @@ export function ClientChecklist({ clientId }: ClientChecklistProps) {
                         <div className="space-y-1">
                           <Label
                             htmlFor={item.id}
-                            className={`text-sm font-medium ${
-                              item.is_completed ? "line-through text-muted-foreground" : ""
-                            }`}
+                            className={`text-sm font-medium ${item.is_completed ? "line-through text-muted-foreground" : ""
+                              }`}
                           >
                             {item.title}
                           </Label>
