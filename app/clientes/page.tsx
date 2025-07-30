@@ -26,14 +26,17 @@ const CLIENTS_PER_PAGE = 10;
 export default function ClientesPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { data: clients = [], isLoading, error } = useGetClientsQuery();
+  const { data: clients = [], isLoading, error } = useGetClientsQuery({
+    page: 1,
+    pageSize: 10
+  });
   const [activeTab, setActiveTab] = useState<string>("lista");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   
   useEffect(() => {
-    if (clients && clients.length > 0) {
-      dispatch(setClients(clients));
+    if (clients && 'data' in clients && clients.data.length > 0) {
+      dispatch(setClients(clients.data));
     }
   }, [clients, dispatch]);
 
@@ -43,7 +46,7 @@ export default function ClientesPage() {
       return clients;
     }
 
-    return clients.filter((client) => 
+    return clients.data.filter((client: any) => 
       client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -168,7 +171,7 @@ export default function ClientesPage() {
                 )}
               </div>
             ) : (
-              currentClients.map((client) => (
+              currentClients.map((client: any) => (
                 <Card 
                   key={client.id} 
                   className="cursor-pointer hover:shadow-md transition-shadow"

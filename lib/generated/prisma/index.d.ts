@@ -18110,6 +18110,7 @@ export namespace Prisma {
     email: number
     password: number
     role: number
+    permissions: number
     created_at: number
     updated_at: number
     _all: number
@@ -18142,6 +18143,7 @@ export namespace Prisma {
     email?: true
     password?: true
     role?: true
+    permissions?: true
     created_at?: true
     updated_at?: true
     _all?: true
@@ -18225,6 +18227,7 @@ export namespace Prisma {
     email: string
     password: string
     role: string | null
+    permissions: string[]
     created_at: Date | null
     updated_at: Date | null
     _count: UsersCountAggregateOutputType | null
@@ -18252,6 +18255,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    permissions?: boolean
     created_at?: boolean
     updated_at?: boolean
     activity_log?: boolean | users$activity_logArgs<ExtArgs>
@@ -18268,6 +18272,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    permissions?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["users"]>
@@ -18278,6 +18283,7 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    permissions?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["users"]>
@@ -18288,11 +18294,12 @@ export namespace Prisma {
     email?: boolean
     password?: boolean
     role?: boolean
+    permissions?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "created_at" | "updated_at", ExtArgs["result"]["users"]>
+  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "permissions" | "created_at" | "updated_at", ExtArgs["result"]["users"]>
   export type usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     activity_log?: boolean | users$activity_logArgs<ExtArgs>
     ai_requests?: boolean | users$ai_requestsArgs<ExtArgs>
@@ -18319,6 +18326,7 @@ export namespace Prisma {
       email: string
       password: string
       role: string | null
+      permissions: string[]
       created_at: Date | null
       updated_at: Date | null
     }, ExtArgs["result"]["users"]>
@@ -18754,6 +18762,7 @@ export namespace Prisma {
     readonly email: FieldRef<"users", 'String'>
     readonly password: FieldRef<"users", 'String'>
     readonly role: FieldRef<"users", 'String'>
+    readonly permissions: FieldRef<"users", 'String[]'>
     readonly created_at: FieldRef<"users", 'DateTime'>
     readonly updated_at: FieldRef<"users", 'DateTime'>
   }
@@ -22871,6 +22880,7 @@ export namespace Prisma {
     email: 'email',
     password: 'password',
     role: 'role',
+    permissions: 'permissions',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
@@ -24075,6 +24085,7 @@ export namespace Prisma {
     email?: StringFilter<"users"> | string
     password?: StringFilter<"users"> | string
     role?: StringNullableFilter<"users"> | string | null
+    permissions?: StringNullableListFilter<"users">
     created_at?: DateTimeNullableFilter<"users"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"users"> | Date | string | null
     activity_log?: Activity_logListRelationFilter
@@ -24090,6 +24101,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrderInput | SortOrder
+    permissions?: SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     activity_log?: activity_logOrderByRelationAggregateInput
@@ -24108,6 +24120,7 @@ export namespace Prisma {
     name?: StringFilter<"users"> | string
     password?: StringFilter<"users"> | string
     role?: StringNullableFilter<"users"> | string | null
+    permissions?: StringNullableListFilter<"users">
     created_at?: DateTimeNullableFilter<"users"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"users"> | Date | string | null
     activity_log?: Activity_logListRelationFilter
@@ -24123,6 +24136,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrderInput | SortOrder
+    permissions?: SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     _count?: usersCountOrderByAggregateInput
@@ -24139,6 +24153,7 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"users"> | string
     password?: StringWithAggregatesFilter<"users"> | string
     role?: StringNullableWithAggregatesFilter<"users"> | string | null
+    permissions?: StringNullableListFilter<"users">
     created_at?: DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"users"> | Date | string | null
   }
@@ -25423,6 +25438,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutUsersInput
@@ -25438,6 +25454,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutUsersInput
@@ -25453,6 +25470,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutUsersNestedInput
@@ -25468,6 +25486,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutUsersNestedInput
@@ -25483,6 +25502,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -25493,6 +25513,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -25503,6 +25524,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -26697,6 +26719,14 @@ export namespace Prisma {
     created_at?: SortOrder
   }
 
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
+  }
+
   export type ConfigurationsListRelationFilter = {
     every?: configurationsWhereInput
     some?: configurationsWhereInput
@@ -26713,6 +26743,7 @@ export namespace Prisma {
     email?: SortOrder
     password?: SortOrder
     role?: SortOrder
+    permissions?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -27953,6 +27984,10 @@ export namespace Prisma {
     deleteMany?: report_metricsScalarWhereInput | report_metricsScalarWhereInput[]
   }
 
+  export type usersCreatepermissionsInput = {
+    set: string[]
+  }
+
   export type activity_logCreateNestedManyWithoutUsersInput = {
     create?: XOR<activity_logCreateWithoutUsersInput, activity_logUncheckedCreateWithoutUsersInput> | activity_logCreateWithoutUsersInput[] | activity_logUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: activity_logCreateOrConnectWithoutUsersInput | activity_logCreateOrConnectWithoutUsersInput[]
@@ -28021,6 +28056,11 @@ export namespace Prisma {
     connectOrCreate?: configurationsCreateOrConnectWithoutUsersInput | configurationsCreateOrConnectWithoutUsersInput[]
     createMany?: configurationsCreateManyUsersInputEnvelope
     connect?: configurationsWhereUniqueInput | configurationsWhereUniqueInput[]
+  }
+
+  export type usersUpdatepermissionsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type activity_logUpdateManyWithoutUsersNestedInput = {
@@ -28688,6 +28728,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     ai_requests?: ai_requestsCreateNestedManyWithoutUsersInput
@@ -28702,6 +28743,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutUsersInput
@@ -28789,6 +28831,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ai_requests?: ai_requestsUpdateManyWithoutUsersNestedInput
@@ -28803,6 +28846,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ai_requests?: ai_requestsUncheckedUpdateManyWithoutUsersNestedInput
@@ -29056,6 +29100,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutUsersInput
@@ -29070,6 +29115,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutUsersInput
@@ -29157,6 +29203,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutUsersNestedInput
@@ -29171,6 +29218,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutUsersNestedInput
@@ -29578,6 +29626,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutUsersInput
@@ -29592,6 +29641,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutUsersInput
@@ -29707,6 +29757,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutUsersNestedInput
@@ -29721,6 +29772,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutUsersNestedInput
@@ -29838,6 +29890,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutUsersInput
@@ -29852,6 +29905,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutUsersInput
@@ -29968,6 +30022,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutUsersNestedInput
@@ -29982,6 +30037,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutUsersNestedInput
@@ -30594,6 +30650,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutUsersInput
@@ -30608,6 +30665,7 @@ export namespace Prisma {
     email: string
     password: string
     role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutUsersInput
@@ -30638,6 +30696,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutUsersNestedInput
@@ -30652,6 +30711,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
     role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutUsersNestedInput
