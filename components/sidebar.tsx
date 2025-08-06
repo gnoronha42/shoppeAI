@@ -4,14 +4,14 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
-import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users, LogOut } from "lucide-react";
+import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users, LogOut, UserPlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 import { useAuth } from '@/contexts/AuthContext';
 
-const sidebarItems = [
+const regularItems = [
   {
     title: "Dashboard",
     href: "/",
@@ -44,10 +44,25 @@ const sidebarItems = [
   },
 ];
 
+const adminItems = [
+  {
+    title: "Gerenciar Analistas",
+    href: "/analistas",
+    icon: <UserPlus className="mr-2 h-5 w-5" />,
+    requiresSuperUser: true,
+  },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
+
+  // Verificar se o usuário é superuser
+  const isSuperUser = user?.role === 'superuser';
+
+  // Combinar os itens do menu baseado nas permissões
+  const sidebarItems = [...regularItems, ...(isSuperUser ? adminItems : [])];
 
   return (
     <>

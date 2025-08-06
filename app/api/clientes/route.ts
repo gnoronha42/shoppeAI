@@ -1,25 +1,37 @@
+// app/api/clients/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { validatePermissions } from '@/lib/middleware';
-import { PERMISSIONS } from '../auth/route';
-import { Prisma } from '@prisma/client';
+import { PERMISSIONS } from '@/lib/permissions';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Prisma } from "@/lib/generated/prisma";
 
 export async function GET(request: Request) {
   try {
+    console.log('\n=== INICIANDO GET /api/clients ===');
+    console.log('URL:', request.url);
+    console.log('Method:', request.method);
+    
     // Verificar permissões - apenas usuários com permissão de gerenciar clientes podem visualizar
     const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    
     if ('error' in authResult) {
+      console.log('❌ Falha na autenticação:', authResult);
       return NextResponse.json(
         { error: authResult.error },
         { status: authResult.status }
       );
     }
 
+    console.log('✅ Usuário autenticado:', authResult.user);
+
     // Obter parâmetros de paginação e busca
     const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get('page')) || 1;
     const pageSize = Number(searchParams.get('pageSize')) || 10;
     const search = searchParams.get('search') || '';
+
+    console.log('Parâmetros:', { page, pageSize, search });
 
     // Calcular o offset para paginação
     const skip = (page - 1) * pageSize;
@@ -34,8 +46,11 @@ export async function GET(request: Request) {
         }
       : {};
 
+    console.log('Condição WHERE:', where);
+
     // Buscar total de registros
     const total = await prisma.clients.count({ where });
+    console.log('Total de registros:', total);
 
     // Buscar clientes com paginação
     const clients = await prisma.clients.findMany({
@@ -60,6 +75,8 @@ export async function GET(request: Request) {
       take: pageSize,
     });
     
+    console.log('Clientes encontrados:', clients.length);
+    
     const mappedClients = clients.map(client => ({
       id: client.id,
       name: client.name,
@@ -77,17 +94,32 @@ export async function GET(request: Request) {
     // Calcular total de páginas
     const totalPages = Math.ceil(total / pageSize);
     
+    console.log('✅ Busca concluída com sucesso');
+    console.log('Retornando:', { total, totalPages, clientsCount: mappedClients.length });
+    
     return NextResponse.json({
       data: mappedClients,
-      total,
-      page,
-      pageSize,
-      totalPages,
+      meta: {
+        total,
+        page,
+        pageSize,
+        totalPages,
+      }
     });
   } catch (error) {
-    console.error('Erro ao buscar clientes:', error);
+    console.error('❌ ERRO GERAL:', error);
+    
+    // Verificar se é um erro do Prisma
+    if (error instanceof PrismaClientKnownRequestError) {
+      return NextResponse.json(
+        { error: `Erro do banco de dados: ${error.message}` },
+        { status: 500 }
+      );
+    }
+    
+    // Erro genérico
     return NextResponse.json(
-      { error: 'Erro ao buscar clientes' },
+      { error: 'Erro interno ao buscar clientes' },
       { status: 500 }
     );
   }

@@ -31,3 +31,18 @@ export interface NavItem {
   href: string;
   icon: string;
 }
+
+export interface Analyst {
+  id: string;
+  name: string;
+  email: string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_login?: string;
+  analyses_count: number;
+  created_by?: string;
+  created_by_user?: {
+    name: string;
+  };
+}

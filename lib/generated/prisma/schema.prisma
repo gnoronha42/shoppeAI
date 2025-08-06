@@ -243,6 +243,9 @@ model users {
   chat_conversations chat_conversations[]
   chat_messages      chat_messages[]
   configurations     configurations[]
+  analysts_created   Analysts[]
+
+  @@map("users")
 }
 
 /// This model stores the checklist blocks and their items
@@ -287,4 +290,20 @@ model checklist_progress {
   item         checklist_items @relation(fields: [item_id], references: [id], onDelete: Cascade)
 
   @@unique([client_id, item_id])
+}
+
+model Analysts {
+  id              String    @id @default(uuid())
+  name            String
+  email           String    @unique
+  password        String
+  active          Boolean   @default(true)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  last_login      DateTime?
+  analyses_count  Int       @default(0)
+  created_by      String? // ID do superuser que criou o analista
+  created_by_user users?    @relation(fields: [created_by], references: [id])
+
+  @@map("analysts")
 }

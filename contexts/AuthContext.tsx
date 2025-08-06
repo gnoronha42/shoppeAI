@@ -57,23 +57,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Credenciais inválidas');
+        throw new Error(data.error || 'Erro ao fazer login');
       }
 
-      const data = await response.json();
+      // Armazenar token
+      localStorage.setItem('token', data.token);
       
-      setIsAuthenticated(true);
+      // Atualizar estado
       setUser(data.user);
       setPermissions(data.permissions);
-      
-      // Salvar token nos cookies (expira em 24h)
-      Cookies.set('auth_token', data.token, { expires: 1 });
-      
-      // Salvar dados do usuário no localStorage
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      router.push('/');
+
+      return data;
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;

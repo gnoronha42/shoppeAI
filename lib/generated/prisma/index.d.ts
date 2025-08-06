@@ -102,6 +102,11 @@ export type checklist_items = $Result.DefaultSelection<Prisma.$checklist_itemsPa
  * 
  */
 export type checklist_progress = $Result.DefaultSelection<Prisma.$checklist_progressPayload>
+/**
+ * Model Analysts
+ * 
+ */
+export type Analysts = $Result.DefaultSelection<Prisma.$AnalystsPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -397,6 +402,16 @@ export class PrismaClient<
     * ```
     */
   get checklist_progress(): Prisma.checklist_progressDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.analysts`: Exposes CRUD operations for the **Analysts** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Analysts
+    * const analysts = await prisma.analysts.findMany()
+    * ```
+    */
+  get analysts(): Prisma.AnalystsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -853,7 +868,8 @@ export namespace Prisma {
     users: 'users',
     checklist_blocks: 'checklist_blocks',
     checklist_items: 'checklist_items',
-    checklist_progress: 'checklist_progress'
+    checklist_progress: 'checklist_progress',
+    Analysts: 'Analysts'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -872,7 +888,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "activity_log" | "ad_metrics" | "ai_requests" | "analyses" | "analysis_results" | "chat_conversations" | "chat_messages" | "clients" | "configurations" | "images" | "products" | "report_metrics" | "reports" | "users" | "checklist_blocks" | "checklist_items" | "checklist_progress"
+      modelProps: "activity_log" | "ad_metrics" | "ai_requests" | "analyses" | "analysis_results" | "chat_conversations" | "chat_messages" | "clients" | "configurations" | "images" | "products" | "report_metrics" | "reports" | "users" | "checklist_blocks" | "checklist_items" | "checklist_progress" | "analysts"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2134,6 +2150,80 @@ export namespace Prisma {
           }
         }
       }
+      Analysts: {
+        payload: Prisma.$AnalystsPayload<ExtArgs>
+        fields: Prisma.AnalystsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AnalystsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AnalystsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>
+          }
+          findFirst: {
+            args: Prisma.AnalystsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AnalystsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>
+          }
+          findMany: {
+            args: Prisma.AnalystsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>[]
+          }
+          create: {
+            args: Prisma.AnalystsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>
+          }
+          createMany: {
+            args: Prisma.AnalystsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AnalystsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>[]
+          }
+          delete: {
+            args: Prisma.AnalystsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>
+          }
+          update: {
+            args: Prisma.AnalystsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>
+          }
+          deleteMany: {
+            args: Prisma.AnalystsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AnalystsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AnalystsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>[]
+          }
+          upsert: {
+            args: Prisma.AnalystsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AnalystsPayload>
+          }
+          aggregate: {
+            args: Prisma.AnalystsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAnalysts>
+          }
+          groupBy: {
+            args: Prisma.AnalystsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AnalystsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AnalystsCountArgs<ExtArgs>
+            result: $Utils.Optional<AnalystsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2235,6 +2325,7 @@ export namespace Prisma {
     checklist_blocks?: checklist_blocksOmit
     checklist_items?: checklist_itemsOmit
     checklist_progress?: checklist_progressOmit
+    analysts?: AnalystsOmit
   }
 
   /* Types for Logging */
@@ -2597,6 +2688,7 @@ export namespace Prisma {
     chat_conversations: number
     chat_messages: number
     configurations: number
+    analysts_created: number
   }
 
   export type UsersCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2605,6 +2697,7 @@ export namespace Prisma {
     chat_conversations?: boolean | UsersCountOutputTypeCountChat_conversationsArgs
     chat_messages?: boolean | UsersCountOutputTypeCountChat_messagesArgs
     configurations?: boolean | UsersCountOutputTypeCountConfigurationsArgs
+    analysts_created?: boolean | UsersCountOutputTypeCountAnalysts_createdArgs
   }
 
   // Custom InputTypes
@@ -2651,6 +2744,13 @@ export namespace Prisma {
    */
   export type UsersCountOutputTypeCountConfigurationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: configurationsWhereInput
+  }
+
+  /**
+   * UsersCountOutputType without action
+   */
+  export type UsersCountOutputTypeCountAnalysts_createdArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AnalystsWhereInput
   }
 
 
@@ -18263,6 +18363,7 @@ export namespace Prisma {
     chat_conversations?: boolean | users$chat_conversationsArgs<ExtArgs>
     chat_messages?: boolean | users$chat_messagesArgs<ExtArgs>
     configurations?: boolean | users$configurationsArgs<ExtArgs>
+    analysts_created?: boolean | users$analysts_createdArgs<ExtArgs>
     _count?: boolean | UsersCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["users"]>
 
@@ -18306,6 +18407,7 @@ export namespace Prisma {
     chat_conversations?: boolean | users$chat_conversationsArgs<ExtArgs>
     chat_messages?: boolean | users$chat_messagesArgs<ExtArgs>
     configurations?: boolean | users$configurationsArgs<ExtArgs>
+    analysts_created?: boolean | users$analysts_createdArgs<ExtArgs>
     _count?: boolean | UsersCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type usersIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -18319,6 +18421,7 @@ export namespace Prisma {
       chat_conversations: Prisma.$chat_conversationsPayload<ExtArgs>[]
       chat_messages: Prisma.$chat_messagesPayload<ExtArgs>[]
       configurations: Prisma.$configurationsPayload<ExtArgs>[]
+      analysts_created: Prisma.$AnalystsPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -18728,6 +18831,7 @@ export namespace Prisma {
     chat_conversations<T extends users$chat_conversationsArgs<ExtArgs> = {}>(args?: Subset<T, users$chat_conversationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$chat_conversationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     chat_messages<T extends users$chat_messagesArgs<ExtArgs> = {}>(args?: Subset<T, users$chat_messagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$chat_messagesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     configurations<T extends users$configurationsArgs<ExtArgs> = {}>(args?: Subset<T, users$configurationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$configurationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    analysts_created<T extends users$analysts_createdArgs<ExtArgs> = {}>(args?: Subset<T, users$analysts_createdArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -19270,6 +19374,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ConfigurationsScalarFieldEnum | ConfigurationsScalarFieldEnum[]
+  }
+
+  /**
+   * users.analysts_created
+   */
+  export type users$analysts_createdArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    where?: AnalystsWhereInput
+    orderBy?: AnalystsOrderByWithRelationInput | AnalystsOrderByWithRelationInput[]
+    cursor?: AnalystsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AnalystsScalarFieldEnum | AnalystsScalarFieldEnum[]
   }
 
   /**
@@ -22676,6 +22804,1182 @@ export namespace Prisma {
 
 
   /**
+   * Model Analysts
+   */
+
+  export type AggregateAnalysts = {
+    _count: AnalystsCountAggregateOutputType | null
+    _avg: AnalystsAvgAggregateOutputType | null
+    _sum: AnalystsSumAggregateOutputType | null
+    _min: AnalystsMinAggregateOutputType | null
+    _max: AnalystsMaxAggregateOutputType | null
+  }
+
+  export type AnalystsAvgAggregateOutputType = {
+    analyses_count: number | null
+  }
+
+  export type AnalystsSumAggregateOutputType = {
+    analyses_count: number | null
+  }
+
+  export type AnalystsMinAggregateOutputType = {
+    id: string | null
+    name: string | null
+    email: string | null
+    password: string | null
+    active: boolean | null
+    created_at: Date | null
+    updated_at: Date | null
+    last_login: Date | null
+    analyses_count: number | null
+    created_by: string | null
+  }
+
+  export type AnalystsMaxAggregateOutputType = {
+    id: string | null
+    name: string | null
+    email: string | null
+    password: string | null
+    active: boolean | null
+    created_at: Date | null
+    updated_at: Date | null
+    last_login: Date | null
+    analyses_count: number | null
+    created_by: string | null
+  }
+
+  export type AnalystsCountAggregateOutputType = {
+    id: number
+    name: number
+    email: number
+    password: number
+    active: number
+    created_at: number
+    updated_at: number
+    last_login: number
+    analyses_count: number
+    created_by: number
+    _all: number
+  }
+
+
+  export type AnalystsAvgAggregateInputType = {
+    analyses_count?: true
+  }
+
+  export type AnalystsSumAggregateInputType = {
+    analyses_count?: true
+  }
+
+  export type AnalystsMinAggregateInputType = {
+    id?: true
+    name?: true
+    email?: true
+    password?: true
+    active?: true
+    created_at?: true
+    updated_at?: true
+    last_login?: true
+    analyses_count?: true
+    created_by?: true
+  }
+
+  export type AnalystsMaxAggregateInputType = {
+    id?: true
+    name?: true
+    email?: true
+    password?: true
+    active?: true
+    created_at?: true
+    updated_at?: true
+    last_login?: true
+    analyses_count?: true
+    created_by?: true
+  }
+
+  export type AnalystsCountAggregateInputType = {
+    id?: true
+    name?: true
+    email?: true
+    password?: true
+    active?: true
+    created_at?: true
+    updated_at?: true
+    last_login?: true
+    analyses_count?: true
+    created_by?: true
+    _all?: true
+  }
+
+  export type AnalystsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Analysts to aggregate.
+     */
+    where?: AnalystsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Analysts to fetch.
+     */
+    orderBy?: AnalystsOrderByWithRelationInput | AnalystsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AnalystsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Analysts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Analysts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Analysts
+    **/
+    _count?: true | AnalystsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AnalystsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AnalystsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AnalystsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AnalystsMaxAggregateInputType
+  }
+
+  export type GetAnalystsAggregateType<T extends AnalystsAggregateArgs> = {
+        [P in keyof T & keyof AggregateAnalysts]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAnalysts[P]>
+      : GetScalarType<T[P], AggregateAnalysts[P]>
+  }
+
+
+
+
+  export type AnalystsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AnalystsWhereInput
+    orderBy?: AnalystsOrderByWithAggregationInput | AnalystsOrderByWithAggregationInput[]
+    by: AnalystsScalarFieldEnum[] | AnalystsScalarFieldEnum
+    having?: AnalystsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AnalystsCountAggregateInputType | true
+    _avg?: AnalystsAvgAggregateInputType
+    _sum?: AnalystsSumAggregateInputType
+    _min?: AnalystsMinAggregateInputType
+    _max?: AnalystsMaxAggregateInputType
+  }
+
+  export type AnalystsGroupByOutputType = {
+    id: string
+    name: string
+    email: string
+    password: string
+    active: boolean
+    created_at: Date
+    updated_at: Date
+    last_login: Date | null
+    analyses_count: number
+    created_by: string | null
+    _count: AnalystsCountAggregateOutputType | null
+    _avg: AnalystsAvgAggregateOutputType | null
+    _sum: AnalystsSumAggregateOutputType | null
+    _min: AnalystsMinAggregateOutputType | null
+    _max: AnalystsMaxAggregateOutputType | null
+  }
+
+  type GetAnalystsGroupByPayload<T extends AnalystsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AnalystsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AnalystsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AnalystsGroupByOutputType[P]>
+            : GetScalarType<T[P], AnalystsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AnalystsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    password?: boolean
+    active?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    last_login?: boolean
+    analyses_count?: boolean
+    created_by?: boolean
+    created_by_user?: boolean | Analysts$created_by_userArgs<ExtArgs>
+  }, ExtArgs["result"]["analysts"]>
+
+  export type AnalystsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    password?: boolean
+    active?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    last_login?: boolean
+    analyses_count?: boolean
+    created_by?: boolean
+    created_by_user?: boolean | Analysts$created_by_userArgs<ExtArgs>
+  }, ExtArgs["result"]["analysts"]>
+
+  export type AnalystsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    password?: boolean
+    active?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    last_login?: boolean
+    analyses_count?: boolean
+    created_by?: boolean
+    created_by_user?: boolean | Analysts$created_by_userArgs<ExtArgs>
+  }, ExtArgs["result"]["analysts"]>
+
+  export type AnalystsSelectScalar = {
+    id?: boolean
+    name?: boolean
+    email?: boolean
+    password?: boolean
+    active?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    last_login?: boolean
+    analyses_count?: boolean
+    created_by?: boolean
+  }
+
+  export type AnalystsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "password" | "active" | "created_at" | "updated_at" | "last_login" | "analyses_count" | "created_by", ExtArgs["result"]["analysts"]>
+  export type AnalystsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    created_by_user?: boolean | Analysts$created_by_userArgs<ExtArgs>
+  }
+  export type AnalystsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    created_by_user?: boolean | Analysts$created_by_userArgs<ExtArgs>
+  }
+  export type AnalystsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    created_by_user?: boolean | Analysts$created_by_userArgs<ExtArgs>
+  }
+
+  export type $AnalystsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Analysts"
+    objects: {
+      created_by_user: Prisma.$usersPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      name: string
+      email: string
+      password: string
+      active: boolean
+      created_at: Date
+      updated_at: Date
+      last_login: Date | null
+      analyses_count: number
+      created_by: string | null
+    }, ExtArgs["result"]["analysts"]>
+    composites: {}
+  }
+
+  type AnalystsGetPayload<S extends boolean | null | undefined | AnalystsDefaultArgs> = $Result.GetResult<Prisma.$AnalystsPayload, S>
+
+  type AnalystsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AnalystsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AnalystsCountAggregateInputType | true
+    }
+
+  export interface AnalystsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Analysts'], meta: { name: 'Analysts' } }
+    /**
+     * Find zero or one Analysts that matches the filter.
+     * @param {AnalystsFindUniqueArgs} args - Arguments to find a Analysts
+     * @example
+     * // Get one Analysts
+     * const analysts = await prisma.analysts.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AnalystsFindUniqueArgs>(args: SelectSubset<T, AnalystsFindUniqueArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Analysts that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AnalystsFindUniqueOrThrowArgs} args - Arguments to find a Analysts
+     * @example
+     * // Get one Analysts
+     * const analysts = await prisma.analysts.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AnalystsFindUniqueOrThrowArgs>(args: SelectSubset<T, AnalystsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Analysts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsFindFirstArgs} args - Arguments to find a Analysts
+     * @example
+     * // Get one Analysts
+     * const analysts = await prisma.analysts.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AnalystsFindFirstArgs>(args?: SelectSubset<T, AnalystsFindFirstArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Analysts that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsFindFirstOrThrowArgs} args - Arguments to find a Analysts
+     * @example
+     * // Get one Analysts
+     * const analysts = await prisma.analysts.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AnalystsFindFirstOrThrowArgs>(args?: SelectSubset<T, AnalystsFindFirstOrThrowArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Analysts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Analysts
+     * const analysts = await prisma.analysts.findMany()
+     * 
+     * // Get first 10 Analysts
+     * const analysts = await prisma.analysts.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const analystsWithIdOnly = await prisma.analysts.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AnalystsFindManyArgs>(args?: SelectSubset<T, AnalystsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Analysts.
+     * @param {AnalystsCreateArgs} args - Arguments to create a Analysts.
+     * @example
+     * // Create one Analysts
+     * const Analysts = await prisma.analysts.create({
+     *   data: {
+     *     // ... data to create a Analysts
+     *   }
+     * })
+     * 
+     */
+    create<T extends AnalystsCreateArgs>(args: SelectSubset<T, AnalystsCreateArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Analysts.
+     * @param {AnalystsCreateManyArgs} args - Arguments to create many Analysts.
+     * @example
+     * // Create many Analysts
+     * const analysts = await prisma.analysts.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AnalystsCreateManyArgs>(args?: SelectSubset<T, AnalystsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Analysts and returns the data saved in the database.
+     * @param {AnalystsCreateManyAndReturnArgs} args - Arguments to create many Analysts.
+     * @example
+     * // Create many Analysts
+     * const analysts = await prisma.analysts.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Analysts and only return the `id`
+     * const analystsWithIdOnly = await prisma.analysts.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AnalystsCreateManyAndReturnArgs>(args?: SelectSubset<T, AnalystsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Analysts.
+     * @param {AnalystsDeleteArgs} args - Arguments to delete one Analysts.
+     * @example
+     * // Delete one Analysts
+     * const Analysts = await prisma.analysts.delete({
+     *   where: {
+     *     // ... filter to delete one Analysts
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AnalystsDeleteArgs>(args: SelectSubset<T, AnalystsDeleteArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Analysts.
+     * @param {AnalystsUpdateArgs} args - Arguments to update one Analysts.
+     * @example
+     * // Update one Analysts
+     * const analysts = await prisma.analysts.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AnalystsUpdateArgs>(args: SelectSubset<T, AnalystsUpdateArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Analysts.
+     * @param {AnalystsDeleteManyArgs} args - Arguments to filter Analysts to delete.
+     * @example
+     * // Delete a few Analysts
+     * const { count } = await prisma.analysts.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AnalystsDeleteManyArgs>(args?: SelectSubset<T, AnalystsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Analysts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Analysts
+     * const analysts = await prisma.analysts.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AnalystsUpdateManyArgs>(args: SelectSubset<T, AnalystsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Analysts and returns the data updated in the database.
+     * @param {AnalystsUpdateManyAndReturnArgs} args - Arguments to update many Analysts.
+     * @example
+     * // Update many Analysts
+     * const analysts = await prisma.analysts.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Analysts and only return the `id`
+     * const analystsWithIdOnly = await prisma.analysts.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AnalystsUpdateManyAndReturnArgs>(args: SelectSubset<T, AnalystsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Analysts.
+     * @param {AnalystsUpsertArgs} args - Arguments to update or create a Analysts.
+     * @example
+     * // Update or create a Analysts
+     * const analysts = await prisma.analysts.upsert({
+     *   create: {
+     *     // ... data to create a Analysts
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Analysts we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AnalystsUpsertArgs>(args: SelectSubset<T, AnalystsUpsertArgs<ExtArgs>>): Prisma__AnalystsClient<$Result.GetResult<Prisma.$AnalystsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Analysts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsCountArgs} args - Arguments to filter Analysts to count.
+     * @example
+     * // Count the number of Analysts
+     * const count = await prisma.analysts.count({
+     *   where: {
+     *     // ... the filter for the Analysts we want to count
+     *   }
+     * })
+    **/
+    count<T extends AnalystsCountArgs>(
+      args?: Subset<T, AnalystsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AnalystsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Analysts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AnalystsAggregateArgs>(args: Subset<T, AnalystsAggregateArgs>): Prisma.PrismaPromise<GetAnalystsAggregateType<T>>
+
+    /**
+     * Group by Analysts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AnalystsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AnalystsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AnalystsGroupByArgs['orderBy'] }
+        : { orderBy?: AnalystsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AnalystsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAnalystsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Analysts model
+   */
+  readonly fields: AnalystsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Analysts.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AnalystsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    created_by_user<T extends Analysts$created_by_userArgs<ExtArgs> = {}>(args?: Subset<T, Analysts$created_by_userArgs<ExtArgs>>): Prisma__usersClient<$Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Analysts model
+   */
+  interface AnalystsFieldRefs {
+    readonly id: FieldRef<"Analysts", 'String'>
+    readonly name: FieldRef<"Analysts", 'String'>
+    readonly email: FieldRef<"Analysts", 'String'>
+    readonly password: FieldRef<"Analysts", 'String'>
+    readonly active: FieldRef<"Analysts", 'Boolean'>
+    readonly created_at: FieldRef<"Analysts", 'DateTime'>
+    readonly updated_at: FieldRef<"Analysts", 'DateTime'>
+    readonly last_login: FieldRef<"Analysts", 'DateTime'>
+    readonly analyses_count: FieldRef<"Analysts", 'Int'>
+    readonly created_by: FieldRef<"Analysts", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Analysts findUnique
+   */
+  export type AnalystsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * Filter, which Analysts to fetch.
+     */
+    where: AnalystsWhereUniqueInput
+  }
+
+  /**
+   * Analysts findUniqueOrThrow
+   */
+  export type AnalystsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * Filter, which Analysts to fetch.
+     */
+    where: AnalystsWhereUniqueInput
+  }
+
+  /**
+   * Analysts findFirst
+   */
+  export type AnalystsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * Filter, which Analysts to fetch.
+     */
+    where?: AnalystsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Analysts to fetch.
+     */
+    orderBy?: AnalystsOrderByWithRelationInput | AnalystsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Analysts.
+     */
+    cursor?: AnalystsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Analysts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Analysts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Analysts.
+     */
+    distinct?: AnalystsScalarFieldEnum | AnalystsScalarFieldEnum[]
+  }
+
+  /**
+   * Analysts findFirstOrThrow
+   */
+  export type AnalystsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * Filter, which Analysts to fetch.
+     */
+    where?: AnalystsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Analysts to fetch.
+     */
+    orderBy?: AnalystsOrderByWithRelationInput | AnalystsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Analysts.
+     */
+    cursor?: AnalystsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Analysts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Analysts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Analysts.
+     */
+    distinct?: AnalystsScalarFieldEnum | AnalystsScalarFieldEnum[]
+  }
+
+  /**
+   * Analysts findMany
+   */
+  export type AnalystsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * Filter, which Analysts to fetch.
+     */
+    where?: AnalystsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Analysts to fetch.
+     */
+    orderBy?: AnalystsOrderByWithRelationInput | AnalystsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Analysts.
+     */
+    cursor?: AnalystsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Analysts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Analysts.
+     */
+    skip?: number
+    distinct?: AnalystsScalarFieldEnum | AnalystsScalarFieldEnum[]
+  }
+
+  /**
+   * Analysts create
+   */
+  export type AnalystsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Analysts.
+     */
+    data: XOR<AnalystsCreateInput, AnalystsUncheckedCreateInput>
+  }
+
+  /**
+   * Analysts createMany
+   */
+  export type AnalystsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Analysts.
+     */
+    data: AnalystsCreateManyInput | AnalystsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Analysts createManyAndReturn
+   */
+  export type AnalystsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * The data used to create many Analysts.
+     */
+    data: AnalystsCreateManyInput | AnalystsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Analysts update
+   */
+  export type AnalystsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Analysts.
+     */
+    data: XOR<AnalystsUpdateInput, AnalystsUncheckedUpdateInput>
+    /**
+     * Choose, which Analysts to update.
+     */
+    where: AnalystsWhereUniqueInput
+  }
+
+  /**
+   * Analysts updateMany
+   */
+  export type AnalystsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Analysts.
+     */
+    data: XOR<AnalystsUpdateManyMutationInput, AnalystsUncheckedUpdateManyInput>
+    /**
+     * Filter which Analysts to update
+     */
+    where?: AnalystsWhereInput
+    /**
+     * Limit how many Analysts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Analysts updateManyAndReturn
+   */
+  export type AnalystsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * The data used to update Analysts.
+     */
+    data: XOR<AnalystsUpdateManyMutationInput, AnalystsUncheckedUpdateManyInput>
+    /**
+     * Filter which Analysts to update
+     */
+    where?: AnalystsWhereInput
+    /**
+     * Limit how many Analysts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Analysts upsert
+   */
+  export type AnalystsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Analysts to update in case it exists.
+     */
+    where: AnalystsWhereUniqueInput
+    /**
+     * In case the Analysts found by the `where` argument doesn't exist, create a new Analysts with this data.
+     */
+    create: XOR<AnalystsCreateInput, AnalystsUncheckedCreateInput>
+    /**
+     * In case the Analysts was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AnalystsUpdateInput, AnalystsUncheckedUpdateInput>
+  }
+
+  /**
+   * Analysts delete
+   */
+  export type AnalystsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+    /**
+     * Filter which Analysts to delete.
+     */
+    where: AnalystsWhereUniqueInput
+  }
+
+  /**
+   * Analysts deleteMany
+   */
+  export type AnalystsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Analysts to delete
+     */
+    where?: AnalystsWhereInput
+    /**
+     * Limit how many Analysts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Analysts.created_by_user
+   */
+  export type Analysts$created_by_userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the users
+     */
+    select?: usersSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the users
+     */
+    omit?: usersOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: usersInclude<ExtArgs> | null
+    where?: usersWhereInput
+  }
+
+  /**
+   * Analysts without action
+   */
+  export type AnalystsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Analysts
+     */
+    select?: AnalystsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Analysts
+     */
+    omit?: AnalystsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AnalystsInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -22924,6 +24228,22 @@ export namespace Prisma {
   };
 
   export type Checklist_progressScalarFieldEnum = (typeof Checklist_progressScalarFieldEnum)[keyof typeof Checklist_progressScalarFieldEnum]
+
+
+  export const AnalystsScalarFieldEnum: {
+    id: 'id',
+    name: 'name',
+    email: 'email',
+    password: 'password',
+    active: 'active',
+    created_at: 'created_at',
+    updated_at: 'updated_at',
+    last_login: 'last_login',
+    analyses_count: 'analyses_count',
+    created_by: 'created_by'
+  };
+
+  export type AnalystsScalarFieldEnum = (typeof AnalystsScalarFieldEnum)[keyof typeof AnalystsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -24093,6 +25413,7 @@ export namespace Prisma {
     chat_conversations?: Chat_conversationsListRelationFilter
     chat_messages?: Chat_messagesListRelationFilter
     configurations?: ConfigurationsListRelationFilter
+    analysts_created?: AnalystsListRelationFilter
   }
 
   export type usersOrderByWithRelationInput = {
@@ -24109,6 +25430,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsOrderByRelationAggregateInput
     chat_messages?: chat_messagesOrderByRelationAggregateInput
     configurations?: configurationsOrderByRelationAggregateInput
+    analysts_created?: AnalystsOrderByRelationAggregateInput
   }
 
   export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -24128,6 +25450,7 @@ export namespace Prisma {
     chat_conversations?: Chat_conversationsListRelationFilter
     chat_messages?: Chat_messagesListRelationFilter
     configurations?: ConfigurationsListRelationFilter
+    analysts_created?: AnalystsListRelationFilter
   }, "id" | "email">
 
   export type usersOrderByWithAggregationInput = {
@@ -24360,6 +25683,88 @@ export namespace Prisma {
     completed_at?: DateTimeNullableWithAggregatesFilter<"checklist_progress"> | Date | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"checklist_progress"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"checklist_progress"> | Date | string | null
+  }
+
+  export type AnalystsWhereInput = {
+    AND?: AnalystsWhereInput | AnalystsWhereInput[]
+    OR?: AnalystsWhereInput[]
+    NOT?: AnalystsWhereInput | AnalystsWhereInput[]
+    id?: StringFilter<"Analysts"> | string
+    name?: StringFilter<"Analysts"> | string
+    email?: StringFilter<"Analysts"> | string
+    password?: StringFilter<"Analysts"> | string
+    active?: BoolFilter<"Analysts"> | boolean
+    created_at?: DateTimeFilter<"Analysts"> | Date | string
+    updated_at?: DateTimeFilter<"Analysts"> | Date | string
+    last_login?: DateTimeNullableFilter<"Analysts"> | Date | string | null
+    analyses_count?: IntFilter<"Analysts"> | number
+    created_by?: StringNullableFilter<"Analysts"> | string | null
+    created_by_user?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
+  }
+
+  export type AnalystsOrderByWithRelationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    active?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    last_login?: SortOrderInput | SortOrder
+    analyses_count?: SortOrder
+    created_by?: SortOrderInput | SortOrder
+    created_by_user?: usersOrderByWithRelationInput
+  }
+
+  export type AnalystsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    email?: string
+    AND?: AnalystsWhereInput | AnalystsWhereInput[]
+    OR?: AnalystsWhereInput[]
+    NOT?: AnalystsWhereInput | AnalystsWhereInput[]
+    name?: StringFilter<"Analysts"> | string
+    password?: StringFilter<"Analysts"> | string
+    active?: BoolFilter<"Analysts"> | boolean
+    created_at?: DateTimeFilter<"Analysts"> | Date | string
+    updated_at?: DateTimeFilter<"Analysts"> | Date | string
+    last_login?: DateTimeNullableFilter<"Analysts"> | Date | string | null
+    analyses_count?: IntFilter<"Analysts"> | number
+    created_by?: StringNullableFilter<"Analysts"> | string | null
+    created_by_user?: XOR<UsersNullableScalarRelationFilter, usersWhereInput> | null
+  }, "id" | "email">
+
+  export type AnalystsOrderByWithAggregationInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    active?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    last_login?: SortOrderInput | SortOrder
+    analyses_count?: SortOrder
+    created_by?: SortOrderInput | SortOrder
+    _count?: AnalystsCountOrderByAggregateInput
+    _avg?: AnalystsAvgOrderByAggregateInput
+    _max?: AnalystsMaxOrderByAggregateInput
+    _min?: AnalystsMinOrderByAggregateInput
+    _sum?: AnalystsSumOrderByAggregateInput
+  }
+
+  export type AnalystsScalarWhereWithAggregatesInput = {
+    AND?: AnalystsScalarWhereWithAggregatesInput | AnalystsScalarWhereWithAggregatesInput[]
+    OR?: AnalystsScalarWhereWithAggregatesInput[]
+    NOT?: AnalystsScalarWhereWithAggregatesInput | AnalystsScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Analysts"> | string
+    name?: StringWithAggregatesFilter<"Analysts"> | string
+    email?: StringWithAggregatesFilter<"Analysts"> | string
+    password?: StringWithAggregatesFilter<"Analysts"> | string
+    active?: BoolWithAggregatesFilter<"Analysts"> | boolean
+    created_at?: DateTimeWithAggregatesFilter<"Analysts"> | Date | string
+    updated_at?: DateTimeWithAggregatesFilter<"Analysts"> | Date | string
+    last_login?: DateTimeNullableWithAggregatesFilter<"Analysts"> | Date | string | null
+    analyses_count?: IntWithAggregatesFilter<"Analysts"> | number
+    created_by?: StringNullableWithAggregatesFilter<"Analysts"> | string | null
   }
 
   export type activity_logCreateInput = {
@@ -25446,6 +26851,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesCreateNestedManyWithoutUsersInput
     configurations?: configurationsCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUncheckedCreateInput = {
@@ -25462,6 +26868,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutUsersInput
     configurations?: configurationsUncheckedCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUpdateInput = {
@@ -25478,6 +26885,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersUncheckedUpdateInput = {
@@ -25494,6 +26902,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUncheckedUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersCreateManyInput = {
@@ -25734,6 +27143,96 @@ export namespace Prisma {
     completed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AnalystsCreateInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    active?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    last_login?: Date | string | null
+    analyses_count?: number
+    created_by_user?: usersCreateNestedOneWithoutAnalysts_createdInput
+  }
+
+  export type AnalystsUncheckedCreateInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    active?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    last_login?: Date | string | null
+    analyses_count?: number
+    created_by?: string | null
+  }
+
+  export type AnalystsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
+    created_by_user?: usersUpdateOneWithoutAnalysts_createdNestedInput
+  }
+
+  export type AnalystsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
+    created_by?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type AnalystsCreateManyInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    active?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    last_login?: Date | string | null
+    analyses_count?: number
+    created_by?: string | null
+  }
+
+  export type AnalystsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type AnalystsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
+    created_by?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UuidFilter<$PrismaModel = never> = {
@@ -26733,7 +28232,17 @@ export namespace Prisma {
     none?: configurationsWhereInput
   }
 
+  export type AnalystsListRelationFilter = {
+    every?: AnalystsWhereInput
+    some?: AnalystsWhereInput
+    none?: AnalystsWhereInput
+  }
+
   export type configurationsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AnalystsOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -26924,6 +28433,53 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type AnalystsCountOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    active?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    last_login?: SortOrder
+    analyses_count?: SortOrder
+    created_by?: SortOrder
+  }
+
+  export type AnalystsAvgOrderByAggregateInput = {
+    analyses_count?: SortOrder
+  }
+
+  export type AnalystsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    active?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    last_login?: SortOrder
+    analyses_count?: SortOrder
+    created_by?: SortOrder
+  }
+
+  export type AnalystsMinOrderByAggregateInput = {
+    id?: SortOrder
+    name?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    active?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+    last_login?: SortOrder
+    analyses_count?: SortOrder
+    created_by?: SortOrder
+  }
+
+  export type AnalystsSumOrderByAggregateInput = {
+    analyses_count?: SortOrder
   }
 
   export type clientsCreateNestedOneWithoutActivity_logInput = {
@@ -28023,6 +29579,13 @@ export namespace Prisma {
     connect?: configurationsWhereUniqueInput | configurationsWhereUniqueInput[]
   }
 
+  export type AnalystsCreateNestedManyWithoutCreated_by_userInput = {
+    create?: XOR<AnalystsCreateWithoutCreated_by_userInput, AnalystsUncheckedCreateWithoutCreated_by_userInput> | AnalystsCreateWithoutCreated_by_userInput[] | AnalystsUncheckedCreateWithoutCreated_by_userInput[]
+    connectOrCreate?: AnalystsCreateOrConnectWithoutCreated_by_userInput | AnalystsCreateOrConnectWithoutCreated_by_userInput[]
+    createMany?: AnalystsCreateManyCreated_by_userInputEnvelope
+    connect?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+  }
+
   export type activity_logUncheckedCreateNestedManyWithoutUsersInput = {
     create?: XOR<activity_logCreateWithoutUsersInput, activity_logUncheckedCreateWithoutUsersInput> | activity_logCreateWithoutUsersInput[] | activity_logUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: activity_logCreateOrConnectWithoutUsersInput | activity_logCreateOrConnectWithoutUsersInput[]
@@ -28056,6 +29619,13 @@ export namespace Prisma {
     connectOrCreate?: configurationsCreateOrConnectWithoutUsersInput | configurationsCreateOrConnectWithoutUsersInput[]
     createMany?: configurationsCreateManyUsersInputEnvelope
     connect?: configurationsWhereUniqueInput | configurationsWhereUniqueInput[]
+  }
+
+  export type AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput = {
+    create?: XOR<AnalystsCreateWithoutCreated_by_userInput, AnalystsUncheckedCreateWithoutCreated_by_userInput> | AnalystsCreateWithoutCreated_by_userInput[] | AnalystsUncheckedCreateWithoutCreated_by_userInput[]
+    connectOrCreate?: AnalystsCreateOrConnectWithoutCreated_by_userInput | AnalystsCreateOrConnectWithoutCreated_by_userInput[]
+    createMany?: AnalystsCreateManyCreated_by_userInputEnvelope
+    connect?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
   }
 
   export type usersUpdatepermissionsInput = {
@@ -28133,6 +29703,20 @@ export namespace Prisma {
     deleteMany?: configurationsScalarWhereInput | configurationsScalarWhereInput[]
   }
 
+  export type AnalystsUpdateManyWithoutCreated_by_userNestedInput = {
+    create?: XOR<AnalystsCreateWithoutCreated_by_userInput, AnalystsUncheckedCreateWithoutCreated_by_userInput> | AnalystsCreateWithoutCreated_by_userInput[] | AnalystsUncheckedCreateWithoutCreated_by_userInput[]
+    connectOrCreate?: AnalystsCreateOrConnectWithoutCreated_by_userInput | AnalystsCreateOrConnectWithoutCreated_by_userInput[]
+    upsert?: AnalystsUpsertWithWhereUniqueWithoutCreated_by_userInput | AnalystsUpsertWithWhereUniqueWithoutCreated_by_userInput[]
+    createMany?: AnalystsCreateManyCreated_by_userInputEnvelope
+    set?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    disconnect?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    delete?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    connect?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    update?: AnalystsUpdateWithWhereUniqueWithoutCreated_by_userInput | AnalystsUpdateWithWhereUniqueWithoutCreated_by_userInput[]
+    updateMany?: AnalystsUpdateManyWithWhereWithoutCreated_by_userInput | AnalystsUpdateManyWithWhereWithoutCreated_by_userInput[]
+    deleteMany?: AnalystsScalarWhereInput | AnalystsScalarWhereInput[]
+  }
+
   export type activity_logUncheckedUpdateManyWithoutUsersNestedInput = {
     create?: XOR<activity_logCreateWithoutUsersInput, activity_logUncheckedCreateWithoutUsersInput> | activity_logCreateWithoutUsersInput[] | activity_logUncheckedCreateWithoutUsersInput[]
     connectOrCreate?: activity_logCreateOrConnectWithoutUsersInput | activity_logCreateOrConnectWithoutUsersInput[]
@@ -28201,6 +29785,20 @@ export namespace Prisma {
     update?: configurationsUpdateWithWhereUniqueWithoutUsersInput | configurationsUpdateWithWhereUniqueWithoutUsersInput[]
     updateMany?: configurationsUpdateManyWithWhereWithoutUsersInput | configurationsUpdateManyWithWhereWithoutUsersInput[]
     deleteMany?: configurationsScalarWhereInput | configurationsScalarWhereInput[]
+  }
+
+  export type AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput = {
+    create?: XOR<AnalystsCreateWithoutCreated_by_userInput, AnalystsUncheckedCreateWithoutCreated_by_userInput> | AnalystsCreateWithoutCreated_by_userInput[] | AnalystsUncheckedCreateWithoutCreated_by_userInput[]
+    connectOrCreate?: AnalystsCreateOrConnectWithoutCreated_by_userInput | AnalystsCreateOrConnectWithoutCreated_by_userInput[]
+    upsert?: AnalystsUpsertWithWhereUniqueWithoutCreated_by_userInput | AnalystsUpsertWithWhereUniqueWithoutCreated_by_userInput[]
+    createMany?: AnalystsCreateManyCreated_by_userInputEnvelope
+    set?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    disconnect?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    delete?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    connect?: AnalystsWhereUniqueInput | AnalystsWhereUniqueInput[]
+    update?: AnalystsUpdateWithWhereUniqueWithoutCreated_by_userInput | AnalystsUpdateWithWhereUniqueWithoutCreated_by_userInput[]
+    updateMany?: AnalystsUpdateManyWithWhereWithoutCreated_by_userInput | AnalystsUpdateManyWithWhereWithoutCreated_by_userInput[]
+    deleteMany?: AnalystsScalarWhereInput | AnalystsScalarWhereInput[]
   }
 
   export type checklist_itemsCreateNestedManyWithoutBlockInput = {
@@ -28355,6 +29953,22 @@ export namespace Prisma {
     upsert?: checklist_itemsUpsertWithoutProgressInput
     connect?: checklist_itemsWhereUniqueInput
     update?: XOR<XOR<checklist_itemsUpdateToOneWithWhereWithoutProgressInput, checklist_itemsUpdateWithoutProgressInput>, checklist_itemsUncheckedUpdateWithoutProgressInput>
+  }
+
+  export type usersCreateNestedOneWithoutAnalysts_createdInput = {
+    create?: XOR<usersCreateWithoutAnalysts_createdInput, usersUncheckedCreateWithoutAnalysts_createdInput>
+    connectOrCreate?: usersCreateOrConnectWithoutAnalysts_createdInput
+    connect?: usersWhereUniqueInput
+  }
+
+  export type usersUpdateOneWithoutAnalysts_createdNestedInput = {
+    create?: XOR<usersCreateWithoutAnalysts_createdInput, usersUncheckedCreateWithoutAnalysts_createdInput>
+    connectOrCreate?: usersCreateOrConnectWithoutAnalysts_createdInput
+    upsert?: usersUpsertWithoutAnalysts_createdInput
+    disconnect?: usersWhereInput | boolean
+    delete?: usersWhereInput | boolean
+    connect?: usersWhereUniqueInput
+    update?: XOR<XOR<usersUpdateToOneWithWhereWithoutAnalysts_createdInput, usersUpdateWithoutAnalysts_createdInput>, usersUncheckedUpdateWithoutAnalysts_createdInput>
   }
 
   export type NestedUuidFilter<$PrismaModel = never> = {
@@ -28735,6 +30349,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesCreateNestedManyWithoutUsersInput
     configurations?: configurationsCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUncheckedCreateWithoutActivity_logInput = {
@@ -28750,6 +30365,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutUsersInput
     configurations?: configurationsUncheckedCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersCreateOrConnectWithoutActivity_logInput = {
@@ -28838,6 +30454,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersUncheckedUpdateWithoutActivity_logInput = {
@@ -28853,6 +30470,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUncheckedUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type clientsCreateWithoutAd_metricsInput = {
@@ -29107,6 +30725,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesCreateNestedManyWithoutUsersInput
     configurations?: configurationsCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUncheckedCreateWithoutAi_requestsInput = {
@@ -29122,6 +30741,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutUsersInput
     configurations?: configurationsUncheckedCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersCreateOrConnectWithoutAi_requestsInput = {
@@ -29210,6 +30830,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersUncheckedUpdateWithoutAi_requestsInput = {
@@ -29225,6 +30846,7 @@ export namespace Prisma {
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUncheckedUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type clientsCreateWithoutAnalysesInput = {
@@ -29633,6 +31255,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesCreateNestedManyWithoutUsersInput
     configurations?: configurationsCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUncheckedCreateWithoutChat_conversationsInput = {
@@ -29648,6 +31271,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutUsersInput
     configurations?: configurationsUncheckedCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersCreateOrConnectWithoutChat_conversationsInput = {
@@ -29764,6 +31388,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersUncheckedUpdateWithoutChat_conversationsInput = {
@@ -29779,6 +31404,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUncheckedUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUncheckedUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type chat_messagesUpsertWithWhereUniqueWithoutChat_conversationsInput = {
@@ -29897,6 +31523,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsCreateNestedManyWithoutUsersInput
     chat_conversations?: chat_conversationsCreateNestedManyWithoutUsersInput
     configurations?: configurationsCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUncheckedCreateWithoutChat_messagesInput = {
@@ -29912,6 +31539,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutUsersInput
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutUsersInput
     configurations?: configurationsUncheckedCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersCreateOrConnectWithoutChat_messagesInput = {
@@ -30029,6 +31657,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUpdateManyWithoutUsersNestedInput
     chat_conversations?: chat_conversationsUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersUncheckedUpdateWithoutChat_messagesInput = {
@@ -30044,6 +31673,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUncheckedUpdateManyWithoutUsersNestedInput
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutUsersNestedInput
     configurations?: configurationsUncheckedUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type activity_logCreateWithoutClientsInput = {
@@ -30657,6 +32287,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsCreateNestedManyWithoutUsersInput
     chat_conversations?: chat_conversationsCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersUncheckedCreateWithoutConfigurationsInput = {
@@ -30672,6 +32303,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutUsersInput
     chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutUsersInput
     chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutUsersInput
+    analysts_created?: AnalystsUncheckedCreateNestedManyWithoutCreated_by_userInput
   }
 
   export type usersCreateOrConnectWithoutConfigurationsInput = {
@@ -30703,6 +32335,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUpdateManyWithoutUsersNestedInput
     chat_conversations?: chat_conversationsUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type usersUncheckedUpdateWithoutConfigurationsInput = {
@@ -30718,6 +32351,7 @@ export namespace Prisma {
     ai_requests?: ai_requestsUncheckedUpdateManyWithoutUsersNestedInput
     chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutUsersNestedInput
     chat_messages?: chat_messagesUncheckedUpdateManyWithoutUsersNestedInput
+    analysts_created?: AnalystsUncheckedUpdateManyWithoutCreated_by_userNestedInput
   }
 
   export type analysesCreateWithoutImagesInput = {
@@ -31479,6 +33113,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type AnalystsCreateWithoutCreated_by_userInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    active?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    last_login?: Date | string | null
+    analyses_count?: number
+  }
+
+  export type AnalystsUncheckedCreateWithoutCreated_by_userInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    active?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    last_login?: Date | string | null
+    analyses_count?: number
+  }
+
+  export type AnalystsCreateOrConnectWithoutCreated_by_userInput = {
+    where: AnalystsWhereUniqueInput
+    create: XOR<AnalystsCreateWithoutCreated_by_userInput, AnalystsUncheckedCreateWithoutCreated_by_userInput>
+  }
+
+  export type AnalystsCreateManyCreated_by_userInputEnvelope = {
+    data: AnalystsCreateManyCreated_by_userInput | AnalystsCreateManyCreated_by_userInput[]
+    skipDuplicates?: boolean
+  }
+
   export type activity_logUpsertWithWhereUniqueWithoutUsersInput = {
     where: activity_logWhereUniqueInput
     update: XOR<activity_logUpdateWithoutUsersInput, activity_logUncheckedUpdateWithoutUsersInput>
@@ -31570,6 +33238,38 @@ export namespace Prisma {
     is_global?: BoolNullableFilter<"configurations"> | boolean | null
     created_at?: DateTimeNullableFilter<"configurations"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"configurations"> | Date | string | null
+  }
+
+  export type AnalystsUpsertWithWhereUniqueWithoutCreated_by_userInput = {
+    where: AnalystsWhereUniqueInput
+    update: XOR<AnalystsUpdateWithoutCreated_by_userInput, AnalystsUncheckedUpdateWithoutCreated_by_userInput>
+    create: XOR<AnalystsCreateWithoutCreated_by_userInput, AnalystsUncheckedCreateWithoutCreated_by_userInput>
+  }
+
+  export type AnalystsUpdateWithWhereUniqueWithoutCreated_by_userInput = {
+    where: AnalystsWhereUniqueInput
+    data: XOR<AnalystsUpdateWithoutCreated_by_userInput, AnalystsUncheckedUpdateWithoutCreated_by_userInput>
+  }
+
+  export type AnalystsUpdateManyWithWhereWithoutCreated_by_userInput = {
+    where: AnalystsScalarWhereInput
+    data: XOR<AnalystsUpdateManyMutationInput, AnalystsUncheckedUpdateManyWithoutCreated_by_userInput>
+  }
+
+  export type AnalystsScalarWhereInput = {
+    AND?: AnalystsScalarWhereInput | AnalystsScalarWhereInput[]
+    OR?: AnalystsScalarWhereInput[]
+    NOT?: AnalystsScalarWhereInput | AnalystsScalarWhereInput[]
+    id?: StringFilter<"Analysts"> | string
+    name?: StringFilter<"Analysts"> | string
+    email?: StringFilter<"Analysts"> | string
+    password?: StringFilter<"Analysts"> | string
+    active?: BoolFilter<"Analysts"> | boolean
+    created_at?: DateTimeFilter<"Analysts"> | Date | string
+    updated_at?: DateTimeFilter<"Analysts"> | Date | string
+    last_login?: DateTimeNullableFilter<"Analysts"> | Date | string | null
+    analyses_count?: IntFilter<"Analysts"> | number
+    created_by?: StringNullableFilter<"Analysts"> | string | null
   }
 
   export type checklist_itemsCreateWithoutBlockInput = {
@@ -31986,6 +33686,86 @@ export namespace Prisma {
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clientsId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type usersCreateWithoutAnalysts_createdInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    activity_log?: activity_logCreateNestedManyWithoutUsersInput
+    ai_requests?: ai_requestsCreateNestedManyWithoutUsersInput
+    chat_conversations?: chat_conversationsCreateNestedManyWithoutUsersInput
+    chat_messages?: chat_messagesCreateNestedManyWithoutUsersInput
+    configurations?: configurationsCreateNestedManyWithoutUsersInput
+  }
+
+  export type usersUncheckedCreateWithoutAnalysts_createdInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    role?: string | null
+    permissions?: usersCreatepermissionsInput | string[]
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    activity_log?: activity_logUncheckedCreateNestedManyWithoutUsersInput
+    ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutUsersInput
+    chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutUsersInput
+    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutUsersInput
+    configurations?: configurationsUncheckedCreateNestedManyWithoutUsersInput
+  }
+
+  export type usersCreateOrConnectWithoutAnalysts_createdInput = {
+    where: usersWhereUniqueInput
+    create: XOR<usersCreateWithoutAnalysts_createdInput, usersUncheckedCreateWithoutAnalysts_createdInput>
+  }
+
+  export type usersUpsertWithoutAnalysts_createdInput = {
+    update: XOR<usersUpdateWithoutAnalysts_createdInput, usersUncheckedUpdateWithoutAnalysts_createdInput>
+    create: XOR<usersCreateWithoutAnalysts_createdInput, usersUncheckedCreateWithoutAnalysts_createdInput>
+    where?: usersWhereInput
+  }
+
+  export type usersUpdateToOneWithWhereWithoutAnalysts_createdInput = {
+    where?: usersWhereInput
+    data: XOR<usersUpdateWithoutAnalysts_createdInput, usersUncheckedUpdateWithoutAnalysts_createdInput>
+  }
+
+  export type usersUpdateWithoutAnalysts_createdInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    activity_log?: activity_logUpdateManyWithoutUsersNestedInput
+    ai_requests?: ai_requestsUpdateManyWithoutUsersNestedInput
+    chat_conversations?: chat_conversationsUpdateManyWithoutUsersNestedInput
+    chat_messages?: chat_messagesUpdateManyWithoutUsersNestedInput
+    configurations?: configurationsUpdateManyWithoutUsersNestedInput
+  }
+
+  export type usersUncheckedUpdateWithoutAnalysts_createdInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: NullableStringFieldUpdateOperationsInput | string | null
+    permissions?: usersUpdatepermissionsInput | string[]
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    activity_log?: activity_logUncheckedUpdateManyWithoutUsersNestedInput
+    ai_requests?: ai_requestsUncheckedUpdateManyWithoutUsersNestedInput
+    chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutUsersNestedInput
+    chat_messages?: chat_messagesUncheckedUpdateManyWithoutUsersNestedInput
+    configurations?: configurationsUncheckedUpdateManyWithoutUsersNestedInput
   }
 
   export type analysis_resultsCreateManyAnalysesInput = {
@@ -32747,6 +34527,18 @@ export namespace Prisma {
     updated_at?: Date | string | null
   }
 
+  export type AnalystsCreateManyCreated_by_userInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    active?: boolean
+    created_at?: Date | string
+    updated_at?: Date | string
+    last_login?: Date | string | null
+    analyses_count?: number
+  }
+
   export type activity_logUpdateWithoutUsersInput = {
     id?: StringFieldUpdateOperationsInput | string
     action?: StringFieldUpdateOperationsInput | string
@@ -32888,6 +34680,42 @@ export namespace Prisma {
     is_global?: NullableBoolFieldUpdateOperationsInput | boolean | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AnalystsUpdateWithoutCreated_by_userInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type AnalystsUncheckedUpdateWithoutCreated_by_userInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
+  }
+
+  export type AnalystsUncheckedUpdateManyWithoutCreated_by_userInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    active?: BoolFieldUpdateOperationsInput | boolean
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    updated_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    last_login?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    analyses_count?: IntFieldUpdateOperationsInput | number
   }
 
   export type checklist_itemsCreateManyBlockInput = {

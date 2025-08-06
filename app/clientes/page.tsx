@@ -20,59 +20,52 @@ import { useGetClientsQuery } from "@/lib/api";
 import { Loader2, Plus, User, Search } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setClients } from "@/features/clients/clientSlice";
+import { Client } from "@/types";
 
 const CLIENTS_PER_PAGE = 10;
 
 export default function ClientesPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const { data: clients = [], isLoading, error } = useGetClientsQuery({
-    page: 1,
-    pageSize: 10
-  });
   const [activeTab, setActiveTab] = useState<string>("lista");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  
+  const [page, setPage] = useState<number>(1);
+
+  const { data: response, isLoading, error } = useGetClientsQuery({
+    page,
+    pageSize: CLIENTS_PER_PAGE,
+    search: searchTerm
+  });
+
+  // Garantir que clients seja sempre um array
+  const clients = Array.isArray(response?.data) ? response.data : [];
+  const { total = 0, totalPages = 0 } = response?.meta || {};
+  const currentPage = response?.meta?.page || 1;
+  const pageSize = response?.meta?.pageSize || CLIENTS_PER_PAGE;
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+
   useEffect(() => {
-    if (clients && 'data' in clients && clients.data.length > 0) {
-      dispatch(setClients(clients.data));
+    if (clients && clients.length > 0) {
+      dispatch(setClients(clients));
     }
   }, [clients, dispatch]);
 
-  // Filtrar clientes baseado no termo de busca
-  const filteredClients = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return clients;
-    }
-
-    return clients.data.filter((client: any) => 
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.ownerName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [clients, searchTerm]);
-
-  // Calcular dados da paginação
-  const totalPages = Math.ceil(filteredClients.length / CLIENTS_PER_PAGE);
-  const startIndex = (currentPage - 1) * CLIENTS_PER_PAGE;
-  const endIndex = startIndex + CLIENTS_PER_PAGE;
-  const currentClients = filteredClients.slice(startIndex, endIndex);
-
   // Resetar para primeira página quando buscar
   useEffect(() => {
-    setCurrentPage(1);
+    setPage(1);
   }, [searchTerm]);
   
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   const navigateToClientDetails = (clientId: string) => {
     router.push(`/clientes/${clientId}`);
   };
 
   const handleClientFormSuccess = () => {
     setActiveTab("lista");
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,9 +113,9 @@ export default function ClientesPage() {
           {!isLoading && !error && (
             <div className="flex justify-between items-center text-sm text-muted-foreground">
               <span>
-                {filteredClients.length === 0 
+                {clients.length === 0 
                   ? "Nenhum cliente encontrado" 
-                  : `Mostrando ${startIndex + 1}-${Math.min(endIndex, filteredClients.length)} de ${filteredClients.length} cliente${filteredClients.length !== 1 ? 's' : ''}`
+                  : `Mostrando ${startIndex + 1}-${Math.min(endIndex, total)} de ${total} cliente${total !== 1 ? 's' : ''}`
                 }
                 {searchTerm && ` para "${searchTerm}"`}
               </span>
@@ -142,7 +135,7 @@ export default function ClientesPage() {
               <div className="col-span-full text-center py-10">
                 <p className="text-red-500">Erro ao carregar clientes</p>
               </div>
-            ) : currentClients.length === 0 ? (
+            ) : clients.length === 0 ? (
               <div className="col-span-full text-center py-10">
                 {searchTerm ? (
                   <div>
@@ -171,7 +164,7 @@ export default function ClientesPage() {
                 )}
               </div>
             ) : (
-              currentClients.map((client: any) => (
+              clients.map((client: Client) => (
                 <Card 
                   key={client.id} 
                   className="cursor-pointer hover:shadow-md transition-shadow"
@@ -216,18 +209,18 @@ export default function ClientesPage() {
                     />
                   </PaginationItem>
                   
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <PaginationItem key={page}>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                    <PaginationItem key={pageNum}>
                       <PaginationLink
                         href="#"
                         onClick={(e) => {
                           e.preventDefault();
-                          handlePageChange(page);
+                          handlePageChange(pageNum);
                         }}
-                        isActive={currentPage === page}
+                        isActive={currentPage === pageNum}
                         className="cursor-pointer"
                       >
-                        {page}
+                        {pageNum}
                       </PaginationLink>
                     </PaginationItem>
                   ))}

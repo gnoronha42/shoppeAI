@@ -23,15 +23,19 @@ import { cn } from "@/lib/utils";
 import { Client } from "@/types";
 
 export function ClientSelector() {
-  const { data: clients = [], isLoading } = useGetClientsQuery();
+  const { data: response, isLoading } = useGetClientsQuery({
+    page: 1,
+    pageSize: 100 // Carregar mais clientes para o selector
+  });
   const selectedClientId = useSelector(selectSelectedClientId);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
 
+  // Garantir que clients seja sempre um array
+  const clients = Array.isArray(response?.data) ? response.data : [];
+  
   // Os clientes já vêm ordenados alfabeticamente do backend
-  const sortedClients = clients;
-
-  const selectedClient = sortedClients.find(client => client.id === selectedClientId);
+  const selectedClient = clients.find(client => client.id === selectedClientId);
 
   useEffect(() => {
     if (clients.length > 0) {
@@ -69,7 +73,7 @@ export function ClientSelector() {
           <CommandList>
             <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
             <CommandGroup>
-              {sortedClients.map((client: Client) => (
+              {clients.map((client: Client) => (
                 <CommandItem
                   key={client.id}
                   value={`${client.name} ${client.ownerName}`.toLowerCase()}
