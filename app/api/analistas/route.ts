@@ -31,35 +31,29 @@ export async function GET(request: Request) {
     const skip = (page - 1) * pageSize;
 
     // Construir a condição de busca
-    const where: Prisma.AnalystsWhereInput = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
-            { email: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
-          ],
-        }
-      : {};
+    const where: Prisma.usersWhereInput = {
+      role: 'analyst',
+      ...(search ? {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+          { email: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        ],
+      } : {}),
+    };
 
     // Buscar total de registros
-    const total = await prisma.analysts.count({ where });
+    const total = await prisma.users.count({ where });
 
-    // Buscar analistas com paginação
-    const analysts = await prisma.analysts.findMany({
+    // Buscar analistas
+    const analysts = await prisma.users.findMany({
       where,
       select: {
         id: true,
         name: true,
         email: true,
-        active: true,
+        role: true,
         created_at: true,
         updated_at: true,
-        last_login: true,
-        analyses_count: true,
-        created_by_user: {
-          select: {
-            name: true,
-          },
-        },
       },
       orderBy: {
         name: 'asc',
@@ -113,11 +107,11 @@ export async function POST(request: Request) {
     }
 
     // Verificar se email já existe
-    const existingAnalyst = await prisma.analysts.findUnique({
+    const existingUser = await prisma.users.findUnique({
       where: { email },
     });
 
-    if (existingAnalyst) {
+    if (existingUser) {
       return NextResponse.json(
         { error: 'Email já cadastrado' },
         { status: 400 }
@@ -126,13 +120,17 @@ export async function POST(request: Request) {
 
     console.log('Criando analista:', { name, email }); // Log para debug
 
-    // Criar novo analista
-    const analyst = await prisma.analysts.create({
+    // Criar novo usuário como analista
+    const analyst = await prisma.users.create({
       data: {
         name,
         email,
         password,
-        created_by: authResult.user.id,
+        role: 'analyst',
+        permissions: [
+          PERMISSIONS.MANAGE_ANALYSIS,
+          PERMISSIONS.VIEW_DASHBOARD,
+        ],
       },
     });
 
@@ -152,7 +150,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     // Verificar permissões
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_ANALYSTS]);
+    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -170,9 +168,15 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Atualizar analista
-    const analyst = await prisma.analysts.update({
-      where: { id },
+    // Garantir que não pode mudar o role
+    delete data.role;
+
+    // Atualizar usuário
+    const analyst = await prisma.users.update({
+      where: { 
+        id,
+        role: 'analyst', // Garantir que só atualiza analistas
+      },
       data,
     });
 
@@ -186,11 +190,11 @@ export async function PATCH(request: Request) {
   }
 }
 
-// DELETE - Remover analista
+// DELETE - Desativar analista
 export async function DELETE(request: Request) {
   try {
     // Verificar permissões
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_ANALYSTS]);
+    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -208,17 +212,22 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Remover analista (soft delete)
-    await prisma.analysts.update({
-      where: { id },
-      data: { active: false },
+
+    await prisma.users.update({
+      where: { 
+        id,
+        role: 'analyst', 
+      },
+      data: { 
+        role: 'inactive_analyst', 
+      },
     });
 
-    return NextResponse.json({ message: 'Analista removido com sucesso' });
+    return NextResponse.json({ message: 'Analista desativado com sucesso' });
   } catch (error) {
-    console.error('Erro ao remover analista:', error);
+    console.error('Erro ao desativar analista:', error);
     return NextResponse.json(
-      { error: 'Erro ao remover analista' },
+      { error: 'Erro ao desativar analista' },
       { status: 500 }
     );
   }

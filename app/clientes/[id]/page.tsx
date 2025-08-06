@@ -55,6 +55,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { PERMISSIONS } from "@/lib/permissions";
 
 // Importar marked dinamicamente para evitar erros de SSR
 import { marked } from "marked";
@@ -72,6 +74,7 @@ export default function ClientDetailsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const clientId = params.id as string;
+  const { hasPermission } = useAuth();
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null);
   const [selectedAnalysisContent, setSelectedAnalysisContent] = useState<
     string | null
@@ -590,47 +593,51 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setSelectedTab("edit")}>
-            Editar Cliente
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">Excluir</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Esta ação não pode ser desfeita. Isso excluirá permanentemente
-                  o cliente &quot;{client.name}&quot; e todos os dados
-                  associados a ele.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDeleteClient}
-                  className="bg-red-600 hover:bg-red-700"
-                  disabled={isDeleting}
-                >
-                  {isDeleting ? "Excluindo..." : "Sim, excluir cliente"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+        {hasPermission(PERMISSIONS.MANAGE_CLIENTS) && (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setSelectedTab("edit")}>
+              Editar Cliente
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Excluir</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação não pode ser desfeita. Isso excluirá permanentemente
+                    o cliente &quot;{client.name}&quot; e todos os dados
+                    associados a ele.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteClient}
+                    className="bg-red-600 hover:bg-red-700"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Excluindo..." : "Sim, excluir cliente"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full md:w-[800px] grid-cols-5">
+        <TabsList className="grid w-full md:w-[800px] grid-cols-4">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="analyses">
             Análises ({analyses.length})
           </TabsTrigger>
           <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
-          <TabsTrigger value="edit">Editar</TabsTrigger>
+          {hasPermission(PERMISSIONS.MANAGE_CLIENTS) && (
+            <TabsTrigger value="edit">Editar</TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="info" className="space-y-4 mt-6">

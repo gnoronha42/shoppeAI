@@ -20,6 +20,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
+    console.log('Tentativa de login:', { email }); // Log para debug
+
     // Busca o usuário no banco
     const user: User | null = await prisma.users.findUnique({
       where: { email },
@@ -33,6 +35,8 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('Usuário encontrado:', user ? 'sim' : 'não'); // Log para debug
+
     if (!user) {
       return NextResponse.json(
         { error: 'Credenciais inválidas' },
@@ -42,6 +46,8 @@ export async function POST(request: Request) {
 
     // Comparação direta da senha
     const isValidPassword = user.password === password;
+
+    console.log('Senha válida:', isValidPassword); // Log para debug
 
     if (!isValidPassword) {
       return NextResponse.json(
@@ -67,6 +73,8 @@ export async function POST(request: Request) {
       JWT_SECRET,
       { expiresIn: '24h' }
     );
+
+    console.log('Login bem-sucedido, retornando dados'); // Log para debug
 
     return NextResponse.json({
       user: userWithoutPassword,

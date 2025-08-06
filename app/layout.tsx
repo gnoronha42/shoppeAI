@@ -1,47 +1,34 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { MainLayout } from '@/components/layout/main-layout';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { usePathname } from 'next/navigation';
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Providers } from "./providers";
+import { Sidebar } from "@/components/sidebar";
+import { usePathname } from "next/navigation";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
-function RootLayoutContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/login';
+  const isLoginPage = pathname === "/login";
 
-  // Se for a página de login, não aplica o layout
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
-
-  // Se não estiver autenticado e não estiver na página de login, redireciona
-  // if (!isAuthenticated && !isLoginPage) {
-  //   window.location.href = '/login';
-  //   return null;
-  // }
-
-  // Se estiver autenticado e não for página de login, aplica o layout
-  return (
-    <MainLayout>
-      {children}
-    </MainLayout>
-  );
-}
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
-        <AuthProvider>
-          <RootLayoutContent>
-            {children}
-          </RootLayoutContent>
-        </AuthProvider>
+        <Providers>
+          <div className="min-h-screen">
+            {!isLoginPage && <Sidebar />}
+            <main className={`${!isLoginPage ? 'md:pl-64 p-6' : ''} min-h-screen bg-gray-50 dark:bg-zinc-900`}>
+              <div className={`${!isLoginPage ? 'max-w-7xl mx-auto' : ''}`}>
+                {children}
+              </div>
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );

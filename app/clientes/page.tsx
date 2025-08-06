@@ -21,6 +21,9 @@ import { Loader2, Plus, User, Search } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setClients } from "@/features/clients/clientSlice";
 import { Client } from "@/types";
+import { useAuth } from "@/contexts/AuthContext";
+import { PERMISSIONS } from "@/lib/permissions";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const CLIENTS_PER_PAGE = 10;
 
@@ -30,6 +33,7 @@ export default function ClientesPage() {
   const [activeTab, setActiveTab] = useState<string>("lista");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [page, setPage] = useState<number>(1);
+  const { hasPermission } = useAuth();
 
   const { data: response, isLoading, error } = useGetClientsQuery({
     page,
@@ -82,10 +86,7 @@ export default function ClientesPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-          <TabsTrigger value="lista">Lista de Clientes</TabsTrigger>
-          <TabsTrigger value="cadastro">Cadastrar Cliente</TabsTrigger>
-        </TabsList>
+       
         
         <TabsContent value="lista" className="space-y-6 mt-6">
           {/* Campo de busca */}
@@ -100,13 +101,15 @@ export default function ClientesPage() {
                 className="pl-8"
               />
             </div>
-            <Button 
-              variant="outline"
-              onClick={() => setActiveTab("cadastro")}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Cliente
-            </Button>
+            {hasPermission(PERMISSIONS.MANAGE_CLIENTS) && (
+              <Button 
+                variant="outline"
+                onClick={() => setActiveTab("cadastro")}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Novo Cliente
+              </Button>
+            )}
           </div>
 
           {/* Informações da busca/paginação */}

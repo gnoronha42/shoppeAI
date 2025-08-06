@@ -10,11 +10,11 @@ export const PERMISSIONS = {
   MANAGE_SETTINGS: 'manage_settings',
   VIEW_HISTORY: 'view_history',
   USE_AI: 'use_ai',
-  MANAGE_ANALYSTS: 'manage_analysts',
+  VIEW_CLIENTS: 'view_clients', // Nova permissão apenas para visualizar clientes
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
-export type Role = 'superuser' | 'admin' | 'user';
+export type Role = 'superuser' | 'admin' | 'analyst' | 'user';
 
 // Permissões padrão para cada tipo de usuário
 export const DEFAULT_PERMISSIONS: Record<Role, Permission[]> = {
@@ -26,7 +26,7 @@ export const DEFAULT_PERMISSIONS: Record<Role, Permission[]> = {
     PERMISSIONS.MANAGE_SETTINGS,
     PERMISSIONS.VIEW_HISTORY,
     PERMISSIONS.USE_AI,
-    PERMISSIONS.MANAGE_ANALYSTS,
+    PERMISSIONS.VIEW_CLIENTS,
   ],
   admin: [
     PERMISSIONS.VIEW_DASHBOARD,
@@ -34,14 +34,20 @@ export const DEFAULT_PERMISSIONS: Record<Role, Permission[]> = {
     PERMISSIONS.MANAGE_ANALYSIS,
     PERMISSIONS.VIEW_HISTORY,
     PERMISSIONS.USE_AI,
+    PERMISSIONS.VIEW_CLIENTS,
   ],
-  user: [
+  analyst: [
     PERMISSIONS.VIEW_DASHBOARD,
     PERMISSIONS.MANAGE_ANALYSIS,
     PERMISSIONS.VIEW_HISTORY,
     PERMISSIONS.USE_AI,
+    PERMISSIONS.VIEW_CLIENTS, // Pode apenas visualizar clientes
   ],
-} as const;
+  user: [
+    PERMISSIONS.VIEW_DASHBOARD,
+    PERMISSIONS.VIEW_HISTORY,
+  ],
+};
 
 // Descrições amigáveis das permissões
 export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
