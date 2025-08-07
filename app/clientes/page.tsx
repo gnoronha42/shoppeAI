@@ -33,7 +33,15 @@ export default function ClientesPage() {
   const [activeTab, setActiveTab] = useState<string>("lista");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [page, setPage] = useState<number>(1);
-  const { hasPermission } = useAuth();
+  const { hasPermission, user } = useAuth();
+  
+  // Adicionar logs para debugar
+  useEffect(() => {
+    console.log('=== DEBUG PERMISSÕES CLIENTE ===');
+    console.log('Usuário:', user);
+    console.log('hasPermission create_clients:', hasPermission('create_clients'));
+    console.log('hasPermission view_clients:', hasPermission('view_clients'));
+  }, [user, hasPermission]);
 
   const { data: response, isLoading, error } = useGetClientsQuery({
     page,
@@ -101,7 +109,7 @@ export default function ClientesPage() {
                 className="pl-8"
               />
             </div>
-            {hasPermission(PERMISSIONS.MANAGE_CLIENTS) && (
+            {(user?.role === 'superuser' || user?.role === 'admin') && (
               <Button 
                 variant="outline"
                 onClick={() => setActiveTab("cadastro")}
@@ -155,14 +163,16 @@ export default function ClientesPage() {
                 ) : (
                   <div>
                     <p className="text-muted-foreground">Nenhum cliente cadastrado</p>
-                    <Button 
-                      variant="outline" 
-                      className="mt-4"
-                      onClick={() => setActiveTab("cadastro")}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Cadastrar Cliente
-                    </Button>
+                    {(user?.role === 'superuser' || user?.role === 'admin') && (
+                      <Button 
+                        variant="outline" 
+                        className="mt-4"
+                        onClick={() => setActiveTab("cadastro")}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Cadastrar Cliente
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

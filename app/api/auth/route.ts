@@ -56,6 +56,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verificar se o usuário está ativo (não pode ser 'inactive_analyst' ou outros roles inativos)
+    if (user.role === 'inactive_analyst' || user.role?.includes('inactive')) {
+      console.log('Usuário inativo tentando fazer login:', user.email);
+      return NextResponse.json(
+        { error: 'Conta desativada. Entre em contato com o administrador.' },
+        { status: 403 }
+      );
+    }
+
     // Remove a senha dos dados retornados
     const { password: _, ...userWithoutPassword } = user;
 

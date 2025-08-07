@@ -9,6 +9,7 @@
     "lint": "next lint",
     "vercel-build": "prisma generate && prisma db push && next build",
     "backup": "ts-node --project tsconfig.scripts.json scripts/backups/backup-db.ts",
+    "restore": "ts-node --project tsconfig.scripts.json scripts/backups/restore-db.ts",
     "postinstall": "prisma generate",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:reset": "prisma migrate reset --force",

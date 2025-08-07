@@ -72,68 +72,43 @@ function extractToken(request: Request): string | null {
  * @returns Resultado da validação
  */
 export async function validatePermissions(
-  request: Request, 
-  requiredPermissions: string[] = []
+  request: Request,
+  requiredPermissions: string[]
 ): Promise<AuthResult> {
   try {
     console.log('=== VALIDANDO PERMISSÕES ===');
     console.log('Permissões necessárias:', requiredPermissions);
-    
-    // Extrair token do header Authorization ou cookies
-    const token = extractToken(request);
-    
-    console.log('Token extraído:', token ? 'presente' : 'ausente');
 
+    // Extrair token do header Authorization
+    const authHeader = request.headers.get('authorization');
+    const token = authHeader?.replace('Bearer ', '') || request.headers.get('cookie')?.split('token=')[1]?.split(';')[0];
+    
     if (!token) {
       console.log('❌ Token não encontrado');
-      return {
-        error: 'Token de autorização necessário',
-        status: 401
-      };
+      return { error: 'Token de acesso não fornecido', status: 401 };
     }
 
-    // Verificar e decodificar JWT
-    let decoded: JWTPayload;
-    try {
-      decoded = verify(token, JWT_SECRET) as JWTPayload;
-      console.log('✅ Token JWT válido para usuário:', decoded.userId);
-    } catch (jwtError: any) {
-      console.log('❌ Erro JWT:', jwtError.message);
-      return {
-        error: 'Token inválido ou expirado',
-        status: 401
-      };
-    }
+    console.log('Token extraído: presente');
 
-    // Buscar usuário no banco de dados - ✅ CORRIGIDO: removido is_active
-    const user: any = await prisma.users.findUnique({
+    // Verificar e decodificar o token
+    const decoded = verify(token, JWT_SECRET) as { userId: string };
+    console.log('✅ Token JWT válido para usuário:', decoded.userId);
+
+    // Buscar usuário no banco
+    const user = await prisma.users.findUnique({
       where: { id: decoded.userId },
       select: {
         id: true,
         email: true,
-        name: true,
         role: true,
         permissions: true,
-        // ❌ REMOVIDO: is_active: true,
       },
     });
 
     if (!user) {
-      console.log('❌ Usuário não encontrado:', decoded.userId);
-      return {
-        error: 'Usuário não encontrado',
-        status: 404
-      };
+      console.log('❌ Usuário não encontrado');
+      return { error: 'Usuário não encontrado', status: 404 };
     }
-
-    // ❌ REMOVIDO: Verificação de is_active
-    // if (!user.is_active) {
-    //   console.log('❌ Usuário inativo:', user.email);
-    //   return {
-    //     error: 'Usuário inativo',
-    //     status: 403
-    //   };
-    // }
 
     console.log('✅ Usuário encontrado:', {
       id: user.id,
@@ -141,49 +116,48 @@ export async function validatePermissions(
       role: user.role
     });
 
-    // Determinar permissões do usuário
-    const defaultRolePermissions = DEFAULT_PERMISSIONS[user.role as Role] || DEFAULT_PERMISSIONS.user;
-    const userPermissions = user.permissions && user.permissions.length > 0 
-      ? user.permissions as Permission[]
-      : defaultRolePermissions;
+    // Obter permissões do usuário (do banco ou padrão do role)
+    let userPermissions: string[] = [];
+    
+    if (user.permissions && Array.isArray(user.permissions)) {
+      userPermissions = user.permissions;
+    } else {
+      // Fallback para permissões padrão baseadas no role
+      userPermissions = DEFAULT_PERMISSIONS[user.role as keyof typeof DEFAULT_PERMISSIONS] || [];
+    }
 
     console.log('Permissões do usuário:', userPermissions);
 
     // Verificar se o usuário tem todas as permissões necessárias
-    if (requiredPermissions.length > 0) {
-      const hasAllPermissions = requiredPermissions.every(permission => 
-        userPermissions.includes(permission as Permission)
-      );
+    // IMPORTANTE: Comparar as CHAVES das permissões, não as descrições
+    const hasAllPermissions = requiredPermissions.every(permission => 
+      userPermissions.includes(permission)
+    );
 
-      if (!hasAllPermissions) {
-        console.log('❌ Permissões insuficientes');
-        console.log('Necessárias:', requiredPermissions);
-        console.log('Usuário possui:', userPermissions);
-        return {
-          error: 'Permissões insuficientes para esta ação',
-          status: 403
-        };
-      }
+    if (!hasAllPermissions) {
+      console.log('❌ Permissões insuficientes');
+      console.log('Necessárias:', requiredPermissions);
+      console.log('Usuário possui:', userPermissions);
+      return { 
+        error: 'Permissões insuficientes para esta ação', 
+        status: 403 
+      };
     }
 
-    console.log('✅ Validação de permissões bem-sucedida');
+    console.log('✅ Permissões validadas com sucesso');
 
     return {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name,
         role: user.role,
       },
-      permissions: userPermissions
+      permissions: userPermissions,
     };
 
   } catch (error) {
     console.error('❌ Erro na validação de permissões:', error);
-    return {
-      error: 'Erro interno na validação de permissões',
-      status: 500
-    };
+    return { error: 'Erro interno de autenticação', status: 500 };
   }
 }
 

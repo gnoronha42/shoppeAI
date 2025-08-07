@@ -58,10 +58,8 @@ export function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
 
-  // Verificar se o usuário é superuser
   const isSuperUser = user?.role === 'superuser';
 
-  // Combinar os itens do menu baseado nas permissões
   const sidebarItems = [...regularItems, ...(isSuperUser ? adminItems : [])];
 
   return (
@@ -112,7 +110,6 @@ export function Sidebar() {
           </nav>
           
           <div className="p-4 border-t border-gray-200 dark:border-zinc-800">
-            {/* User info and logout */}
             <div className="mb-4 space-y-3">
               <div className="flex items-center space-x-3">
                 <div className="rounded-full bg-orange-100 p-2 dark:bg-zinc-800">

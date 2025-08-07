@@ -3,90 +3,139 @@
 
 // Lista de todas as permissões possíveis
 export const PERMISSIONS = {
-  VIEW_DASHBOARD: 'view_dashboard',
-  MANAGE_CLIENTS: 'manage_clients',
-  MANAGE_ANALYSIS: 'manage_analysis',
-  MANAGE_USERS: 'manage_users',
-  MANAGE_SETTINGS: 'manage_settings',
-  VIEW_HISTORY: 'view_history',
-  USE_AI: 'use_ai',
-  VIEW_CLIENTS: 'view_clients', // Nova permissão apenas para visualizar clientes
+  // Dashboard
+  view_dashboard: 'Visualizar dashboard',
+  
+  // Análises
+  manage_analysis: 'Gerenciar análises',
+  view_history: 'Visualizar histórico',
+  
+  // IA
+  use_ai: 'Usar funcionalidades de IA',
+  
+  // Clientes - Separando as permissões
+  view_clients: 'Visualizar clientes',
+  create_clients: 'Criar clientes',
+  edit_clients: 'Editar clientes',
+  delete_clients: 'Deletar clientes',
+  manage_client_checklist: 'Gerenciar checklist de clientes',
+  
+  // Usuários
+  manage_users: 'Gerenciar usuários',
+  
+  // Configurações
+  manage_settings: 'Gerenciar configurações',
 } as const;
 
-export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
-export type Role = 'superuser' | 'admin' | 'analyst' | 'user';
+export type Permission = keyof typeof PERMISSIONS;
+export type Role = 'superuser' | 'admin' | 'analyst' | 'inactive_analyst' | 'user';
 
-// Permissões padrão para cada tipo de usuário
-export const DEFAULT_PERMISSIONS: Record<Role, Permission[]> = {
+// Permissões por role
+export const ROLE_PERMISSIONS = {
   superuser: [
-    PERMISSIONS.VIEW_DASHBOARD,
-    PERMISSIONS.MANAGE_CLIENTS,
-    PERMISSIONS.MANAGE_ANALYSIS,
-    PERMISSIONS.MANAGE_USERS,
-    PERMISSIONS.MANAGE_SETTINGS,
-    PERMISSIONS.VIEW_HISTORY,
-    PERMISSIONS.USE_AI,
-    PERMISSIONS.VIEW_CLIENTS,
+    'view_dashboard',
+    'manage_analysis',
+    'view_history',
+    'use_ai',
+    'view_clients',
+    'create_clients',
+    'edit_clients',
+    'delete_clients',
+    'manage_client_checklist',
+    'manage_users',
+    'manage_settings',
   ],
   admin: [
-    PERMISSIONS.VIEW_DASHBOARD,
-    PERMISSIONS.MANAGE_CLIENTS,
-    PERMISSIONS.MANAGE_ANALYSIS,
-    PERMISSIONS.VIEW_HISTORY,
-    PERMISSIONS.USE_AI,
-    PERMISSIONS.VIEW_CLIENTS,
+    'view_dashboard',
+    'manage_analysis',
+    'view_history',
+    'use_ai',
+    'view_clients',
+    'create_clients',
+    'edit_clients',
+    'delete_clients',
+    'manage_client_checklist',
+    'manage_users',
+    'manage_settings',
   ],
   analyst: [
-    PERMISSIONS.VIEW_DASHBOARD,
-    PERMISSIONS.MANAGE_ANALYSIS,
-    PERMISSIONS.VIEW_HISTORY,
-    PERMISSIONS.USE_AI,
-    PERMISSIONS.VIEW_CLIENTS, // Pode apenas visualizar clientes
+    'view_dashboard',
+    'manage_analysis',
+    'view_history',
+    'use_ai',
+    'view_clients',
+    'manage_client_checklist', // Analistas podem gerenciar checklist mas não criar/editar clientes
+  ],
+  inactive_analyst: [
+    'view_dashboard',
+    'view_history',
+    'view_clients',
   ],
   user: [
-    PERMISSIONS.VIEW_DASHBOARD,
-    PERMISSIONS.VIEW_HISTORY,
+    'view_dashboard',
+    'view_history',
   ],
-};
+} as const;
+
+// Permissões padrão para cada tipo de usuário
+export const DEFAULT_PERMISSIONS = {
+  superuser: ROLE_PERMISSIONS.superuser,
+  admin: ROLE_PERMISSIONS.admin,
+  analyst: ROLE_PERMISSIONS.analyst,
+  inactive_analyst: ROLE_PERMISSIONS.inactive_analyst,
+  user: ROLE_PERMISSIONS.user,
+} as const;
 
 // Descrições amigáveis das permissões
 export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
-  [PERMISSIONS.VIEW_DASHBOARD]: 'Visualizar Dashboard',
-  [PERMISSIONS.MANAGE_CLIENTS]: 'Gerenciar Clientes',
-  [PERMISSIONS.MANAGE_ANALYSIS]: 'Gerenciar Análises',
-  [PERMISSIONS.MANAGE_USERS]: 'Gerenciar Usuários',
-  [PERMISSIONS.MANAGE_SETTINGS]: 'Gerenciar Configurações',
-  [PERMISSIONS.VIEW_HISTORY]: 'Visualizar Histórico',
-  [PERMISSIONS.USE_AI]: 'Usar Inteligência Artificial',
+  view_dashboard: 'Visualizar Dashboard',
+  manage_analysis: 'Gerenciar Análises',
+  view_history: 'Visualizar Histórico',
+  use_ai: 'Usar Inteligência Artificial',
+  view_clients: 'Visualizar Clientes',
+  create_clients: 'Criar Clientes',
+  edit_clients: 'Editar Clientes',
+  delete_clients: 'Deletar Clientes',
+  manage_client_checklist: 'Gerenciar Checklist de Clientes',
+  manage_users: 'Gerenciar Usuários',
+  manage_settings: 'Gerenciar Configurações',
 };
 
 // Descrições dos tipos de usuário
 export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   superuser: 'Super Usuário - Acesso total ao sistema',
   admin: 'Administrador - Gerencia clientes, análises e visualiza dados',
-  user: 'Usuário - Pode criar análises e visualizar dados básicos',
+  analyst: 'Analista - Pode criar análises e visualizar dados',
+  inactive_analyst: 'Analista Inativo - Acesso limitado apenas para visualização',
+  user: 'Usuário - Pode visualizar dados básicos',
 };
 
 // Grupos de permissões para organização na UI
 export const PERMISSION_GROUPS = {
   dashboard: {
     name: 'Dashboard',
-    permissions: [PERMISSIONS.VIEW_DASHBOARD]
+    permissions: [PERMISSIONS.view_dashboard]
   },
   clients: {
     name: 'Clientes',
-    permissions: [PERMISSIONS.MANAGE_CLIENTS]
+    permissions: [
+      PERMISSIONS.view_clients,
+      PERMISSIONS.create_clients,
+      PERMISSIONS.edit_clients,
+      PERMISSIONS.delete_clients,
+      PERMISSIONS.manage_client_checklist,
+    ]
   },
   analysis: {
     name: 'Análises',
-    permissions: [PERMISSIONS.MANAGE_ANALYSIS, PERMISSIONS.USE_AI]
+    permissions: [PERMISSIONS.manage_analysis, PERMISSIONS.use_ai]
   },
   system: {
     name: 'Sistema',
-    permissions: [PERMISSIONS.MANAGE_USERS, PERMISSIONS.MANAGE_SETTINGS]
+    permissions: [PERMISSIONS.manage_users, PERMISSIONS.manage_settings]
   },
   data: {
     name: 'Dados',
-    permissions: [PERMISSIONS.VIEW_HISTORY]
+    permissions: [PERMISSIONS.view_history]
   }
 } as const;

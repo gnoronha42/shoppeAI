@@ -2,49 +2,13 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Client, Report } from '@/types';
 
 // Função para extrair token de cookies
-const getTokenFromCookie = (name: string): string | null => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift() || null;
-  }
-  return null;
-};
+
 
 // Base API with authentication
 export const api = createApi({
   baseQuery: fetchBaseQuery({ 
     baseUrl: '/api',
-    credentials: 'include', // ✅ IMPORTANTE: Inclui cookies automaticamente
-    prepareHeaders: (headers) => {
-      // Tentar múltiplas fontes para o token
-      const token = localStorage.getItem('token') || 
-                   localStorage.getItem('auth_token') || 
-                   sessionStorage.getItem('token') ||
-                   sessionStorage.getItem('auth_token') ||
-                   getTokenFromCookie('auth_token') ||  // ✅ NOVO: Procura no cookie
-                   getTokenFromCookie('token');
-      
-      console.log('🔑 Token encontrado:', token ? 'SIM' : 'NÃO');
-      console.log('🔑 Fonte do token:', 
-        localStorage.getItem('token') ? 'localStorage.token' :
-        localStorage.getItem('auth_token') ? 'localStorage.auth_token' :
-        sessionStorage.getItem('token') ? 'sessionStorage.token' :
-        sessionStorage.getItem('auth_token') ? 'sessionStorage.auth_token' :
-        getTokenFromCookie('auth_token') ? 'cookie.auth_token' :
-        getTokenFromCookie('token') ? 'cookie.token' : 'NENHUMA'
-      );
-      console.log('🔑 Token (primeiros 20 chars):', token?.substring(0, 20));
-      
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
-        console.log('✅ Header Authorization definido');
-      } else {
-        console.log('❌ Nenhum token encontrado');
-      }
-      
-      return headers;
-    },
+    credentials: 'include', // ✅ Inclui cookies automaticamente (auth_token)
   }),
   tagTypes: ['Clients', 'Reports', 'Analyses'],
   endpoints: (builder) => ({
@@ -233,6 +197,7 @@ export const api = createApi({
             title: analysis.title || `Análise de ${analysis.type === 'account' ? 'Conta' : 'Anúncios'}`,
             type: analysis.type,
             created_at: analysis.created_at,
+            creator: analysis.creator,
             content: analysis.analysis_results && analysis.analysis_results.length > 0 
               ? analysis.analysis_results[0].content 
               : undefined

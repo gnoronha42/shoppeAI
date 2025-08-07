@@ -28,6 +28,7 @@ import {
   Download,
   CalendarIcon,
   TrendingUp,
+  Plus,
 } from "lucide-react";
 import {
   useGetClientQuery,
@@ -81,7 +82,7 @@ export default function ClientDetailsPage() {
   >(null);
   const [selectedTab, setSelectedTab] = useState("info");
   const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
-  
+
   // Estados para relatório histórico
   const [historicalReportType, setHistoricalReportType] = useState<'account' | 'ads'>('account');
   const [dateRange, setDateRange] = useState<{
@@ -161,7 +162,9 @@ export default function ClientDetailsPage() {
 
     try {
       console.log("Buscando conteúdo da análise:", analysisId);
-      const response = await fetch(`/api/analises?id=${analysisId}`);
+      const response = await fetch(`/api/analises?id=${analysisId}`, {
+        credentials: 'include', // Enviar cookies automaticamente
+      });
       if (!response.ok) {
         throw new Error("Erro ao carregar análise");
       }
@@ -197,6 +200,7 @@ export default function ClientDetailsPage() {
       // Corrigido para usar o searchParam ao invés de path param
       const response = await fetch(`/api/analises/save?id=${analysisId}`, {
         method: "DELETE",
+        credentials: 'include', // Enviar cookies automaticamente
       });
 
       const responseText = await response.text();
@@ -240,12 +244,12 @@ export default function ClientDetailsPage() {
       }
 
       const data = await response.json();
-      
+
       // Adicionar log para debugar a estrutura dos dados
       console.log("Dados retornados da API para PDF:", data);
-      
+
       let content = null;
-      
+
       // Tentar diferentes estruturas de dados possíveis
       if (data && data.analysis_results && data.analysis_results.length > 0) {
         content = data.analysis_results[0].content;
@@ -254,7 +258,7 @@ export default function ClientDetailsPage() {
       } else if (analysis && analysis.content) {
         content = analysis.content;
       }
-      
+
       if (!content) {
         console.error("Estrutura de dados recebida:", data);
         throw new Error("Conteúdo da análise não encontrado");
@@ -276,10 +280,10 @@ export default function ClientDetailsPage() {
       // Verificar se o PDF precisa ser regenerado
       if (pdfResponse.status === 422) {
         const errorData = await pdfResponse.json();
-        
+
         if (errorData.shouldRegenerate) {
           console.log("⚠️ Relatório incompleto detectado. Seções faltantes:", errorData.missingSections);
-          
+
           toast({
             title: "Relatório incompleto detectado",
             description: "Gerando nova versão com todas as seções...",
@@ -288,7 +292,7 @@ export default function ClientDetailsPage() {
 
           // SEGUNDA TENTATIVA: Tentar novamente após 2 segundos
           await new Promise(resolve => setTimeout(resolve, 2000));
-          
+
           pdfResponse = await fetch("/api/analises/generate", {
             method: "POST",
             headers: {
@@ -351,7 +355,7 @@ export default function ClientDetailsPage() {
 
     try {
       setIsGeneratingHistoricalReport(true);
-      
+
       // TODO: Descomentar quando a implementação real estiver pronta
       /*
       const response = await fetch('/api/analises/historical', {
@@ -379,10 +383,10 @@ export default function ClientDetailsPage() {
       
       setHistoricalReportContent(historicalAnalysis);
       */
-      
+
       // Simular delay de processamento (versão mockada)
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Mock de conteúdo do relatório histórico
       const mockHistoricalReport = `
 # 📊 RELATÓRIO HISTÓRICO - ${client?.name}
@@ -428,13 +432,13 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
       `;
 
       setHistoricalReportContent(mockHistoricalReport);
-      
+
       toast({
         title: "Relatório histórico gerado!",
         description: "O relatório foi gerado com base nas análises do período selecionado",
         variant: "default",
       });
-      
+
     } catch (error) {
       console.error("Erro ao gerar relatório histórico:", error);
       toast({
@@ -460,7 +464,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
 
     try {
       setIsGeneratingComparison(true);
-      
+
       const response = await fetch('/api/analises/comparison', {
         method: 'POST',
         headers: {
@@ -480,9 +484,9 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         throw new Error(errorData.error || 'Erro ao gerar comparação');
       }
 
-      const { 
-        comparison, 
-        reportId, 
+      const {
+        comparison,
+        reportId,
         analysesCount,
         totalAnalysesFound,
         period,
@@ -492,20 +496,20 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         warning,
         tokenLimitReached
       } = await response.json();
-      
+
       setComparisonContent(comparison);
       setComparisonReportId(reportId);
-      
+
       let toastMessage = `Baseado em ${analysesCount} análises`;
       if (totalAnalysesFound && totalAnalysesFound > analysesCount) {
         toastMessage += ` de ${totalAnalysesFound} encontradas`;
       }
       toastMessage += ` (${insightsUsed} otimizadas, ${fullAnalysesUsed} completas)`;
-      
+
       if (optimization?.reductionPercentage) {
         toastMessage += `. ${optimization.reductionPercentage}% tokens economizados`;
       }
-      
+
       if (warning) {
         toastMessage += `. ${warning}`;
       }
@@ -515,7 +519,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         description: toastMessage,
         variant: tokenLimitReached ? "destructive" : "default",
       });
-      
+
     } catch (error: any) {
       console.error("Erro ao gerar comparação:", error);
       toast({
@@ -547,8 +551,8 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
   };
 
   const isComparison = (report: any) => {
-    return report.title?.includes('COMPARAÇÃO') || 
-           report.analysis_results?.[0]?.processed_by === 'comparison-service';
+    return report.title?.includes('COMPARAÇÃO') ||
+      report.analysis_results?.[0]?.processed_by === 'comparison-service';
   };
 
   if (isClientLoading) {
@@ -593,36 +597,41 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
             </p>
           </div>
         </div>
-        {hasPermission(PERMISSIONS.MANAGE_CLIENTS) && (
+        {hasPermission('edit_clients') && (
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setSelectedTab("edit")}>
-              Editar Cliente
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Excluir</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação não pode ser desfeita. Isso excluirá permanentemente
-                    o cliente &quot;{client.name}&quot; e todos os dados
-                    associados a ele.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteClient}
-                    className="bg-red-600 hover:bg-red-700"
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? "Excluindo..." : "Sim, excluir cliente"}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {hasPermission('edit_clients') && (
+              <Button variant="outline" onClick={() => setSelectedTab("edit")}>
+                Editar Cliente
+              </Button>
+            )}
+
+            {hasPermission('delete_clients') && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">Excluir</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação não pode ser desfeita. Isso excluirá permanentemente
+                      o cliente &quot;{client.name}&quot; e todos os dados
+                      associados a ele.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteClient}
+                      className="bg-red-600 hover:bg-red-700"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? "Excluindo..." : "Sim, excluir cliente"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         )}
       </div>
@@ -635,9 +644,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
           </TabsTrigger>
           <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
-          {hasPermission(PERMISSIONS.MANAGE_CLIENTS) && (
-            <TabsTrigger value="edit">Editar</TabsTrigger>
-          )}
+          
         </TabsList>
 
         <TabsContent value="info" className="space-y-4 mt-6">
@@ -720,6 +727,11 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
                         <CardDescription>
                           {new Date(analysis.created_at).toLocaleString(
                             "pt-BR"
+                          )}
+                          {analysis.creator && (
+                            <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded">
+                              por {analysis.creator.name}
+                            </span>
                           )}
                         </CardDescription>
                       </div>
@@ -845,7 +857,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
                       </PopoverContent>
                     </Popover>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label className="text-xs text-muted-foreground">Data Final</Label>
                     <Popover>
@@ -871,7 +883,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
                           selected={dateRange.to}
                           onSelect={(date) => setDateRange(prev => ({ ...prev, to: date }))}
                           disabled={(date) =>
-                            date > new Date() || 
+                            date > new Date() ||
                             date < new Date("2020-01-01") ||
                             (dateRange.from ? date < dateRange.from : false)
                           }
@@ -913,15 +925,15 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
 
               {/* Botões de geração - AQUI É O LOCAL CORRETO */}
               <div className="flex flex-col sm:flex-row gap-4 justify-end">
-    
+
                 <Button
                   onClick={handleGenerateComparison}
                   disabled={!dateRange.from || !dateRange.to || isGeneratingComparison}
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <TrendingUp className="mr-2 h-4 w-4" />
-                  {isGeneratingComparison 
-                    ? "Gerando Comparação..." 
+                  {isGeneratingComparison
+                    ? "Gerando Comparação..."
                     : "Comparar Análises"
                   }
                 </Button>
@@ -930,7 +942,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
               {/* Informações adicionais */}
               <div className="bg-muted/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                
+
                   <strong>Comparar Análises:</strong> Analisa múltiplas análises do período usando IA para identificar tendências e insights evolutivos.
                 </p>
               </div>
@@ -1065,6 +1077,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         <TabsContent value="edit" className="mt-6">
           <Card>
             <CardHeader>
+
               <CardTitle>Editar Cliente</CardTitle>
               <CardDescription>
                 Atualize as informações do cliente

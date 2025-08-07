@@ -66,14 +66,17 @@ model analyses {
   client_id        String             @db.Uuid
   type             String             @db.VarChar(50)
   title            String?            @db.VarChar(255)
+  created_by       String?            @db.Uuid
   created_at       DateTime?          @default(now()) @db.Timestamptz(6)
   clients          clients            @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  creator          users?             @relation(fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
   analysis_results analysis_results[]
   images           images[]
   reports          reports[]
 
   @@index([client_id], map: "idx_analyses_client_id")
   @@index([created_at], map: "idx_analyses_created_at")
+  @@index([created_by], map: "idx_analyses_created_by")
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -229,6 +232,7 @@ model reports {
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model users {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name               String               @db.VarChar(255)
@@ -236,6 +240,7 @@ model users {
   password           String               @db.VarChar(255)
   role               String?              @default("user") @db.VarChar(50)
   permissions        String[]             @default([])
+  created_by         String?              @db.Uuid
   created_at         DateTime?            @default(now()) @db.Timestamptz(6)
   updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
   activity_log       activity_log[]
@@ -244,6 +249,10 @@ model users {
   chat_messages      chat_messages[]
   configurations     configurations[]
   analysts_created   Analysts[]
+  created_analyses   analyses[]
+  checklist_executions checklist_progress[]
+  creator            users?               @relation("UserCreator", fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  created_users      users[]              @relation("UserCreator")
 
   @@map("users")
 }
@@ -279,21 +288,27 @@ model checklist_items {
 }
 
 model checklist_progress {
-  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  client_id    String          @db.Uuid
-  item_id      String          @db.Uuid
-  is_completed Boolean         @default(false)
-  completed_at DateTime?
-  created_at   DateTime?       @default(now())
-  updated_at   DateTime?       @default(now())
-  client       clients         @relation(fields: [client_id], references: [id], onDelete: Cascade)
-  item         checklist_items @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id         String          @db.Uuid
+  item_id           String          @db.Uuid
+  is_completed      Boolean         @default(false)
+  completed_at      DateTime?
+  analyst_id        String?         @db.Uuid
+  analyst_name      String?         @db.VarChar(255)
+  execution_count   Int             @default(1)
+  execution_history Json            @default("[]")
+  created_at        DateTime?       @default(now())
+  updated_at        DateTime?       @default(now())
+  client            clients         @relation(fields: [client_id], references: [id], onDelete: Cascade)
+  item              checklist_items @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  analyst           users?          @relation(fields: [analyst_id], references: [id], onDelete: SetNull)
 
-  @@unique([client_id, item_id])
+  @@index([analyst_id], map: "idx_checklist_progress_analyst_id")
+  @@index([execution_count], map: "idx_checklist_progress_execution_count")
 }
 
 model Analysts {
-  id            String      @id @default(uuid())
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String
   email         String      @unique
   password      String
@@ -302,7 +317,7 @@ model Analysts {
   updated_at    DateTime    @updatedAt
   last_login    DateTime?
   analyses_count Int        @default(0)
-  created_by    String?    // ID do superuser que criou o analista
+  created_by    String?    @db.Uuid // ID do superuser que criou o analista
   created_by_user users?   @relation(fields: [created_by], references: [id])
 
   @@map("analysts")

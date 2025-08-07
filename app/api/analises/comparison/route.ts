@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/lib/generated/prisma";
+import { getCurrentUser } from '@/lib/middleware';
 
 // Inicializar o cliente Prisma (seguindo o padrão do seu projeto)
 const prisma = new PrismaClient();
@@ -107,6 +108,10 @@ TÍTULO ORIGINAL: ${insights.title || result.analyses?.title || 'Título não di
 
 export async function POST(request: NextRequest) {
   try {
+    // Obter usuário logado
+    const authResult = await getCurrentUser(request);
+    const userId = 'user' in authResult ? authResult.user.id : null;
+    
     const { clientId, startDate, endDate, analysisType, maxAnalyses = 50 } = await request.json();
 
     console.log('🔍 Iniciando busca de análises para comparação');
@@ -290,7 +295,8 @@ export async function POST(request: NextRequest) {
       data: {
         client_id: clientId,
         type: analysisType,
-        title: `COMPARAÇÃO ${analysisType.toUpperCase()} - ${period}`
+        title: `COMPARAÇÃO ${analysisType.toUpperCase()} - ${period}`,
+        created_by: userId, // Associar ao usuário logado
       }
     });
 

@@ -12,8 +12,8 @@ export async function GET(request: Request) {
     console.log('URL:', request.url);
     console.log('Method:', request.method);
     
-    // Verificar permissões - apenas usuários com permissão de gerenciar clientes podem visualizar
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Verificar permissões - usuários podem visualizar clientes se tiverem view_clients
+    const authResult = await validatePermissions(request, ['view_clients']);
     
     if ('error' in authResult) {
       console.log('❌ Falha na autenticação:', authResult);
@@ -127,8 +127,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // Verificar permissões - apenas usuários com permissão de gerenciar clientes podem criar
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Verificar permissões - apenas usuários com permissão de criar clientes podem criar
+    const authResult = await validatePermissions(request, ['create_clients']);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -184,8 +184,8 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    // Verificar permissões - apenas usuários com permissão de gerenciar clientes podem atualizar
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Verificar permissões - apenas usuários com permissão de editar clientes podem atualizar
+    const authResult = await validatePermissions(request, ['edit_clients']);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -242,8 +242,8 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    // Verificar permissões - apenas usuários com permissão de gerenciar clientes podem deletar
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Verificar permissões - apenas usuários com permissão de deletar clientes podem deletar
+    const authResult = await validatePermissions(request, ['delete_clients']);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },

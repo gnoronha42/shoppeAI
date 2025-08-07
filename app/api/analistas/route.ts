@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { validatePermissions } from '@/lib/middleware';
-import { PERMISSIONS } from '@/lib/permissions';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PERMISSIONS, DEFAULT_PERMISSIONS } from '@/lib/permissions';
 import type { Prisma } from "@/lib/generated/prisma";
 
-// Configuração da API
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// GET - Listar analistas
+
 export async function GET(request: Request) {
   try {
-    // Verificar permissões - apenas superusers podem gerenciar analistas
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Usar a CHAVE da permissão, não a descrição
+    const authResult = await validatePermissions(request, ['manage_users']);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -21,16 +20,16 @@ export async function GET(request: Request) {
       );
     }
 
-    // Obter parâmetros de paginação e busca
+
     const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get('page')) || 1;
     const pageSize = Number(searchParams.get('pageSize')) || 10;
     const search = searchParams.get('search') || '';
 
-    // Calcular o offset para paginação
+
     const skip = (page - 1) * pageSize;
 
-    // Construir a condição de busca
+
     const where: Prisma.usersWhereInput = {
       role: 'analyst',
       ...(search ? {
@@ -41,10 +40,10 @@ export async function GET(request: Request) {
       } : {}),
     };
 
-    // Buscar total de registros
+
     const total = await prisma.users.count({ where });
 
-    // Buscar analistas
+
     const analysts = await prisma.users.findMany({
       where,
       select: {
@@ -54,6 +53,16 @@ export async function GET(request: Request) {
         role: true,
         created_at: true,
         updated_at: true,
+        created_analyses: {
+          select: {
+            id: true,
+          }
+        },
+        creator: {
+          select: {
+            name: true,
+          }
+        },
       },
       orderBy: {
         name: 'asc',
@@ -62,11 +71,23 @@ export async function GET(request: Request) {
       take: pageSize,
     });
 
-    // Calcular total de páginas
+
+    const analystsWithCounts = analysts.map(analyst => ({
+      id: analyst.id,
+      name: analyst.name,
+      email: analyst.email,
+      active: analyst.role === 'analyst', // ativo se role for 'analyst'
+      created_at: analyst.created_at?.toISOString() || new Date().toISOString(),
+      last_login: null, // Por enquanto null, implementar depois
+      analyses_count: analyst.created_analyses.length,
+      created_by_user: analyst.creator ? { name: analyst.creator.name } : null,
+    }));
+
+
     const totalPages = Math.ceil(total / pageSize);
 
     return NextResponse.json({
-      data: analysts,
+      data: analystsWithCounts,
       meta: {
         total,
         page,
@@ -83,17 +104,21 @@ export async function GET(request: Request) {
   }
 }
 
-// POST - Criar novo analista
+
 export async function POST(request: Request) {
   try {
-    // Verificar permissões
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Usar a CHAVE da permissão, não a descrição
+    const authResult = await validatePermissions(request, ['manage_users']);
     if ('error' in authResult) {
+      console.log('❌ Erro de permissão ao criar analista:', authResult.error);
       return NextResponse.json(
         { error: authResult.error },
         { status: authResult.status }
       );
     }
+
+    console.log('✅ Usuário autorizado a criar analista:', authResult.user?.name);
+    console.log('🔑 Permissões do usuário:', authResult.permissions);
 
     const body = await request.json();
     const { name, email, password } = body;
@@ -106,9 +131,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verificar se email já existe
+
     const existingUser = await prisma.users.findUnique({
       where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true,
+      },
     });
 
     if (existingUser) {
@@ -119,22 +152,27 @@ export async function POST(request: Request) {
     }
 
     console.log('Criando analista:', { name, email }); // Log para debug
+    console.log('📋 Permissões padrão para analista:', DEFAULT_PERMISSIONS.analyst);
 
-    // Criar novo usuário como analista
+    // Criar novo usuário como analista com permissões padrão
     const analyst = await prisma.users.create({
       data: {
         name,
         email,
         password,
         role: 'analyst',
-        permissions: [
-          PERMISSIONS.MANAGE_ANALYSIS,
-          PERMISSIONS.VIEW_DASHBOARD,
-        ],
+        permissions: DEFAULT_PERMISSIONS.analyst,
+        created_by: authResult.user?.id, // ID do usuário que está criando o analista
       },
     });
 
-    console.log('Analista criado:', analyst); // Log para debug
+    console.log('✅ Analista criado com sucesso:', {
+      id: analyst.id,
+      name: analyst.name,
+      email: analyst.email,
+      role: analyst.role,
+      permissions: analyst.permissions
+    });
 
     return NextResponse.json(analyst, { status: 201 });
   } catch (error) {
@@ -149,8 +187,8 @@ export async function POST(request: Request) {
 // PATCH - Atualizar analista
 export async function PATCH(request: Request) {
   try {
-    // Verificar permissões
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Usar a CHAVE da permissão, não a descrição
+    const authResult = await validatePermissions(request, ['manage_users']);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -168,14 +206,13 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Garantir que não pode mudar o role
     delete data.role;
 
-    // Atualizar usuário
+
     const analyst = await prisma.users.update({
-      where: { 
+      where: {
         id,
-        role: 'analyst', // Garantir que só atualiza analistas
+        role: 'analyst',
       },
       data,
     });
@@ -190,11 +227,11 @@ export async function PATCH(request: Request) {
   }
 }
 
-// DELETE - Desativar analista
+
 export async function DELETE(request: Request) {
   try {
-    // Verificar permissões
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_CLIENTS]);
+    // Usar a CHAVE da permissão, não a descrição
+    const authResult = await validatePermissions(request, ['manage_users']);
     if ('error' in authResult) {
       return NextResponse.json(
         { error: authResult.error },
@@ -204,6 +241,7 @@ export async function DELETE(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const action = searchParams.get('action');
 
     if (!id) {
       return NextResponse.json(
@@ -212,22 +250,64 @@ export async function DELETE(request: Request) {
       );
     }
 
+    if (action === 'delete_analyses') {
 
-    await prisma.users.update({
-      where: { 
-        id,
-        role: 'analyst', 
-      },
-      data: { 
-        role: 'inactive_analyst', 
-      },
-    });
+      const deletedAnalyses = await prisma.analyses.deleteMany({
+        where: {
+          created_by: id,
+        },
+      });
 
-    return NextResponse.json({ message: 'Analista desativado com sucesso' });
+      return NextResponse.json({
+        message: `${deletedAnalyses.count} análises excluídas com sucesso`,
+        deletedCount: deletedAnalyses.count
+      });
+    } else {
+      const currentUser = await prisma.users.findUnique({
+        where: { id },
+        select: { role: true, name: true }
+      });
+
+      if (!currentUser) {
+        return NextResponse.json(
+          { error: 'Usuário não encontrado' },
+          { status: 404 }
+        );
+      }
+
+      if (currentUser.role === 'inactive_analyst') {
+        // Reativar analista
+        await prisma.users.update({
+          where: { id },
+          data: { role: 'analyst' },
+        });
+
+        return NextResponse.json({
+          message: 'Analista reativado com sucesso',
+          action: 'reactivated'
+        });
+      } else if (currentUser.role === 'analyst') {
+        // Desativar analista
+        await prisma.users.update({
+          where: { id },
+          data: { role: 'inactive_analyst' },
+        });
+
+        return NextResponse.json({
+          message: 'Analista desativado com sucesso. O usuário não poderá mais fazer login.',
+          action: 'deactivated'
+        });
+      } else {
+        return NextResponse.json(
+          { error: 'Usuário não é um analista' },
+          { status: 400 }
+        );
+      }
+    }
   } catch (error) {
-    console.error('Erro ao desativar analista:', error);
+    console.error('Erro ao processar solicitação DELETE:', error);
     return NextResponse.json(
-      { error: 'Erro ao desativar analista' },
+      { error: 'Erro ao processar solicitação' },
       { status: 500 }
     );
   }

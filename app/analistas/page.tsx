@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -27,9 +27,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Search, UserPlus } from "lucide-react";
+import { Loader2, Plus, Search, UserPlus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -62,7 +73,9 @@ export default function AnalistasPage() {
   const loadAnalysts = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/analistas");
+      const response = await fetch("/api/analistas", {
+        credentials: 'include', // Enviar cookies automaticamente
+      });
       if (!response.ok) throw new Error("Erro ao carregar analistas");
       const data = await response.json();
       setAnalysts(data.data);
@@ -87,11 +100,8 @@ export default function AnalistasPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Garantir que o token de autenticação seja enviado
-          ...(localStorage.getItem('token') && {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          })
         },
+        credentials: 'include', // Enviar cookies automaticamente
         body: JSON.stringify(newAnalyst),
       });
 
@@ -125,29 +135,70 @@ export default function AnalistasPage() {
     }
   };
 
-  // Função para desativar analista
-  const handleDeactivateAnalyst = async (id: string) => {
+  // Função para desativar/reativar analista
+  const handleToggleAnalystStatus = async (id: string, currentlyActive: boolean) => {
     try {
       const response = await fetch(`/api/analistas?id=${id}`, {
         method: "DELETE",
+        credentials: 'include', // Enviar cookies automaticamente
       });
 
-      if (!response.ok) throw new Error("Erro ao desativar analista");
+      if (!response.ok) throw new Error("Erro ao alterar status do analista");
 
+      const data = await response.json();
+      
       toast({
         title: "Sucesso",
-        description: "Analista desativado com sucesso",
+        description: data.message,
       });
 
       loadAnalysts();
     } catch (error) {
       toast({
         title: "Erro",
-        description: "Erro ao desativar analista",
+        description: "Erro ao alterar status do analista",
         variant: "destructive",
       });
     }
   };
+
+  // Função para excluir análises do analista
+  const handleDeleteAnalyses = async (id: string, analystName: string) => {
+    try {
+      const response = await fetch(`/api/analistas?id=${id}&action=delete_analyses`, {
+        method: "DELETE",
+        credentials: 'include', // Enviar cookies automaticamente
+      });
+
+      if (!response.ok) throw new Error("Erro ao excluir análises");
+
+      const data = await response.json();
+      
+      toast({
+        title: "Sucesso",
+        description: data.message,
+      });
+
+      // Recarregar a lista para atualizar a contagem
+      loadAnalysts();
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir análises",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadAnalysts();
+  }, []);
+
+  // Filtrar analistas baseado no termo de busca
+  const filteredAnalysts = analysts.filter(analyst =>
+    analyst.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    analyst.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -267,7 +318,7 @@ export default function AnalistasPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {analysts.map((analyst) => (
+                {filteredAnalysts.map((analyst) => (
                   <TableRow key={analyst.id}>
                     <TableCell>{analyst.name}</TableCell>
                     <TableCell>{analyst.email}</TableCell>
@@ -282,7 +333,42 @@ export default function AnalistasPage() {
                         {analyst.active ? "Ativo" : "Inativo"}
                       </span>
                     </TableCell>
-                    <TableCell>{analyst.analyses_count}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span>{analyst.analyses_count}</span>
+                        {analyst.analyses_count > 0 && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Análises</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja excluir todas as {analyst.analyses_count} análises de {analyst.name}? 
+                                  Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDeleteAnalyses(analyst.id, analyst.name)}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Excluir Análises
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {analyst.last_login
                         ? format(new Date(analyst.last_login), "dd/MM/yyyy HH:mm", {
@@ -296,7 +382,7 @@ export default function AnalistasPage() {
                         variant="outline"
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => handleDeactivateAnalyst(analyst.id)}
+                        onClick={() => handleToggleAnalystStatus(analyst.id, analyst.active)}
                       >
                         {analyst.active ? "Desativar" : "Reativar"}
                       </Button>
