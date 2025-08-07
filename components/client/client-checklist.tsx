@@ -116,6 +116,22 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
           })
         )
       );
+      
+      // Recarregar dados do checklist após salvar
+      console.log('🔄 Recarregando dados do checklist...');
+      const response = await fetch(`/api/clientes/${clientId}/checklist`, {
+        credentials: 'include',
+        cache: 'no-cache', // Evitar cache
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Dados recarregados:', data);
+        setBlocks(data.blocks || []);
+      } else {
+        console.error('❌ Erro ao recarregar dados:', response.status);
+      }
+      
       toast({ title: "Checklist salvo!", description: "Progresso salvo com sucesso.", variant: "default" });
       setChangedItems({});
     } catch (error) {
@@ -237,7 +253,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
   const handleGeneratePDF = async () => {
     try {
       const markdown = generateChecklistMarkdown();
-      const response = await fetch("https://analysis-micro.onrender.com/checklist-completed-pdf", {
+      const response = await fetch("http://localhost:3001/checklist-completed-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

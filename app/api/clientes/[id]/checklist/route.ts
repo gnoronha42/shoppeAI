@@ -140,12 +140,12 @@ export async function POST(
         is_completed: isCompleted,
         completed_at: isCompleted ? new Date() : null,
         analyst_id: authResult.user.id,
-        analyst_name: authResult.user.name,
+        analyst_name: authResult.user.name || 'Usuário sem nome',
         execution_count: 1, // Cada registro representa 1 execução
         execution_history: JSON.stringify([{
           executed_at: new Date(),
           analyst_id: authResult.user.id,
-          analyst_name: authResult.user.name,
+          analyst_name: authResult.user.name || 'Usuário sem nome',
           is_completed: isCompleted,
           execution_number: newExecutionCount
         }])

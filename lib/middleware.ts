@@ -99,6 +99,7 @@ export async function validatePermissions(
       where: { id: decoded.userId },
       select: {
         id: true,
+        name: true,
         email: true,
         role: true,
         permissions: true,
@@ -149,6 +150,7 @@ export async function validatePermissions(
     return {
       user: {
         id: user.id,
+        name: user.name,
         email: user.email,
         role: user.role,
       },
