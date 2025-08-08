@@ -9,7 +9,7 @@ export const store = configureStore({
     clients: clientReducer,
     theme: themeReducer,
     [api.reducerPath]: api.reducer,
-  },
+      },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),
 });

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/middleware';
 
 // Cache para armazenar resultados recentes
 const resultsCache = new Map();
@@ -7,6 +8,10 @@ const CACHE_TTL = 1000 * 60 * 30; // 30 minutos
 
 export async function POST(request: Request) {
   try {
+    // Obter usuário logado
+    const authResult = await getCurrentUser(request);
+    const userId = 'user' in authResult ? authResult.user.id : null;
+    
     const body = await request.json();
     
     // Validar campos obrigatórios
@@ -22,7 +27,8 @@ export async function POST(request: Request) {
       data: {
         client_id: body.clientId,
         type: body.type,
-        title: body.title || `Análise de ${body.type === 'account' ? 'Conta' : 'Anúncios'}`
+        title: body.title || `Análise de ${body.type === 'account' ? 'Conta' : 'Anúncios'}`,
+        created_by: userId, // Associar ao usuário logado
       },
     });
     
@@ -147,7 +153,12 @@ export async function GET(request: Request) {
       },
       include: {
         analysis_results: true,
-        images: true
+        images: true,
+        creator: {
+          select: {
+            name: true,
+          }
+        }
       },
       take: 100
     });

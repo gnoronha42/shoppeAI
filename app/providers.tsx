@@ -1,17 +1,20 @@
 "use client";
 
-import { store } from "@/lib/store";
-import { Provider } from "react-redux";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { Provider as ReduxProvider } from "react-redux";
+import { store } from "@/lib/store";
 import { Toaster } from "@/components/ui/toaster";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <Provider store={store}>
-      <ThemeProvider defaultTheme="light" storageKey="shopee-analytics-theme">
-        {children}
-        <Toaster />
-      </ThemeProvider>
-    </Provider>
+    <ReduxProvider store={store}>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="light" storageKey="shoppeai-theme">
+          {children}
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
+    </ReduxProvider>
   );
 }

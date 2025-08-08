@@ -1,26 +1,34 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { MainLayout } from '@/components/layout/main-layout';
+"use client";
 
-const inter = Inter({ subsets: ['latin'] });
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Providers } from "./providers";
+import { Sidebar } from "@/components/sidebar";
+import { usePathname } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: 'Shop.AI',
-  description: 'Plataforma para análise de contas e ads da Shopee',
-};
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
+
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
-        <MainLayout>
-          {children}
-        </MainLayout>
+        <Providers>
+          <div className="min-h-screen">
+            {!isLoginPage && <Sidebar />}
+            <main className={`${!isLoginPage ? 'md:pl-64 p-6' : ''} min-h-screen bg-gray-50 dark:bg-zinc-900`}>
+              <div className={`${!isLoginPage ? 'max-w-7xl mx-auto' : ''}`}>
+                {children}
+              </div>
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
