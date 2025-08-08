@@ -154,5 +154,4 @@ export async function GET(request: Request) {
   }
 }
 
-// Re-exportar as permissões para compatibilidade com código existente
-export { PERMISSIONS };
+// Permissões são exportadas diretamente do arquivo de permissões

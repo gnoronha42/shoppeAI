@@ -161,7 +161,7 @@ export async function POST(request: Request) {
         email,
         password,
         role: 'analyst',
-        permissions: DEFAULT_PERMISSIONS.analyst,
+        permissions: [...DEFAULT_PERMISSIONS.analyst],
         created_by: authResult.user?.id, // ID do usuário que está criando o analista
       },
     });

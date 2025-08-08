@@ -253,7 +253,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
   const handleGeneratePDF = async () => {
     try {
       const markdown = generateChecklistMarkdown();
-      const response = await fetch("http://localhost:3001/checklist-completed-pdf", {
+      const response = await fetch("https://analysis-micro.onrender.com/checklist-completed-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

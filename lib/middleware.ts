@@ -124,7 +124,8 @@ export async function validatePermissions(
       userPermissions = user.permissions;
     } else {
       // Fallback para permissões padrão baseadas no role
-      userPermissions = DEFAULT_PERMISSIONS[user.role as keyof typeof DEFAULT_PERMISSIONS] || [];
+      const defaultPerms = DEFAULT_PERMISSIONS[user.role as keyof typeof DEFAULT_PERMISSIONS] || [];
+      userPermissions = [...defaultPerms]; // Converter readonly para mutable
     }
 
     console.log('Permissões do usuário:', userPermissions);
@@ -152,9 +153,9 @@ export async function validatePermissions(
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: user.role || 'user',
       },
-      permissions: userPermissions,
+      permissions: userPermissions as Permission[],
     };
 
   } catch (error) {
@@ -279,15 +280,15 @@ export async function updateUserPermissions(
 ): Promise<AuthResult | { success: boolean; user: any }> {
   try {
     // Verificar se quem está fazendo a alteração tem permissão
-    const authResult = await validatePermissions(request, [PERMISSIONS.MANAGE_USERS]);
+    const authResult = await validatePermissions(request, ['manage_users']);
     
     if ('error' in authResult) {
       return authResult;
     }
 
     // Validar se as permissões são válidas
-    const validPermissions = Object.values(PERMISSIONS);
-    const invalidPermissions = newPermissions.filter(p => !validPermissions.includes(p as Permission));
+    const validPermissions = Object.keys(PERMISSIONS);
+    const invalidPermissions = newPermissions.filter(p => !validPermissions.includes(p));
     
     if (invalidPermissions.length > 0) {
       return {
