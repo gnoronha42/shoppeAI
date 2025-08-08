@@ -4,13 +4,14 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
-import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users } from "lucide-react";
+import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users, LogOut, UserPlus } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
+import { useAuth } from '@/contexts/AuthContext';
 
-const sidebarItems = [
+const regularItems = [
   {
     title: "Dashboard",
     href: "/",
@@ -43,9 +44,23 @@ const sidebarItems = [
   },
 ];
 
+const adminItems = [
+  {
+    title: "Gerenciar Analistas",
+    href: "/analistas",
+    icon: <UserPlus className="mr-2 h-5 w-5" />,
+    requiresSuperUser: true,
+  },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, logout } = useAuth();
+
+  const isSuperUser = user?.role === 'superuser';
+
+  const sidebarItems = [...regularItems, ...(isSuperUser ? adminItems : [])];
 
   return (
     <>
@@ -95,6 +110,26 @@ export function Sidebar() {
           </nav>
           
           <div className="p-4 border-t border-gray-200 dark:border-zinc-800">
+            <div className="mb-4 space-y-3">
+              <div className="flex items-center space-x-3">
+                <div className="rounded-full bg-orange-100 p-2 dark:bg-zinc-800">
+                  <Users className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{user?.name || 'Usuário'}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</p>
+                </div>
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                onClick={logout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sair
+              </Button>
+            </div>
+            
             <p className="text-sm text-gray-500 dark:text-gray-400">
               © 2025 Shopee Analytics
             </p>

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { validatePermissions } from '@/lib/middleware';
+import { PERMISSIONS } from '@/lib/permissions';
 
 // GET - Obter um cliente específico
 export async function GET(
@@ -7,6 +9,15 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Verificar permissões - usuários podem visualizar clientes se tiverem view_clients
+    const authResult = await validatePermissions(request, ['view_clients']);
+    if ('error' in authResult) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
+    }
+
     const clientId = params.id;
     
     const client = await prisma.clients.findUnique({
@@ -43,23 +54,24 @@ export async function GET(
   }
 }
 
-// PUT - Atualizar um cliente
+// PUT - Atualizar um cliente específico
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const clientId = params.id;
-    const body = await request.json();
-    
-    // Validar dados obrigatórios
-    if (!body.name || !body.ownerName) {
+    // Verificar permissões - apenas usuários com edit_clients podem atualizar
+    const authResult = await validatePermissions(request, ['edit_clients']);
+    if ('error' in authResult) {
       return NextResponse.json(
-        { error: 'Nome da loja e nome do proprietário são obrigatórios' },
-        { status: 400 }
+        { error: authResult.error },
+        { status: authResult.status }
       );
     }
-    
+
+    const clientId = params.id;
+    const body = await request.json();
+
     const updatedClient = await prisma.clients.update({
       where: {
         id: clientId,
@@ -67,16 +79,15 @@ export async function PUT(
       data: {
         name: body.name,
         owner_name: body.ownerName,
-        shop_url: body.shopUrl || null,
-        followers: body.followers || null,
-        rating: body.rating || null,
-        registration_date: body.registrationDate || null,
-        product_count: body.productCount || null,
-        response_rate: body.responseRate || null,
-        updated_at: new Date()
+        shop_url: body.shopUrl,
+        followers: body.followers,
+        rating: body.rating,
+        registration_date: body.registrationDate,
+        product_count: body.productCount,
+        response_rate: body.responseRate,
       },
     });
-    
+
     return NextResponse.json(updatedClient);
   } catch (error) {
     console.error('Erro ao atualizar cliente:', error);
@@ -87,21 +98,30 @@ export async function PUT(
   }
 }
 
-// DELETE - Excluir um cliente
+// DELETE - Excluir um cliente específico
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Verificar permissões - apenas usuários com delete_clients podem excluir
+    const authResult = await validatePermissions(request, ['delete_clients']);
+    if ('error' in authResult) {
+      return NextResponse.json(
+        { error: authResult.error },
+        { status: authResult.status }
+      );
+    }
+
     const clientId = params.id;
-    
+
     await prisma.clients.delete({
       where: {
         id: clientId,
       },
     });
-    
-    return NextResponse.json({ success: true });
+
+    return NextResponse.json({ message: 'Cliente excluído com sucesso' });
   } catch (error) {
     console.error('Erro ao excluir cliente:', error);
     return NextResponse.json(

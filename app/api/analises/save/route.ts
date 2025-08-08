@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getCurrentUser } from '@/lib/middleware';
 
 // Função para extrair insights chave da análise
 const extractKeyInsights = (markdown: string, analysisType: string) => {
@@ -79,13 +80,18 @@ export async function POST(request: Request) {
   try {
     console.log('🔄 Recebida requisição para salvar análise');
     
+    // Obter usuário logado
+    const authResult = await getCurrentUser(request);
+    const userId = 'user' in authResult ? authResult.user.id : null;
+    
     const body = await request.json();
     console.log('📋 Dados recebidos:', {
       hasMarkdown: !!body.markdown,
       markdownLength: body.markdown?.length,
       clientId: body.clientId,
       clientName: body.clientName,
-      analysisType: body.analysisType
+      analysisType: body.analysisType,
+      userId: userId
     });
     
     // Validar campos obrigatórios
@@ -140,14 +146,16 @@ export async function POST(request: Request) {
       clientId,
       originalAnalysisType,
       analysisType,
-      title
+      title,
+      userId
     });
 
     const analysis = await prisma.analyses.create({
       data: {
         client_id: clientId,
         type: analysisType,
-        title: title
+        title: title,
+        created_by: userId, // Associar ao usuário logado
       },
     });
 
@@ -178,7 +186,8 @@ export async function POST(request: Request) {
         data: {
           client_id: clientId,
           type: analysisType,
-          title: `Insights - ${title}`
+          title: `Insights - ${title}`,
+          created_by: userId, // Associar ao usuário logado
         },
       });
 
@@ -198,20 +207,16 @@ export async function POST(request: Request) {
     }
 
     // Retornar os IDs da análise e do resultado
-    const response = {
-      id: analysis.id,
-      result: analysisResult,
-      insights: keyInsights, // Retornar os insights extraídos
-      message: 'Análise markdown salva com sucesso'
-    };
-    
-    console.log('🎉 Salvamento concluído com sucesso');
-    return NextResponse.json(response, { status: 201 });
-    
+    return NextResponse.json({
+      analysisId: analysis.id,
+      resultId: analysisResult.id,
+      message: 'Análise salva com sucesso'
+    });
+
   } catch (error) {
-    console.error('Erro ao salvar análise markdown:', error);
+    console.error('❌ Erro ao salvar análise:', error);
     return NextResponse.json(
-      { error: 'Erro ao processar a solicitação: ' + (error instanceof Error ? error.message : 'Erro desconhecido') },
+      { error: 'Erro ao salvar análise' },
       { status: 500 }
     );
   }

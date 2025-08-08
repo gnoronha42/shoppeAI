@@ -25,6 +25,16 @@ interface ChecklistItem {
   description?: string;
   is_completed?: boolean;
   completed_at?: string;
+  execution_count?: number;
+  last_analyst?: string;
+  execution_history?: Array<{
+    id: string;
+    is_completed: boolean;
+    completed_at: string | null;
+    analyst_name: string | null;
+    execution_count: number;
+    created_at: string | null;
+  }>;
 }
 
 interface ChecklistBlock {
@@ -48,7 +58,9 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
   // Carregar checklist do backend
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/clientes/${clientId}/checklist`)
+    fetch(`/api/clientes/${clientId}/checklist`, {
+        credentials: 'include', // Enviar cookies automaticamente
+      })
       .then(async (res) => {
         if (!res.ok) throw new Error("Erro ao carregar checklist");
         const data = await res.json();
@@ -99,10 +111,27 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
           fetch(`/api/clientes/${clientId}/checklist`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
+            credentials: 'include', // Enviar cookies automaticamente
             body: JSON.stringify({ itemId, isCompleted }),
           })
         )
       );
+      
+      // Recarregar dados do checklist após salvar
+      console.log('🔄 Recarregando dados do checklist...');
+      const response = await fetch(`/api/clientes/${clientId}/checklist`, {
+        credentials: 'include',
+        cache: 'no-cache', // Evitar cache
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 Dados recarregados:', data);
+        setBlocks(data.blocks || []);
+      } else {
+        console.error('❌ Erro ao recarregar dados:', response.status);
+      }
+      
       toast({ title: "Checklist salvo!", description: "Progresso salvo com sucesso.", variant: "default" });
       setChangedItems({});
     } catch (error) {
@@ -162,10 +191,18 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
 
       block.items.forEach((item, idx) => {
         totalConcluidos++;
-        md += `### ✓ ${item.title}\n`;
+        const executionText = item.execution_count && item.execution_count > 1 
+          ? ` (${item.execution_count}x)` 
+          : '';
+        
+        md += `### ✓ ${item.title}${executionText}\n`;
 
         if (item.description) {
           md += `**Descrição:** ${item.description}\n\n`;
+        }
+
+        if (item.last_analyst) {
+          md += `**Último Analista:** ${item.last_analyst}\n\n`;
         }
 
         if (item.completed_at) {
@@ -177,9 +214,27 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
             minute: '2-digit',
             second: '2-digit'
           });
-          md += `**✅ Concluído em:** ${dataFormatada}\n\n`;
+          md += `**✅ Última Execução:** ${dataFormatada}\n\n`;
         } else {
           md += `**✅ Status:** Concluído\n\n`;
+        }
+
+        // Adicionar histórico se houver múltiplas execuções
+        if (item.execution_history && item.execution_history.length > 1) {
+          md += `**📊 Histórico de Execuções:**\n`;
+          item.execution_history.forEach((hist, histIdx) => {
+            const histDataFormatada = hist.completed_at 
+              ? new Date(hist.completed_at).toLocaleDateString('pt-BR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : 'Data não informada';
+            md += `- ${histIdx + 1}ª execução: ${hist.analyst_name || 'Analista não informado'} em ${histDataFormatada}\n`;
+          });
+          md += `\n`;
         }
 
         md += `---\n\n`;
@@ -300,16 +355,28 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
                           }
                         />
                         <div className="space-y-1">
-                          <Label
-                            htmlFor={item.id}
-                            className={`text-sm font-medium ${item.is_completed ? "line-through text-muted-foreground" : ""
-                              }`}
-                          >
-                            {item.title}
-                          </Label>
+                          <div className="flex items-center gap-2">
+                            <Label
+                              htmlFor={item.id}
+                              className={`text-sm font-medium ${item.is_completed ? "line-through text-muted-foreground" : ""
+                                }`}
+                            >
+                              {item.title}
+                            </Label>
+                            {item.execution_count && item.execution_count > 0 && (
+                              <Badge variant="secondary" className="text-xs">
+                                {item.execution_count}x
+                              </Badge>
+                            )}
+                          </div>
                           {item.description && (
                             <p className="text-sm text-muted-foreground">
                               {item.description}
+                            </p>
+                          )}
+                          {item.last_analyst && (
+                            <p className="text-xs text-muted-foreground">
+                              Último: {item.last_analyst}
                             </p>
                           )}
                         </div>
