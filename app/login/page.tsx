@@ -42,7 +42,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center mb-8">
           <Image src={logo} alt="Shop.AI" width={200} height={200} />
           <h2 className="text-2xl font-bold mt-4 text-center">
-            Bem-vindo ao Shop.AI
+            Bem-vindo ao Seller.AI
           </h2>
           <p className="text-gray-600 dark:text-gray-400 text-center mt-2">
             Faça login para continuar
