@@ -43,11 +43,19 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Search, UserPlus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Analyst {
   id: string;
   name: string;
   email: string;
+  role: string;
   active: boolean;
   created_at: string;
   last_login?: string;
@@ -66,6 +74,7 @@ export default function AnalistasPage() {
     name: "",
     email: "",
     password: "",
+    role: "analyst" as "analyst" | "superuser",
   });
   const { toast } = useToast();
 
@@ -122,7 +131,7 @@ export default function AnalistasPage() {
       });
 
       setIsDialogOpen(false);
-      setNewAnalyst({ name: "", email: "", password: "" });
+      setNewAnalyst({ name: "", email: "", password: "", role: "analyst" });
       loadAnalysts();
     } catch (error: any) {
       toast({
@@ -203,9 +212,9 @@ export default function AnalistasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Gerenciar Analistas</h1>
+        <h1 className="text-3xl font-bold">Gerenciar Usuários</h1>
         <p className="text-muted-foreground">
-          Gerencie os analistas que podem gerar análises e checklists
+          Gerencie analistas e super usuários do sistema
         </p>
       </div>
 
@@ -214,7 +223,7 @@ export default function AnalistasPage() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Buscar analistas..."
+            placeholder="Buscar usuários..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8"
@@ -225,14 +234,14 @@ export default function AnalistasPage() {
           <DialogTrigger asChild>
             <Button>
               <UserPlus className="mr-2 h-4 w-4" />
-              Novo Analista
+              Novo Usuário
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Criar Novo Analista</DialogTitle>
+              <DialogTitle>Criar Novo Usuário</DialogTitle>
               <DialogDescription>
-                Adicione um novo analista para gerar análises e checklists
+                Adicione um novo analista ou super usuário ao sistema
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -268,6 +277,37 @@ export default function AnalistasPage() {
                   }
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Tipo de Usuário</Label>
+                <Select
+                  value={newAnalyst.role}
+                  onValueChange={(value: "analyst" | "superuser") =>
+                    setNewAnalyst({ ...newAnalyst, role: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo de usuário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="analyst">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Analista</span>
+                        <span className="text-xs text-muted-foreground">
+                          Pode criar análises e gerenciar checklists
+                        </span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="superuser">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Super Usuário</span>
+                        <span className="text-xs text-muted-foreground">
+                          Acesso total ao sistema, incluindo gestão de usuários
+                        </span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <DialogFooter>
               <Button
@@ -284,7 +324,7 @@ export default function AnalistasPage() {
                     Criando...
                   </>
                 ) : (
-                  "Criar Analista"
+                  `Criar ${newAnalyst.role === 'superuser' ? 'Super Usuário' : 'Analista'}`
                 )}
               </Button>
             </DialogFooter>
@@ -294,9 +334,9 @@ export default function AnalistasPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Analistas</CardTitle>
+          <CardTitle>Usuários</CardTitle>
           <CardDescription>
-            Lista de todos os analistas cadastrados no sistema
+            Lista de todos os usuários cadastrados no sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -310,6 +350,7 @@ export default function AnalistasPage() {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Análises</TableHead>
                   <TableHead>Último Acesso</TableHead>
@@ -322,6 +363,17 @@ export default function AnalistasPage() {
                   <TableRow key={analyst.id}>
                     <TableCell>{analyst.name}</TableCell>
                     <TableCell>{analyst.email}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          analyst.role === "superuser"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {analyst.role === "superuser" ? "Super Usuário" : "Analista"}
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs ${

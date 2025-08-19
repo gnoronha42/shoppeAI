@@ -31,7 +31,9 @@ export async function GET(request: Request) {
 
 
     const where: Prisma.usersWhereInput = {
-      role: 'analyst',
+      role: {
+        in: ['analyst', 'superuser', 'inactive_analyst']
+      },
       ...(search ? {
         OR: [
           { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
@@ -76,7 +78,8 @@ export async function GET(request: Request) {
       id: analyst.id,
       name: analyst.name,
       email: analyst.email,
-      active: analyst.role === 'analyst', // ativo se role for 'analyst'
+      role: analyst.role,
+      active: analyst.role !== 'inactive_analyst', // ativo se role não for 'inactive_analyst'
       created_at: analyst.created_at?.toISOString() || new Date().toISOString(),
       last_login: null, // Por enquanto null, implementar depois
       analyses_count: analyst.created_analyses.length,
@@ -121,12 +124,20 @@ export async function POST(request: Request) {
     console.log('🔑 Permissões do usuário:', authResult.permissions);
 
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, email, password, role = 'analyst' } = body;
 
     // Validações básicas
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: 'Nome, email e senha são obrigatórios' },
+        { status: 400 }
+      );
+    }
+
+    // Validar role
+    if (!['analyst', 'superuser'].includes(role)) {
+      return NextResponse.json(
+        { error: 'Tipo de usuário inválido. Deve ser "analyst" ou "superuser"' },
         { status: 400 }
       );
     }
@@ -151,22 +162,22 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log('Criando analista:', { name, email }); // Log para debug
-    console.log('📋 Permissões padrão para analista:', DEFAULT_PERMISSIONS.analyst);
+    console.log('Criando usuário:', { name, email, role }); // Log para debug
+    console.log('📋 Permissões padrão para role:', role, DEFAULT_PERMISSIONS[role as keyof typeof DEFAULT_PERMISSIONS]);
 
-    // Criar novo usuário como analista com permissões padrão
+    // Criar novo usuário com o role especificado e permissões padrão
     const analyst = await prisma.users.create({
       data: {
         name,
         email,
         password,
-        role: 'analyst',
-        permissions: [...DEFAULT_PERMISSIONS.analyst],
-        created_by: authResult.user?.id, // ID do usuário que está criando o analista
+        role,
+        permissions: [...(DEFAULT_PERMISSIONS[role as keyof typeof DEFAULT_PERMISSIONS] || DEFAULT_PERMISSIONS.analyst)],
+        created_by: authResult.user?.id, // ID do usuário que está criando o usuário
       },
     });
 
-    console.log('✅ Analista criado com sucesso:', {
+    console.log('✅ Usuário criado com sucesso:', {
       id: analyst.id,
       name: analyst.name,
       email: analyst.email,
@@ -276,30 +287,38 @@ export async function DELETE(request: Request) {
       }
 
       if (currentUser.role === 'inactive_analyst') {
-        // Reativar analista
+        // Reativar usuário - determinar role original baseado em permissões ou usar 'analyst' como padrão
+        const user = await prisma.users.findUnique({
+          where: { id },
+          select: { permissions: true }
+        });
+        
+        // Se tem permissão de manage_users, provavelmente era superuser
+        const originalRole = user?.permissions?.includes('manage_users') ? 'superuser' : 'analyst';
+        
         await prisma.users.update({
           where: { id },
-          data: { role: 'analyst' },
+          data: { role: originalRole },
         });
 
         return NextResponse.json({
-          message: 'Analista reativado com sucesso',
+          message: `${originalRole === 'superuser' ? 'Super usuário' : 'Analista'} reativado com sucesso`,
           action: 'reactivated'
         });
-      } else if (currentUser.role === 'analyst') {
-        // Desativar analista
+      } else if (currentUser.role && ['analyst', 'superuser'].includes(currentUser.role)) {
+        // Desativar usuário
         await prisma.users.update({
           where: { id },
           data: { role: 'inactive_analyst' },
         });
 
         return NextResponse.json({
-          message: 'Analista desativado com sucesso. O usuário não poderá mais fazer login.',
+          message: `${currentUser.role === 'superuser' ? 'Super usuário' : 'Analista'} desativado com sucesso. O usuário não poderá mais fazer login.`,
           action: 'deactivated'
         });
       } else {
         return NextResponse.json(
-          { error: 'Usuário não é um analista' },
+          { error: 'Usuário não é um analista ou super usuário' },
           { status: 400 }
         );
       }

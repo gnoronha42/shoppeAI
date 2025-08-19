@@ -22,7 +22,7 @@ export default function RootLayout({
         <Providers>
           <div className="min-h-screen">
             {!isLoginPage && <Sidebar />}
-            <main className={`${!isLoginPage ? 'md:pl-64 p-6' : ''} min-h-screen bg-gray-50 dark:bg-zinc-900`}>
+            <main className={`${!isLoginPage ? 'md:pl-80 p-4 md:p-6' : ''} min-h-screen bg-gray-50 dark:bg-zinc-900`}>
               <div className={`${!isLoginPage ? 'max-w-7xl mx-auto' : ''}`}>
                 {children}
               </div>

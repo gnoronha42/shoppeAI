@@ -27,21 +27,17 @@ const regularItems = [
     href: "/analise",
     icon: <BarChart2 className="mr-2 h-5 w-5" />,
   },
-  {
-    title: "Pergunte a IA",
-    href: "/ia",
-    icon: <BrainCircuit className="mr-2 h-5 w-5" />,
-  },
+ // {
+   // title: "Pergunte a IA",
+    //href: "/ia",
+    //icon: <BrainCircuit className="mr-2 h-5 w-5" />,
+  //},
   {
     title: "Configurações",
     href: "/configuracoes",
     icon: <Settings className="mr-2 h-5 w-5" />,
   },
-  {
-    title: "Histórico",
-    href: "/historico",
-    icon: <Clock className="mr-2 h-5 w-5" />,
-  },
+ 
 ];
 
 const adminItems = [
@@ -50,6 +46,11 @@ const adminItems = [
     href: "/analistas",
     icon: <UserPlus className="mr-2 h-5 w-5" />,
     requiresSuperUser: true,
+  },
+  {
+    title: "Histórico",
+    href: "/historico",
+    icon: <Clock className="mr-2 h-5 w-5" />,
   },
 ];
 
@@ -80,7 +81,7 @@ export function Sidebar() {
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         <div className="h-full flex flex-col">
-          <div className="p-4 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+          <div className="p-6 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
             <div className="flex items-center">
               <ShoppingBag className="h-8 w-8 text-orange-600 mr-2" />
                
@@ -90,14 +91,14 @@ export function Sidebar() {
             <ThemeToggle />
           </div>
           
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-6 space-y-2">
             {sidebarItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  "flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200",
+                  "flex items-center px-5 py-3.5 text-sm font-medium rounded-lg transition-all duration-200",
                   pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href))
                     ? "bg-orange-100 text-orange-700 dark:bg-zinc-800 dark:text-orange-400"
                     : "text-gray-700 hover:bg-orange-50 dark:text-gray-300 dark:hover:bg-zinc-800"
@@ -109,7 +110,7 @@ export function Sidebar() {
             ))}
           </nav>
           
-          <div className="p-4 border-t border-gray-200 dark:border-zinc-800">
+          <div className="p-6 border-t border-gray-200 dark:border-zinc-800">
             <div className="mb-4 space-y-3">
               <div className="flex items-center space-x-3">
                 <div className="rounded-full bg-orange-100 p-2 dark:bg-zinc-800">
