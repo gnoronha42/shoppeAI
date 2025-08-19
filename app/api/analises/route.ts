@@ -469,3 +469,183 @@ function extractAdsMetrics(content: string) {
   
   return metrics;
 } 
+
+// Nova rota para buscar histórico de análises express
+export async function HEAD(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const clientId = searchParams.get('clientId');
+    const type = searchParams.get('type');
+    
+    if (!clientId || !type) {
+      return NextResponse.json(
+        { error: 'Parâmetros obrigatórios: clientId, type' },
+        { status: 400 }
+      );
+    }
+    
+    // Verificar cache
+    const cacheKey = `express_history_${clientId}_${type}`;
+    const cachedData = resultsCache.get(cacheKey);
+    
+    if (cachedData && (Date.now() - cachedData.timestamp < CACHE_TTL)) {
+      return NextResponse.json(cachedData.data);
+    }
+    
+    // Buscar análises express do cliente ordenadas por data
+    const expressAnalyses = await prisma.analyses.findMany({
+      where: {
+        client_id: clientId,
+        type: type
+      },
+      orderBy: {
+        created_at: 'desc'
+      },
+      include: {
+        analysis_results: {
+          select: {
+            id: true,
+            content: true,
+            created_at: true
+          }
+        }
+      },
+      take: 5 // Últimas 5 análises
+    });
+    
+    // Estruturar dados para o frontend
+    const historico = expressAnalyses.map(analysis => ({
+      id: analysis.id,
+      title: analysis.title,
+      created_at: analysis.created_at,
+      content: analysis.analysis_results[0]?.content || '',
+      results_count: analysis.analysis_results.length
+    }));
+    
+    // Dados para análise incremental
+    const dadosIncrementais = {
+      historico: historico,
+      ultimaAnalise: historico.length > 0 ? historico[0] : null,
+      analiseAnterior: historico.length > 1 ? historico[1] : null,
+      totalAnalises: historico.length,
+      evolucaoDisponivel: historico.length >= 2
+    };
+    
+    // Armazenar em cache
+    resultsCache.set(cacheKey, {
+      data: dadosIncrementais,
+      timestamp: Date.now()
+    });
+    
+    return NextResponse.json(dadosIncrementais);
+  } catch (error) {
+    console.error('Erro ao buscar histórico de análises express:', error);
+    return NextResponse.json(
+      { error: 'Erro ao processar a solicitação: ' + (error instanceof Error ? error.message : 'Erro desconhecido') },
+      { status: 500 }
+    );
+  }
+}
+
+// Nova rota para obter última análise específica para comparação
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const clientId = searchParams.get('clientId');
+    const analysisId = searchParams.get('analysisId');
+    
+    if (!clientId || !analysisId) {
+      return NextResponse.json(
+        { error: 'Parâmetros obrigatórios: clientId, analysisId' },
+        { status: 400 }
+      );
+    }
+    
+    // Verificar cache
+    const cacheKey = `last_analysis_${clientId}_${analysisId}`;
+    const cachedData = resultsCache.get(cacheKey);
+    
+    if (cachedData && (Date.now() - cachedData.timestamp < CACHE_TTL)) {
+      return NextResponse.json(cachedData.data);
+    }
+    
+    // Buscar análise específica
+    const analysis = await prisma.analyses.findFirst({
+      where: {
+        id: analysisId,
+        client_id: clientId
+      },
+      include: {
+        analysis_results: {
+          select: {
+            id: true,
+            content: true,
+            created_at: true
+          }
+        }
+      }
+    });
+    
+    if (!analysis) {
+      return NextResponse.json(
+        { error: 'Análise não encontrada' },
+        { status: 404 }
+      );
+    }
+    
+    // Buscar análise anterior para comparação
+    const analiseAnterior = await prisma.analyses.findFirst({
+      where: {
+        client_id: clientId,
+        type: analysis.type,
+        created_at: analysis.created_at ? {
+          lt: analysis.created_at
+        } : undefined
+      },
+      orderBy: {
+        created_at: 'desc'
+      },
+      include: {
+        analysis_results: {
+          select: {
+            id: true,
+            content: true,
+            created_at: true
+          }
+        }
+      }
+    });
+    
+    const dadosComparacao = {
+      analiseAtual: {
+        id: analysis.id,
+        title: analysis.title,
+        created_at: analysis.created_at,
+        content: (analysis as any).analysis_results?.[0]?.content || '',
+        type: analysis.type
+      },
+      analiseAnterior: analiseAnterior ? {
+        id: analiseAnterior.id,
+        title: analiseAnterior.title,
+        created_at: analiseAnterior.created_at,
+        content: (analiseAnterior as any).analysis_results?.[0]?.content || '',
+        type: analiseAnterior.type
+      } : null,
+      comparacaoDisponivel: !!analiseAnterior
+    };
+    
+    // Armazenar em cache
+    resultsCache.set(cacheKey, {
+      data: dadosComparacao,
+      timestamp: Date.now()
+    });
+    
+    return NextResponse.json(dadosComparacao);
+  } catch (error) {
+    console.error('Erro ao buscar análise para comparação:', error);
+    return NextResponse.json(
+      { error: 'Erro ao processar a solicitação: ' + (error instanceof Error ? error.message : 'Erro desconhecido') },
+      { status: 500 }
+    );
+  }
+} 

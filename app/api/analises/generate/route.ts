@@ -4,6 +4,250 @@ import { marked } from "marked";
 import path from "path";
 import fs from "fs";
 
+// Função para calcular CPA (copiada do microserviço)
+function calcularCPA(markdown: string): string {
+  console.log('🧮 Iniciando cálculo do CPA...');
+  console.log('📝 Markdown recebido (primeiros 300 chars):', markdown.substring(0, 300));
+  
+  // Múltiplas estratégias para encontrar investimento e pedidos
+  let investimento: number | null = null;
+  let pedidos: number | null = null;
+  
+  // Estratégia 1: Buscar investimento e pedidos separadamente (mais robusto)
+  const investimentoMatch = markdown.match(/\|\s*Investimento\s+em\s+Ads\s*\|\s*R\$\s*([\d.,]+)\s*\|/i);
+  if (investimentoMatch) {
+    investimento = parseFloat(investimentoMatch[1].replace(/\./g, '').replace(',', '.'));
+    console.log('📊 Estratégia 1 - Investimento encontrado:', investimento);
+  }
+  
+  const pedidosMatch = markdown.match(/\|\s*Pedidos\s+Pagos\s+Mês\s*\|\s*([\d.]+)\s*\|/i);
+  if (pedidosMatch) {
+    pedidos = parseInt(pedidosMatch[1].replace(/\./g, ''));
+    console.log('📊 Estratégia 1 - Pedidos encontrados:', pedidos);
+  }
+  
+  // Estratégia 2: Buscar por padrões de texto mais flexíveis
+  if (!investimento) {
+    // Buscar investimento em Ads
+    const investimentoMatch2 = markdown.match(/(?:Investimento\s+(?:em\s+)?Ads?|Investimento\s+total\s+em\s+Ads?)\s*[:|]\s*R\$\s*([\d.,]+)/i);
+    if (investimentoMatch2) {
+      investimento = parseFloat(investimentoMatch2[1].replace(/\./g, '').replace(',', '.'));
+      console.log('📊 Estratégia 2 - Investimento encontrado:', investimento);
+    }
+  }
+  
+  if (!pedidos) {
+    // Buscar pedidos pagos
+    const pedidosMatch2 = markdown.match(/(?:Pedidos\s+Pagos(?:\s+Mês)?|Pedidos\s+via\s+Ads?|Pedidos\s+Pagos\s+Mês)\s*[:|]\s*([\d.]+)/i);
+    if (pedidosMatch2) {
+      pedidos = parseInt(pedidosMatch2[1].replace(/\./g, ''));
+      console.log('📊 Estratégia 2 - Pedidos encontrados:', pedidos);
+    }
+  }
+  
+  // Estratégia 3: Buscar por valores na tabela de forma mais genérica
+  if (!investimento) {
+    // Buscar qualquer valor R$ na linha do investimento
+    const investimentoLinha = markdown.match(/\|\s*Investimento\s+em\s+Ads\s*\|\s*R\$\s*([\d.,]+)\s*\|/i);
+    if (investimentoLinha) {
+      investimento = parseFloat(investimentoLinha[1].replace(/\./g, '').replace(',', '.'));
+      console.log('📊 Estratégia 3 - Investimento na linha:', investimento);
+    }
+  }
+  
+  if (!pedidos) {
+    // Buscar qualquer número na linha dos pedidos
+    const pedidosLinha = markdown.match(/\|\s*Pedidos\s+Pagos\s+Mês\s*\|\s*([\d.]+)\s*\|/i);
+    if (pedidosLinha) {
+      pedidos = parseInt(pedidosLinha[1].replace(/\./g, ''));
+      console.log('📊 Estratégia 3 - Pedidos na linha:', pedidos);
+    }
+  }
+  
+  // Estratégia 4: Buscar por valores isolados no contexto
+  if (!investimento) {
+    // Buscar investimento próximo à palavra "Ads"
+    const investimentoContexto = markdown.match(/R\$\s*([\d.,]+)(?=\s*[^|]*Ads)/i);
+    if (investimentoContexto) {
+      investimento = parseFloat(investimentoContexto[1].replace(/\./g, '').replace(',', '.'));
+      console.log('📊 Estratégia 4 - Investimento no contexto:', investimento);
+    }
+  }
+  
+  if (!pedidos) {
+    // Buscar pedidos próximo à palavra "Pedidos"
+    const pedidosContexto = markdown.match(/([\d.]+)(?=\s*[^|]*Pedidos)/i);
+    if (pedidosContexto) {
+      pedidos = parseInt(pedidosContexto[1].replace(/\./g, ''));
+      console.log('📊 Estratégia 4 - Pedidos no contexto:', pedidos);
+    }
+  }
+  
+  // Estratégia 5: Busca mais agressiva para dados
+  if (!investimento) {
+    // Buscar qualquer valor R$ na linha que contenha "Investimento"
+    const investimentoAgressivo = markdown.match(/\|\s*[^|]*Investimento[^|]*\|\s*R\$\s*([\d.,]+)\s*\|/i);
+    if (investimentoAgressivo) {
+      investimento = parseFloat(investimentoAgressivo[1].replace(/\./g, '').replace(',', '.'));
+      console.log('📊 Estratégia 5 - Investimento agressivo:', investimento);
+    }
+  }
+  
+  if (!pedidos) {
+    // Buscar qualquer número na linha que contenha "Pedidos"
+    const pedidosAgressivo = markdown.match(/\|\s*[^|]*Pedidos[^|]*\|\s*([\d.]+)\s*\|/i);
+    if (pedidosAgressivo) {
+      pedidos = parseInt(pedidosAgressivo[1].replace(/\./g, ''));
+      console.log('📊 Estratégia 5 - Pedidos agressivo:', pedidos);
+    }
+  }
+
+  console.log('💰 Investimento final:', investimento);
+  console.log('📦 Pedidos finais:', pedidos);
+
+  if (investimento && pedidos && pedidos > 0 && !isNaN(investimento)) {
+    const cpa = (investimento / pedidos).toFixed(2);
+    const cpaFormatado = cpa.replace('.', ',');
+    console.log('🎯 CPA calculado:', cpaFormatado);
+    console.log('🧮 Cálculo:', `${investimento} ÷ ${pedidos} = ${cpa}`);
+    
+    let markdownAtualizado = markdown;
+    
+    // Limpar linha malformada do CPA primeiro
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*R\$[\d.,]+\s*\|\s*CPA\s*\|\s*[\d.,]+\s*\|/gi,
+      '| CPA | Dado não informado |'
+    );
+    
+    // Limpar qualquer CPA malformado primeiro (incluindo RCPA)
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*R?CPA\s*\|\s*[\d.,]+\s*\|/gi,
+      '| CPA | Dado não informado |'
+    );
+    
+    // Limpar RCPA isolado
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*RCPA\s*\|/gi,
+      '| CPA | Dado não informado |'
+    );
+    
+    // Limpar RCPA em qualquer formato
+    markdownAtualizado = markdownAtualizado.replace(
+      /RCPA/g,
+      'Dado não informado'
+    );
+    
+    // Limpar CPA malformado em qualquer formato
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*[^|]*R[^|]*\|/gi,
+      '| CPA | Dado não informado |'
+    );
+    
+    // Atualizar CPA em todas as ocorrências possíveis
+    markdownAtualizado = markdownAtualizado.replace(
+      /(CPA\s*(?:Médio|via Ads|geral)?\s*[:|])\s*(?:Dado não informado|R\$\s*[\d.,]+|R?CPA\s*\|\s*[\d.,]+)/gi,
+      `$1 ${cpaFormatado}`
+    );
+    
+    // Atualizar CPA na tabela se existir
+    markdownAtualizado = markdownAtualizado.replace(
+      /(\|\s*CPA\s*\|\s*)(?:Dado não informado|R\$\s*[\d.,]+|R?CPA\s*\|\s*[\d.,]+)(\s*\|)/gi,
+      `$1${cpaFormatado}$2`
+    );
+    
+    // Forçar atualização de qualquer CPA existente (incluindo RCPA)
+    markdownAtualizado = markdownAtualizado.replace(
+      /(CPA\s*[:|]\s*)R?CPA/gi,
+      `$1${cpaFormatado}`
+    );
+    
+    // Forçar atualização de qualquer CPA existente
+    markdownAtualizado = markdownAtualizado.replace(
+      /(CPA\s*[:|]\s*)R\$\s*[\d.,]+/gi,
+      `$1${cpaFormatado}`
+    );
+    
+    // Substituição específica para tabelas markdown
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*[^|]*\|/gi,
+      `| CPA | ${cpaFormatado} |`
+    );
+    
+    // Corrigir qualquer linha de tabela que contenha CPA
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*.*?\|/gi,
+      `| CPA | ${cpaFormatado} |`
+    );
+    
+    // Remover colunas extras do CPA se existirem
+    markdownAtualizado = markdownAtualizado.replace(
+      /(\|\s*CPA\s*\|\s*R\$[\d.,]+\s*)\|\s*CPA\s*\|\s*[\d.,]+\s*\|/gi,
+      '$1|'
+    );
+    
+    // Adicionar CPA na tabela se não existir
+    if (!markdownAtualizado.includes(`CPA | ${cpaFormatado}`)) {
+      // Tentar adicionar após investimento
+      markdownAtualizado = markdownAtualizado.replace(
+        /(\|\s*Investimento\s+em\s+Ads\s*\|\s*R\$[\d.,]+\s*\|)/i,
+        `$1\n| CPA | ${cpaFormatado} |`
+      );
+      
+      // Se ainda não encontrou, tentar após ROAS
+      if (!markdownAtualizado.includes(`CPA | ${cpaFormatado}`)) {
+        markdownAtualizado = markdownAtualizado.replace(
+          /(\|\s*ROAS\s*\|\s*[\d.,]+\s*\|)/i,
+          `$1\n| CPA | ${cpaFormatado} |`
+        );
+      }
+    }
+    
+    // Verificação final: forçar atualização de qualquer CPA restante
+    const cpaEscaped = cpaFormatado.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    markdownAtualizado = markdownAtualizado.replace(
+      new RegExp(`\\|\\s*CPA\\s*\\|\\s*(?!${cpaEscaped})[^|]*\\|`, 'gi'),
+      `| CPA | ${cpaFormatado} |`
+    );
+    
+    // Última verificação: substituir qualquer CPA restante
+    markdownAtualizado = markdownAtualizado.replace(
+      /\|\s*CPA\s*\|\s*(?!19,54)[^|]*\|/gi,
+      `| CPA | ${cpaFormatado} |`
+    );
+    
+    console.log('✅ CPA atualizado no markdown');
+    
+    // Verificação final: confirmar que o CPA foi atualizado
+    if (markdownAtualizado.includes(cpaFormatado)) {
+      console.log('✅ Verificação: CPA encontrado no markdown final');
+      console.log('📝 Markdown final (primeiros 500 chars):', markdownAtualizado.substring(0, 500));
+      
+      // Verificar se ainda há RCPA no resultado
+      if (markdownAtualizado.includes('RCPA')) {
+        console.log('⚠️ ATENÇÃO: RCPA ainda presente! Tentando limpeza final...');
+        markdownAtualizado = markdownAtualizado.replace(/RCPA/g, cpaFormatado);
+        console.log('🧹 Limpeza final aplicada');
+      }
+    } else {
+      console.log('⚠️ Verificação: CPA NÃO encontrado no markdown final');
+    }
+    
+    return markdownAtualizado;
+  } else {
+    console.log('⚠️ Não foi possível calcular CPA - dados insuficientes ou inválidos');
+    console.log('Investimento:', investimento, 'Pedidos:', pedidos);
+    
+    // Tentar encontrar os dados de forma mais agressiva
+    console.log('🔍 Buscando dados de forma mais agressiva...');
+    const todosValores = markdown.match(/R\$\s*([\d.,]+)/g);
+    const todosNumeros = markdown.match(/(\d+)/g);
+    console.log('💰 Todos os valores R$ encontrados:', todosValores);
+    console.log('🔢 Todos os números encontrados:', todosNumeros);
+  }
+  
+  return markdown;
+}
+
 const TIMEOUT = 120000; // 2 minutos
 
 const launchBrowser = async (retryCount = 0) => {
@@ -60,7 +304,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let htmlContent = await marked(markdown);
+    console.log('📝 Markdown original recebido (primeiros 500 chars):', markdown.substring(0, 500));
+    
+    // Calcular CPA antes de converter para HTML
+    const markdownComCPA = calcularCPA(markdown);
+    console.log('🧮 Após cálculo do CPA (primeiros 500 chars):', markdownComCPA.substring(0, 500));
+
+    let htmlContent = await marked(markdownComCPA);
     
     // Seu código de pré-processamento HTML existente
     htmlContent = htmlContent

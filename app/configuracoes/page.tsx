@@ -34,7 +34,7 @@ export default function ConfiguracoesPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Notificações</CardTitle>
             <CardDescription>
@@ -61,7 +61,7 @@ export default function ConfiguracoesPage() {
               <Switch id="app-notifications" defaultChecked />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader>
@@ -80,19 +80,11 @@ export default function ConfiguracoesPage() {
               </div>
               <Switch id="shopee-api" />
             </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="google-analytics">Google Analytics</Label>
-                <p className="text-sm text-muted-foreground">
-                  Integrar com Google Analytics
-                </p>
-              </div>
-              <Switch id="google-analytics" />
-            </div>
+            
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Armazenamento de Dados</CardTitle>
             <CardDescription>
@@ -111,17 +103,9 @@ export default function ConfiguracoesPage() {
                 <div className="h-full bg-orange-600 rounded-full" style={{ width: '24%' }}></div>
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="auto-delete">Exclusão Automática</Label>
-                <p className="text-sm text-muted-foreground">
-                  Excluir relatórios após 90 dias
-                </p>
-              </div>
-              <Switch id="auto-delete" defaultChecked />
-            </div>
+           
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );
