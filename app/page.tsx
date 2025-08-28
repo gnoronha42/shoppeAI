@@ -19,16 +19,18 @@ const generateChartData = (config: any): ChartData => {
   const totalVendas = 77300000;
   
   // Distribuição mensal com crescimento ao longo do ano
-  // Meses 6 e 7 terão mais vendas (Black Friday, Natal, etc.)
+  // Meses 6, 7 e 8 terão mais vendas (Black Friday, Natal, etc.)
+  // Total: 100% = R$ 77.300.000
+  // Jan(10%) + Fev(8%) + Mar(12%) + Abr(13%) + Mai(14%) + Jun(16%) + Jul(18%) + Ago(9%) = 100%
   const vendasMensais = [
-    { name: "Jan", vendas: Math.round(totalVendas * 0.12) }, // 12% - Início do ano
-    { name: "Fev", vendas: Math.round(totalVendas * 0.10) }, // 10% - Carnaval
-    { name: "Mar", vendas: Math.round(totalVendas * 0.13) }, // 13% - Recuperação
-    { name: "Abr", vendas: Math.round(totalVendas * 0.14) }, // 14% - Crescimento
-    { name: "Mai", vendas: Math.round(totalVendas * 0.15) }, // 15% - Maio
-    { name: "Jun", vendas: Math.round(totalVendas * 0.18) }, // 18% - Junho (mais vendas)
+    { name: "Jan", vendas: Math.round(totalVendas * 0.10) }, // 10% - Início do ano
+    { name: "Fev", vendas: Math.round(totalVendas * 0.08) }, // 8% - Carnaval
+    { name: "Mar", vendas: Math.round(totalVendas * 0.12) }, // 12% - Recuperação
+    { name: "Abr", vendas: Math.round(totalVendas * 0.13) }, // 13% - Crescimento
+    { name: "Mai", vendas: Math.round(totalVendas * 0.14) }, // 14% - Maio
+    { name: "Jun", vendas: Math.round(totalVendas * 0.16) }, // 16% - Junho (mais vendas)
     { name: "Jul", vendas: Math.round(totalVendas * 0.18) }, // 18% - Julho (mais vendas)
-    { name: "Ago", vendas: Math.round(totalVendas * 0.18) }, // 18% - Agosto (mais vendas)
+    { name: "Ago", vendas: Math.round(totalVendas * 0.09) }, // 9% - Agosto
   ];
 
   return {
@@ -46,13 +48,13 @@ const generateChartData = (config: any): ChartData => {
     ],
     trafegoConversao: [
       { name: "Jan", visitas: Math.round(config.numeroVisitas * 0.8), conversoes: Math.round(config.numeroPedidos * 0.8) },
-      { name: "Fev", visitas: Math.round(config.numeroVisitas * 0.9), conversoes: Math.round(config.numeroPedidos * 0.9) },
-      { name: "Mar", visitas: Math.round(config.numeroVisitas * 1.1), conversoes: Math.round(config.numeroPedidos * 1.1) },
-      { name: "Abr", visitas: Math.round(config.numeroVisitas * 0.7), conversoes: Math.round(config.numeroPedidos * 0.7) },
-      { name: "Mai", visitas: Math.round(config.numeroVisitas * 1.2), conversoes: Math.round(config.numeroPedidos * 1.2) },
-      { name: "Jun", visitas: config.numeroVisitas, conversoes: config.numeroPedidos },
-      { name: "Jul", visitas: config.numeroVisitas, conversoes: config.numeroPedidos },
-      { name: "Ago", visitas: config.numeroVisitas, conversoes: config.numeroPedidos },
+      { name: "Fev", visitas: Math.round(config.numeroVisitas * 0.7), conversoes: Math.round(config.numeroPedidos * 0.7) },
+      { name: "Mar", visitas: Math.round(config.numeroVisitas * 0.9), conversoes: Math.round(config.numeroPedidos * 0.9) },
+      { name: "Abr", visitas: Math.round(config.numeroVisitas * 0.8), conversoes: Math.round(config.numeroPedidos * 0.8) },
+      { name: "Mai", visitas: Math.round(config.numeroVisitas * 1.0), conversoes: Math.round(config.numeroPedidos * 1.0) },
+      { name: "Jun", visitas: Math.round(config.numeroVisitas * 1.2), conversoes: Math.round(config.numeroPedidos * 1.2) },
+      { name: "Jul", visitas: Math.round(config.numeroVisitas * 1.4), conversoes: Math.round(config.numeroPedidos * 1.4) },
+      { name: "Ago", visitas: Math.round(config.numeroVisitas * 1.1), conversoes: Math.round(config.numeroPedidos * 1.1) },
     ]
   };
 };
@@ -247,9 +249,12 @@ export default function Home() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-6 w-6 text-blue-600" />
-              Vendas Mensais
-            </CardTitle>
-            <CardDescription>Desempenho de vendas dos últimos 7 meses</CardDescription>
+              Vendas Mensais 
+            <span className="ml-4 text-base font-normal text-muted-foreground">
+              Total: {formatCurrency(chartData.vendasMensais.reduce((acc, item) => acc + item.vendas, 0))}
+            </span>
+            </CardTitle> 
+            <CardDescription>Desempenho de vendas dos últimos 8 meses</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="h-80 flex items-center justify-center">
@@ -259,7 +264,7 @@ export default function Home() {
                   <h3 className="text-lg font-semibold text-muted-foreground">Gráfico de Vendas</h3>
                   <p className="text-sm text-muted-foreground">Dados baseados nas suas configurações</p>
                 </div>
-                <div className="grid grid-cols-7 gap-2 text-xs">
+                <div className="grid grid-cols-8 gap-2 text-xs">
                   {chartData.vendasMensais.map((item, index) => (
                     <div key={index} className="text-center">
                       <div className="bg-blue-100 dark:bg-blue-900/20 rounded p-2 mb-1">
@@ -326,7 +331,7 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-muted-foreground">Métricas de Conversão</h3>
                 <p className="text-sm text-muted-foreground">Visitas vs Pedidos por mês</p>
               </div>
-              <div className="grid grid-cols-6 gap-2 text-xs">
+              <div className="grid grid-cols-8 gap-2 text-xs">
                 {chartData.trafegoConversao.map((item, index) => (
                   <div key={index} className="text-center space-y-1">
                     <div className="bg-purple-100 dark:bg-purple-900/20 rounded p-2">
