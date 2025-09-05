@@ -55,11 +55,11 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
   const [changedItems, setChangedItems] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
-  // Carregar checklist do backend
+
   useEffect(() => {
     setLoading(true);
     fetch(`/api/clientes/${clientId}/checklist`, {
-        credentials: 'include', // Enviar cookies automaticamente
+        credentials: 'include', 
       })
       .then(async (res) => {
         if (!res.ok) throw new Error("Erro ao carregar checklist");
@@ -249,7 +249,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
     return md;
   };
 
-  // Gerar PDF completo
+
   const handleGeneratePDF = async () => {
     try {
       const markdown = generateChecklistMarkdown();
@@ -257,7 +257,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          blocks: blocks, // Envie os blocos completos
+          blocks: blocks, 
           clientName: "Cliente",
           markdown: markdown
         }),
