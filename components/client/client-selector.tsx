@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useGetClientsQuery } from "@/lib/api";
 import { useDispatch, useSelector } from "react-redux";
 import { selectClient, selectSelectedClientId, setClients } from "@/features/clients/clientSlice";
@@ -23,16 +23,28 @@ import { cn } from "@/lib/utils";
 import { Client } from "@/types";
 
 export function ClientSelector() {
-  const { data: response, isLoading } = useGetClientsQuery({
-    page: 1,
-    pageSize: 100 // Carregar mais clientes para o selector
+  const { data: response, isLoading, error } = useGetClientsQuery({
+    page: 1, // ✅ Mudança: Buscar da página 1
+    pageSize: 1000 // ✅ Mudança: Aumentar pageSize para buscar mais clientes
   });
   const selectedClientId = useSelector(selectSelectedClientId);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   // Garantir que clients seja sempre um array
   const clients = Array.isArray(response?.data) ? response.data : [];
+  
+  // Debug logs
+  console.log('🔍 ClientSelector Debug:', {
+    isLoading,
+    error,
+    response,
+    clientsCount: clients.length,
+    searchValue,
+    meta: response?.meta,
+    clients: clients.map(c => ({ id: c.id, name: c.name, ownerName: c.ownerName }))
+  });
   
   // Os clientes já vêm ordenados alfabeticamente do backend
   const selectedClient = clients.find(client => client.id === selectedClientId);
@@ -43,10 +55,50 @@ export function ClientSelector() {
     }
   }, [clients, dispatch]);
 
-  const handleClientSelect = (currentValue: string) => {
-    dispatch(selectClient(currentValue === selectedClientId ? "" : currentValue));
+  const handleClientSelect = (clientId: string) => {
+    console.log('🎯 Cliente selecionado:', clientId);
+    dispatch(selectClient(clientId === selectedClientId ? "" : clientId));
     setOpen(false);
   };
+
+  // Função para normalizar texto para busca (remove acentos e converte para lowercase)
+  const normalizeText = (text: string) => {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  };
+
+  // Filtrar clientes baseado na busca
+  const filteredClients = useMemo(() => {
+    if (!searchValue.trim()) {
+      return clients;
+    }
+
+    const normalizedSearch = normalizeText(searchValue);
+    console.log(' Buscando com termo normalizado:', normalizedSearch);
+
+    return clients.filter(client => {
+      const clientSearchText = normalizeText(`${client.name} ${client.ownerName}`);
+      const matches = clientSearchText.includes(normalizedSearch);
+      console.log('🔎 Verificando cliente:', {
+        name: client.name,
+        ownerName: client.ownerName,
+        clientSearchText,
+        normalizedSearch,
+        matches
+      });
+      return matches;
+    });
+  }, [clients, searchValue]);
+
+  console.log(' Clientes filtrados:', {
+    searchValue,
+    totalClients: clients.length,
+    filteredClients: filteredClients.length,
+    filteredNames: filteredClients.map(c => c.name)
+  });
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -68,31 +120,43 @@ export function ClientSelector() {
         <Command>
           <CommandInput 
             placeholder="Buscar cliente..." 
-            className="h-9" 
+            className="h-9"
+            value={searchValue}
+            onValueChange={setSearchValue}
           />
           <CommandList>
             <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
             <CommandGroup>
-              {clients.map((client: Client) => (
-                <CommandItem
-                  key={client.id}
-                  value={`${client.name} ${client.ownerName}`.toLowerCase()}
-                  onSelect={() => handleClientSelect(client.id)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedClientId === client.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <div className="flex flex-col">
-                    <span className="font-medium">{client.name}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {client.ownerName}
-                    </span>
-                  </div>
-                </CommandItem>
-              ))}
+              {filteredClients.map((client: Client) => {
+                const searchValue = normalizeText(`${client.name} ${client.ownerName}`);
+                console.log('🔎 Renderizando cliente:', {
+                  id: client.id,
+                  name: client.name,
+                  ownerName: client.ownerName,
+                  searchValue
+                });
+                
+                return (
+                  <CommandItem
+                    key={client.id}
+                    value={searchValue}
+                    onSelect={() => handleClientSelect(client.id)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedClientId === client.id ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{client.name}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {client.ownerName}
+                      </span>
+                    </div>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
