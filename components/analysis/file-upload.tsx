@@ -70,13 +70,13 @@ export function FileUpload({
       >
         <UploadCloud className="h-12 w-12 text-orange-500 mb-2" />
         <p className="text-sm text-center">
-          Arraste e solte prints aqui, ou{" "}
+          Arraste e solte arquivos aqui, ou{" "}
           <label htmlFor="file-upload" className="text-orange-600 dark:text-orange-400 font-medium cursor-pointer hover:underline">
             selecione arquivos
           </label>
         </p>
         <p className="text-xs text-muted-foreground text-center">
-          (Apenas imagens, máximo de {maxFiles} arquivos)
+          (Imagens ou CSV conforme tipo de análise, máximo de {maxFiles} arquivos)
         </p>
         <Input
           id="file-upload"

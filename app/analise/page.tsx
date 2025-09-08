@@ -104,6 +104,74 @@ export default function AnalisePage() {
   const ocrAllImages = async (files: File[]): Promise<string[]> => {
     return Promise.all(files.map(ocrImage));
   };
+  // Função para ler arquivo CSV
+  const readCSVFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsText(file, 'utf-8');
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Função para analisar CSV com IA
+  const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType) => {
+    setApiError(null);
+
+    console.log(`Iniciando análise CSV do tipo: ${type}`);
+    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
+    console.log(`Tamanho do CSV: ${csvContent.length} caracteres`);
+
+    const requestBody = {
+      csvContent: csvContent,
+      analysisType: type,
+      clientName: selectedClient?.name || "Cliente",
+    };
+
+    console.log("Enviando requisição CSV para microserviço...");
+
+    const response = await fetch("https://analysis-micro.onrender.com/analise-csv", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro da API CSV:", errorData);
+      setApiError(errorData.error || errorData.message || "Erro desconhecido");
+      throw new Error(
+        `Erro na análise CSV: ${
+          errorData.error || errorData.message || "Erro desconhecido"
+        }`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Resposta CSV recebida do microserviço:", data);
+    
+    if (!data.analysis) {
+      setApiError("Formato de resposta inesperado do servidor");
+      throw new Error("Formato de resposta inesperado do servidor");
+    }
+
+    return data.analysis;
+  };
+
+  // Função para detectar se há arquivos CSV
+  const hasCSVFiles = () => {
+    return files.some(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+  };
+
+  // Função para detectar se há arquivos de imagem
+  const hasImageFiles = () => {
+    return files.some(file => file.type.startsWith('image/'));
+  };
+
 
   const analyzeImagesWithOpenAI = async (
     base64Images: string[],
@@ -247,21 +315,31 @@ export default function AnalisePage() {
 
     try {
       setIsAnalyzing(true);
-      const ocrTexts = await ocrAllImages(files);
-      const base64Images = await Promise.all(files.map(convertImageToBase64));
 
-      const analysisResult = await analyzeImagesWithOpenAI(
-        base64Images,
-        analysisType,
-        ocrTexts
-      );
+      // Separe os arquivos
+      const csvFile = files.find(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
-      const clientName = selectedClient?.name || "Cliente";
-      const date = new Date().toLocaleDateString("pt-BR");
-      const markdownContent = `${analysisResult}
-`;
+      let analysisResult: string;
 
-      setCustomMarkdown(markdownContent);
+      if (csvFile) {
+        // Só aceita CSV para análise "ads"
+        if (analysisType !== "ads") {
+          toast({ title: "Tipo de análise inválido", description: "Análise CSV só disponível para 'ads'", variant: "destructive" });
+          setIsAnalyzing(false);
+          return;
+        }
+        const csvContent = await readCSVFile(csvFile);
+        analysisResult = await analyzeCSVWithOpenAI(csvContent, analysisType);
+      } else if (imageFiles.length > 0) {
+        const ocrTexts = await ocrAllImages(imageFiles);
+        const base64Images = await Promise.all(imageFiles.map(convertImageToBase64));
+        analysisResult = await analyzeImagesWithOpenAI(base64Images, analysisType, ocrTexts);
+      } else {
+        throw new Error("Nenhum arquivo válido encontrado. Faça upload de imagens ou CSV.");
+      }
+
+      setCustomMarkdown(analysisResult);
 
       toast({
         title: "Análise concluída com sucesso!",
@@ -272,12 +350,12 @@ export default function AnalisePage() {
 
 
       console.log('🗄️ Tentando salvar análise no banco...');
-      console.log('📊 Markdown content length:', markdownContent.length);
+      console.log('📊 Markdown content length:', analysisResult.length);
       console.log('👤 Selected client ID:', selectedClientId);
       console.log('📋 Analysis type:', analysisType);
       
       try {
-        await saveAnalysisToDatabase(markdownContent);
+        await saveAnalysisToDatabase(analysisResult);
       } catch (saveError) {
         console.error("❌ Erro ao salvar no banco (análise gerada com sucesso):", saveError);
       
@@ -405,7 +483,7 @@ export default function AnalisePage() {
             <FileUpload
               onFilesChange={handleFileChange}
               maxFiles={10}
-              accept="image/*"
+              accept="image/*, text/csv"
             />
             <p className="text-xs text-muted-foreground mt-2">
               {analysisType === "account"
