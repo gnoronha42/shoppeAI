@@ -1,0 +1,68 @@
+  // Função para ler arquivo CSV
+  const readCSVFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsText(file, 'utf-8');
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Função para analisar CSV com IA
+  const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType) => {
+    setApiError(null);
+
+    console.log(`Iniciando análise CSV do tipo: ${type}`);
+    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
+    console.log(`Tamanho do CSV: ${csvContent.length} caracteres`);
+
+    const requestBody = {
+      csvContent: csvContent,
+      analysisType: type,
+      clientName: selectedClient?.name || "Cliente",
+    };
+
+    console.log("Enviando requisição CSV para microserviço...");
+
+    const response = await fetch("https://analysis-micro.onrender.com/analise-csv", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro da API CSV:", errorData);
+      setApiError(errorData.error || errorData.message || "Erro desconhecido");
+      throw new Error(
+        `Erro na análise CSV: ${
+          errorData.error || errorData.message || "Erro desconhecido"
+        }`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Resposta CSV recebida do microserviço:", data);
+    
+    if (!data.analysis) {
+      setApiError("Formato de resposta inesperado do servidor");
+      throw new Error("Formato de resposta inesperado do servidor");
+    }
+
+    return data.analysis;
+  };
+
+  // Função para detectar se há arquivos CSV
+  const hasCSVFiles = () => {
+    return files.some(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+  };
+
+  // Função para detectar se há arquivos de imagem
+  const hasImageFiles = () => {
+    return files.some(file => file.type.startsWith('image/'));
+  };
+
