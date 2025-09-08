@@ -15,19 +15,21 @@ export default function RootLayout({
 }) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
+  const isSelleriaPage = pathname === "/selleria";
 
   return (
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
           <div className="min-h-screen">
-            {!isLoginPage && <Sidebar />}
+            {!isLoginPage && !isSelleriaPage && <Sidebar />}
             <main className={`${!isLoginPage ? 'md:pl-80 p-4 md:p-6' : ''} min-h-screen bg-gray-50 dark:bg-zinc-900`}>
               <div className={`${!isLoginPage ? 'max-w-7xl mx-auto' : ''}`}>
                 {children}
               </div>
             </main>
           </div>
+           
         </Providers>
       </body>
     </html>
