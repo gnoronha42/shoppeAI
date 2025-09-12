@@ -6,17 +6,19 @@ export default function SelleriaPage() {
   const [form, setForm] = useState({
     nome: "",
     email: "",
-    gmv: "",
+    telefone: "",
+    faturamento30d: "",
     visitantes: "",
     pedidos: "",
     investimentoAds: "",
+    roasMensal: "",
     desafio: "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -25,19 +27,33 @@ export default function SelleriaPage() {
     setSuccess("");
     setError("");
     setLoading(true);
-    // Simula envio
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setLoading(false);
-    setSuccess("Análise solicitada com sucesso! Você receberá o relatório em seu email em até 24 horas.");
+    try {
+      const res = await fetch("https://analysis-micro.onrender.com/api/whatsapp-express", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSuccess("Mensagem enviada para o WhatsApp! Você receberá a análise em até 24h.");
     setForm({
       nome: "",
       email: "",
-      gmv: "",
+      telefone: "",
+      faturamento30d: "",
       visitantes: "",
       pedidos: "",
       investimentoAds: "",
+      roasMensal: "",
       desafio: "",
     });
+      } else {
+        setError(data.error || "Erro ao enviar mensagem para o WhatsApp.");
+      }
+    } catch (err: any) {
+      setError("Erro de conexão com o microserviço.");
+    }
+    setLoading(false);
   };
 
   return (
@@ -68,22 +84,10 @@ export default function SelleriaPage() {
           <div className="hero">
             <h2>Descubra o Potencial da Sua Loja Shopee</h2>
             <p>Receba uma análise completa e personalizada da sua conta em menos de 2 minutos. Nossa IA especializada identifica oportunidades de crescimento imediatas.</p>
-            <div className="features">
-              <div className="feature-card">
-                <div className="feature-icon">📊</div>
-                <h3>Diagnóstico Completo</h3>
-                <p>Análise detalhada de conversão, ROAS e performance geral</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">🎯</div>
-                <h3>Pontos de Melhoria</h3>
-                <p>Identificação precisa dos gargalos que limitam seu crescimento</p>
-              </div>
-              <div className="feature-card">
-                <div className="feature-icon">📈</div>
-                <h3>Ações Imediatas</h3>
-                <p>Plano de ação prático para os próximos 30 dias</p>
-              </div>
+            <div className="benefits">
+              <div className="benefit-item">📊 Diagnóstico Completo</div>
+              <div className="benefit-item">🎯 Pontos de Melhoria</div>
+              <div className="benefit-item">📈 Ações Imediatas</div>
             </div>
           </div>
           <div className="form-card">
@@ -110,70 +114,46 @@ export default function SelleriaPage() {
                 <div className="form-group">
                   <div className="form-row">
                     <div>
-                      <label className="form-label" htmlFor="gmv">GMV do Último Mês *</label>
-                      <select id="gmv" name="gmv" className="form-select" required value={form.gmv} onChange={handleChange}>
-                        <option value="">Selecione a faixa de faturamento</option>
-                        <option value="0-5k">R$ 0 - R$ 5.000</option>
-                        <option value="5k-15k">R$ 5.000 - R$ 15.000</option>
-                        <option value="15k-30k">R$ 15.000 - R$ 30.000</option>
-                        <option value="30k-50k">R$ 30.000 - R$ 50.000</option>
-                        <option value="50k-100k">R$ 50.000 - R$ 100.000</option>
-                        <option value="100k+">Acima de R$ 100.000</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="form-label" htmlFor="visitantes">Visitantes do Último Mês *</label>
-                      <select id="visitantes" name="visitantes" className="form-select" required value={form.visitantes} onChange={handleChange}>
-                        <option value="">Selecione o número de visitantes</option>
-                        <option value="0-1k">0 - 1.000</option>
-                        <option value="1k-5k">1.000 - 5.000</option>
-                        <option value="5k-10k">5.000 - 10.000</option>
-                        <option value="10k-25k">10.000 - 25.000</option>
-                        <option value="25k-50k">25.000 - 50.000</option>
-                        <option value="50k+">Acima de 50.000</option>
-                      </select>
+                      <label className="form-label" htmlFor="telefone">Telefone (WhatsApp) *</label>
+                      <input type="text" id="telefone" name="telefone" className="form-input" placeholder="Ex: 5511999999999" required value={form.telefone} onChange={handleChange} />
                     </div>
                   </div>
                 </div>
                 <div className="form-group">
                   <div className="form-row">
                     <div>
-                      <label className="form-label" htmlFor="pedidos">Pedidos Pagos do Último Mês *</label>
-                      <select id="pedidos" name="pedidos" className="form-select" required value={form.pedidos} onChange={handleChange}>
-                        <option value="">Selecione o número de pedidos</option>
-                        <option value="0-50">0 - 50 pedidos</option>
-                        <option value="50-150">50 - 150 pedidos</option>
-                        <option value="150-300">150 - 300 pedidos</option>
-                        <option value="300-500">300 - 500 pedidos</option>
-                        <option value="500-1000">500 - 1.000 pedidos</option>
-                        <option value="1000+">Acima de 1.000 pedidos</option>
-                      </select>
+                      <label className="form-label" htmlFor="faturamento30d">Valor Faturado nos Últimos 30 Dias *</label>
+                      <input type="text" id="faturamento30d" name="faturamento30d" className="form-input" placeholder="Ex: 15.000" required value={form.faturamento30d} onChange={handleChange} />
                     </div>
                     <div>
-                      <label className="form-label" htmlFor="investimentoAds">Investimento em Shopee Ads *</label>
-                      <select id="investimentoAds" name="investimentoAds" className="form-select" required value={form.investimentoAds} onChange={handleChange}>
-                        <option value="">Selecione o investimento mensal</option>
-                        <option value="0">Não invisto em ads</option>
-                        <option value="0-500">R$ 0 - R$ 500</option>
-                        <option value="500-1500">R$ 500 - R$ 1.500</option>
-                        <option value="1500-3000">R$ 1.500 - R$ 3.000</option>
-                        <option value="3000-5000">R$ 3.000 - R$ 5.000</option>
-                        <option value="5000+">Acima de R$ 5.000</option>
-                      </select>
+                      <label className="form-label" htmlFor="visitantes">Visitantes (Últimos 30 Dias) *</label>
+                      <input type="text" id="visitantes" name="visitantes" className="form-input" placeholder="Ex: 2.500" required value={form.visitantes} onChange={handleChange} />
                     </div>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label" htmlFor="desafio">Principal Desafio Hoje *</label>
-                  <select id="desafio" name="desafio" className="form-select" required value={form.desafio} onChange={handleChange}>
-                    <option value="">Selecione seu maior desafio atual</option>
-                    <option value="trafego">Aumentar Tráfego / Visibilidade</option>
-                    <option value="conversao">Melhorar Taxa de Conversão</option>
-                    <option value="ads">Otimizar Shopee Ads / ROAS</option>
-                    <option value="ticket">Aumentar Ticket Médio</option>
-                    <option value="logistica">Melhorar Logística / Entrega</option>
-                    <option value="concorrencia">Competir com Concorrência</option>
-                  </select>
+                  <div className="form-row">
+                    <div>
+                      <label className="form-label" htmlFor="pedidos">Pedidos (Últimos 30 Dias) *</label>
+                      <input type="text" id="pedidos" name="pedidos" className="form-input" placeholder="Ex: 85" required value={form.pedidos} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label className="form-label" htmlFor="investimentoAds">Investimento Mensal em Shopee Ads *</label>
+                      <input type="text" id="investimentoAds" name="investimentoAds" className="form-input" placeholder="Ex: 1.200" required value={form.investimentoAds} onChange={handleChange} />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <div className="form-row">
+                    <div>
+                      <label className="form-label" htmlFor="roasMensal">ROAS Mensal *</label>
+                      <input type="text" id="roasMensal" name="roasMensal" className="form-input" placeholder="Ex: 8.5" required value={form.roasMensal} onChange={handleChange} />
+                    </div>
+                    <div>
+                      <label className="form-label" htmlFor="desafio">Maior Desafio Hoje *</label>
+                      <input type="text" id="desafio" name="desafio" className="form-input" placeholder="Ex: Aumentar conversão" required value={form.desafio} onChange={handleChange} />
+                    </div>
+                  </div>
                 </div>
                 <button type="submit" className="submit-button" disabled={loading}>
                   <span style={{ display: loading ? "none" : "inline" }}>🔎 Gerar Análise Express da Minha Conta</span>
@@ -207,16 +187,13 @@ export default function SelleriaPage() {
         .selleria-root .logo-text h1 { font-size: 1.5rem; font-weight: bold; background: linear-gradient(135deg, #7c3aed, #6d28d9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .selleria-root .logo-text p { font-size: 0.875rem; color: #6b7280; }
         .selleria-root .badge { background: #f3f4f6; color: #7c3aed; padding: 0.5rem 1rem; border-radius: 1rem; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.25rem; }
-        .selleria-root .main-content { max-width: 1000px; margin: 0 auto; padding: 3rem 1rem; }
-        .selleria-root .hero { text-align: center; margin-bottom: 3rem; }
+        .selleria-root .main-content { max-width: 800px; margin: 0 auto; padding: 2rem 1rem; display: flex; flex-direction: column; align-items: center; }
+        .selleria-root .hero { text-align: center; margin-bottom: 3rem; width: 100%; }
         .selleria-root .hero h2 { font-size: 2.5rem; font-weight: bold; color: #111827; margin-bottom: 1rem; }
-        .selleria-root .hero p { font-size: 1.25rem; color: #6b7280; margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
-        .selleria-root .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .selleria-root .feature-card { background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; text-align: center; }
-        .selleria-root .feature-icon { width: 3rem; height: 3rem; background: #f3f4f6; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; color: #7c3aed; font-size: 1.5rem; }
-        .selleria-root .feature-card h3 { font-weight: 600; color: #111827; margin-bottom: 0.5rem; }
-        .selleria-root .feature-card p { font-size: 0.875rem; color: #6b7280; }
-        .selleria-root .form-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .selleria-root .hero p { font-size: 1.25rem; color: #6b7280; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .selleria-root .benefits { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .selleria-root .benefit-item { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; padding: 0.75rem 1.5rem; border-radius: 2rem; font-weight: 600; font-size: 0.875rem; white-space: nowrap; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); }
+        .selleria-root .form-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.2); width: 100%; max-width: 600px; }
         .selleria-root .form-header { text-align: center; padding: 2rem 2rem 0; }
         .selleria-root .form-title { font-size: 1.5rem; font-weight: bold; color: #111827; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .selleria-root .form-description { font-size: 1.125rem; color: #6b7280; }
@@ -235,7 +212,25 @@ export default function SelleriaPage() {
         .selleria-root .trust-section { text-align: center; margin-top: 3rem; }
         .selleria-root .trust-main { font-size: 0.875rem; color: #6b7280; margin-bottom: 1rem; }
         .selleria-root .trust-indicators { display: flex; justify-content: center; gap: 2rem; font-size: 0.75rem; color: #9ca3af; flex-wrap: wrap; }
-        @media (max-width: 768px) { .selleria-root .header-content { flex-direction: column; gap: 1rem; text-align: center; } .selleria-root .hero h2 { font-size: 2rem; } .selleria-root .hero p { font-size: 1.125rem; } .selleria-root .form-row { grid-template-columns: 1fr; } .selleria-root .trust-indicators { flex-direction: column; gap: 0.5rem; } }
+        @media (max-width: 768px) { 
+          .selleria-root .header-content { flex-direction: column; gap: 1rem; text-align: center; } 
+          .selleria-root .main-content { padding: 1rem; } 
+          .selleria-root .hero { margin-bottom: 2rem; } 
+          .selleria-root .hero h2 { font-size: 1.75rem; line-height: 1.2; } 
+          .selleria-root .hero p { font-size: 1rem; margin-bottom: 1.5rem; } 
+          .selleria-root .benefits { gap: 1rem; } 
+          .selleria-root .benefit-item { font-size: 0.75rem; padding: 0.5rem 1rem; } 
+          .selleria-root .form-card { margin: 0; border-radius: 0.75rem; } 
+          .selleria-root .form-header { padding: 1.5rem 1rem 0; } 
+          .selleria-root .form-content { padding: 1.5rem 1rem; } 
+          .selleria-root .form-title { font-size: 1.25rem; } 
+          .selleria-root .form-description { font-size: 1rem; } 
+          .selleria-root .form-row { grid-template-columns: 1fr; gap: 1rem; } 
+          .selleria-root .form-group { margin-bottom: 1.25rem; } 
+          .selleria-root .submit-button { font-size: 1rem; padding: 0.875rem 1.25rem; } 
+          .selleria-root .trust-indicators { flex-direction: column; gap: 0.5rem; font-size: 0.75rem; } 
+          .selleria-root .trust-main { font-size: 0.8rem; } 
+        }
         .selleria-root .success-message { background: #10b981; color: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; text-align: center; }
         .selleria-root .error-message { background: #ef4444; color: white; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; text-align: center; }
       `}</style>
