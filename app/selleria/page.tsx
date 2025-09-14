@@ -18,7 +18,7 @@ export default function SelleriaPage() {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -151,7 +151,15 @@ export default function SelleriaPage() {
                     </div>
                     <div>
                       <label className="form-label" htmlFor="desafio">Maior Desafio Hoje *</label>
-                      <input type="text" id="desafio" name="desafio" className="form-input" placeholder="Ex: Aumentar conversão" required value={form.desafio} onChange={handleChange} />
+                      <select id="desafio" name="desafio" className="form-select" required value={form.desafio} onChange={handleChange}>
+                        <option value="">Selecione seu maior desafio atual</option>
+                        <option value="trafego">Aumentar Tráfego / Visibilidade</option>
+                        <option value="conversao">Melhorar Taxa de Conversão</option>
+                        <option value="ads">Otimizar Shopee Ads / ROAS</option>
+                        <option value="ticket">Aumentar Ticket Médio</option>
+                        <option value="logistica">Melhorar Logística / Entrega</option>
+                        <option value="concorrencia">Competir com Concorrência</option>
+                      </select>
                     </div>
                   </div>
                 </div>
