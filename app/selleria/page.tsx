@@ -28,7 +28,7 @@ export default function SelleriaPage() {
     setError("");
     setLoading(true);
     try {
-      const res = await fetch("https://analysis-micro.onrender.com/api/whatsapp-express", {
+      const res = await fetch("http://localhost:3001/api/whatsapp-express", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
