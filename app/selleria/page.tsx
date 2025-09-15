@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import Head from "next/head";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SelleriaPage() {
   const [form, setForm] = useState({
@@ -15,8 +17,10 @@ export default function SelleriaPage() {
     desafio: "",
   });
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -27,26 +31,40 @@ export default function SelleriaPage() {
     setSuccess("");
     setError("");
     setLoading(true);
+    setProgress(10);
     try {
+      // Simula progresso enquanto espera a resposta
+      const progressInterval = setInterval(() => {
+        setProgress((old) => {
+          if (old < 90) return old + 10;
+          return old;
+        });
+      }, 300);
       const res = await fetch("https://analysis-micro.onrender.com/api/whatsapp-express", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      clearInterval(progressInterval);
+      setProgress(100);
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccess("Mensagem enviada para o WhatsApp! Você receberá a análise em até 24h.");
-    setForm({
-      nome: "",
-      email: "",
-      telefone: "",
-      faturamento30d: "",
-      visitantes: "",
-      pedidos: "",
-      investimentoAds: "",
-      roasMensal: "",
-      desafio: "",
-    });
+        toast({
+          title: "Mensagem enviada!",
+          description: "Você receberá a análise em até 24h no WhatsApp.",
+        });
+        setForm({
+          nome: "",
+          email: "",
+          telefone: "",
+          faturamento30d: "",
+          visitantes: "",
+          pedidos: "",
+          investimentoAds: "",
+          roasMensal: "",
+          desafio: "",
+        });
       } else {
         setError(data.error || "Erro ao enviar mensagem para o WhatsApp.");
       }
@@ -54,6 +72,7 @@ export default function SelleriaPage() {
       setError("Erro de conexão com o microserviço.");
     }
     setLoading(false);
+    setTimeout(() => setProgress(0), 500);
   };
 
   return (
@@ -164,8 +183,8 @@ export default function SelleriaPage() {
                   </div>
                 </div>
                 <button type="submit" className="submit-button" disabled={loading}>
-                  <span style={{ display: loading ? "none" : "inline" }}>🔎 Gerar Análise Express da Minha Conta</span>
-                  {loading && <div className="loading-spinner" />}
+                  {!loading && <span>🔎 Gerar Análise Express da Minha Conta</span>}
+                  {loading && <div style={{ width: '100%' }}><Progress value={progress} max={100} /></div>}
                 </button>
               </form>
             </div>
