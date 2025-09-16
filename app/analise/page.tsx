@@ -131,7 +131,7 @@ export default function AnalisePage() {
     };
 
     console.log("Enviando requisição CSV para microserviço...");
-
+    
     const response = await fetch("https://analysis-micro.onrender.com/analise-csv", {
       method: "POST",
       headers: {
@@ -189,7 +189,7 @@ export default function AnalisePage() {
 
     console.log("Enviando requisição de múltiplos CSVs para microserviço...");
 
-    const response = await fetch("https://analysis-micro.onrender.com/analise-csv", {
+    const response = await fetch("http://localhost:3001/analise-csv", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
