@@ -162,6 +162,63 @@ export default function AnalisePage() {
     return data.analysis;
   };
 
+  // Nova função para analisar múltiplos CSVs para análise de conta
+  const analyzeMultipleCSVsWithOpenAI = async (csvFiles: File[], type: AnalysisType) => {
+    setApiError(null);
+
+    console.log(`Iniciando análise de múltiplos CSVs do tipo: ${type}`);
+    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
+    console.log(`Número de arquivos CSV: ${csvFiles.length}`);
+
+    // Ler conteúdo de todos os CSVs
+    const csvFilesContent = await Promise.all(
+      csvFiles.map(async (file) => {
+        const content = await readCSVFile(file);
+        return {
+          nome: file.name,
+          conteudo: content
+        };
+      })
+    );
+
+    const requestBody = {
+      csvFiles: csvFilesContent,
+      analysisType: type,
+      clientName: selectedClient?.name || "Cliente",
+    };
+
+    console.log("Enviando requisição de múltiplos CSVs para microserviço...");
+
+    const response = await fetch("https://analysis-micro.onrender.com/analise-csv", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Erro da API CSV:", errorData);
+      setApiError(errorData.error || errorData.message || "Erro desconhecido");
+      throw new Error(
+        `Erro na análise CSV: ${
+          errorData.error || errorData.message || "Erro desconhecido"
+        }`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Resposta CSV recebida do microserviço:", data);
+    
+    if (!data.analysis) {
+      setApiError("Formato de resposta inesperado do servidor");
+      throw new Error("Formato de resposta inesperado do servidor");
+    }
+
+    return data.analysis;
+  };
+
   // Função para detectar se há arquivos CSV
   const hasCSVFiles = () => {
     return files.some(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
@@ -317,20 +374,30 @@ export default function AnalisePage() {
       setIsAnalyzing(true);
 
       // Separe os arquivos
-      const csvFile = files.find(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+      const csvFiles = files.filter(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
       const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
       let analysisResult: string;
 
-      if (csvFile) {
-        // Só aceita CSV para análise "ads"
-        if (analysisType !== "ads") {
-          toast({ title: "Tipo de análise inválido", description: "Análise CSV só disponível para 'ads'", variant: "destructive" });
+      if (csvFiles.length > 0) {
+        // Análise via CSV
+        if (analysisType === "ads") {
+          // Para análise de ADS, usar apenas 1 CSV (comportamento existente)
+          if (csvFiles.length > 1) {
+            toast({ title: "Múltiplos CSVs", description: "Para análise de Ads, use apenas 1 arquivo CSV", variant: "destructive" });
+            setIsAnalyzing(false);
+            return;
+          }
+          const csvContent = await readCSVFile(csvFiles[0]);
+          analysisResult = await analyzeCSVWithOpenAI(csvContent, analysisType);
+        } else if (analysisType === "account") {
+          // Para análise de ACCOUNT, aceitar múltiplos CSVs
+          analysisResult = await analyzeMultipleCSVsWithOpenAI(csvFiles, analysisType);
+        } else {
+          toast({ title: "Tipo de análise inválido", description: "Análise CSV disponível para 'ads' e 'account'", variant: "destructive" });
           setIsAnalyzing(false);
           return;
         }
-        const csvContent = await readCSVFile(csvFile);
-        analysisResult = await analyzeCSVWithOpenAI(csvContent, analysisType);
       } else if (imageFiles.length > 0) {
         const ocrTexts = await ocrAllImages(imageFiles);
         const base64Images = await Promise.all(imageFiles.map(convertImageToBase64));
@@ -487,9 +554,9 @@ export default function AnalisePage() {
             />
             <p className="text-xs text-muted-foreground mt-2">
               {analysisType === "account"
-                ? "Faça upload de prints da sua conta Shopee: dashboard, visitantes, vendas, produtos e métricas gerais (máximo 10 imagens)"
+                ? "Faça upload de prints da sua conta Shopee OU múltiplos arquivos CSV (shop-stats, parentskudetail, productoverview, dados de anúncios) para análise completa"
                 : analysisType === "ads"
-                ? "Faça upload de prints das suas campanhas Shopee Ads: performance, ROAS, CTR, investimento e resultados (máximo 10 imagens)"
+                ? "Faça upload de prints das suas campanhas Shopee Ads OU 1 arquivo CSV de dados de anúncios: performance, ROAS, CTR, investimento e resultados"
                 : "Faça upload de prints da sua loja Shopee para análise semanal: métricas principais, vendas e performance geral (máximo 10 imagens)"}
             </p>
             {files.length > 0 && (
