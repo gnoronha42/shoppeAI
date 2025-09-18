@@ -53,13 +53,65 @@ export default function AnalisePage() {
   const [showMarkdownImport, setShowMarkdownImport] = useState<boolean>(false);
   const [isClient, setIsClient] = useState(false);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [metricasAvancadas, setMetricasAvancadas] = useState<any>(null);
+  const [relatorioPersonalizado, setRelatorioPersonalizado] = useState<any>(null);
+  const [testResults, setTestResults] = useState<any>(null);
+  const [isTestingSystem, setIsTestingSystem] = useState(false);
+  const [selectedAnalysisMethod, setSelectedAnalysisMethod] = useState<'auto' | 'debug' | 'bypass' | 'robust'>('auto');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // Função helper para obter URL base
+  const getBaseUrl = () => {
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+    const baseUrl = "https://analysis-micro.onrender.com";
+    
+    console.log('🌐 Ambiente detectado:', {
+      isLocalhost,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side',
+      baseUrl
+    });
+    
+    return baseUrl;
+  };
+
+  // Função para testar conectividade
+  const testConnection = async () => {
+    try {
+      const baseUrl = getBaseUrl();
+      console.log('🔍 Testando conectividade com:', baseUrl);
+      
+      const response = await fetch(`${baseUrl}/health`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      console.log('🔍 Status da conectividade:', response.status);
+      
+      if (response.ok) {
+        const data = await response.text();
+        console.log('✅ Servidor respondeu:', data);
+        return true;
+      } else {
+        console.log('❌ Servidor retornou erro:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Erro de conectividade:', error);
+      return false;
+    }
+  };
+
   const handleFileChange = (newFiles: File[]) => {
     setFiles(newFiles);
+    // Limpar resultados de teste quando mudar arquivos
+    if (testResults) {
+      setTestResults(null);
+    }
   };
 
   const convertImageToBase64 = (file: File): Promise<string> => {
@@ -132,7 +184,10 @@ export default function AnalisePage() {
 
     console.log("Enviando requisição CSV para microserviço...");
     
-    const response = await fetch("https://analysis-micro.onrender.com/analise-csv", {
+    // Usar endpoint local para desenvolvimento ou produção
+    const baseUrl =  "https://analysis-micro.onrender.com";
+    
+    const response = await fetch(`${baseUrl}/analise-csv`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -162,14 +217,86 @@ export default function AnalisePage() {
     return data.analysis;
   };
 
-  // Nova função para analisar múltiplos CSVs para análise de conta
-  const analyzeMultipleCSVsWithOpenAI = async (csvFiles: File[], type: AnalysisType) => {
+  // Nova função para testar todos os sistemas
+  const testAllSystems = async (csvFiles: File[]) => {
+    setIsTestingSystem(true);
+    setApiError(null);
+    
+    try {
+      console.log('🧪 Testando todos os sistemas de análise...');
+      
+      // Primeiro, testar conectividade
+      console.log('🔍 Verificando conectividade...');
+      const isConnected = await testConnection();
+      
+      if (!isConnected) {
+        throw new Error('Não foi possível conectar ao servidor de análise');
+      }
+      
+      // Ler conteúdo de todos os CSVs
+      const csvFilesContent = await Promise.all(
+        csvFiles.map(async (file) => {
+          const content = await readCSVFile(file);
+          return {
+            nome: file.name,
+            conteudo: content
+          };
+        })
+      );
+
+      const baseUrl = getBaseUrl();
+      const fullUrl = `${baseUrl}/test-todas-solucoes`;
+      console.log('🔗 URL completa para teste:', fullUrl);
+        
+      const response = await fetch(fullUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ csvFiles: csvFilesContent }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro no teste: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('🧪 Resultado dos testes:', data);
+      
+      setTestResults(data);
+      
+      toast({
+        title: "Teste concluído!",
+        description: `${data.sistemasComSucesso}/${data.totalSistemas} sistemas funcionando`,
+        variant: "default",
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('❌ Erro no teste:', error);
+      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack');
+      
+      const errorMessage = error instanceof Error ? error.message : 'Erro no teste';
+      setApiError(`Erro no teste: ${errorMessage}`);
+      
+      toast({
+        title: "Erro no teste",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      
+      throw error;
+    } finally {
+      setIsTestingSystem(false);
+    }
+  };
+
+  // Nova função para análise com método específico
+  const analyzeWithSpecificMethod = async (csvFiles: File[], method: string, type: AnalysisType) => {
     setApiError(null);
 
-    console.log(`Iniciando análise de múltiplos CSVs do tipo: ${type}`);
-    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
-    console.log(`Número de arquivos CSV: ${csvFiles.length}`);
-
+    console.log(`🔄 Iniciando análise com método: ${method}`);
+    
     // Ler conteúdo de todos os CSVs
     const csvFilesContent = await Promise.all(
       csvFiles.map(async (file) => {
@@ -187,9 +314,29 @@ export default function AnalisePage() {
       clientName: selectedClient?.name || "Cliente",
     };
 
-    console.log("Enviando requisição de múltiplos CSVs para microserviço...");
+    let endpoint = "/analise-csv"; // padrão
+    
+    switch (method) {
+      case 'bypass':
+        endpoint = "/analise-csv-bypass";
+        break;
+      case 'robust':
+        endpoint = "/analise-csv-robusta";
+        break;
+      case 'debug':
+        endpoint = "/analise-csv"; // usa o sistema original com debug
+        break;
+    }
 
-    const response = await fetch("http://localhost:3001/analise-csv", {
+    console.log(`📡 Chamando endpoint: ${endpoint}`);
+
+    const baseUrl = getBaseUrl();
+    const fullUrl = `${baseUrl}${endpoint}`;
+    console.log('🔗 URL completa para análise:', fullUrl);
+    console.log('📍 Endpoint:', endpoint);
+    console.log('🔧 Método:', method);
+
+    const response = await fetch(fullUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -199,17 +346,17 @@ export default function AnalisePage() {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Erro da API CSV:", errorData);
+      console.error("Erro da API:", errorData);
       setApiError(errorData.error || errorData.message || "Erro desconhecido");
       throw new Error(
-        `Erro na análise CSV: ${
+        `Erro na análise ${method}: ${
           errorData.error || errorData.message || "Erro desconhecido"
         }`
       );
     }
 
     const data = await response.json();
-    console.log("Resposta CSV recebida do microserviço:", data);
+    console.log("Resposta recebida:", data);
     
     if (!data.analysis) {
       setApiError("Formato de resposta inesperado do servidor");
@@ -217,6 +364,57 @@ export default function AnalisePage() {
     }
 
     return data.analysis;
+  };
+
+  // Nova função para analisar múltiplos CSVs para análise de conta
+  const analyzeMultipleCSVsWithOpenAI = async (csvFiles: File[], type: AnalysisType) => {
+    setApiError(null);
+
+    console.log(`Iniciando análise de múltiplos CSVs do tipo: ${type}`);
+    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
+    console.log(`Número de arquivos CSV: ${csvFiles.length}`);
+    console.log(`Método selecionado: ${selectedAnalysisMethod}`);
+
+    // Se método é 'auto', testar todos os sistemas primeiro
+    if (selectedAnalysisMethod === 'auto') {
+      try {
+        const testData = await testAllSystems(csvFiles);
+        
+        // Usar o primeiro sistema que funcionou
+        if (testData.sistemasComSucesso > 0) {
+          const bestMethod = Object.keys(testData.resultados).find(
+            key => testData.resultados[key].sucesso
+          );
+          
+          let methodMap: { [key: string]: string } = {
+            'bypassSystem': 'bypass',
+            'robustSystem': 'robust',
+            'debugSystem': 'debug'
+          };
+          
+          const method = methodMap[bestMethod!] || 'bypass';
+          console.log(`🎯 Usando método recomendado: ${method}`);
+          
+          toast({
+            title: "Sistema automático",
+            description: `Usando método ${method} (melhor resultado nos testes)`,
+            variant: "default",
+          });
+          
+          return await analyzeWithSpecificMethod(csvFiles, method, type);
+        } else {
+          throw new Error('Nenhum sistema de análise funcionou');
+        }
+      } catch (error) {
+        console.error('❌ Erro no modo automático:', error);
+        // Fallback para bypass
+        console.log('🔄 Tentando fallback para bypass...');
+        return await analyzeWithSpecificMethod(csvFiles, 'bypass', type);
+      }
+    } else {
+      // Usar método específico selecionado
+      return await analyzeWithSpecificMethod(csvFiles, selectedAnalysisMethod, type);
+    }
   };
 
   // Função para detectar se há arquivos CSV
@@ -227,6 +425,56 @@ export default function AnalisePage() {
   // Função para detectar se há arquivos de imagem
   const hasImageFiles = () => {
     return files.some(file => file.type.startsWith('image/'));
+  };
+
+  // Função para obter métricas avançadas
+  const obterMetricasAvancadas = async (dados: any) => {
+    try {
+      const baseUrl =  "https://analysis-micro.onrender.com";
+      
+      const response = await fetch(`${baseUrl}/api/metricas-avancadas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dados }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao obter métricas avançadas');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Erro ao obter métricas avançadas:', error);
+      return null;
+    }
+  };
+
+  // Função para gerar relatório personalizado
+  const gerarRelatorioPersonalizado = async (dados: any, tipoRelatorio: string = 'completo') => {
+    try {
+      const baseUrl =  "https://analysis-micro.onrender.com";
+      
+      const response = await fetch(`${baseUrl}/api/relatorio-personalizado`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ dados, tipoRelatorio }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar relatório personalizado');
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error('Erro ao gerar relatório personalizado:', error);
+      return null;
+    }
   };
 
 
@@ -251,7 +499,10 @@ export default function AnalisePage() {
 
     console.log("Enviando requisição para microserviço...");
 
-    const response = await fetch("https://analysis-micro.onrender.com/analise", {
+    // Usar endpoint local para desenvolvimento ou produção
+    const baseUrl =  "https://analysis-micro.onrender.com";
+
+    const response = await fetch(`${baseUrl}/analise`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -536,6 +787,108 @@ export default function AnalisePage() {
           </CardContent>
         </Card>
 
+        {/* {hasCSVFiles() && analysisType === "account" && (
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
+            <CardHeader>
+              <CardTitle className="text-blue-700 dark:text-blue-400 flex items-center">
+                <FileSpreadsheet className="mr-2 h-5 w-5" />
+                Método de Análise de CSV
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant={selectedAnalysisMethod === 'auto' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedAnalysisMethod('auto')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    🤖 Automático
+                  </Button>
+                  <Button
+                    variant={selectedAnalysisMethod === 'bypass' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedAnalysisMethod('bypass')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    ⚡ Bypass
+                  </Button>
+                  <Button
+                    variant={selectedAnalysisMethod === 'robust' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedAnalysisMethod('robust')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    🔄 Robusto
+                  </Button>
+                  <Button
+                    variant={selectedAnalysisMethod === 'debug' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedAnalysisMethod('debug')}
+                    className="flex-1 min-w-[120px]"
+                  >
+                    🔍 Debug
+                  </Button>
+                </div>
+                
+                <p className="text-xs text-muted-foreground">
+                  {selectedAnalysisMethod === 'auto' && "🤖 Testa todos os sistemas e usa o melhor automaticamente"}
+                  {selectedAnalysisMethod === 'bypass' && "⚡ Usa dados pré-validados para garantir precisão máxima"}
+                  {selectedAnalysisMethod === 'robust' && "🔄 Sistema inteligente com múltiplas tentativas de extração"}
+                  {selectedAnalysisMethod === 'debug' && "🔍 Sistema original com logs detalhados para diagnóstico"}
+                </p>
+
+                {files.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => testAllSystems(files.filter(f => f.type === 'text/csv' || f.name.toLowerCase().endsWith('.csv')))}
+                    disabled={isTestingSystem}
+                    className="w-full"
+                  >
+                    {isTestingSystem ? "🧪 Testando..." : "🧪 Testar Todos os Sistemas"}
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )} */}
+
+        {testResults && (
+          <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
+            <CardHeader>
+              <CardTitle className="text-green-700 dark:text-green-400 flex items-center">
+                <AlertCircle className="mr-2 h-5 w-5" />
+                Resultado dos Testes ({testResults.sistemasComSucesso}/{testResults.totalSistemas} funcionando)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {Object.entries(testResults.resultados).map(([system, result]: [string, any]) => (
+                  <div key={system} className="flex items-center justify-between p-2 rounded border">
+                    <span className="font-medium">
+                      {system === 'debugSystem' && '🔍 Sistema Debug'}
+                      {system === 'bypassSystem' && '⚡ Sistema Bypass'}
+                      {system === 'robustSystem' && '🔄 Sistema Robusto'}
+                    </span>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      result.sucesso 
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' 
+                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                    }`}>
+                      {result.sucesso ? '✅ Funcionando' : '❌ Falhou'}
+                    </span>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground mt-2">
+                  <strong>Recomendação:</strong> {testResults.recomendacao}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>
@@ -581,13 +934,18 @@ export default function AnalisePage() {
               !selectedClientId ||
               files.length === 0 ||
               isLoading ||
-              isAnalyzing
+              isAnalyzing ||
+              isTestingSystem
             }
             className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
           >
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             {isLoading || isAnalyzing
               ? "Analisando com IA..."
+              : isTestingSystem
+              ? "Testando sistemas..."
+              : hasCSVFiles() && analysisType === "account"
+              ? `Gerar com ${selectedAnalysisMethod === 'auto' ? '🤖 Auto' : selectedAnalysisMethod === 'bypass' ? '⚡ Bypass' : selectedAnalysisMethod === 'robust' ? '🔄 Robusto' : '🔍 Debug'}`
               : "Gerar Relatório com IA"}
           </Button>
 
