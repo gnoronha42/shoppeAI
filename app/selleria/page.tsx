@@ -184,7 +184,7 @@ export default function SelleriaPage() {
                 </div>
                 <button type="submit" className="submit-button" disabled={loading}>
                   {!loading && <span>🔎 Gerar Análise Express da Minha Conta</span>}
-                  {loading && <span>Processando... {progress}%</span>}
+                  {loading && <span>Processando... aguarde {progress}%</span>}
                 </button>
               </form>
             </div>
