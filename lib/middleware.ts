@@ -76,6 +76,7 @@ export async function validatePermissions(
   requiredPermissions: string[]
 ): Promise<AuthResult> {
   try {
+    console.log('request.headers', request.headers);
     console.log('=== VALIDANDO PERMISSÕES ===');
     console.log('Permissões necessárias:', requiredPermissions);
 

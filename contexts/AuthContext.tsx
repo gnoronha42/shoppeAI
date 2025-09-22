@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 
 interface User {
@@ -33,6 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Rotas públicas que não precisam de autenticação
+  const publicRoutes = ['/login', '/selleria'];
 
   // Verificar token salvo ao iniciar
   useEffect(() => {
@@ -42,10 +46,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsAuthenticated(true);
       setUser(JSON.parse(savedUser));
     } else {
-      // Se não houver token, fazer logout
-      logout();
+      // Se não houver token e não for rota pública, fazer logout
+      const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
+      if (!isPublicRoute) {
+        logout();
+      }
     }
-  }, []);
+  }, [pathname]);
 
   const login = async (email: string, password: string) => {
     try {
