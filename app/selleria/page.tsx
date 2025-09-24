@@ -53,6 +53,7 @@ export default function SelleriaPage() {
         toast({
           title: "Mensagem enviada!",
           description: "Você receberá a análise em até 24h no WhatsApp.",
+         
         });
         setForm({
           nome: "",
