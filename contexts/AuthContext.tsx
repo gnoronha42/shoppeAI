@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
 
   // Rotas públicas que não precisam de autenticação
-  const publicRoutes = ['/login', '/selleria'];
+  const publicRoutes = ['/login', '/selleria', '/obrigado'];
 
   // Verificar token salvo ao iniciar
   useEffect(() => {

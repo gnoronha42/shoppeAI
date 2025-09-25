@@ -90,10 +90,38 @@ const config: Config = {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
+        'gradient-move': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '33%': { transform: 'translateY(-30px) rotate(120deg)' },
+          '66%': { transform: 'translateY(15px) rotate(240deg)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+          '50%': { opacity: '0.6', transform: 'scale(1.1)' },
+        },
+        'wave': {
+          '0%': { transform: 'translateX(-100%) translateY(0px)' },
+          '50%': { transform: 'translateX(100%) translateY(-20px)' },
+          '100%': { transform: 'translateX(-100%) translateY(0px)' },
+        },
+        'spiral': {
+          '0%': { transform: 'rotate(0deg) translateX(100px) rotate(0deg)' },
+          '100%': { transform: 'rotate(360deg) translateX(100px) rotate(-360deg)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'gradient-move': 'gradient-move 6s ease infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-glow': 'pulse-glow 4s ease-in-out infinite',
+        'wave': 'wave 8s linear infinite',
+        'spiral': 'spiral 20s linear infinite',
       },
     },
   },

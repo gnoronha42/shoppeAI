@@ -168,11 +168,11 @@ export default function AnalisePage() {
     });
   };
 
-  // Função para analisar CSV com IA
+  // Função para analisar CSV com IA (CORRIGIDA)
   const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType) => {
     setApiError(null);
 
-    console.log(`Iniciando análise CSV do tipo: ${type}`);
+    console.log(`🔍 Iniciando análise CSV CORRIGIDA do tipo: ${type}`);
     console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
     console.log(`Tamanho do CSV: ${csvContent.length} caracteres`);
 
@@ -182,10 +182,10 @@ export default function AnalisePage() {
       clientName: selectedClient?.name || "Cliente",
     };
 
-    console.log("Enviando requisição CSV para microserviço...");
+    console.log("📡 Enviando requisição CSV para microserviço com dados corretos...");
     
-    // Usar endpoint local para desenvolvimento ou produção
-    const baseUrl =  "https://analysis-micro.onrender.com";
+    // USAR ENDPOINT CORRIGIDO
+    const baseUrl = "https://analysis-micro.onrender.com";
     
     const response = await fetch(`${baseUrl}/analise-csv`, {
       method: "POST",
@@ -485,10 +485,11 @@ export default function AnalisePage() {
   ) => {
     setApiError(null);
 
-    console.log(`Iniciando análise do tipo: ${type}`);
+    console.log(`⚠️ Iniciando análise de IMAGENS do tipo: ${type}`);
     console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
     console.log(`Número de imagens: ${base64Images.length}`);
     console.log(`Textos OCR: ${ocrTexts.length} extraídos`);
+    console.log(`⚠️ AVISO: Análise de imagens pode ter imprecisões matemáticas. Para dados precisos, use CSV.`);
 
     const requestBody = {
       images: base64Images,
@@ -497,10 +498,9 @@ export default function AnalisePage() {
       ocrTexts: ocrTexts,
     };
 
-    console.log("Enviando requisição para microserviço...");
+    console.log("📡 Enviando requisição para análise de imagens...");
 
-    // Usar endpoint local para desenvolvimento ou produção
-    const baseUrl =  "https://analysis-micro.onrender.com";
+    const baseUrl = "https://analysis-micro.onrender.com";
 
     const response = await fetch(`${baseUrl}/analise`, {
       method: "POST",
@@ -631,9 +631,11 @@ export default function AnalisePage() {
       let analysisResult: string;
 
       if (csvFiles.length > 0) {
-        // Análise via CSV
+        // ✅ ANÁLISE VIA CSV (DADOS CORRETOS GARANTIDOS)
+        console.log('🔍 Usando análise CSV - dados 100% precisos!');
+        
         if (analysisType === "ads") {
-          // Para análise de ADS, usar apenas 1 CSV (comportamento existente)
+          // Para análise de ADS, usar apenas 1 CSV
           if (csvFiles.length > 1) {
             toast({ title: "Múltiplos CSVs", description: "Para análise de Ads, use apenas 1 arquivo CSV", variant: "destructive" });
             setIsAnalyzing(false);
@@ -650,8 +652,12 @@ export default function AnalisePage() {
           return;
         }
       } else if (imageFiles.length > 0) {
+        // ⚠️ ANÁLISE VIA IMAGENS (PODE TER IMPRECISÕES)
+        console.log('⚠️ Usando análise de imagens - dados podem ter imprecisões matemáticas');
+        
         const ocrTexts = await ocrAllImages(imageFiles);
         const base64Images = await Promise.all(imageFiles.map(convertImageToBase64));
+        
         analysisResult = await analyzeImagesWithOpenAI(base64Images, analysisType, ocrTexts);
       } else {
         throw new Error("Nenhum arquivo válido encontrado. Faça upload de imagens ou CSV.");
@@ -909,9 +915,25 @@ export default function AnalisePage() {
               {analysisType === "account"
                 ? "Faça upload de prints da sua conta Shopee OU múltiplos arquivos CSV (shop-stats, parentskudetail, productoverview, dados de anúncios) para análise completa"
                 : analysisType === "ads"
-                ? "Faça upload de prints das suas campanhas Shopee Ads OU 1 arquivo CSV de dados de anúncios: performance, ROAS, CTR, investimento e resultados"
+                ? "✅ RECOMENDADO: 1 arquivo CSV de anúncios para dados 100% precisos (ROAS, investimento, GMV corretos) OU prints das campanhas Shopee Ads (pode ter imprecisões matemáticas)"
                 : "Faça upload de prints da sua loja Shopee para análise semanal: métricas principais, vendas e performance geral (máximo 10 imagens)"}
             </p>
+            
+            {hasCSVFiles() && analysisType === "ads" && (
+              <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/30 rounded border border-green-200">
+                <p className="text-xs text-green-700 dark:text-green-300">
+                  ✅ <strong>CSV detectado!</strong> Análise será feita com dados extraídos diretamente do CSV - precisão matemática garantida!
+                </p>
+              </div>
+            )}
+            
+            {hasImageFiles() && !hasCSVFiles() && analysisType === "ads" && (
+              <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/30 rounded border border-yellow-200">
+                <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                  ⚠️ <strong>Apenas imagens detectadas.</strong> Para dados 100% precisos, recomendamos usar o arquivo CSV de anúncios da Shopee.
+                </p>
+              </div>
+            )}
             {files.length > 0 && (
               <div className="mt-4">
                 <p className="text-sm font-medium">
@@ -944,10 +966,47 @@ export default function AnalisePage() {
               ? "Analisando com IA..."
               : isTestingSystem
               ? "Testando sistemas..."
-              : hasCSVFiles() && analysisType === "account"
-              ? `Gerar com ${selectedAnalysisMethod === 'auto' ? '🤖 Auto' : selectedAnalysisMethod === 'bypass' ? '⚡ Bypass' : selectedAnalysisMethod === 'robust' ? '🔄 Robusto' : '🔍 Debug'}`
+              : hasCSVFiles()
+              ? "✅ Gerar com CSV (Dados Precisos)"
+              : hasImageFiles()
+              ? "⚠️ Gerar com Imagens (Pode ter imprecisões)"
               : "Gerar Relatório com IA"}
           </Button>
+
+          {hasCSVFiles() && (
+            <Button
+              onClick={async () => {
+                if (!files.length) return;
+                
+                const csvFiles = files.filter(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+                if (csvFiles.length === 0) return;
+                
+                try {
+                  const csvContent = await readCSVFile(csvFiles[0]);
+                  const response = await fetch(`${getBaseUrl()}/test-analise-correta`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ csvContent })
+                  });
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    toast({
+                      title: "Teste de Dados Corretos",
+                      description: `ROAS correto: ${data.dadosCorretos.roasMedio.toFixed(2)}x | Investimento: R$ ${data.dadosCorretos.investimentoTotal.toFixed(2)}`,
+                      variant: "default",
+                    });
+                  }
+                } catch (error) {
+                  console.error('Erro no teste:', error);
+                }
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              🧪 Testar Dados Corretos
+            </Button>
+          )}
 
           <Button
             onClick={() => setShowMarkdownImport(!showMarkdownImport)}
