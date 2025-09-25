@@ -120,17 +120,7 @@ function ObrigadoContent() {
           Obrigado!
         </h1>
 
-        <a
-          href="https://consultoriaefeitovendas.com.br/seller-ia/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold text-lg shadow-lg transition-all duration-200 mb-4"
-        >
-          <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Conheça o Seller.IA 
-        </a>
+        
         
         <p className="text-lg md:text-xl text-center text-gray-200 max-w-2xl mb-6 px-4">
           Sua análise foi gerada com sucesso. 
@@ -185,6 +175,19 @@ function ObrigadoContent() {
               <span>🔒 Dados seguros</span>
               <span>⭐ Seller.IA</span>
             </div>
+
+            <a
+              href="https://consultoriaefeitovendas.com.br/seller-ia/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 w-full px-8 py-4 rounded-full bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold text-xl shadow-lg transition-all duration-200 mb-4"
+              style={{ maxWidth: '98%' }}
+            >
+              <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
+                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Conheça o Seller.IA 
+            </a>
           </CardFooter>
         </Card>
      
