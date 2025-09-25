@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Rotas públicas
-const publicRoutes = ['/login', '/api/auth', '/selleria'];
+const publicRoutes = ['/login', '/api/auth', '/selleria', '/obrigado', '/mock-test', '/teste-obrigado', '/debug-storage'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
