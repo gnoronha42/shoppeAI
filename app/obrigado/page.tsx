@@ -119,6 +119,18 @@ function ObrigadoContent() {
         <h1 className="text-3xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-4 px-6">
           Obrigado!
         </h1>
+
+        <a
+          href="https://consultoriaefeitovendas.com.br/seller-ia/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold text-lg shadow-lg transition-all duration-200 mb-4"
+        >
+          <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
+            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Conheça o Seller.IA 
+        </a>
         
         <p className="text-lg md:text-xl text-center text-gray-200 max-w-2xl mb-6 px-4">
           Sua análise foi gerada com sucesso. Confira os resultados abaixo e use <kbd className="bg-gray-700 px-2 py-1 rounded text-sm">Ctrl + P</kbd> para imprimir.
@@ -161,33 +173,11 @@ function ObrigadoContent() {
 
           <CardFooter className="flex flex-col gap-4 pb-6 pt-2 print:hidden">
             <div className="flex flex-wrap gap-3 justify-center w-full">
-              <Button 
-                onClick={handlePrint}
-                className="flex items-center gap-2 bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold px-6 py-3"
-              >
-                <svg width="20px" height="20px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M17 17h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M9 15h6v4H9z" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M7 9V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4" stroke="currentColor" strokeWidth="2"/>
-                </svg>
-                Imprimir Relatório (Ctrl + P)
-              </Button>
               
-              <Button 
-                onClick={handleBackToHome}
-                variant="outline"
-                className="border-2 border-[#FF3A29] text-[#FF3A29] hover:bg-[#FF3A29] hover:text-white font-bold px-6 py-3"
-              >
-                Nova Análise
-              </Button>
+              
+             
 
-              <Button 
-                onClick={handleClearAndReload}
-                variant="outline"
-                className="border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black font-bold px-4 py-2 text-sm"
-              >
-                🔧 Limpar Cache & Recarregar
-              </Button>
+           
             </div>
             
             <div className="flex flex-wrap gap-2 justify-center text-xs text-gray-500">
