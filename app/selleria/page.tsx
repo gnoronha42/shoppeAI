@@ -52,19 +52,13 @@ export default function SelleriaPage() {
       clearInterval(progressInterval);
       setProgress(100);
       const data = await res.json();
-      console.log('🔍 RESPOSTA COMPLETA DA API:', data);
-      console.log('🔍 data.success:', data.success);
-      console.log('🔍 data.preview:', data.preview ? 'Presente (tamanho: ' + data.preview.length + ')' : 'Ausente');
-      console.log('🔍 data.relatorio:', data.relatorio ? 'Presente (tamanho: ' + data.relatorio.length + ')' : 'Ausente');
+   
       
       if (res.ok && data.success) {
         // Se houver relatório na resposta, redirecionar para página de obrigado
-        if (data.preview || data.relatorio) {
-          const relatorioCompleto = data.relatorio || data.preview;
-          console.log('✅ ENCONTROU RELATÓRIO!');
-          console.log('📄 Relatório escolhido:', data.relatorio ? 'data.relatorio' : 'data.preview');
-          console.log('📏 Tamanho do relatório:', relatorioCompleto.length, 'caracteres');
-          console.log('📝 Primeiros 200 chars:', relatorioCompleto.substring(0, 200));
+        if (data.preview ) {
+          const relatorioCompleto =  data.preview;
+      
           
           // Nova estratégia: usar apenas localStorage (mais confiável que URL)
           try {
