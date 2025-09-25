@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 import { useSearchParams } from "next/navigation";
+import logoefeito from "@/assets/logoe.png";
 
 // Componente interno que usa useSearchParams
 function ObrigadoContent() {
@@ -196,7 +197,9 @@ function ObrigadoContent() {
             </div>
           </CardFooter>
         </Card>
+     
       </div>
+      <Image src={logoefeito} alt="Shop.AI" width={200} height={200} />
 
       {/* Print Styles */}
       <style jsx global>{`
@@ -244,6 +247,7 @@ export default function ObrigadoPage() {
       </div>
     }>
       <ObrigadoContent />
+     
     </Suspense>
   );
 }

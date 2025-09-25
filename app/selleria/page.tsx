@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
-import logoefeito from "@/assets/efeitologo.png";
+import logoefeito from "@/assets/logoe.png";
 import { Select, SelectItem, SelectContent, SelectValue, SelectTrigger } from "@/components/ui/select";
 
 export default function SelleriaPage() {
@@ -55,35 +55,27 @@ export default function SelleriaPage() {
    
       
       if (res.ok && data.success) {
-        // Se houver relatório na resposta, redirecionar para página de obrigado
         if (data.preview ) {
           const relatorioCompleto =  data.preview;
-      
+    
           
-          // Nova estratégia: usar apenas localStorage (mais confiável que URL)
           try {
-            console.log('💾 Salvando no localStorage...');
             localStorage.setItem('relatorio', relatorioCompleto);
             
             // Também salvar no sessionStorage como backup
             sessionStorage.setItem('relatorio', relatorioCompleto);
             
-            // Verificar se foi salvo corretamente
             const verificacao = localStorage.getItem('relatorio');
-            console.log('✅ Verificação localStorage:', verificacao ? `OK (${verificacao.length} chars)` : 'FALHOU');
             
-            // Marcar timestamp para debug
             localStorage.setItem('relatorio_timestamp', Date.now().toString());
             
-            console.log('🚀 REDIRECIONANDO SEM PARÂMETROS NA URL...');
-            // Redirecionar sem parâmetros na URL (mais confiável)
+    
             window.location.href = '/obrigado';
           } catch (error) {
             console.error('❌ Erro no processo:', error);
             setError('Erro ao processar relatório. Tente novamente.');
           }
         } else {
-          // Senão, mostrar mensagem de WhatsApp
           setSuccess("Mensagem enviada para o WhatsApp! Você receberá a análise em até 24h.");
           toast({
             title: "Mensagem enviada!",
@@ -116,7 +108,6 @@ export default function SelleriaPage() {
       {/* HERO SECTION */}
       <div className="w-full flex flex-col items-center justify-center pt-12 pb-8 px-2">
         <div className="relative flex flex-col items-center">
-          {/* Gradiente circular azul escuro abraçando todo o conteúdo */}
           <div 
             className="absolute inset-0 rounded-full blur-xl transform scale-150 -translate-y-8"
             style={{
@@ -256,8 +247,9 @@ export default function SelleriaPage() {
             </div>
           </CardFooter>
         </Card>
-         {/* <Image src={logoefeito} alt="Shop.AI" width={400} height={400} /> */}
       </div>
+      <Image src={logoefeito} alt="Shop.AI" width={200} height={200} />
+
     </div>
   );
 } 
