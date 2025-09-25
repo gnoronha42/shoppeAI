@@ -133,7 +133,7 @@ function ObrigadoContent() {
         </a>
         
         <p className="text-lg md:text-xl text-center text-gray-200 max-w-2xl mb-6 px-4">
-          Sua análise foi gerada com sucesso. Confira os resultados abaixo e use <kbd className="bg-gray-700 px-2 py-1 rounded text-sm">Ctrl + P</kbd> para imprimir.
+          Sua análise foi gerada com sucesso. 
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-6">
