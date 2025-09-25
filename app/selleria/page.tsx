@@ -178,13 +178,13 @@ export default function SelleriaPage() {
                   <input type="text" id="nome" name="nome" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.nome} onChange={handleChange} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="email">E-mail para Receber a Análise *</label>
+                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="email">E-mail </label>
                   <input type="email" id="email" name="email" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.email} onChange={handleChange} />
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="telefone">Telefone (WhatsApp) *</label>
+                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="telefone">Telefone (WhatsApp) para Receber a Análise * *</label>
                   <input type="text" id="telefone" name="telefone" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.telefone} onChange={handleChange} />
                 </div>
                 <div>
