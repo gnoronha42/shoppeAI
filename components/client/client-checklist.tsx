@@ -59,8 +59,8 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
   useEffect(() => {
     setLoading(true);
     fetch(`/api/clientes/${clientId}/checklist`, {
-        credentials: 'include', 
-      })
+      credentials: 'include',
+    })
       .then(async (res) => {
         if (!res.ok) throw new Error("Erro ao carregar checklist");
         const data = await res.json();
@@ -116,14 +116,14 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
           })
         )
       );
-      
+
       // Recarregar dados do checklist após salvar
       console.log('🔄 Recarregando dados do checklist...');
       const response = await fetch(`/api/clientes/${clientId}/checklist`, {
         credentials: 'include',
         cache: 'no-cache', // Evitar cache
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('📊 Dados recarregados:', data);
@@ -131,7 +131,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       } else {
         console.error('❌ Erro ao recarregar dados:', response.status);
       }
-      
+
       toast({ title: "Checklist salvo!", description: "Progresso salvo com sucesso.", variant: "default" });
       setChangedItems({});
     } catch (error) {
@@ -191,10 +191,10 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
 
       block.items.forEach((item, idx) => {
         totalConcluidos++;
-        const executionText = item.execution_count && item.execution_count > 1 
-          ? ` (${item.execution_count}x)` 
+        const executionText = item.execution_count && item.execution_count > 1
+          ? ` (${item.execution_count}x)`
           : '';
-        
+
         md += `### ✓ ${item.title}${executionText}\n`;
 
         if (item.description) {
@@ -223,14 +223,14 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
         if (item.execution_history && item.execution_history.length > 1) {
           md += `**📊 Histórico de Execuções:**\n`;
           item.execution_history.forEach((hist, histIdx) => {
-            const histDataFormatada = hist.completed_at 
+            const histDataFormatada = hist.completed_at
               ? new Date(hist.completed_at).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
               : 'Data não informada';
             md += `- ${histIdx + 1}ª execução: ${hist.analyst_name || 'Analista não informado'} em ${histDataFormatada}\n`;
           });
@@ -249,15 +249,72 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
     return md;
   };
 
-
-  const handleGeneratePDF = async () => {
+  // Novo: Função para gerar PDF apenas dos itens concluídos
+  const handleGenerateCompletedPDF = async () => {
     try {
-      const markdown = generateChecklistMarkdown();
+      // Usar a função específica para itens concluídos que inclui todas as informações
+      const completedBlocks = filtrarBlocosComAlgumConcluido(blocks);
+      
+      if (completedBlocks.length === 0) {
+        toast({ 
+          title: "Nenhum item concluído", 
+          description: "Não há itens concluídos para gerar o PDF.", 
+          variant: "default" 
+        });
+        return;
+      }
+      
+      console.log('📊 Dados sendo enviados para PDF de concluídos:', {
+        blocksTotal: blocks.length,
+        completedBlocks: completedBlocks.length,
+        clientName: clientName,
+        exampleItem: completedBlocks[0]?.items[0] // Debug do primeiro item
+      });
+      
       const response = await fetch("https://analysis-micro.onrender.com/checklist-completed-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          blocks: blocks, 
+          blocks: completedBlocks, // Enviar apenas blocos com itens concluídos, mas com todos os dados
+          clientName: clientName,
+          markdown: null // Deixar o backend gerar o markdown correto
+        }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Erro na resposta do servidor:', response.status, errorText);
+        throw new Error(`Erro ${response.status}: ${errorText}`);
+      }
+      
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `checklist_concluidos_${clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({ title: "PDF gerado!", description: "Checklist de itens concluídos baixado em PDF.", variant: "default" });
+    } catch (error) {
+      console.error('❌ Erro ao gerar PDF:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ title: "Erro ao gerar PDF", description: `Não foi possível gerar o PDF: ${errorMessage}`, variant: "destructive" });
+    }
+  };
+
+  const handleGeneratePDF = async () => {
+    try {
+      // Gerar PDF completo (todos os itens)
+      const markdown = generateChecklistMarkdown();
+      const response = await fetch("https://analysis-micro.onrender.com/checklist-completed-pdf",
+      // const response = await fetch("http://localhost:3001/checklist-completed-pdf",
+        {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blocks: blocks, // Enviar todos os blocos
           clientName: clientName,
           markdown: markdown
         }),
@@ -267,7 +324,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `checklist_completo_Cliente.pdf`;
+      link.download = `checklist_completo_${clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -278,7 +335,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
     }
   };
 
-  
+
 
 
   const calculateBlockProgress = (items: ChecklistItem[]) => {
@@ -321,8 +378,9 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
             {saving ? "Salvando..." : "Salvar"}
           </Button>
           <Button onClick={handleGeneratePDF} variant="outline">
-            Gerar PDF
+            PDF Completo
           </Button>
+          
         </div>
         <Accordion type="single" collapsible className="space-y-4">
           {blocks.map(block => {
