@@ -258,7 +258,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           blocks: blocks, 
-          clientName: "Cliente",
+          clientName: clientName,
           markdown: markdown
         }),
       });
