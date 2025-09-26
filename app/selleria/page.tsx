@@ -120,11 +120,12 @@ export default function SelleriaPage() {
           </div>
          
           <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-4 px-6">
-            Escale sua loja Shopee   <span className="text-white">com IA estratégica</span>
+          Sua loja pode vender muito mais 
+
           </h1>
           
           <p className="relative z-10 text-lg md:text-2xl text-center text-gray-200 max-w-2xl mb-6 px-4">
-            A Seller.IA analisa sua conta em tempo real, cruza seus dados com o comportamento do consumidor e mostra exatamente o que você precisa fazer para crescer.
+          Pare de adivinhar. A Seller.IA faz uma análise gratuita e mostra exatamente o que está impedindo sua loja de crescer  🚀
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-3 mb-8">
