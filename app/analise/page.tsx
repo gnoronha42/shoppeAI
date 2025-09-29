@@ -77,34 +77,7 @@ export default function AnalisePage() {
     return baseUrl;
   };
 
-  // Função para testar conectividade
-  const testConnection = async () => {
-    try {
-      const baseUrl = getBaseUrl();
-      console.log('🔍 Testando conectividade com:', baseUrl);
-      
-      const response = await fetch(`${baseUrl}/health`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      console.log('🔍 Status da conectividade:', response.status);
-      
-      if (response.ok) {
-        const data = await response.text();
-        console.log('✅ Servidor respondeu:', data);
-        return true;
-      } else {
-        console.log('❌ Servidor retornou erro:', response.status);
-        return false;
-      }
-    } catch (error) {
-      console.error('❌ Erro de conectividade:', error);
-      return false;
-    }
-  };
+ 
 
   const handleFileChange = (newFiles: File[]) => {
     setFiles(newFiles);
@@ -227,11 +200,7 @@ export default function AnalisePage() {
       
       // Primeiro, testar conectividade
       console.log('🔍 Verificando conectividade...');
-      const isConnected = await testConnection();
-      
-      if (!isConnected) {
-        throw new Error('Não foi possível conectar ao servidor de análise');
-      }
+    
       
       // Ler conteúdo de todos os CSVs
       const csvFilesContent = await Promise.all(
@@ -973,40 +942,7 @@ export default function AnalisePage() {
               : "Gerar Relatório com IA"}
           </Button>
 
-          {hasCSVFiles() && (
-            <Button
-              onClick={async () => {
-                if (!files.length) return;
-                
-                const csvFiles = files.filter(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
-                if (csvFiles.length === 0) return;
-                
-                try {
-                  const csvContent = await readCSVFile(csvFiles[0]);
-                  const response = await fetch(`${getBaseUrl()}/test-analise-correta`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ csvContent })
-                  });
-                  
-                  if (response.ok) {
-                    const data = await response.json();
-                    toast({
-                      title: "Teste de Dados Corretos",
-                      description: `ROAS correto: ${data.dadosCorretos.roasMedio.toFixed(2)}x | Investimento: R$ ${data.dadosCorretos.investimentoTotal.toFixed(2)}`,
-                      variant: "default",
-                    });
-                  }
-                } catch (error) {
-                  console.error('Erro no teste:', error);
-                }
-              }}
-              variant="outline"
-              className="flex-1"
-            >
-              🧪 Testar Dados Corretos
-            </Button>
-          )}
+      
 
           <Button
             onClick={() => setShowMarkdownImport(!showMarkdownImport)}
