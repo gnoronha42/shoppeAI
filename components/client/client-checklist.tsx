@@ -18,6 +18,17 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ChecklistItem {
   id: string;
@@ -350,6 +361,60 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
     }, 0);
   };
 
+  const getTotalExecutionsCount = () => {
+    return blocks.reduce((total, block) => {
+      return total + block.items.reduce((blockTotal, item) => {
+        return blockTotal + (item.execution_count || 0);
+      }, 0);
+    }, 0);
+  };
+
+  // Função para limpar todas as ações (resetar contadores)
+  const handleClearActions = async () => {
+    try {
+      setSaving(true);
+      
+      const response = await fetch(`/api/clientes/${clientId}/checklist/clear-actions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+
+      // Recarregar dados do checklist após limpar
+      console.log('🔄 Recarregando dados após limpar ações...');
+      const reloadResponse = await fetch(`/api/clientes/${clientId}/checklist`, {
+        credentials: 'include',
+        cache: 'no-cache',
+      });
+
+      if (reloadResponse.ok) {
+        const data = await reloadResponse.json();
+        console.log('📊 Dados recarregados após limpeza:', data);
+        setBlocks(data.blocks || []);
+      }
+
+      toast({ 
+        title: "Ações limpas!", 
+        description: "Todos os contadores de execução foram resetados.", 
+        variant: "default" 
+      });
+    } catch (error) {
+      console.error('❌ Erro ao limpar ações:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ 
+        title: "Erro ao limpar ações", 
+        description: `Não foi possível limpar as ações: ${errorMessage}`, 
+        variant: "destructive" 
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -373,14 +438,48 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-end">
-          <Button onClick={handleSave} disabled={saving || Object.keys(changedItems).length === 0} className="bg-green-600 hover:bg-green-700 text-white">
-            {saving ? "Salvando..." : "Salvar"}
-          </Button>
-          <Button onClick={handleGeneratePDF} variant="outline">
-            PDF Completo
-          </Button>
+        <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-between">
+          <div className="flex gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button 
+                  disabled={saving || getTotalExecutionsCount() === 0}
+                  variant="destructive"
+                  size="sm"
+                >
+                  {saving ? "Processando..." : `Limpar Ações (${getTotalExecutionsCount()})`}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar limpeza de ações</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação irá <strong>remover permanentemente</strong> todo o histórico de execuções 
+                    deste checklist ({getTotalExecutionsCount()} ações registradas).
+                    <br /><br />
+                    <strong>Todas as numerações (1x, 2x, 3x...) serão resetadas para zero.</strong>
+                    <br /><br />
+                    Esta operação não pode ser desfeita. Tem certeza que deseja continuar?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleClearActions} className="bg-red-600 hover:bg-red-700">
+                    Sim, limpar todas as ações
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
           
+          <div className="flex gap-2">
+            <Button onClick={handleSave} disabled={saving || Object.keys(changedItems).length === 0} className="bg-green-600 hover:bg-green-700 text-white">
+              {saving ? "Salvando..." : "Salvar"}
+            </Button>
+            <Button onClick={handleGeneratePDF} variant="outline">
+              PDF Completo
+            </Button>
+          </div>
         </div>
         <Accordion type="single" collapsible className="space-y-4">
           {blocks.map(block => {
