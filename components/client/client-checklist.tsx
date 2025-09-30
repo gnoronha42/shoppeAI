@@ -440,36 +440,14 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-between">
           <div className="flex gap-2">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  disabled={saving || getTotalExecutionsCount() === 0}
-                  variant="destructive"
-                  size="sm"
-                >
-                  {saving ? "Processando..." : `Limpar Ações (${getTotalExecutionsCount()})`}
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Confirmar limpeza de ações</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação irá <strong>remover permanentemente</strong> todo o histórico de execuções 
-                    deste checklist ({getTotalExecutionsCount()} ações registradas).
-                    <br /><br />
-                    <strong>Todas as numerações (1x, 2x, 3x...) serão resetadas para zero.</strong>
-                    <br /><br />
-                    Esta operação não pode ser desfeita. Tem certeza que deseja continuar?
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleClearActions} className="bg-red-600 hover:bg-red-700">
-                    Sim, limpar todas as ações
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button 
+              onClick={handleClearActions} 
+              disabled={saving || getTotalExecutionsCount() === 0}
+              variant="destructive"
+              size="sm"
+            >
+              {saving ? "Processando..." : `Limpar Ações (${getTotalExecutionsCount()})`}
+            </Button>
           </div>
           
           <div className="flex gap-2">

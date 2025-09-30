@@ -62,12 +62,12 @@ function ObrigadoContent() {
         }
         
         if (!found) {
-          setRelatorio("Relatório não encontrado. Por favor, refaça sua análise.");
+          setRelatorio("Análise não encontrada. Por favor, refaça sua análise.");
         }
       }
     } catch (error) {
       console.error('❌ Erro ao carregar relatório:', error);
-      setRelatorio("Erro ao carregar relatório. Por favor, refaça sua análise.");
+      setRelatorio("Erro ao carregar análise. Por favor, refaça sua análise.");
     }
     
     setLoading(false);
@@ -123,7 +123,7 @@ function ObrigadoContent() {
         
         
         <p className="text-lg md:text-xl text-center text-gray-200 max-w-2xl mb-6 px-4">
-          Sua análise foi gerada com sucesso. 
+          Sua análise personalizada está pronta! Veja abaixo os insights e recomendações para sua loja.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 mb-6">
@@ -137,7 +137,7 @@ function ObrigadoContent() {
             <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Relatório Personalizado
+            Análise Personalizada
           </div>
         </div>
       </div>
@@ -150,7 +150,7 @@ function ObrigadoContent() {
               Análise da Sua Loja Shopee
             </CardTitle>
             <CardDescription className="text-base md:text-lg text-gray-600 print:text-black">
-              Relatório completo gerado por IA - {new Date().toLocaleDateString('pt-BR')}
+              Análise completa gerada por IA - {new Date().toLocaleDateString('pt-BR')}
             </CardDescription>
           </CardHeader>
           

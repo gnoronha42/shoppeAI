@@ -55,32 +55,31 @@ export default function SelleriaPage() {
    
       
       if (res.ok && data.success) {
-        if (data.preview ) {
-          const relatorioCompleto =  data.preview;
-    
+        // Sempre redirecionar para página de obrigado com a análise
+        const relatorioCompleto = data.preview || data.relatorio || data.analise;
+        
+        if (relatorioCompleto) {
+          console.log('✅ Análise gerada com sucesso!');
+          console.log('📄 Tamanho da análise:', relatorioCompleto.length, 'caracteres');
           
           try {
+            // Salvar análise no localStorage
             localStorage.setItem('relatorio', relatorioCompleto);
-            
-            // Também salvar no sessionStorage como backup
             sessionStorage.setItem('relatorio', relatorioCompleto);
-            
-            const verificacao = localStorage.getItem('relatorio');
-            
             localStorage.setItem('relatorio_timestamp', Date.now().toString());
             
-    
+            console.log('💾 Análise salva no storage');
+            console.log('🚀 Redirecionando para página de obrigado...');
+            
+            // Redirecionar para página de obrigado
             window.location.href = '/obrigado';
           } catch (error) {
-            console.error('❌ Erro no processo:', error);
-            setError('Erro ao processar relatório. Tente novamente.');
+            console.error('❌ Erro ao processar análise:', error);
+            setError('Erro ao processar análise. Tente novamente.');
           }
         } else {
-          setSuccess("Mensagem enviada para o WhatsApp! Você receberá a análise em até 24h.");
-          toast({
-            title: "Mensagem enviada!",
-            description: "Você receberá a análise em até 24h no WhatsApp.",
-          });
+          console.error('❌ Nenhuma análise encontrada na resposta');
+          setError('Erro: Análise não foi gerada. Tente novamente.');
         }
         setForm({
           nome: "",
@@ -94,7 +93,7 @@ export default function SelleriaPage() {
           desafio: "",
         });
       } else {
-        setError(data.error || "Erro ao enviar mensagem para o WhatsApp.");
+        setError(data.error || "Erro ao gerar análise.");
       }
     } catch (err: any) {
       setError("Erro de conexão com o microserviço.");
@@ -166,7 +165,7 @@ export default function SelleriaPage() {
               Receba sua Análise Express
             </CardTitle>
             <CardDescription className="text-base md:text-lg text-gray-200">
-              Preencha os dados abaixo e receba sua análise personalizada no WhatsApp e e-mail
+              Preencha os dados abaixo e receba sua análise personalizada instantaneamente
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-2 pb-0">
@@ -185,7 +184,7 @@ export default function SelleriaPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="telefone">Telefone (WhatsApp) para Receber a Análise * *</label>
+                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="telefone">Telefone (WhatsApp) *</label>
                   <input type="text" id="telefone" name="telefone" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.telefone} onChange={handleChange} />
                 </div>
                 <div>
@@ -233,8 +232,8 @@ export default function SelleriaPage() {
               </div>
               <div className="pt-2">
                 <Button type="submit" className="w-full text-lg py-3 bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold border-none shadow-none" disabled={loading}>
-                  {!loading && <span>Gerar Análise da Minha Conta</span>}
-                  {loading && <span>Processando... aguarde {progress}%</span>}
+                  {!loading && <span>Gerar Minha Análise Agora</span>}
+                  {loading && <span>Gerando análise... {progress}%</span>}
                 </Button>
          
               </div>
@@ -243,6 +242,7 @@ export default function SelleriaPage() {
           <CardFooter className="flex flex-col gap-2 pb-6 pt-2">
             <div className="flex flex-wrap gap-2 justify-center text-xs text-gray-300">
               <span>🔒 Dados protegidos</span>
+              <span>⚡ Análise instantânea</span>
               <span>🚀 +500 lojas analisadas</span>
               <span>⭐ 4.9/5 de satisfação</span>
             </div>

@@ -129,7 +129,7 @@ export default function AnalisePage() {
   const ocrAllImages = async (files: File[]): Promise<string[]> => {
     return Promise.all(files.map(ocrImage));
   };
-  // Função para ler arquivo CSV
+
   const readCSVFile = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -141,7 +141,7 @@ export default function AnalisePage() {
     });
   };
 
-  // Função para analisar CSV com IA (CORRIGIDA)
+  
   const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType) => {
     setApiError(null);
 
