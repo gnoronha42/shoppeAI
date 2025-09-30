@@ -59,6 +59,7 @@ export default function SelleriaPage() {
         
         if (userData.success) {
           console.log('✅ Usuário salvo com sucesso:', userData.analyst?.name);
+          console.log('📱 Telefone salvo:', userData.analyst?.telefone);
         } else {
           console.log('⚠️ Aviso no cadastro de usuário:', userData.message || userData.error);
         }

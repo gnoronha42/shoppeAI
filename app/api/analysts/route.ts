@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
@@ -34,23 +33,23 @@ export async function POST(request: Request) {
           id: existingAnalyst.id,
           name: existingAnalyst.name,
           email: existingAnalyst.email,
+          telefone: existingAnalyst.password, // Campo password contém o telefone
           created_at: existingAnalyst.created_at
         }
       });
     }
     
-    // Gerar senha temporária baseada no telefone ou email
-    const tempPassword = telefone ? telefone.replace(/\D/g, '').slice(-6) : email.split('@')[0];
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    // Usar o telefone no campo password (adaptação do schema existente)
+    const telefoneFormatado = telefone ? telefone.replace(/\D/g, '') : '';
     
-    console.log('🔐 Senha temporária gerada para:', email);
+    console.log('📱 Salvando telefone para:', email, '- Telefone:', telefoneFormatado);
     
     // Criar novo analista
     const newAnalyst = await prisma.analysts.create({
       data: {
         name: nome,
         email: email,
-        password: hashedPassword,
+        password: telefoneFormatado, // Salvando telefone no campo password
         active: true,
         analyses_count: 0
       }
@@ -65,9 +64,9 @@ export async function POST(request: Request) {
         id: newAnalyst.id,
         name: newAnalyst.name,
         email: newAnalyst.email,
+        telefone: telefoneFormatado,
         created_at: newAnalyst.created_at
-      },
-      tempPassword: tempPassword // Retornar senha temporária para o usuário
+      }
     });
     
   } catch (error) {
@@ -91,6 +90,7 @@ export async function GET() {
         id: true,
         name: true,
         email: true,
+        password: true, // Campo que contém o telefone
         active: true,
         created_at: true,
         updated_at: true,
@@ -102,12 +102,25 @@ export async function GET() {
       }
     });
     
+    // Mapear para renomear password para telefone na resposta
+    const analystsFormatted = analysts.map(analyst => ({
+      id: analyst.id,
+      name: analyst.name,
+      email: analyst.email,
+      telefone: analyst.password, // Renomear password para telefone
+      active: analyst.active,
+      created_at: analyst.created_at,
+      updated_at: analyst.updated_at,
+      last_login: analyst.last_login,
+      analyses_count: analyst.analyses_count
+    }));
+    
     console.log(`✅ ${analysts.length} analistas encontrados`);
     
     return NextResponse.json({
       success: true,
-      analysts: analysts,
-      total: analysts.length
+      analysts: analystsFormatted,
+      total: analystsFormatted.length
     });
     
   } catch (error) {
