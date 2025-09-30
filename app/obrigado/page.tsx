@@ -176,6 +176,29 @@ function ObrigadoContent() {
               <span>⭐ Seller.IA</span>
             </div>
 
+            {/* Vídeo do YouTube */}
+            <div className="w-full max-w-3xl mx-auto my-6">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  🎯 Veja como aplicar essas estratégias na prática
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Assista ao vídeo completo e descubra os próximos passos para escalar sua loja
+                </p>
+              </div>
+              
+              <div className="relative w-full h-0 pb-[56.25%] rounded-lg overflow-hidden shadow-lg border-2 border-gray-200">
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src="https://www.youtube.com/embed/LW5leoksUoc?rel=0&modestbranding=1&showinfo=0"
+                  title="Como Escalar sua Loja Shopee - Seller.IA"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+
             <a
               href="https://consultoriaefeitovendas.com.br/seller-ia/"
               target="_blank"
