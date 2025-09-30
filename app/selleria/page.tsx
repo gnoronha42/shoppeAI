@@ -44,6 +44,29 @@ export default function SelleriaPage() {
           return old;
         });
       }, 300);
+      
+      // Primeiro, salvar o usuário na tabela analysts
+      try {
+        console.log('👤 Salvando usuário na base de dados...');
+        const userResponse = await fetch("/api/analysts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome: form.nome, email: form.email, telefone: form.telefone }),
+        });
+        
+        const userData = await userResponse.json();
+        console.log('👤 Resposta do cadastro de usuário:', userData);
+        
+        if (userData.success) {
+          console.log('✅ Usuário salvo com sucesso:', userData.analyst?.name);
+        } else {
+          console.log('⚠️ Aviso no cadastro de usuário:', userData.message || userData.error);
+        }
+      } catch (userError) {
+        console.error('❌ Erro ao salvar usuário (continuando com análise):', userError);
+        // Não interromper o fluxo se houver erro no cadastro do usuário
+      }
+      
       const res = await fetch("https://analysis-micro.onrender.com/api/whatsapp-express", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
