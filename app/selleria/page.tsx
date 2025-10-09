@@ -1,15 +1,49 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import logo from "@/assets/logo.png";
-import logoefeito from "@/assets/logoe.png";
 import { Select, SelectItem, SelectContent, SelectValue, SelectTrigger } from "@/components/ui/select";
+import Lottie from "lottie-react";
+import { motion } from "framer-motion";
+
+
+// Componente para ícones da lista
+const CheckmarkIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-[#FF3A29]">
+        <path d="M20 6L9 17l-5-5"/>
+    </svg>
+);
+
+
+// Componente para os cards de recursos (substituindo os flip-boxes)
+const FeatureCard = ({ icon, title, description, fullDescription }: { icon: React.ReactNode, title: string, description: string, fullDescription: string }) => (
+  <div className="group relative w-full h-64 rounded-xl border border-white/20 bg-white/5 p-6 text-center text-white transition-all duration-500 [transform-style:preserve-3d] hover:[transform:rotateY(180deg)]">
+    {/* Frente do Card */}
+    <div className="absolute inset-0 flex flex-col items-center justify-center [backface-visibility:hidden]">
+      <div className="mb-4">{icon}</div>
+      <h3 className="text-xl font-bold mb-2">{title}</h3>
+      <p className="text-gray-300">{description}</p>
+    </div>
+    {/* Dorso do Card */}
+    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-gray-800 p-6 [transform:rotateY(180deg)] [backface-visibility:hidden]">
+      <p className="text-sm text-gray-200">{fullDescription}</p>
+    </div>
+  </div>
+);
+
 
 export default function SelleriaPage() {
+    const [lottieJson, setLottieJson] = useState(null);
+
+  useEffect(() => {
+    fetch('https://consultoriaefeitovendas.com.br/wp-content/uploads/2025/07/simple-ai-pulse.json')
+      .then(response => response.json())
+      .then(data => setLottieJson(data))
+      .catch(error => console.error('Error loading Lottie animation:', error));
+  }, []);
+
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -25,7 +59,6 @@ export default function SelleriaPage() {
   const [progress, setProgress] = useState(0);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
-  const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,8 +77,7 @@ export default function SelleriaPage() {
           return old;
         });
       }, 300);
-      
-      // Primeiro, salvar o usuário na tabela analysts
+
       try {
         console.log('👤 Salvando usuário na base de dados...');
         const userResponse = await fetch("/api/analysts", {
@@ -65,7 +97,6 @@ export default function SelleriaPage() {
         }
       } catch (userError) {
         console.error('❌ Erro ao salvar usuário (continuando com análise):', userError);
-        // Não interromper o fluxo se houver erro no cadastro do usuário
       }
       
       const res = await fetch("https://analysis-micro.onrender.com/api/whatsapp-express", {
@@ -79,7 +110,6 @@ export default function SelleriaPage() {
    
       
       if (res.ok && data.success) {
-        // Sempre redirecionar para página de obrigado com a análise
         const relatorioCompleto = data.preview || data.relatorio || data.analise;
         
         if (relatorioCompleto) {
@@ -87,7 +117,6 @@ export default function SelleriaPage() {
           console.log('📄 Tamanho da análise:', relatorioCompleto.length, 'caracteres');
           
           try {
-            // Salvar análise no localStorage
             localStorage.setItem('relatorio', relatorioCompleto);
             sessionStorage.setItem('relatorio', relatorioCompleto);
             localStorage.setItem('relatorio_timestamp', Date.now().toString());
@@ -95,7 +124,6 @@ export default function SelleriaPage() {
             console.log('💾 Análise salva no storage');
             console.log('🚀 Redirecionando para página de obrigado...');
             
-            // Redirecionar para página de obrigado
             window.location.href = '/obrigado';
           } catch (error) {
             console.error('❌ Erro ao processar análise:', error);
@@ -106,15 +134,8 @@ export default function SelleriaPage() {
           setError('Erro: Análise não foi gerada. Tente novamente.');
         }
         setForm({
-          nome: "",
-          email: "",
-          telefone: "",
-          faturamento30d: "",
-          visitantes: "",
-          pedidos: "",
-          investimentoAds: "",
-          roasMensal: "",
-          desafio: "",
+          nome: "", email: "", telefone: "", faturamento30d: "",
+          visitantes: "", pedidos: "", investimentoAds: "", roasMensal: "", desafio: "",
         });
       } else {
         setError(data.error || "Erro ao gerar análise.");
@@ -125,155 +146,318 @@ export default function SelleriaPage() {
     setLoading(false);
     setTimeout(() => setProgress(0), 500);
   };
+  
+
+ 
+  function AIPulse() {
+    const rings = [0, 1, 2]; // número de ondas
+  
+    return (
+      <div className="relative flex items-center justify-center w-64 h-64 bg-red">
+        {/* O quadrado central */}
+        <div className="relative flex items-center justify-center w-32 h-32 rounded-2xl bg-gray-800">
+          <span className="text-5xl font-bold text-gray-200">AI</span>
+          {/* Borda degradê */}
+          <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-br from-indigo-500 via-purple-500 to-orange-400">
+            <div className="w-full h-full rounded-2xl bg-gray-800 text-center p-9  text-5xl font-bold text-gray-200">AI</div>
+          </div>
+        </div>
+  
+        {/* Ondas animadas */}
+        {rings.map((i) => (
+          <motion.div
+            key={i}
+            className="absolute w-32 h-32 rounded-2xl border border-white/30"
+            initial={{ scale: 1, opacity: 0.8 }}
+            animate={{
+              scale: [1, 2.5],
+              opacity: [0.8, 0],
+            }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              delay: i * 0.8,
+              ease: "easeOut",
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
+  
+
+  const features = [
+    { 
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>, 
+      title: "Analisa suas métricas", 
+      description: "Analisa seus números com precisão e visão estratégica.",
+      fullDescription: "A Seller.IA interpreta visitas, vendas e conversões como um especialista. Mostra os pontos fortes e os gargalos que travam o crescimento." 
+    },
+    { 
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>, 
+      title: "Direção clara de ação", 
+      description: "Indica onde investir e o que cortar sem dúvidas.",
+      fullDescription: "Direciona seus recursos para campanhas e produtos de maior retorno, eliminando desperdícios e potencializando cada real aplicado."
+    },
+    { 
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>, 
+      title: "Corrige perdas invisíveis", 
+      description: "Encontra falhas ocultas que drenam seu faturamento.",
+      fullDescription: "A IA identifica anúncios ineficientes e produtos mal otimizados, entregando ações práticas para recuperar lucro e evitar perdas futuras."
+    },
+    { 
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>, 
+      title: "Crescimento sob medida", 
+      description: "Cria estratégias de crescimento sob medida para sua loja.",
+      fullDescription: "Com base no histórico da sua conta e no comportamento do consumidor, a Seller.IA define planos seguros para escalar vendas."
+    },
+    { 
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>, 
+      title: "Clareza em segundos", 
+      description: "Gera relatórios claros, objetivos e fáceis de entender.",
+      fullDescription: "Em minutos você tem um diagnóstico completo e recomendações práticas. Nada de relatórios confusos, só clareza para agir rápido."
+    },
+    { 
+      icon: <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>, 
+      title: "Evolução constante", 
+      description: "Evolui constantemente conforme sua loja gera mais dados.",
+      fullDescription: "A Seller.IA aprende com seus resultados e se adapta ao mercado, mantendo suas estratégias sempre atualizadas e competitivas."
+    }
+  ];
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col items-center justify-center bg-black overflow-x-hidden">
-      {/* HERO SECTION */}
-      <div className="w-full flex flex-col items-center justify-center pt-12 pb-8 px-2">
-        <div className="relative flex flex-col items-center">
-          <div 
-            className="absolute inset-0 rounded-full blur-xl transform scale-150 -translate-y-8"
-            style={{
-              background: "radial-gradient(circle, rgba(30,58,138,0.2) 0%, rgba(30,64,175,0.3) 40%, transparent 70%)"
-            }}
-          ></div>
-          
-          <div className="relative mb-[-100px] mt-[-100px] z-10">  
-            <Image src={logo} alt="Shop.AI" width={400} height={400} />
-          </div>
-         
-          <h1 className="relative z-10 text-3xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-4 px-6">
-          Sua loja pode vender muito mais 
+    <div className="bg-[#000000] text-white overflow-x-hidden">
 
-          </h1>
-          
-          <p className="relative z-10 text-lg md:text-2xl text-center text-gray-200 max-w-2xl mb-6 px-4">
-          Pare de adivinhar. A Seller.IA faz uma análise gratuita e mostra exatamente o que está impedindo sua loja de crescer  🚀
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 shadow text-white font-semibold text-xs">
-            <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#e65c00">
-              <g>
-                <path d="M11.5283 1.5999C11.7686 1.29437 12.2314 1.29437 12.4717 1.5999L14.2805 3.90051C14.4309 4.09173 14.6818 4.17325 14.9158 4.10693L17.7314 3.3089C18.1054 3.20292 18.4799 3.475 18.4946 3.86338L18.6057 6.78783C18.615 7.03089 18.77 7.24433 18.9984 7.32823L21.7453 8.33761C22.1101 8.47166 22.2532 8.91189 22.0368 9.23478L20.4078 11.666C20.2724 11.8681 20.2724 12.1319 20.4078 12.334L22.0368 14.7652C22.2532 15.0881 22.1101 15.5283 21.7453 15.6624L18.9984 16.6718C18.77 16.7557 18.615 16.9691 18.6057 17.2122L18.4946 20.1366C18.4799 20.525 18.1054 20.7971 17.7314 20.6911L14.9158 19.8931C14.6818 19.8267 14.4309 19.9083 14.2805 20.0995L12.4717 22.4001C12.2314 22.7056 11.7686 22.7056 11.5283 22.4001L9.71949 20.0995C9.56915 19.9083 9.31823 19.8267 9.08421 19.8931L6.26856 20.6911C5.89463 20.7971 5.52014 20.525 5.50539 20.1366L5.39427 17.2122C5.38503 16.9691 5.22996 16.7557 5.00164 16.6718L2.25467 15.6624C1.88986 15.5283 1.74682 15.0881 1.96317 14.7652L3.59221 12.334C3.72761 12.1319 3.72761 11.8681 3.59221 11.666L1.96317 9.23478C1.74682 8.91189 1.88986 8.47166 2.25467 8.33761L5.00165 7.32823C5.22996 7.24433 5.38503 7.03089 5.39427 6.78783L5.50539 3.86338C5.52014 3.475 5.89463 3.20292 6.26857 3.3089L9.08421 4.10693C9.31823 4.17325 9.56915 4.09173 9.71949 3.90051L11.5283 1.5999Z" stroke="#ce3027" strokeWidth="1.2"></path>
-                <path d="M9 12L11 14L15 10" stroke="#ce3027" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"></path>
-              </g>
-            </svg>
-            Análise inteligente
+      {/* Seção 1: Hero */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Apresentamos a <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">Seller.IA</span>
+            </h1>
+            <h2 className="text-lg md:text-xl text-gray-300">
+              <b>A primeira Inteligência Artificial treinada com dados reais de contas Shopee.</b>
+              <br/><br/>
+              Sua conta está estagnada porque você ainda toma decisões com base em achismo. Enquanto você tenta “adivinhar” o que deu certo no mês passado, tem gente usando inteligência artificial para prever o que vai vender nas próximas semanas.
+              <br/><br/>
+              <b>Essa é a diferença entre quem fatura R$ 20 mil e quem fatura R$ 500 mil. A verdadeira diferença entre quem sobrevive e quem escala.</b>
+            </h2>
           </div>
-          <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 shadow text-white font-semibold text-xs">
-            <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#e65c00">
-              <g>
-                <path d="M11.5283 1.5999C11.7686 1.29437 12.2314 1.29437 12.4717 1.5999L14.2805 3.90051C14.4309 4.09173 14.6818 4.17325 14.9158 4.10693L17.7314 3.3089C18.1054 3.20292 18.4799 3.475 18.4946 3.86338L18.6057 6.78783C18.615 7.03089 18.77 7.24433 18.9984 7.32823L21.7453 8.33761C22.1101 8.47166 22.2532 8.91189 22.0368 9.23478L20.4078 11.666C20.2724 11.8681 20.2724 12.1319 20.4078 12.334L22.0368 14.7652C22.2532 15.0881 22.1101 15.5283 21.7453 15.6624L18.9984 16.6718C18.77 16.7557 18.615 16.9691 18.6057 17.2122L18.4946 20.1366C18.4799 20.525 18.1054 20.7971 17.7314 20.6911L14.9158 19.8931C14.6818 19.8267 14.4309 19.9083 14.2805 20.0995L12.4717 22.4001C12.2314 22.7056 11.7686 22.7056 11.5283 22.4001L9.71949 20.0995C9.56915 19.9083 9.31823 19.8267 9.08421 19.8931L6.26856 20.6911C5.89463 20.7971 5.52014 20.525 5.50539 20.1366L5.39427 17.2122C5.38503 16.9691 5.22996 16.7557 5.00164 16.6718L2.25467 15.6624C1.88986 15.5283 1.74682 15.0881 1.96317 14.7652L3.59221 12.334C3.72761 12.1319 3.72761 11.8681 3.59221 11.666L1.96317 9.23478C1.74682 8.91189 1.88986 8.47166 2.25467 8.33761L5.00165 7.32823C5.22996 7.24433 5.38503 7.03089 5.39427 6.78783L5.50539 3.86338C5.52014 3.475 5.89463 3.20292 6.26857 3.3089L9.08421 4.10693C9.31823 4.17325 9.56915 4.09173 9.71949 3.90051L11.5283 1.5999Z" stroke="#ce3027" strokeWidth="1.2"></path>
-                <path d="M9 12L11 14L15 10" stroke="#ce3027" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"></path>
-              </g>
-            </svg>
-            Decisões baseadas em dados
-          </div>
-          <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 shadow text-white font-semibold text-xs">
-            <svg width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#e65c00">
-              <g>
-                <path d="M11.5283 1.5999C11.7686 1.29437 12.2314 1.29437 12.4717 1.5999L14.2805 3.90051C14.4309 4.09173 14.6818 4.17325 14.9158 4.10693L17.7314 3.3089C18.1054 3.20292 18.4799 3.475 18.4946 3.86338L18.6057 6.78783C18.615 7.03089 18.77 7.24433 18.9984 7.32823L21.7453 8.33761C22.1101 8.47166 22.2532 8.91189 22.0368 9.23478L20.4078 11.666C20.2724 11.8681 20.2724 12.1319 20.4078 12.334L22.0368 14.7652C22.2532 15.0881 22.1101 15.5283 21.7453 15.6624L18.9984 16.6718C18.77 16.7557 18.615 16.9691 18.6057 17.2122L18.4946 20.1366C18.4799 20.525 18.1054 20.7971 17.7314 20.6911L14.9158 19.8931C14.6818 19.8267 14.4309 19.9083 14.2805 20.0995L12.4717 22.4001C12.2314 22.7056 11.7686 22.7056 11.5283 22.4001L9.71949 20.0995C9.56915 19.9083 9.31823 19.8267 9.08421 19.8931L6.26856 20.6911C5.89463 20.7971 5.52014 20.525 5.50539 20.1366L5.39427 17.2122C5.38503 16.9691 5.22996 16.7557 5.00164 16.6718L2.25467 15.6624C1.88986 15.5283 1.74682 15.0881 1.96317 14.7652L3.59221 12.334C3.72761 12.1319 3.72761 11.8681 3.59221 11.666L1.96317 9.23478C1.74682 8.91189 1.88986 8.47166 2.25467 8.33761L5.00165 7.32823C5.22996 7.24433 5.38503 7.03089 5.39427 6.78783L5.50539 3.86338C5.52014 3.475 5.89463 3.20292 6.26857 3.3089L9.08421 4.10693C9.31823 4.17325 9.56915 4.09173 9.71949 3.90051L11.5283 1.5999Z" stroke="#ce3027" strokeWidth="1.2"></path>
-                <path d="M9 12L11 14L15 10" stroke="#ce3027" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"></path>
-              </g>
-            </svg>
-            Escala previsível
+          <div className="flex justify-center">
+            {AIPulse()}
           </div>
         </div>
-      </div>
-      {/* FORM SECTION */}
-      <div className="w-full flex justify-center items-center pb-12">
-        <Card className="w-full max-w-lg md:max-w-2xl bg-transparent border-4 border-[#57545c] rounded-[20px] shadow-none p-0">
-          <CardHeader className="pt-8 pb-2 text-center">
-            <CardTitle className="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent">
-              Receba sua Análise Express
-            </CardTitle>
-            <CardDescription className="text-base md:text-lg text-gray-200">
-              Preencha os dados abaixo e receba sua análise personalizada instantaneamente
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-2 pb-0">
-            {success && <div className="bg-green-100 text-green-800 p-3 rounded mb-4 text-center font-semibold">{success}</div>}
-            {error && <div className="bg-red-100 text-red-800 p-3 rounded mb-4 text-center font-semibold">{error}</div>}
-            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="nome">Nome / Nome da Loja *</label>
-                  <input type="text" id="nome" name="nome" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.nome} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="email">E-mail </label>
-                  <input type="email" id="email" name="email" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.email} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="telefone">Telefone (WhatsApp) *</label>
-                  <input type="text" id="telefone" name="telefone" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.telefone} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="faturamento30d">Valor Faturado nos Últimos 30 Dias *</label>
-                  <input type="text" id="faturamento30d" name="faturamento30d" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.faturamento30d} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="visitantes">Visitantes (Últimos 30 Dias) *</label>
-                  <input type="text" id="visitantes" name="visitantes" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.visitantes} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="pedidos">Pedidos (Últimos 30 Dias) *</label>
-                  <input type="text" id="pedidos" name="pedidos" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.pedidos} onChange={handleChange} />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="investimentoAds">Investimento Mensal em Shopee Ads *</label>
-                  <input type="text" id="investimentoAds" name="investimentoAds" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.investimentoAds} onChange={handleChange} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2 text-white" htmlFor="roasMensal">ROAS Mensal *</label>
-                  <input type="text" id="roasMensal" name="roasMensal" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-300 rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition" required value={form.roasMensal} onChange={handleChange} />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-white" htmlFor="desafio">Maior Desafio Hoje *</label>
-             
-                <Select name="desafio" required value={form.desafio} onValueChange={(value) => setForm({ ...form, desafio: value })}>
-                  <SelectTrigger className="w-full border-2 border-[#FF3A29] bg-white/5 text-white rounded-[8px] px-3 py-2 focus:outline-none focus:border-[#FF3A29] transition">
-                    <SelectValue placeholder="Selecione seu maior desafio atual" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="trafego">Aumentar Tráfego / Visibilidade</SelectItem>
-                    <SelectItem value="conversao">Melhorar Taxa de Conversão</SelectItem>
-                    <SelectItem value="ads">Otimizar Shopee Ads / ROAS</SelectItem>
-                    <SelectItem value="ticket">Aumentar Ticket Médio</SelectItem>
-                    <SelectItem value="logistica">Melhorar Logística / Entrega</SelectItem>
-                    <SelectItem value="concorrencia">Competir com Concorrência</SelectItem>
-                  </SelectContent>
-                </Select>
-                 
-              </div>
-              <div className="pt-2">
-                <Button type="submit" className="w-full text-lg py-3 bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold border-none shadow-none" disabled={loading}>
-                  {!loading && <span>Gerar Minha Análise Agora</span>}
-                  {loading && <span>Gerando análise... {progress}%</span>}
-                </Button>
-         
-              </div>
-            </form>
-          </CardContent>
-          <CardFooter className="flex flex-col gap-2 pb-6 pt-2">
-            <div className="flex flex-wrap gap-2 justify-center text-xs text-gray-300">
-              <span>🔒 Dados protegidos</span>
-              <span>⚡ Análise instantânea</span>
-              <span>🚀 +500 lojas analisadas</span>
-              <span>⭐ 4.9/5 de satisfação</span>
+      </section>
+      
+      {/* Seção do Formulário (Calculadora) */}
+    
+
+      {/* Seção 2: "achismo" vs "dados reais" */}
+      <section className="py-20 px-2">
+        <div className="container  p-5 bg-black rounded-xl border border-gray-800">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-center md:text-left">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Você pode continuar jogando esse jogo do achismo, ou pode usar dados reais, históricos e comportamentais <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">da sua própria conta para crescer.</span>
+              </h2>
+              <h3 className="text-lg md:text-xl text-gray-300 mt-6">
+                Essa Inteligência Artificial não foi criada por teóricos de mercado. Ela foi treinada por quem já escalou milhares de contas reais.
+              </h3>
             </div>
-          </CardFooter>
-        </Card>
+            <div className="space-y-4">
+                <div className="flex items-start gap-4"><CheckmarkIcon /><span>Faz a análise das suas métricas como um especialista.</span></div>
+                <div className="flex items-start gap-4"><CheckmarkIcon /><span>Encontra onde você está perdendo dinheiro.</span></div>
+                <div className="flex items-start gap-4"><CheckmarkIcon /><span>Diz exatamente onde investir e onde parar.</span></div>
+                <div className="flex items-start gap-4"><CheckmarkIcon /><span>Cria estratégias de escala com base nas suas vendas.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Seção 3: Marquee */}
+      <div className="relative w-full bg-[#FF3A29] flex items-center justify-center h-8 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+         
+        </div>
+        {/* Marquee effect for desktop/large screens */}
+        <div className="w-full h-full flex items-center">
+          <div className="animate-marquee whitespace-nowrap flex items-center gap-8 min-w-max">
+            <span className="font-bold text-white">PREVISIBILIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">ESCALA</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">LUCRATIVIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">SHOPEE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">PREVISIBILIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">ESCALA</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">LUCRATIVIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">SHOPEE</span>
+            <span className="font-bold text-white">•</span>
+          </div>
+          <div className="absolute left-0 top-0 w-full h-full animate-marquee2 whitespace-nowrap flex items-center gap-8 min-w-max">
+            <span className="font-bold text-white">PREVISIBILIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">ESCALA</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">LUCRATIVIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">SHOPEE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">PREVISIBILIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">ESCALA</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">LUCRATIVIDADE</span>
+            <span className="font-bold text-white">•</span>
+            <span className="font-bold text-white">SHOPEE</span>
+            <span className="font-bold text-white">•</span>
+          </div>
+        </div>
       </div>
-      <Image src={logoefeito} alt="Shop.AI" width={200} height={200} />
+      
+      <section id="analise" className="py-20 px-4 bg-black">
+        <div className="container mx-auto">
+            <Card className="w-full max-w-4xl mx-auto bg-transparent border-2 border-[#57545c] rounded-lg shadow-lg">
+                <CardHeader className="text-center p-8">
+                    <CardTitle className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-2">
+                        Receba sua Análise Express Gratuita
+                    </CardTitle>
+                    <CardDescription className="text-lg text-gray-300">
+                        Preencha os dados e veja na hora o que está impedindo sua loja de crescer.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="p-8">
+                    {success && <div className="bg-green-900 border border-green-700 text-green-200 p-4 rounded-md mb-6 text-center font-semibold">{success}</div>}
+                    {error && <div className="bg-red-900 border border-red-700 text-red-200 p-4 rounded-md mb-6 text-center font-semibold">{error}</div>}
+                    <form onSubmit={handleSubmit} autoComplete="off" className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="nome">Nome / Nome da Loja *</label>
+                                <input type="text" id="nome" name="nome" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.nome} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="email">E-mail</label>
+                                <input type="email" id="email" name="email" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.email} onChange={handleChange} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="telefone">Telefone (WhatsApp) *</label>
+                                <input type="text" id="telefone" name="telefone" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.telefone} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="faturamento30d">Valor Faturado (Últimos 30 Dias) *</label>
+                                <input type="text" id="faturamento30d" name="faturamento30d" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.faturamento30d} onChange={handleChange} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="visitantes">Visitantes (Últimos 30 Dias) *</label>
+                                <input type="text" id="visitantes" name="visitantes" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.visitantes} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="pedidos">Pedidos (Últimos 30 Dias) *</label>
+                                <input type="text" id="pedidos" name="pedidos" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.pedidos} onChange={handleChange} />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                           <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="investimentoAds">Investimento Mensal em Ads *</label>
+                                <input type="text" id="investimentoAds" name="investimentoAds" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.investimentoAds} onChange={handleChange} />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2 text-white" htmlFor="roasMensal">ROAS Mensal *</label>
+                                <input type="text" id="roasMensal" name="roasMensal" className="w-full border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition" required value={form.roasMensal} onChange={handleChange} />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-2 text-white" htmlFor="desafio">Maior Desafio Hoje *</label>
+                            <Select name="desafio" required value={form.desafio} onValueChange={(value) => setForm({ ...form, desafio: value })}>
+                                <SelectTrigger className="w-full border-2 border-[#FF3A29] bg-white/5 text-white rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#FF3A29] transition">
+                                    <SelectValue placeholder="Selecione seu maior desafio atual" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-gray-800 text-white border-gray-700">
+                                    <SelectItem value="trafego">Aumentar Tráfego / Visibilidade</SelectItem>
+                                    <SelectItem value="conversao">Melhorar Taxa de Conversão</SelectItem>
+                                    <SelectItem value="ads">Otimizar Shopee Ads / ROAS</SelectItem>
+                                    <SelectItem value="ticket">Aumentar Ticket Médio</SelectItem>
+                                    <SelectItem value="logistica">Melhorar Logística / Entrega</SelectItem>
+                                    <SelectItem value="concorrencia">Competir com Concorrência</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="pt-4">
+                            <Button type="submit" className="w-full text-lg font-bold py-3 px-6 bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white border-none rounded-md shadow-lg transform hover:scale-105 transition-transform duration-300" disabled={loading}>
+                                {!loading && <span>Gerar Minha Análise Agora</span>}
+                                {loading && <span>Gerando análise... {progress}%</span>}
+                            </Button>
+                            {loading && <div className="mt-4"><Progress value={progress} className="bg-gray-700 [&>div]:bg-orange-500" /></div>}
+                        </div>
+                    </form>
+                </CardContent>
+                <CardFooter className="flex-col gap-2 p-6 text-center text-xs text-gray-400">
+                  <div className="flex flex-wrap gap-4 justify-center">
+                    <span>🔒 Dados protegidos</span>
+                    <span>⚡ Análise instantânea</span>
+                    <span>🚀 +500 lojas analisadas</span>
+                  </div>
+                </CardFooter>
+            </Card>
+        </div>
+      </section>
+
+      {/* Seção 5: "Poder de um time" */}
+      <section className="py-20 px-4 bg-black">
+        <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
+            <div className="flex justify-center">
+                <Image 
+                    src="https://consultoriaefeitovendas.com.br/wp-content/uploads/2025/09/Karina-Leite-2-1024x1024.png"
+                    alt="Especialista em Shopee"
+                    width={500}
+                    height={500}
+                    className=" object-cover"
+                />
+            </div>
+            <div className="text-center md:text-left">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                    O poder de um time inteiro em uma <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">única inteligência artificial</span>
+                </h2>
+                <p className="text-lg text-gray-300">
+                    Agora imagine ter ao seu lado um estrategista que nunca dorme, acompanha cada métrica em tempo real e enxerga oportunidades que você não vê.
+                    <br/><br/>
+                    Esse é o papel da Seller.IA sua inteligência artificial dedicada, capaz de analisar milhares de dados da sua conta Shopee em segundos e transformar tudo em recomendações claras, objetivas e acionáveis.
+                    <br/><br/>
+                    Não é opinião, não é chute. É leitura precisa, baseada em ciência de escala e em resultados reais de quem já faturou milhões na plataforma.
+                </p>
+            </div>
+        </div>
+      </section>
+
+      {/* Seção 6: Recursos */}
+      <section className="py-20 px-4 ">
+        <div className="container mx-auto text-left">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                Os recursos da <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">Seller.IA</span>
+            </h2>
+            <p className="text-lg text-gray-300 mb-12">Diga adeus ao trabalho manual e erros desnecessários.</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {features.map((feature, index) => (
+                    <FeatureCard key={index} {...feature} />
+                ))}
+            </div>
+        </div>
+      </section>
+      
+      {/* Footer */}
+      <footer className="py-8 px-4 bg-black text-center text-gray-500">
+        <p>Todos os direitos reservados | Seller.IA</p>
+      </footer>
 
     </div>
   );

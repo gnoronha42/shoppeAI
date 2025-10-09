@@ -427,6 +427,41 @@ const checklistData = [
         description: "Criamos cenários simulados com orçamentos distintos para tomada de decisão."
       }
     ]
+  },
+  {
+    title: "BLOCO 11 – MARKETING",
+    items: [
+      {
+        title: "Transmissão Via Chat",
+        description: "Configuramos e otimizamos a transmissão via chat para melhorar o engajamento e conversão através de comunicação direta com os clientes."
+      },
+      {
+        title: "Criação De Vídeo",
+        description: "Produzimos vídeos promocionais e explicativos para aumentar a conversão e melhorar a apresentação dos produtos na plataforma."
+      }
+    ]
+  },
+  {
+    title: "BLOCO 12 – CADASTRO DE PRODUTOS AVANÇADO",
+    items: [
+      {
+        title: "Registro de Marca Shopee",
+        description: "Realizamos o processo de registro e proteção da marca na plataforma Shopee, garantindo exclusividade e proteção contra concorrência desleal."
+      }
+    ]
+  },
+  {
+    title: "BLOCO 13 – ADS AVANÇADO",
+    items: [
+      {
+        title: "Destravar Proteção De Roas",
+        description: "Implementamos estratégias para destravar e otimizar a proteção de ROAS, maximizando o retorno sobre investimento em anúncios."
+      },
+      {
+        title: "Alinhamento com o Consultor",
+        description: "Realizamos alinhamento estratégico com o consultor especializado para definir as melhores práticas e estratégias de anúncios personalizadas."
+      }
+    ]
   }
 ];
 
