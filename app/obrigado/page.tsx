@@ -175,46 +175,292 @@ function ObrigadoContent() {
               <span>🔒 Dados seguros</span>
               <span>⭐ Seller.IA</span>
             </div>
-
-            {/* Vídeo do YouTube */}
-            <div className="w-full max-w-3xl mx-auto my-6">
-              <div className="text-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-700 mb-2">
-                  🎯 Veja como aplicar essas estratégias na prática
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Assista ao vídeo completo e descubra os próximos passos para escalar sua loja
-                </p>
-              </div>
               
-              <div className="relative w-full h-0 pb-[56.25%] rounded-lg overflow-hidden shadow-lg border-2 border-gray-200">
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src="https://www.youtube.com/embed/LW5leoksUoc?rel=0&modestbranding=1&showinfo=0"
-                  title="Como Escalar sua Loja Shopee - Seller.IA"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                ></iframe>
+                 {/* SEÇÃO DE PLANOS */}
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 md:py-12 print:hidden">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-3 md:mb-4">
+          Conheça Nossos Planos
+        </h2>
+        <p className="text-center text-black text-sm md:text-base mb-8 md:mb-10 max-w-2xl mx-auto px-4">
+          Escolha o plano ideal para escalar sua loja Shopee com inteligência estratégica
+        </p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          {/* Plano E1 */}
+          <div className="bg-white/95 border-2 border-gray-200 rounded-2xl p-4 md:p-6 hover:border-[#FF3A29] transition-all duration-300 hover:shadow-xl hover:shadow-[#FF3A29]/20">
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+                <svg fill="white" viewBox="0 0 512 512" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <title>ionicons-v5-p</title>
+                    <path d="M477.64,38.26a4.75,4.75,0,0,0-3.55-3.66c-58.57-14.32-193.9,36.71-267.22,110a317,317,0,0,0-35.63,42.1c-22.61-2-45.22-.33-64.49,8.07C52.38,218.7,36.55,281.14,32.14,308a9.64,9.64,0,0,0,10.55,11.2L130,309.57a194.1,194.1,0,0,0,1.19,19.7,19.53,19.53,0,0,0,5.7,12L170.7,375a19.59,19.59,0,0,0,12,5.7,193.53,193.53,0,0,0,19.59,1.19l-9.58,87.2a9.65,9.65,0,0,0,11.2,10.55c26.81-4.3,89.36-20.13,113.15-74.5,8.4-19.27,10.12-41.77,8.18-64.27a317.66,317.66,0,0,0,42.21-35.64C441,232.05,491.74,99.74,477.64,38.26ZM294.07,217.93a48,48,0,1,1,67.86,0A47.95,47.95,0,0,1,294.07,217.93Z"></path>
+                    <path d="M168.4,399.43c-5.48,5.49-14.27,7.63-24.85,9.46-23.77,4.05-44.76-16.49-40.49-40.52,1.63-9.11,6.45-21.88,9.45-24.88a4.37,4.37,0,0,0-3.65-7.45,60,60,0,0,0-35.13,17.12C50.22,376.69,48,464,48,464s87.36-2.22,110.87-25.75A59.69,59.69,0,0,0,176,403.09C176.37,398.91,171.28,396.42,168.4,399.43Z"></path>
+                  </g>
+                </svg>
               </div>
+              <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent">
+                Plano <span className="text-[#FF3A29]">E1</span>
+              </h3>
             </div>
 
-            <a
-              href="https://consultoriaefeitovendas.com.br/seller-ia/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 w-full px-8 py-4 rounded-full bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white font-bold text-xl shadow-lg transition-all duration-200 mb-4"
-              style={{ maxWidth: '98%' }}
-            >
-              <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
-                <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Conheça o Seller.IA 
-            </a>
+            <h4 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-2">Inteligência Estratégica</h4>
+            <p className="text-2xl md:text-3xl font-extrabold text-[#FF3A29] mb-3 md:mb-4">R$ 497,00<span className="text-base md:text-lg text-gray-500">/mês</span></p>
+            
+            <div className="border-t border-gray-300 my-3 md:my-4"></div>
+            
+            <div className="flex justify-center mb-2">
+              <button
+                onClick={() => window.open("https://form.typeform.com/to/zM1hCmHj", "_blank", "noopener,noreferrer")}
+                className="inline-block whitespace-nowrap bg-[#FF3A29] hover:bg-[#E63320] text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm text-center transition-all duration-300 transform hover:scale-105"
+                type="button"
+              >
+                FALE COM NOSSO CONSULTOR
+              </button>
+            </div>
+
+            <p className="text-xs md:text-sm text-gray-600 mb-4 md:mb-6">
+              Ideal para quem já vende e quer tomar decisões com base em dados.
+            </p>
+
+            <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Envio de Análises semanais da conta e dos anúncios com apoio da nossa IA
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Diagnóstico prático com sugestões aplicáveis toda semana
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Relatório mensal de fechamento com visão estratégica
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Identificação de gargalos, oportunidades e ações para escalar
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Direcionamento de melhorias na performance dos produtos
+              </li>
+            </ul>
+          </div>
+
+          {/* Plano E2 */}
+          <div className="bg-white/95 border-4 border-[#FF3A29] rounded-2xl p-4 md:p-6 hover:shadow-2xl hover:shadow-[#FF3A29]/30 transition-all duration-300 relative lg:transform lg:scale-105">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#FF3A29] text-white text-xs md:text-sm font-bold px-3 md:px-4 py-1 rounded-full">
+              MAIS POPULAR
+            </div>
+            
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 mt-2">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#FF3A29] flex items-center justify-center flex-shrink-0">
+              <svg fill="white" viewBox="0 0 512 512" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <title>ionicons-v5-p</title>
+                    <path d="M477.64,38.26a4.75,4.75,0,0,0-3.55-3.66c-58.57-14.32-193.9,36.71-267.22,110a317,317,0,0,0-35.63,42.1c-22.61-2-45.22-.33-64.49,8.07C52.38,218.7,36.55,281.14,32.14,308a9.64,9.64,0,0,0,10.55,11.2L130,309.57a194.1,194.1,0,0,0,1.19,19.7,19.53,19.53,0,0,0,5.7,12L170.7,375a19.59,19.59,0,0,0,12,5.7,193.53,193.53,0,0,0,19.59,1.19l-9.58,87.2a9.65,9.65,0,0,0,11.2,10.55c26.81-4.3,89.36-20.13,113.15-74.5,8.4-19.27,10.12-41.77,8.18-64.27a317.66,317.66,0,0,0,42.21-35.64C441,232.05,491.74,99.74,477.64,38.26ZM294.07,217.93a48,48,0,1,1,67.86,0A47.95,47.95,0,0,1,294.07,217.93Z"></path>
+                    <path d="M168.4,399.43c-5.48,5.49-14.27,7.63-24.85,9.46-23.77,4.05-44.76-16.49-40.49-40.52,1.63-9.11,6.45-21.88,9.45-24.88a4.37,4.37,0,0,0-3.65-7.45,60,60,0,0,0-35.13,17.12C50.22,376.69,48,464,48,464s87.36-2.22,110.87-25.75A59.69,59.69,0,0,0,176,403.09C176.37,398.91,171.28,396.42,168.4,399.43Z"></path>
+                  </g>
+                </svg>
+              </div>
+              <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent">
+                Plano <span className="text-[#FF3A29]">E2</span>
+              </h3>
+            </div>
+
+            <h4 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-2">Estratégia com Suporte Direto</h4>
+            <p className="text-2xl md:text-3xl font-extrabold text-[#FF3A29] mb-3 md:mb-4">R$ 997,00<span className="text-base md:text-lg text-gray-500">/mês</span></p>
+            
+            <div className="border-t border-gray-300 my-3 md:my-4"></div>
+            <div className="flex justify-center mb-2">
+              <button
+                onClick={() => window.open("https://form.typeform.com/to/zM1hCmHj", "_blank", "noopener,noreferrer")}
+                className="inline-block whitespace-nowrap bg-[#FF3A29] hover:bg-[#E63320] text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm text-center transition-all duration-300 transform hover:scale-105"
+                type="button"
+              >
+                FALE COM NOSSO CONSULTOR
+              </button>
+            </div>
+            <p className="text-xs md:text-sm text-gray-600 mb-4 md:mb-6">
+              Ideal para quem aplica sozinho, mas quer validação e orientação contínua.
+            </p>
+
+            <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Envio de análises semanais da conta e dos anúncios com apoio da nossa IA
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Diagnóstico prático com sugestões aplicáveis toda semana
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Relatório mensal de fechamento com visão estratégica
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Identificação de gargalos, oportunidades e ações para escalar
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Direcionamento de melhorias na performance dos produtos
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                2 reuniões mensais com estrategista (30min cada)
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Grupo exclusivo para tirar dúvidas direto com nosso time
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Auditoria quinzenal dos produtos e anúncios da sua conta
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Recomendações personalizadas de ajuste semanal
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Alinhamento de estratégia para campanhas sazonais (ex: 9.9, 11.11)
+              </li>
+            </ul>
+
+          
+          </div>
+
+          {/* Plano E3 */}
+          <div className="bg-white/95 border-2 border-gray-200 rounded-2xl p-4 md:p-6 hover:border-[#FF3A29] transition-all duration-300 hover:shadow-xl hover:shadow-[#FF3A29]/20">
+            <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#9100B3]/20 flex items-center justify-center flex-shrink-0">
+                <svg fill="white" viewBox="0 0 512 512" width="28" height="28" xmlns="http://www.w3.org/2000/svg">
+                  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                  <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <title>ionicons-v5-p</title>
+                    <path d="M477.64,38.26a4.75,4.75,0,0,0-3.55-3.66c-58.57-14.32-193.9,36.71-267.22,110a317,317,0,0,0-35.63,42.1c-22.61-2-45.22-.33-64.49,8.07C52.38,218.7,36.55,281.14,32.14,308a9.64,9.64,0,0,0,10.55,11.2L130,309.57a194.1,194.1,0,0,0,1.19,19.7,19.53,19.53,0,0,0,5.7,12L170.7,375a19.59,19.59,0,0,0,12,5.7,193.53,193.53,0,0,0,19.59,1.19l-9.58,87.2a9.65,9.65,0,0,0,11.2,10.55c26.81-4.3,89.36-20.13,113.15-74.5,8.4-19.27,10.12-41.77,8.18-64.27a317.66,317.66,0,0,0,42.21-35.64C441,232.05,491.74,99.74,477.64,38.26ZM294.07,217.93a48,48,0,1,1,67.86,0A47.95,47.95,0,0,1,294.07,217.93Z"></path>
+                    <path d="M168.4,399.43c-5.48,5.49-14.27,7.63-24.85,9.46-23.77,4.05-44.76-16.49-40.49-40.52,1.63-9.11,6.45-21.88,9.45-24.88a4.37,4.37,0,0,0-3.65-7.45,60,60,0,0,0-35.13,17.12C50.22,376.69,48,464,48,464s87.36-2.22,110.87-25.75A59.69,59.69,0,0,0,176,403.09C176.37,398.91,171.28,396.42,168.4,399.43Z"></path>
+                  </g>
+                </svg>
+              </div>
+              <h3 className="text-lg md:text-xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent">
+                Plano <span className="text-[#FF3A29]">E3</span>
+              </h3>
+            </div>
+
+            <h4 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-2">Gestão com IA + Especialistas</h4>
+            <p className="text-2xl md:text-3xl font-extrabold text-[#FF3A29] mb-3 md:mb-4">R$ 1.897,00<span className="text-base md:text-lg text-gray-500">/mês</span></p>
+            
+            <div className="border-t border-gray-300 my-3 md:my-4"></div>
+            <div className="flex justify-center mb-2">
+              <button
+                onClick={() => window.open("https://form.typeform.com/to/zM1hCmHj", "_blank", "noopener,noreferrer")}
+                className="inline-block whitespace-nowrap bg-[#FF3A29] hover:bg-[#E63320] text-white font-bold py-2 px-3 rounded-lg text-xs md:text-sm text-center transition-all duration-300 transform hover:scale-105"
+                type="button"
+              >
+                FALE COM NOSSO CONSULTOR
+              </button>
+            </div>
+            <p className="text-xs md:text-sm text-gray-600 mb-4 md:mb-6">
+              Ideal para quem quer focar nas vendas e deixar tudo nas mãos de quem entende.
+            </p>
+
+            <ul className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                <strong>Tudo dos planos E1 e E2</strong>
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Acesso ao nosso time de especialistas que fazem a gestão completa da sua conta Shopee
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Criação e otimização de cadastros, títulos, imagens (conforme disponibilidade de pacote) e SEO
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Estratégia e execução de campanhas no Shopee Ads
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Leitura de dados semanais com inteligência artificial + revisão humana
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Planejamento mensal de vendas e ações para escalar
+              </li>
+              <li className="flex items-start gap-2 text-xs md:text-sm text-gray-700">
+                <svg className="w-4 h-4 md:w-5 md:h-5 mt-0.5 flex-shrink-0" fill="#FF3A29" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                </svg>
+                Monitoramento contínuo com foco em performance e crescimento
+              </li>
+            </ul>
+
+           
+          </div>
+        </div>
+      </div>
+
+              
+   
+
+          
           </CardFooter>
         </Card>
      
       </div>
+
+   
+
       <Image src={logoefeito} alt="Shop.AI" width={200} height={200} />
 
       {/* Print Styles */}
