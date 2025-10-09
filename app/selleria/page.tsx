@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Image from "next/image";
 import { Select, SelectItem, SelectContent, SelectValue, SelectTrigger } from "@/components/ui/select";
-import Lottie from "lottie-react";
 import { motion } from "framer-motion";
 
 
