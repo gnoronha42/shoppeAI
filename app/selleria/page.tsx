@@ -169,7 +169,7 @@ export default function SelleriaPage() {
             className="absolute w-32 h-32 rounded-2xl border border-white/30"
             initial={{ scale: 1, opacity: 0.8 }}
             animate={{
-              scale: [1, 2.5],
+              scale: [5, 2.5],
               opacity: [0.8, 0],
             }}
             transition={{
@@ -438,9 +438,9 @@ export default function SelleriaPage() {
       </section>
 
       {/* Seção 6: Recursos */}
-      <section className="py-20 px-4 ">
-        <div className="container mx-auto text-left">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+      <section className="py-20 px-4 "> 
+        <div className="container mx-auto text-center">
+            <h2 className="text-3xl text-center md:text-center md:text-4xl font-bold mb-4">
                 Os recursos da <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">Seller.IA</span>
             </h2>
             <p className="text-lg text-gray-300 mb-12">Diga adeus ao trabalho manual e erros desnecessários.</p>
