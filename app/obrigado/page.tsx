@@ -219,7 +219,7 @@ function ObrigadoContent() {
             <h4 className="text-2xl font-bold text-gray-900 mb-2">Inteligência Estratégica</h4>
             <p className="text-3xl font-extrabold text-gray-700 mb-4">R$497,00<span className="text-lg text-gray-500">/mês</span></p>
             <button
-              onClick={() => window.open("https://form.typeform.com/to/C0Eh7kc3", "_blank", "noopener,noreferrer")}
+              onClick={() => window.open("https://wa.me/5541984775343?text=Ol%C3%A1%2C%20tenho%20interesse%20no%20Plano%20de%20An%C3%A1lise%20com%20I.A%20de%20R%24497%20e%20quero%20entender%20como%20funciona%20a%20an%C3%A1lise%20da%20minha%20loja.", "_blank", "noopener,noreferrer")}
               className="w-full bg-[#FF3A29] hover:bg-[#E63320] text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2"
               type="button"
             >
@@ -292,7 +292,7 @@ function ObrigadoContent() {
             <h4 className="text-2xl font-bold text-gray-900 mb-2">Estratégia com Suporte Direto</h4>
             <p className="text-3xl font-extrabold text-gray-700 mb-4">R$997,00<span className="text-lg text-gray-500">/mês</span></p>
             <button
-              onClick={() => window.open("https://form.typeform.com/to/zM1hCmHj", "_blank", "noopener,noreferrer")}
+              onClick={() => window.open("https://wa.me/5541984775343?text=Ol%C3%A1!%20Vi%20o%20Plano%20de%20I.A%20com%20Suporte%20por%20R%24997%20e%20quero%20saber%20mais%20detalhes%20sobre%20o%20acompanhamento%20que%20voc%C3%AAs%20oferecem.", "_blank", "noopener,noreferrer")}
               className="w-full bg-[#FF3A29] hover:bg-[#E63320] text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2"
               type="button"
             >
@@ -395,7 +395,7 @@ function ObrigadoContent() {
             <h4 className="text-2xl font-bold text-gray-900 mb-2">Gestão com IA + Especialistas</h4>
             <p className="text-3xl font-extrabold text-gray-700 mb-4">R$1.897,00<span className="text-lg text-gray-500">/mês</span></p>
             <button
-              onClick={() => window.open("https://form.typeform.com/to/zM1hCmHj", "_blank", "noopener,noreferrer")}
+              onClick={() => window.open("https://wa.me/5541984775343?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Plano%20de%20Gest%C3%A3o%20Completa%20e%20quero%20entender%20melhor%20como%20funciona%20o%20trabalho%20de%20voc%C3%AAs%20na%20pr%C3%A1tica.", "_blank", "noopener,noreferrer")}
               className="w-full bg-[#FF3A29] hover:bg-[#E63320] text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2"
               type="button"
             >
