@@ -152,13 +152,13 @@ export default function SelleriaPage() {
     const rings = [0, 1, 2]; // número de ondas
   
     return (
-      <div className="relative flex items-center justify-center w-64 h-64 bg-red">
+      <div className="relative flex items-center justify-center w-96 h-96 bg-red">
         {/* O quadrado central */}
-        <div className="relative flex items-center justify-center w-32 h-32 rounded-2xl bg-gray-800">
-          <span className="text-5xl font-bold text-gray-200">AI</span>
+        <div className="relative flex items-center justify-center w-48 h-48 rounded-2xl bg-gray-800">
+          <span className="text-7xl font-bold text-gray-200">AI</span>
           {/* Borda degradê */}
-          <div className="absolute inset-0 rounded-2xl p-[2px] bg-gradient-to-br from-indigo-500 via-purple-500 to-orange-400">
-            <div className="w-full h-full rounded-2xl bg-gray-800 text-center p-9  text-5xl font-bold text-gray-200">AI</div>
+          <div className="absolute inset-0 rounded-2xl p-[3px] bg-gradient-to-br from-indigo-500 via-purple-500 to-orange-400">
+            <div className="w-full h-full rounded-2xl bg-gray-800 text-center flex items-center justify-center text-7xl font-bold text-gray-200">AI</div>
           </div>
         </div>
   
@@ -166,10 +166,10 @@ export default function SelleriaPage() {
         {rings.map((i) => (
           <motion.div
             key={i}
-            className="absolute w-32 h-32 rounded-2xl border border-white/30"
+            className="absolute w-48 h-48 rounded-2xl border border-white/30"
             initial={{ scale: 1, opacity: 0.8 }}
             animate={{
-              scale: [5, 2.5],
+              scale: [4, 2.5],
               opacity: [0.8, 0],
             }}
             transition={{
