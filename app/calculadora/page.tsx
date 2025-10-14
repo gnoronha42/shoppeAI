@@ -521,8 +521,10 @@ export default function CalculadoraPage() {
       <footer className="py-8 px-4 bg-black text-center text-gray-500">
         <p>© 2025 Calculadora de Precificação Shopee. Todos os direitos reservados.</p>
       </footer>
+
     </div>
   );
 }
+
 
 
