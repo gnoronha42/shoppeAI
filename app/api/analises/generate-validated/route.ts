@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    if (!body.analysisType || !["ads", "account"].includes(body.analysisType)) {
+    if (!body.analysisType || !["ads", "account", "express", "whatsapp-consultivo"].includes(body.analysisType)) {
       return NextResponse.json(
         { error: "Tipo de análise inválido" },
         { status: 400 }

@@ -27,7 +27,12 @@ export async function POST(request: Request) {
       data: {
         client_id: body.clientId,
         type: body.type,
-        title: body.title || `Análise de ${body.type === 'account' ? 'Conta' : 'Anúncios'}`,
+        title: body.title || `Análise de ${
+          body.type === 'account' ? 'Conta' : 
+          body.type === 'ads' ? 'Anúncios' : 
+          body.type === 'whatsapp-consultivo' ? 'WhatsApp Consultivo' :
+          'Semanal'
+        }`,
         created_by: userId, // Associar ao usuário logado
       },
     });
