@@ -66,7 +66,7 @@ export default function AnalisePage() {
   // Função helper para obter URL base
   const getBaseUrl = () => {
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const baseUrl = "https://analysis-micro.onrender.com";
+    const baseUrl = "http://localhost:3001";
     
     console.log('🌐 Ambiente detectado:', {
       isLocalhost,
@@ -158,7 +158,7 @@ export default function AnalisePage() {
     console.log("📡 Enviando requisição CSV para microserviço com dados corretos...");
     
     // USAR ENDPOINT CORRIGIDO
-    const baseUrl = "https://analysis-micro.onrender.com";
+    const baseUrl = "http://localhost:3001";
     
     const response = await fetch(`${baseUrl}/analise-csv`, {
       method: "POST",
@@ -399,7 +399,7 @@ export default function AnalisePage() {
   // Função para obter métricas avançadas
   const obterMetricasAvancadas = async (dados: any) => {
     try {
-      const baseUrl =  "https://analysis-micro.onrender.com";
+      const baseUrl =  "http://localhost:3001";
       
       const response = await fetch(`${baseUrl}/api/metricas-avancadas`, {
         method: "POST",
@@ -424,7 +424,7 @@ export default function AnalisePage() {
   // Função para gerar relatório personalizado
   const gerarRelatorioPersonalizado = async (dados: any, tipoRelatorio: string = 'completo') => {
     try {
-      const baseUrl =  "https://analysis-micro.onrender.com";
+      const baseUrl =  "http://localhost:3001";
       
       const response = await fetch(`${baseUrl}/api/relatorio-personalizado`, {
         method: "POST",
@@ -469,7 +469,7 @@ export default function AnalisePage() {
 
     console.log("📡 Enviando requisição para análise de imagens...");
 
-    const baseUrl = "https://analysis-micro.onrender.com";
+    const baseUrl = "http://localhost:3001";
 
     const response = await fetch(`${baseUrl}/analise`, {
       method: "POST",
@@ -615,8 +615,17 @@ export default function AnalisePage() {
         } else if (analysisType === "account") {
           // Para análise de ACCOUNT, aceitar múltiplos CSVs
           analysisResult = await analyzeMultipleCSVsWithOpenAI(csvFiles, analysisType);
+        } else if (analysisType === "whatsapp-consultivo") {
+          // Para análise WhatsApp Consultivo, usar análise de imagens
+          if (imageFiles.length === 0) {
+            toast({ title: "Erro", description: "Para análise WhatsApp Consultivo, é necessário pelo menos uma imagem", variant: "destructive" });
+            return;
+          }
+          const base64Images = await Promise.all(imageFiles.map(convertImageToBase64));
+          const ocrTexts = await ocrAllImages(imageFiles);
+          analysisResult = await analyzeImagesWithOpenAI(base64Images, analysisType, ocrTexts);
         } else {
-          toast({ title: "Tipo de análise inválido", description: "Análise CSV disponível para 'ads' e 'account'", variant: "destructive" });
+          toast({ title: "Tipo de análise inválido", description: "Análise CSV disponível para 'ads' e 'account'. Para outros tipos, use imagens.", variant: "destructive" });
           setIsAnalyzing(false);
           return;
         }
@@ -757,6 +766,8 @@ export default function AnalisePage() {
                 ? "Análise completa da conta com KPIs detalhados, ranking de produtos, projeções de crescimento e plano tático de 30 dias"
                 : analysisType === "ads"
                 ? "Análise técnica de campanhas Shopee Ads com foco em ROAS, CTR, conversão, CPA e estratégias de escalabilidade"
+                : analysisType === "whatsapp-consultivo"
+                ? "Análise consultiva no formato WhatsApp com diagnóstico semanal, métricas visuais e recomendações práticas em linguagem humana"
                 : "Análise semanal expressa com diagnóstico técnico do funil, gargalos identificados e ações estratégicas prioritárias"}
             </p>
           </CardContent>
@@ -871,6 +882,8 @@ export default function AnalisePage() {
                 ? "Upload de Prints da Conta"
                 : analysisType === "ads"
                 ? "Upload de Prints dos Anúncios"
+                : analysisType === "whatsapp-consultivo"
+                ? "Upload de Prints para WhatsApp Consultivo"
                 : "Upload de Prints para Análise Semanal"}
             </CardTitle>
           </CardHeader>
@@ -885,6 +898,8 @@ export default function AnalisePage() {
                 ? "Faça upload de prints da sua conta Shopee OU múltiplos arquivos CSV (shop-stats, parentskudetail, productoverview, dados de anúncios) para análise completa"
                 : analysisType === "ads"
                 ? "✅ RECOMENDADO: 1 arquivo CSV de anúncios para dados 100% precisos (ROAS, investimento, GMV corretos) OU prints das campanhas Shopee Ads (pode ter imprecisões matemáticas)"
+                : analysisType === "whatsapp-consultivo"
+                ? "Faça upload de prints da performance da sua loja dos últimos 7 dias: métricas principais, funil de vendas e produtos em destaque para análise consultiva"
                 : "Faça upload de prints da sua loja Shopee para análise semanal: métricas principais, vendas e performance geral (máximo 10 imagens)"}
             </p>
             
