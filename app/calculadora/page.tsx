@@ -1,527 +1,537 @@
 "use client";
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
 
 // Função para converter string para float (aceita formato brasileiro)
-function toFloat(x: any): number {
-  if (typeof x === 'number') return x;
-  const str = String(x).trim();
-  // Remove pontos (separador de milhares) e substitui vírgula por ponto
-  const normalized = str.replace(/\./g, '').replace(',', '.');
-  return parseFloat(normalized) || 0;
+function _toFloat(x: any): number {
+  if (!x) return 0;
+  const str = x.toString().replace(/\./g, '').replace(/,/g, '.');
+  return parseFloat(str) || 0;
 }
 
 // Interface para os dados de entrada
 interface CalculatorInput {
-  nomeProduto: string;
+  nome: string;
   custoProduto: string;
   custoUnidade: string;
-  margemPct: string;
-  comissaoPct: string;
-  impostosPct: string;
+  margem: string;
+  comissao: string;
+  impostos: string;
   outrasDespesas: string;
+  usarCPA: string;
+  roas: string;
 }
 
 // Interface para o resultado
 interface CalculatorResult {
-  produto: string;
+  nome: string;
   precoVenda: number;
-  detalheRS: {
-    custoProduto: number;
-    custoUnidade: number;
-    outrasDespesas: number;
-    comissao: number;
-    impostos: number;
-    lucro: number;
-    cpa10pct: number;
-  };
-  percentuaisSobrePreco: {
-    margem: number;
-    comissao: number;
-    impostos: number;
-    cpa: number;
-    somaTotal: number;
-  };
-  roasIdeal: number;
+  custoTotal: number;
+  comissaoR: number;
+  impostosR: number;
+  cpaR: number;
+  lucro: number;
+  cpaPct: number;
+  roasReal: number;
+  usarCPA: boolean;
+  roasDesejado: number;
 }
-
-// Função principal de cálculo (baseada no Python)
-function calcularPrecoSemCpa(input: CalculatorInput): CalculatorResult {
-  const CProd = toFloat(input.custoProduto);
-  const CUnit = toFloat(input.custoUnidade);
-  const margem = toFloat(input.margemPct);
-  const comiss = toFloat(input.comissaoPct);
-  const impost = toFloat(input.impostosPct);
-  const COut = toFloat(input.outrasDespesas);
-
-  // Custos fixos (não percentuais)
-  const C0 = CProd + CUnit + COut;
-
-  // CPA é fixo: 10% do preço
-  const cpaPct = 10.0;
-
-  // Soma das % sobre o preço (margem + comissão + impostos + CPA)
-  const somaPct = margem + comiss + impost + cpaPct;
-
-  if (somaPct >= 100) {
-    throw new Error(
-      `A soma das porcentagens chegou a ${somaPct.toFixed(2)}% (>=100%). Reduza margem/comissão/impostos.`
-    );
-  }
-
-  // Preço de venda: P = C0 / (1 - (margem+comissão+impostos+CPA)/100)
-  const preco = C0 / (1 - somaPct / 100.0);
-
-  // Quebra em R$
-  const cpaR = preco * (cpaPct / 100.0);
-  const lucro = preco * (margem / 100.0);
-  const comR = preco * (comiss / 100.0);
-  const impR = preco * (impost / 100.0);
-
-  // ROAS ideal = preço / cpa (quanto deve retornar por R$1 investido)
-  const roasIdeal = cpaR > 0 ? preco / cpaR : Infinity;
-
-  return {
-    produto: input.nomeProduto.trim(),
-    precoVenda: Math.round(preco * 100) / 100,
-    detalheRS: {
-      custoProduto: Math.round(CProd * 100) / 100,
-      custoUnidade: Math.round(CUnit * 100) / 100,
-      outrasDespesas: Math.round(COut * 100) / 100,
-      comissao: Math.round(comR * 100) / 100,
-      impostos: Math.round(impR * 100) / 100,
-      lucro: Math.round(lucro * 100) / 100,
-      cpa10pct: Math.round(cpaR * 100) / 100,
-    },
-    percentuaisSobrePreco: {
-      margem,
-      comissao: comiss,
-      impostos: impost,
-      cpa: cpaPct,
-      somaTotal: somaPct,
-    },
-    roasIdeal: Math.round(roasIdeal * 100) / 100,
-  };
-}
-
-// Componente para ícones
-const CalculatorIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FF3A29" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
-    <line x1="9" x2="15" y1="9" y2="9"/>
-    <line x1="9" x2="15" y1="13" y2="13"/>
-    <line x1="9" x2="15" y1="17" y2="17"/>
-  </svg>
-);
 
 export default function CalculadoraPage() {
   const [form, setForm] = useState<CalculatorInput>({
-    nomeProduto: "",
+    nome: "",
     custoProduto: "",
     custoUnidade: "",
-    margemPct: "",
-    comissaoPct: "",
-    impostosPct: "",
+    margem: "",
+    comissao: "",
+    impostos: "",
     outrasDespesas: "",
+    usarCPA: "nao",
+    roas: "10",
   });
 
   const [result, setResult] = useState<CalculatorResult | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError(""); // Limpa erro ao digitar
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 850);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Se mudar para usar CPA e não tiver ROAS, define como 10
+    if (name === "usarCPA" && value === "sim" && !form.roas) {
+      setForm(prev => ({ ...prev, [name]: value, roas: "10" }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const calcularPreco = () => {
+    // 1. Coleta de Dados e Conversão
+    const nome = form.nome.trim();
+    const C_prod = _toFloat(form.custoProduto);
+    const C_unit = _toFloat(form.custoUnidade);
+    const margem = _toFloat(form.margem);
+    const comiss = _toFloat(form.comissao);
+    const impost = _toFloat(form.impostos);
+    const C_out = _toFloat(form.outrasDespesas);
+    const usar_cpa = form.usarCPA === 'sim';
+    const roas_desejado = _toFloat(form.roas || "10");
 
-    try {
-      const calculationResult = calcularPrecoSemCpa(form);
-      setResult(calculationResult);
-    } catch (err: any) {
-      setError(err.message || "Erro no cálculo. Verifique os valores inseridos.");
+    // 2. Cálculo do Percentual de CPA/Tráfego
+    let cpa_pct = usar_cpa && roas_desejado > 0 ? 100 / roas_desejado : 0;
+    const soma_pct = margem + comiss + impost + cpa_pct;
+
+    // 3. Validação
+    if (soma_pct >= 100) {
+      alert(`A soma das porcentagens (Margem, Com., Impostos, CPA) é de ${soma_pct.toFixed(2)}% (>=100%). O preço de venda seria infinito. Reduza as porcentagens.`);
+      return;
     }
 
-    setLoading(false);
-  };
+    // 4. Fórmula do Preço de Venda
+    const C0 = C_prod + C_unit + C_out;
+    const preco = C0 / (1 - soma_pct/100);
+    
+    // 5. Valores Absolutos (em R$)
+    const cpa_R = preco * (cpa_pct/100);
+    const lucro = preco * (margem/100);
+    const com_R = preco * (comiss/100);
+    const imp_R = preco * (impost/100);
 
-  const handleReset = () => {
-    setForm({
-      nomeProduto: "",
-      custoProduto: "",
-      custoUnidade: "",
-      margemPct: "",
-      comissaoPct: "",
-      impostosPct: "",
-      outrasDespesas: "",
+    // 6. ROAS Real
+    const roas_real_calc = cpa_R > 0 ? preco / cpa_R : Infinity;
+    const roas_real = parseFloat(roas_real_calc.toFixed(2));
+
+    setResult({
+      nome,
+      precoVenda: preco,
+      custoTotal: C0,
+      comissaoR: com_R,
+      impostosR: imp_R,
+      cpaR: cpa_R,
+      lucro,
+      cpaPct: cpa_pct,
+      roasReal: roas_real,
+      usarCPA: usar_cpa,
+      roasDesejado: roas_desejado
     });
-    setResult(null);
-    setError("");
+
+    setShowResult(true);
   };
 
   return (
-    <div className="bg-[#000000] text-white min-h-screen">
-      {/* Hero Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="flex justify-center mb-6">
-              <CalculatorIcon />
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Calculadora de{" "}
-              <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">
-                Precificação Shopee
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-              Calcule o preço ideal do seu produto considerando todos os custos,
-              margem de lucro e CPA automático de 10%. Tenha o ROAS ideal para suas campanhas.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+    <div style={{
+      backgroundColor: '#000',
+      color: '#fff',
+      fontFamily: "'Poppins', sans-serif",
+      margin: 0,
+      padding: '20px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      minHeight: '100vh'
+    }}>
+      <h1 style={{
+        color: '#ff5722',
+        fontSize: '2.2rem',
+        marginBottom: '0.5rem',
+        textAlign: 'center'
+      }}>
+        Calculadora de Precificação Shopee
+      </h1>
+      <p style={{
+        color: '#ccc',
+        marginBottom: '2rem',
+        textAlign: 'center'
+      }}>
+        Use a tabela de referência, defina seus custos e calcule o preço ideal para atingir sua meta de <strong>ROAS</strong>.
+      </p>
 
-      {/* Calculator Section */}
-      <section className="py-10 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Formulário */}
-            <Card className="bg-transparent border-2 border-[#57545c] rounded-lg shadow-lg">
-              <CardHeader className="text-center p-6">
-                <CardTitle className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-[#FF3A29] via-[#F96534] to-[#E2732C] bg-clip-text text-transparent mb-2">
-                  Dados do Produto
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  Preencha as informações do seu produto para calcular o preço ideal
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                {error && (
-                  <div className="bg-red-900 border border-red-700 text-red-200 p-4 rounded-md mb-6 text-center font-semibold">
-                    {error}
-                  </div>
-                )}
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-white">
-                      Nome do Produto *
-                    </label>
-                    <Input
-                      name="nomeProduto"
-                      value={form.nomeProduto}
-                      onChange={handleChange}
-                      className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                      placeholder="Ex: Camiseta Premium"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">
-                        Custo do Produto (R$) *
-                      </label>
-                      <Input
-                        name="custoProduto"
-                        value={form.custoProduto}
-                        onChange={handleChange}
-                        className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                        placeholder="Ex: 15,00"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">
-                        Custo por Unidade (R$) *
-                      </label>
-                      <Input
-                        name="custoUnidade"
-                        value={form.custoUnidade}
-                        onChange={handleChange}
-                        className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                        placeholder="Ex: 5,00"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">
-                        Margem Desejada (%) *
-                      </label>
-                      <Input
-                        name="margemPct"
-                        value={form.margemPct}
-                        onChange={handleChange}
-                        className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                        placeholder="Ex: 30"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">
-                        Comissão Shopee (%) *
-                      </label>
-                      <Input
-                        name="comissaoPct"
-                        value={form.comissaoPct}
-                        onChange={handleChange}
-                        className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                        placeholder="Ex: 5"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2 text-white">
-                        Impostos (%) *
-                      </label>
-                      <Input
-                        name="impostosPct"
-                        value={form.impostosPct}
-                        onChange={handleChange}
-                        className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                        placeholder="Ex: 8"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2 text-white">
-                      Outras Despesas (R$)
-                    </label>
-                    <Input
-                      name="outrasDespesas"
-                      value={form.outrasDespesas}
-                      onChange={handleChange}
-                      className="border-2 border-[#FF3A29] bg-white/5 text-white placeholder:text-gray-400 focus:ring-[#FF3A29]"
-                      placeholder="Ex: 2,50 (opcional)"
-                    />
-                  </div>
-
-                  <div className="flex gap-4 pt-4">
-                    <Button
-                      type="submit"
-                      className="flex-1 text-lg font-bold py-3 bg-gradient-to-r from-[#FF3A29] to-[#F98934] hover:from-[#F96534] hover:to-[#E2732C] text-white border-none rounded-md shadow-lg transform hover:scale-105 transition-transform duration-300"
-                      disabled={loading}
-                    >
-                      {loading ? "Calculando..." : "Calcular Preço"}
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={handleReset}
-                      className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition"
-                    >
-                      Limpar
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Resultado */}
-            {result && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <Card className="bg-transparent border-2 border-green-600 rounded-lg shadow-lg">
-                  <CardHeader className="text-center p-6">
-                    <CardTitle className="text-2xl md:text-3xl font-bold text-green-400 mb-2">
-                      Resultado do Cálculo
-                    </CardTitle>
-                    <CardDescription className="text-gray-300">
-                      {result.produto}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-6">
-                    {/* Preço de Venda */}
-                    <div className="text-center bg-gradient-to-r from-[#FF3A29] to-[#F98934] p-6 rounded-lg">
-                      <h3 className="text-lg font-semibold text-white mb-2">
-                        Preço de Venda Ideal
-                      </h3>
-                      <p className="text-4xl font-bold text-white">
-                        R$ {result.precoVenda.toFixed(2).replace('.', ',')}
-                      </p>
-                    </div>
-
-                    {/* Detalhamento em R$ */}
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-3">
-                        Detalhamento por Real (R$)
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Custo do Produto:</span>
-                          <span className="text-white font-semibold">
-                            R$ {result.detalheRS.custoProduto.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Custo por Unidade:</span>
-                          <span className="text-white font-semibold">
-                            R$ {result.detalheRS.custoUnidade.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Outras Despesas:</span>
-                          <span className="text-white font-semibold">
-                            R$ {result.detalheRS.outrasDespesas.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Comissão:</span>
-                          <span className="text-white font-semibold">
-                            R$ {result.detalheRS.comissao.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Impostos:</span>
-                          <span className="text-white font-semibold">
-                            R$ {result.detalheRS.impostos.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-green-400">Lucro:</span>
-                          <span className="text-green-400 font-semibold">
-                            R$ {result.detalheRS.lucro.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-orange-400">CPA (10%):</span>
-                          <span className="text-orange-400 font-semibold">
-                            R$ {result.detalheRS.cpa10pct.toFixed(2).replace('.', ',')}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Percentuais */}
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-3">
-                        Percentuais sobre o Preço
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Margem:</span>
-                          <span className="text-white font-semibold">
-                            {result.percentuaisSobrePreco.margem.toFixed(2)}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Comissão:</span>
-                          <span className="text-white font-semibold">
-                            {result.percentuaisSobrePreco.comissao.toFixed(2)}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-300">Impostos:</span>
-                          <span className="text-white font-semibold">
-                            {result.percentuaisSobrePreco.impostos.toFixed(2)}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-orange-400">CPA:</span>
-                          <span className="text-orange-400 font-semibold">
-                            {result.percentuaisSobrePreco.cpa.toFixed(2)}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-t border-gray-600 pt-2">
-                          <span className="text-white font-semibold">Total:</span>
-                          <span className="text-white font-semibold">
-                            {result.percentuaisSobrePreco.somaTotal.toFixed(2)}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* ROAS Ideal */}
-                    <div className="text-center bg-gradient-to-r from-blue-600 to-blue-800 p-4 rounded-lg">
-                      <h4 className="text-lg font-semibold text-white mb-2">
-                        ROAS Ideal para Campanhas
-                      </h4>
-                      <p className="text-2xl font-bold text-white">
-                        {result.roasIdeal === Infinity ? "∞" : result.roasIdeal.toFixed(2)}x
-                      </p>
-                      <p className="text-sm text-blue-200 mt-1">
-                        Retorno esperado por R$1 investido em ads
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Informações Adicionais */}
-      <section className="py-20 px-4 bg-gray-900/50">
-        <div className="container mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">
-            Como Funciona a{" "}
-            <span className="bg-gradient-to-r from-[#FF3A29] to-[#F98934] bg-clip-text text-transparent">
-              Calculadora
-            </span>
+      <div style={{
+        display: 'flex',
+        gap: isMobile ? '1rem' : '2rem',
+        width: '100%',
+        maxWidth: '1200px',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        flexWrap: 'wrap',
+        margin: '0 auto',
+        flexDirection: isMobile ? 'column' : 'row'
+      }}>
+        
+        {/* Tabela de ROAS */}
+        <div style={{
+          backgroundColor: '#0d0d0d',
+          border: '1px solid #ff5722',
+          padding: '1.5rem',
+          borderRadius: '12px',
+          boxShadow: '0 0 10px rgba(255, 87, 34, 0.2)',
+          width: isMobile ? '90%' : '380px',
+          maxWidth: isMobile ? '500px' : 'none',
+          marginBottom: isMobile ? '20px' : '0',
+          marginLeft: isMobile ? 'auto' : '0',
+          marginRight: isMobile ? 'auto' : '0',
+          boxSizing: 'border-box'
+        }}>
+          <h2 style={{
+            color: '#ff5722',
+            marginBottom: '1rem',
+            fontSize: '1.5rem'
+          }}>
+            Tabela de ROAS Ideal
           </h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center">
-              <div className="bg-[#FF3A29] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white font-bold text-xl">1</span>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Insira os Custos
-              </h3>
-              <p className="text-gray-300">
-                Digite todos os custos do produto: fabricação, unidade, impostos e outras despesas.
-              </p>
+          <p style={{
+            textAlign: 'left',
+            marginBottom: '10px',
+            color: '#ccc'
+          }}>
+            Referência para definir seu <strong>Retorno sobre o Investimento em Anúncios (ROAS)</strong> desejado.
+          </p>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginTop: '1rem',
+            fontSize: '0.95rem'
+          }}>
+            <thead>
+              <tr>
+                <th style={{
+                  backgroundColor: '#ff5722',
+                  color: '#111',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  border: '1px solid #222',
+                  padding: '10px'
+                }}>Nível Estratégico</th>
+                <th style={{
+                  backgroundColor: '#ff5722',
+                  color: '#111',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  border: '1px solid #222',
+                  padding: '10px'
+                }}>Faixa de ROAS</th>
+                <th style={{
+                  backgroundColor: '#ff5722',
+                  color: '#111',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  border: '1px solid #222',
+                  padding: '10px'
+                }}>Foco Principal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ backgroundColor: '#1a1a1a' }}>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Focado em Volume</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>3 a 7</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Expandir vendas e alcance, priorizando crescimento.</td>
+              </tr>
+              <tr>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Intermediário</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>7.1 a 9</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Aperfeiçoar o retorno mantendo bom volume.</td>
+              </tr>
+              <tr style={{ backgroundColor: '#1a1a1a' }}>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Estável</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>9.1 a 12</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Garantir consistência e eficiência nas campanhas, com boa margem de lucro.</td>
+              </tr>
+              <tr>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Alta Rentabilidade</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>12.1+</td>
+                <td style={{ border: '1px solid #222', padding: '10px', textAlign: 'left' }}>Maximizar o retorno com controle de custos e alta performance.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Formulário */}
+        <div style={{
+          backgroundColor: '#111',
+          padding: '1.5rem',
+          borderRadius: '12px',
+          boxShadow: '0 0 10px rgba(255, 87, 34, 0.2)',
+          width: isMobile ? '90%' : '380px',
+          maxWidth: isMobile ? '500px' : 'none',
+          marginBottom: isMobile ? '20px' : '0',
+          marginLeft: isMobile ? 'auto' : '0',
+          marginRight: isMobile ? 'auto' : '0',
+          boxSizing: 'border-box'
+        }}>
+          <h2 style={{
+            color: '#ff5722',
+            marginBottom: '1rem',
+            fontSize: '1.5rem'
+          }}>
+            Dados do Produto
+          </h2>
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Nome do Produto *</label>
+          <input
+            name="nome"
+            value={form.nome}
+            onChange={handleChange}
+            placeholder="Ex: Camiseta Premium"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Custo do Produto (R$) *</label>
+          <input
+            name="custoProduto"
+            value={form.custoProduto}
+            onChange={handleChange}
+            placeholder="Ex: 15.00"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Custo por Unidade (R$) *</label>
+          <input
+            name="custoUnidade"
+            value={form.custoUnidade}
+            onChange={handleChange}
+            placeholder="Ex: 5.00 (embalagem, etc)"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Margem Desejada (%) *</label>
+          <input
+            name="margem"
+            value={form.margem}
+            onChange={handleChange}
+            placeholder="Ex: 30 (o que sobra no seu caixa)"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Comissão Shopee (%) *</label>
+          <input
+            name="comissao"
+            value={form.comissao}
+            onChange={handleChange}
+            placeholder="Ex: 18 (comissão + taxa de transação)"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Impostos (%) *</label>
+          <input
+            name="impostos"
+            value={form.impostos}
+            onChange={handleChange}
+            placeholder="Ex: 8 (Simples Nacional, etc)"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Outras Despesas (R$)</label>
+          <input
+            name="outrasDespesas"
+            value={form.outrasDespesas}
+            onChange={handleChange}
+            placeholder="Ex: 2.50 (custo fixo por venda)"
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          />
+
+          <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>Usa Tráfego Pago (CPA)?</label>
+          <select
+            name="usarCPA"
+            value={form.usarCPA}
+            onChange={handleChange}
+            style={{
+              width: '100%',
+              padding: '8px',
+              marginTop: '4px',
+              border: 'none',
+              borderRadius: '6px',
+              backgroundColor: '#222',
+              color: '#fff',
+              boxSizing: 'border-box'
+            }}
+          >
+            <option value="sim">Sim</option>
+            <option value="nao">Não</option>
+          </select>
+
+          {form.usarCPA === 'sim' && (
+            <div>
+              <label style={{ display: 'block', marginTop: '10px', fontSize: '0.9rem' }}>ROAS Desejado *</label>
+              <input
+                name="roas"
+                value={form.roas}
+                onChange={handleChange}
+                placeholder="Ex: 10 (Consulte a tabela ao lado)"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  marginTop: '4px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  backgroundColor: '#222',
+                  color: '#fff',
+                  boxSizing: 'border-box'
+                }}
+              />
             </div>
-            <div className="text-center">
-              <div className="bg-[#FF3A29] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white font-bold text-xl">2</span>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                CPA Automático
-              </h3>
-              <p className="text-gray-300">
-                A calculadora aplica automaticamente 10% para CPA (custo por aquisição) nas campanhas.
-              </p>
+          )}
+
+          <button
+            onClick={calcularPreco}
+            style={{
+              marginTop: '15px',
+              width: '100%',
+              padding: '10px',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              background: 'linear-gradient(90deg, #ff5722, #ff7043)',
+              color: 'white',
+              transition: '0.3s'
+            }}
+          >
+            Calcular Preço
+          </button>
+        </div>
+        
+        {/* Resultado */}
+        {showResult && result && (
+          <div style={{
+            backgroundColor: '#0f0f0f',
+            border: '1px solid #1b5e20',
+            borderRadius: '12px',
+            padding: '1.5rem',
+            marginTop: isMobile ? '0' : '2rem',
+            width: isMobile ? '90%' : '100%',
+            maxWidth: '800px',
+            boxSizing: 'border-box',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}>
+            <h2 style={{
+              color: '#ff5722',
+              marginBottom: '1rem',
+              fontSize: '1.5rem'
+            }}>
+              Resultado do Cálculo
+            </h2>
+            
+            <div style={{
+              fontSize: '1.8rem',
+              fontWeight: 'bold',
+              color: '#ff7043',
+              backgroundColor: '#1b1b1b',
+              padding: '0.8rem',
+              textAlign: 'center',
+              borderRadius: '8px',
+              marginBottom: '1rem'
+            }}>
+              R$ {result.precoVenda.toFixed(2).replace('.', ',')}
             </div>
-            <div className="text-center">
-              <div className="bg-[#FF3A29] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white font-bold text-xl">3</span>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Preço e ROAS Ideal
-              </h3>
-              <p className="text-gray-300">
-                Receba o preço de venda ideal e o ROAS necessário para suas campanhas Shopee Ads.
-              </p>
+            
+            <div>
+              <p><strong>Custo Total (C0):</strong> R$ {result.custoTotal.toFixed(2).replace('.', ',')}</p>
+              <p><strong>Comissão Shopee ({_toFloat(form.comissao).toFixed(2)}%):</strong> R$ {result.comissaoR.toFixed(2).replace('.', ',')}</p>
+              <p><strong>Impostos ({_toFloat(form.impostos).toFixed(2)}%):</strong> R$ {result.impostosR.toFixed(2).replace('.', ',')}</p>
+              <p><strong>CPA - Custo de Anúncio ({result.cpaPct.toFixed(2)}%):</strong> R$ {result.cpaR.toFixed(2).replace('.', ',')}</p>
+              <hr style={{ border: 'none', borderTop: '1px solid #333', margin: '1rem 0' }} />
+              <p><strong>Lucro Desejado ({_toFloat(form.margem).toFixed(2)}%):</strong> R$ {result.lucro.toFixed(2).replace('.', ',')}</p>
+            </div>
+
+            <div style={{
+              backgroundColor: result.usarCPA ? '#0d47a1' : '#0d47a1',
+              padding: '1rem',
+              textAlign: 'center',
+              borderRadius: '10px',
+              marginTop: '1rem'
+            }}>
+              {result.usarCPA ? (
+                <div>
+                  <strong style={{ fontSize: '1.2rem', display: 'block' }}>
+                    ROAS Desejado: {result.roasDesejado.toFixed(2)}x
+                  </strong>
+                  <p>O Preço de Venda de R$ {result.precoVenda.toFixed(2).replace('.', ',')} resulta em um <strong>ROAS de {result.roasReal.toFixed(2)}x</strong>.</p>
+                </div>
+              ) : (
+                <div>
+                  <strong>Venda Orgânica</strong><br />
+                  <span>Preço calculado sem custo de tráfego (CPA).</span>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-4 bg-black text-center text-gray-500">
-        <p>© 2025 Calculadora de Precificação Shopee. Todos os direitos reservados.</p>
-      </footer>
-
+        )}
+      </div>
     </div>
   );
 }

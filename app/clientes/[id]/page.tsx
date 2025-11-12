@@ -643,6 +643,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
             Análises ({analyses.length})
           </TabsTrigger>
           <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
+          <TabsTrigger value="integrations">Integrações</TabsTrigger>
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
           
         </TabsList>
@@ -1092,7 +1093,91 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         <TabsContent value="checklist" className="mt-6">
           <ClientChecklist clientId={clientId} clientName={client.name} />
         </TabsContent>
+
+        <TabsContent value="integrations" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LinkIcon className="h-5 w-5 text-orange-600" />
+                Conectar à Shopee
+              </CardTitle>
+              <CardDescription>
+                Vincule a conta Shopee deste cliente para sincronizar dados automaticamente.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ShopeeIntegration clientId={clientId} />
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function ShopeeIntegration({ clientId }: { clientId: string }) {
+  const { toast } = useToast();
+  const [status, setStatus] = useState<{ connected: boolean; shop_id?: string; token_expiry?: string | null } | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const loadStatus = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/shopee/status?client_id=${clientId}`, { cache: 'no-store' });
+      const data = await res.json();
+      setStatus(data);
+    } catch (e) {
+      console.error(e);
+      toast({ title: 'Erro', description: 'Falha ao consultar status', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId]);
+
+  const handleConnect = async () => {
+    try {
+      setLoading(true);
+      // Obter URL de conexão (sem redirecionar automático)
+      const res = await fetch(`/api/shopee/connect?client_id=${clientId}`);
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || 'Falha ao gerar link de conexão');
+      }
+      window.location.href = data.url;
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: 'Erro ao conectar', description: e.message || 'Tente novamente', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="space-y-0.5">
+          <p className="text-sm text-muted-foreground">
+            Status: {status?.connected ? 'Conectado' : 'Desconectado'}
+          </p>
+          {status?.connected && status.shop_id && (
+            <p className="text-xs text-muted-foreground">Shop ID: {status.shop_id}</p>
+          )}
+          {status?.token_expiry && (
+            <p className="text-xs text-muted-foreground">
+              Token expira em: {new Date(status.token_expiry).toLocaleString('pt-BR')}
+            </p>
+          )}
+        </div>
+        <Button onClick={handleConnect} disabled={loading} className="bg-orange-600 hover:bg-orange-700">
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LinkIcon className="mr-2 h-4 w-4" />}
+          {status?.connected ? 'Reconectar' : 'Conectar Shopee'}
+        </Button>
+      </div>
     </div>
   );
 }
