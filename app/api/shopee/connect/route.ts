@@ -13,12 +13,15 @@ export async function GET(request: Request) {
     const clientId = searchParams.get('client_id'); // opcional
     const region = searchParams.get('region') || 'BR';
     const doRedirect = searchParams.get('redirect') === '1';
+    const redirectSuccess = searchParams.get('redirect_success'); // +++ CAPTURAR URL DE SUCESSO
+
     const state = toBase64({
       clientId,
       region,
       nonce: crypto.randomUUID(),
       ts: Date.now(),
       mode: clientId ? 'attach' : 'create', // sem clientId, criaremos um cliente na callback
+      redirectSuccess: redirectSuccess, // +++ ADICIONAR AO STATE
     });
     const url = await buildAuthUrlAsync({ state });
     if (doRedirect) {

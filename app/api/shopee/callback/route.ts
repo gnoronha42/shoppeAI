@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     if (!code || !shop_id || !state) {
       return NextResponse.json({ error: 'Parâmetros inválidos' }, { status: 400 });
     }
-    const decoded = fromBase64<{ clientId?: string; region?: string; mode?: 'attach' | 'create' }>(state);
+    const decoded = fromBase64<{ clientId?: string; region?: string; mode?: 'attach' | 'create', redirectSuccess?: string }>(state);
     const tokenRes = await getAccessToken({ code, shop_id });
     const expiresAt = new Date(Date.now() + (tokenRes.expire_in ?? 0) * 1000);
     const finalShopId = String(tokenRes.shop_id || shop_id);
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
       },
     });
     // Redireciona para uma página de sucesso ou retorna JSON
-    const redirect = searchParams.get('redirect_success');
+    const redirect = decoded.redirectSuccess;
     if (redirect) {
       return NextResponse.redirect(redirect);
     }
