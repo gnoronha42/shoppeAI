@@ -113,6 +113,46 @@ function ShopeeIntegration({ clientId }: { clientId: string }) {
     }
   };
 
+  // Gera link de conexão para compartilhar com o cliente (copia para área de transferência)
+  const handleGenerateConnectLink = async () => {
+    try {
+      setLoading(true);
+      // Redireciona para rota pública após o OAuth (cliente não entra na aplicação logada)
+      const successUrl = new URL(`/obrigado`, window.location.origin);
+      successUrl.searchParams.set('integracao', 'shopee');
+      successUrl.searchParams.set('status', 'ok');
+      successUrl.searchParams.set('client_id', clientId);
+
+      const url = new URL('/api/shopee/connect', window.location.origin);
+      url.searchParams.set('client_id', clientId);
+      // Não usar redirect=1 => retorna JSON com { url }
+      url.searchParams.set('redirect_success', successUrl.toString());
+
+      const res = await fetch(url.toString(), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || 'Falha ao gerar link');
+      }
+
+      // Copia para área de transferência
+      await navigator.clipboard.writeText(data.url);
+      toast({
+        title: 'Link de conexão gerado',
+        description: 'O link foi copiado para a área de transferência',
+        variant: 'default',
+      });
+    } catch (e: any) {
+      console.error('Erro ao gerar link de conexão:', e);
+      toast({
+        title: 'Erro ao gerar link',
+        description: e?.message || 'Tente novamente',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-4">
@@ -140,10 +180,15 @@ function ShopeeIntegration({ clientId }: { clientId: string }) {
             </p>
           )}
         </div>
-        <Button onClick={handleConnect} disabled={loading} className="bg-orange-600 hover:bg-orange-700">
-          <LinkIcon className="mr-2 h-4 w-4" />
-          {status?.connected ? 'Reconectar' : 'Conectar com Shopee'}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleConnect} disabled={loading} className="bg-orange-600 hover:bg-orange-700">
+            <LinkIcon className="mr-2 h-4 w-4" />
+            {status?.connected ? 'Reconectar' : 'Conectar com Shopee'}
+          </Button>
+          <Button onClick={handleGenerateConnectLink} disabled={loading} variant="outline">
+            Gerar link de conexão
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -734,7 +779,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full md:w-[800px] grid-cols-4">
+        <TabsList className="grid w-full md:w-[900px] grid-cols-5">
           <TabsTrigger value="info">Informações</TabsTrigger>
           <TabsTrigger value="analyses">
             Análises ({analyses.length})
