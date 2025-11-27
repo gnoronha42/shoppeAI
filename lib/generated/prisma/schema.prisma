@@ -124,17 +124,17 @@ model chat_messages {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model clients {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name               String               @db.VarChar(255)
-  owner_name         String               @db.VarChar(255)
-  shop_url           String?              @db.VarChar(255)
+  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String                @db.VarChar(255)
+  owner_name         String                @db.VarChar(255)
+  shop_url           String?               @db.VarChar(255)
   followers          Int?
-  rating             Decimal?             @db.Decimal(3, 2)
-  registration_date  DateTime?            @db.Timestamptz(6)
+  rating             Decimal?              @db.Decimal(3, 2)
+  registration_date  DateTime?             @db.Timestamptz(6)
   product_count      Int?
-  response_rate      Decimal?             @db.Decimal(5, 2)
-  created_at         DateTime?            @default(now()) @db.Timestamptz(6)
-  updated_at         DateTime?            @default(now()) @db.Timestamptz(6)
+  response_rate      Decimal?              @db.Decimal(5, 2)
+  created_at         DateTime?             @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime?             @default(now()) @db.Timestamptz(6)
   activity_log       activity_log[]
   ad_metrics         ad_metrics[]
   ai_requests        ai_requests[]
@@ -145,6 +145,7 @@ model clients {
   reports            reports[]
   checklist_items    checklist_items[]
   checklist_progress checklist_progress[]
+  integrations       client_integrations[]
 
   @@index([name], map: "idx_clients_name")
 }
@@ -321,4 +322,24 @@ model Analysts {
   created_by_user users?    @relation(fields: [created_by], references: [id])
 
   @@map("analysts")
+}
+
+/// Integrações externas por cliente (Shopee, etc)
+model client_integrations {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  client_id     String    @db.Uuid
+  provider      String    @db.VarChar(50) // ex: "shopee"
+  shop_id       String?   @db.VarChar(100)
+  merchant_id   String?   @db.VarChar(100)
+  region        String?   @db.VarChar(20) // ex: "BR"
+  access_token  String?   @db.Text
+  refresh_token String?   @db.Text
+  token_expiry  DateTime?
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+  clients       clients   @relation(fields: [client_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([client_id, provider])
+  @@index([provider], map: "idx_client_integrations_provider")
+  @@index([shop_id], map: "idx_client_integrations_shop_id")
 }

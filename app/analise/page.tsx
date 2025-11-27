@@ -682,6 +682,106 @@ export default function AnalisePage() {
     }
   };
 
+  // Gera relatório usando dados reais via integração Shopee (sem CSV/prints)
+  const handleGenerateWithShopeeIntegration = async () => {
+    if (!selectedClientId) {
+      toast({
+        title: "Selecione um cliente",
+        description: "É necessário selecionar um cliente para continuar",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      setIsAnalyzing(true);
+      // 1) Verificar status da integração
+      const statusRes = await fetch(`/api/shopee/status?client_id=${selectedClientId}`, { cache: 'no-store' });
+      const statusData = await statusRes.json();
+      if (!statusRes.ok || !statusData?.connected) {
+        throw new Error("Cliente não está conectado à Shopee");
+      }
+      // 2) Buscar dados reais
+      const dataRes = await fetch(`/api/shopee/data?client_id=${selectedClientId}`, { cache: 'no-store' });
+      const dataJson = await dataRes.json();
+      if (!dataRes.ok) {
+        if (dataRes.status === 401 && dataJson?.reconnect_required) {
+          toast({
+            title: "Sessão Shopee expirada",
+            description: "É necessário reconectar a conta na aba Integrações do cliente.",
+            variant: "destructive",
+          });
+          // Redireciona para a aba de integrações do cliente para reconectar
+          try {
+            const successUrl = new URL(`/clientes/${selectedClientId}`, window.location.origin);
+            successUrl.searchParams.set('tab', 'integrations');
+            window.location.href = successUrl.toString();
+          } catch (_) {}
+          return;
+        }
+        throw new Error(dataJson?.error || "Falha ao obter dados da Shopee");
+      }
+      const agg = dataJson?.data || {};
+      const pedidos = Number(agg?.totalOrdersLast30Days) || 0;
+      const gmv = Number(agg?.gmvLast30Days) || 0;
+      const ticketMedio = Number(agg?.ticketMedioLast30Days) || (pedidos > 0 ? gmv / pedidos : 0);
+
+      // 3) Montar payload para o microserviço
+      const dados = {
+        gmv,
+        pedidos,
+        ticketMedio,
+        visitantes: 0,
+        roas: 0,
+        conversao: 0,
+      };
+      const baseUrl = "http://localhost:3001";
+      const extras = {
+        shopName: agg?.shopName || selectedClient?.name || 'Loja',
+        period: agg?.period || null,
+        topProducts: agg?.topProductsLast30Days || []
+      };
+      // Chama o microserviço para gerar o markdown a partir dos dados reais
+      const mdRes = await fetch(`${baseUrl}/api/relatorio-shopee-markdown`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dados,
+          clientName: selectedClient?.name || 'Cliente',
+          analysisType,
+          extras
+        })
+      });
+      if (!mdRes.ok) {
+        const errText = await mdRes.text();
+        throw new Error(`Falha ao gerar markdown no microserviço: ${errText}`);
+      }
+      const mdJson = await mdRes.json();
+      const markdown = mdJson?.markdown;
+      if (!markdown || typeof markdown !== 'string') {
+        throw new Error("Resposta inválida do microserviço");
+      }
+      setCustomMarkdown(markdown);
+      toast({
+        title: "Relatório gerado com dados reais!",
+        description: "Conteúdo pronto para visualização e PDF",
+        variant: "default",
+      });
+      // 4) Salvar no banco
+      try {
+        await saveAnalysisToDatabase(markdown);
+      } catch (_) {}
+    } catch (error: any) {
+      console.error("❌ Erro ao gerar com integração Shopee:", error);
+      toast({
+        title: "Erro ao gerar com dados reais",
+        description: error?.message || "Não foi possível usar os dados da Shopee",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -956,7 +1056,14 @@ export default function AnalisePage() {
               : "Gerar Relatório com IA"}
           </Button>
 
-      
+          <Button
+            onClick={handleGenerateWithShopeeIntegration}
+            disabled={!selectedClientId || isAnalyzing}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+          >
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Gerar com Integração (Shopee)
+          </Button>
 
           <Button
             onClick={() => setShowMarkdownImport(!showMarkdownImport)}

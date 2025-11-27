@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { ensureShopeeEnv, getAccessToken, shopeeFetch } from '@/lib/shopee';
+import { headers } from 'next/headers';
 
 function fromBase64<T = any>(state: string): T {
   return JSON.parse(Buffer.from(state, 'base64url').toString('utf8'));
@@ -9,21 +10,70 @@ function fromBase64<T = any>(state: string): T {
 export async function GET(request: Request) {
   try {
     ensureShopeeEnv();
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
-    const shop_id = searchParams.get('shop_id');
-    const state = searchParams.get('state');
-    if (!code || !shop_id || !state) {
-      return NextResponse.json({ error: 'Parâmetros inválidos' }, { status: 400 });
+
+    const headersList = headers();
+    const proto = headersList.get('x-forwarded-proto') || 'http';
+    const host = headersList.get('x-forwarded-host') || headersList.get('host');
+    const urlObj = new URL(request.url);
+    const path = urlObj.pathname;
+    const search = urlObj.search;
+
+    // Reconstrói URL pública a partir dos headers do proxy
+    const reconstructedUrl = `${proto}://${host}${path}${search}`;
+    const reconstructed = new URL(reconstructedUrl);
+    const sp = reconstructed.searchParams;
+
+    console.log("\n--- DEBUG: CALLBACK RECEBIDO ---");
+    console.log("URL Original (request.url):", request.url);
+    console.log("URL Reconstruída a partir dos Headers:", reconstructedUrl);
+    console.log("searchParams:", reconstructed.searchParams.toString());
+    console.log("--- FIM DEBUG ---\n");
+
+    const code = sp.get('code') || undefined;
+    let shop_id = sp.get('shop_id') || undefined;
+    // Fallback robusto para shop_id via regex
+    if (!shop_id) {
+      const m = reconstructedUrl.match(/[?&]shop_id=([^&#]+)/i);
+      if (m && m[1]) {
+        shop_id = decodeURIComponent(m[1]);
+      }
     }
-    const decoded = fromBase64<{ clientId?: string; region?: string; mode?: 'attach' | 'create', redirectSuccess?: string }>(state);
+    const state = sp.get('state') || undefined; // pode estar ausente
+    const hintClientId = sp.get('hint_client_id') || undefined; // fallback quando state faltar
+
+    console.log("Parsed -> code:", !!code, "shop_id:", shop_id, "state:", state ? 'present' : 'missing', "hint:", hintClientId || 'none');
+
+    if (!code || !shop_id) {
+      return NextResponse.json({ error: 'Parâmetros inválidos (code ou shop_id ausente)' }, { status: 400 });
+    }
+
+    // Decodifica state se existir; se não, segue fluxo criando cliente automaticamente
+    let decoded: { clientId?: string; region?: string; mode?: 'attach' | 'create'; redirectSuccess?: string } = {};
+    if (state) {
+      try {
+        decoded = fromBase64(state);
+      } catch {
+        decoded = {} as any;
+      }
+    }
+
     const tokenRes = await getAccessToken({ code, shop_id });
     const expiresAt = new Date(Date.now() + (tokenRes.expire_in ?? 0) * 1000);
     const finalShopId = String(tokenRes.shop_id || shop_id);
 
-    // Se não houver clientId no estado, criamos um cliente automaticamente
-    let clientId = decoded.clientId;
+    console.log(`DEBUG: Token recebido da Shopee:`, {
+      has_access_token: !!tokenRes.access_token,
+      has_refresh_token: !!tokenRes.refresh_token,
+      access_token_length: tokenRes.access_token?.length || 0,
+      refresh_token_length: tokenRes.refresh_token?.length || 0,
+      expire_in: tokenRes.expire_in,
+      shop_id: finalShopId
+    });
+
+    // Determina clientId destino
+    let clientId = decoded.clientId || hintClientId;
     if (!clientId) {
+      // Sem hint/state: criar cliente novo
       let shopName = `Shopee Shop ${finalShopId}`;
       try {
         const info = await shopeeFetch<any>({
@@ -35,21 +85,15 @@ export async function GET(request: Request) {
         if (info?.shop_name && typeof info.shop_name === 'string') {
           shopName = info.shop_name;
         }
-      } catch (_) {
-        // prossegue com nome padrão se falhar
-      }
+      } catch (_) {}
       const created = await prisma.clients.create({
-        data: {
-          name: shopName,
-          owner_name: 'Shopee',
-          shop_url: null,
-        },
+        data: { name: shopName, owner_name: 'Shopee', shop_url: null },
         select: { id: true },
       });
       clientId = created.id;
     }
 
-    await prisma.client_integrations.upsert({
+    const upsertResult = await prisma.client_integrations.upsert({
       where: { client_id_provider: { client_id: clientId!, provider: 'shopee' } },
       create: {
         client_id: clientId!,
@@ -70,12 +114,22 @@ export async function GET(request: Request) {
         updated_at: new Date(),
       },
     });
-    // Redireciona para uma página de sucesso ou retorna JSON
-    const redirect = decoded.redirectSuccess;
-    if (redirect) {
-      return NextResponse.redirect(redirect);
+
+    console.log(`DEBUG: Integração salva no banco:`, {
+      client_id: clientId,
+      shop_id: upsertResult.shop_id,
+      has_access_token_saved: !!upsertResult.access_token,
+      access_token_length_saved: upsertResult.access_token?.length || 0,
+      token_expiry: upsertResult.token_expiry
+    });
+
+    // Redireciona para página de sucesso se informado no state; senão, tenta redirecionar pelo hint
+    const success = decoded.redirectSuccess || (hintClientId ? `${proto}://${host}/clientes/${hintClientId}?tab=integrations` : undefined);
+    if (success) {
+      return NextResponse.redirect(success);
     }
-    return NextResponse.json({ ok: true, client_id: clientId, shop_id: tokenRes.shop_id || shop_id });
+
+    return NextResponse.json({ ok: true, client_id: clientId, shop_id: finalShopId });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Erro na callback' }, { status: 500 });
   }

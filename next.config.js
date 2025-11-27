@@ -37,6 +37,9 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['puppeteer', 'puppeteer-core'],
   },
+  // ++ Adicionado para normalizar URLs de middleware e proxy reverso (ngrok)
+  skipMiddlewareUrlNormalize: true, 
+  skipTrailingSlashRedirect: true,
 };
 
 module.exports = nextConfig;
