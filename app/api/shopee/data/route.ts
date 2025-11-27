@@ -86,6 +86,7 @@ export async function GET(request: Request) {
     }
 
     // Helper para refresh forçado em caso de 403 invalid_access_token
+    const integrationId = (integration as any).id as string;
     const forceRefreshTokens = async () => {
       if (!refresh_token) {
         return null;
@@ -94,7 +95,7 @@ export async function GET(request: Request) {
         const refreshed = await refreshAccessToken({ refresh_token });
         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
         const updated = await prisma.client_integrations.update({
-          where: { id: integration.id },
+          where: { id: integrationId },
           data: {
             access_token: refreshed.access_token,
             refresh_token: refreshed.refresh_token ?? refresh_token,
@@ -131,8 +132,8 @@ export async function GET(request: Request) {
         // tenta novamente com novo token
         shopInfo = await shopeeFetch<any>({
           path: '/api/v2/shop/get_shop_info',
-          access_token: updated.access_token,
-          shop_id: updated.shop_id,
+          access_token: String(updated.access_token ?? (integration as any).access_token),
+          shop_id: String(updated.shop_id ?? (integration as any).shop_id),
         });
         // atualiza reference de tokens locais
         (integration as any) = updated;
@@ -173,8 +174,8 @@ export async function GET(request: Request) {
         // tenta novamente com novo token
         orderListResponse = await shopeeFetch<any>({
           path: '/api/v2/order/get_order_list',
-          access_token: updated.access_token,
-          shop_id: updated.shop_id,
+          access_token: String(updated.access_token ?? (integration as any).access_token),
+          shop_id: String(updated.shop_id ?? (integration as any).shop_id),
           query: {
               time_range_field: 'create_time',
               time_from: timeFrom,
