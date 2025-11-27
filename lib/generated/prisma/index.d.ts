@@ -108,6 +108,11 @@ export type checklist_progress = $Result.DefaultSelection<Prisma.$checklist_prog
  * 
  */
 export type Analysts = $Result.DefaultSelection<Prisma.$AnalystsPayload>
+/**
+ * Model client_integrations
+ * Integrações externas por cliente (Shopee, etc)
+ */
+export type client_integrations = $Result.DefaultSelection<Prisma.$client_integrationsPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -413,6 +418,16 @@ export class PrismaClient<
     * ```
     */
   get analysts(): Prisma.AnalystsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.client_integrations`: Exposes CRUD operations for the **client_integrations** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Client_integrations
+    * const client_integrations = await prisma.client_integrations.findMany()
+    * ```
+    */
+  get client_integrations(): Prisma.client_integrationsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -870,7 +885,8 @@ export namespace Prisma {
     checklist_blocks: 'checklist_blocks',
     checklist_items: 'checklist_items',
     checklist_progress: 'checklist_progress',
-    Analysts: 'Analysts'
+    Analysts: 'Analysts',
+    client_integrations: 'client_integrations'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -889,7 +905,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "activity_log" | "ad_metrics" | "ai_requests" | "analyses" | "analysis_results" | "chat_conversations" | "chat_messages" | "clients" | "configurations" | "images" | "products" | "report_metrics" | "reports" | "users" | "checklist_blocks" | "checklist_items" | "checklist_progress" | "analysts"
+      modelProps: "activity_log" | "ad_metrics" | "ai_requests" | "analyses" | "analysis_results" | "chat_conversations" | "chat_messages" | "clients" | "configurations" | "images" | "products" | "report_metrics" | "reports" | "users" | "checklist_blocks" | "checklist_items" | "checklist_progress" | "analysts" | "client_integrations"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2225,6 +2241,80 @@ export namespace Prisma {
           }
         }
       }
+      client_integrations: {
+        payload: Prisma.$client_integrationsPayload<ExtArgs>
+        fields: Prisma.client_integrationsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.client_integrationsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.client_integrationsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>
+          }
+          findFirst: {
+            args: Prisma.client_integrationsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.client_integrationsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>
+          }
+          findMany: {
+            args: Prisma.client_integrationsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>[]
+          }
+          create: {
+            args: Prisma.client_integrationsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>
+          }
+          createMany: {
+            args: Prisma.client_integrationsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.client_integrationsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>[]
+          }
+          delete: {
+            args: Prisma.client_integrationsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>
+          }
+          update: {
+            args: Prisma.client_integrationsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>
+          }
+          deleteMany: {
+            args: Prisma.client_integrationsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.client_integrationsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.client_integrationsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>[]
+          }
+          upsert: {
+            args: Prisma.client_integrationsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$client_integrationsPayload>
+          }
+          aggregate: {
+            args: Prisma.Client_integrationsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateClient_integrations>
+          }
+          groupBy: {
+            args: Prisma.client_integrationsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Client_integrationsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.client_integrationsCountArgs<ExtArgs>
+            result: $Utils.Optional<Client_integrationsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2327,6 +2417,7 @@ export namespace Prisma {
     checklist_items?: checklist_itemsOmit
     checklist_progress?: checklist_progressOmit
     analysts?: AnalystsOmit
+    client_integrations?: client_integrationsOmit
   }
 
   /* Types for Logging */
@@ -2511,6 +2602,7 @@ export namespace Prisma {
     reports: number
     checklist_items: number
     checklist_progress: number
+    integrations: number
   }
 
   export type ClientsCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2524,6 +2616,7 @@ export namespace Prisma {
     reports?: boolean | ClientsCountOutputTypeCountReportsArgs
     checklist_items?: boolean | ClientsCountOutputTypeCountChecklist_itemsArgs
     checklist_progress?: boolean | ClientsCountOutputTypeCountChecklist_progressArgs
+    integrations?: boolean | ClientsCountOutputTypeCountIntegrationsArgs
   }
 
   // Custom InputTypes
@@ -2605,6 +2698,13 @@ export namespace Prisma {
    */
   export type ClientsCountOutputTypeCountChecklist_progressArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: checklist_progressWhereInput
+  }
+
+  /**
+   * ClientsCountOutputType without action
+   */
+  export type ClientsCountOutputTypeCountIntegrationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: client_integrationsWhereInput
   }
 
 
@@ -11238,6 +11338,7 @@ export namespace Prisma {
     reports?: boolean | clients$reportsArgs<ExtArgs>
     checklist_items?: boolean | clients$checklist_itemsArgs<ExtArgs>
     checklist_progress?: boolean | clients$checklist_progressArgs<ExtArgs>
+    integrations?: boolean | clients$integrationsArgs<ExtArgs>
     _count?: boolean | ClientsCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["clients"]>
 
@@ -11295,6 +11396,7 @@ export namespace Prisma {
     reports?: boolean | clients$reportsArgs<ExtArgs>
     checklist_items?: boolean | clients$checklist_itemsArgs<ExtArgs>
     checklist_progress?: boolean | clients$checklist_progressArgs<ExtArgs>
+    integrations?: boolean | clients$integrationsArgs<ExtArgs>
     _count?: boolean | ClientsCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type clientsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -11313,6 +11415,7 @@ export namespace Prisma {
       reports: Prisma.$reportsPayload<ExtArgs>[]
       checklist_items: Prisma.$checklist_itemsPayload<ExtArgs>[]
       checklist_progress: Prisma.$checklist_progressPayload<ExtArgs>[]
+      integrations: Prisma.$client_integrationsPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11730,6 +11833,7 @@ export namespace Prisma {
     reports<T extends clients$reportsArgs<ExtArgs> = {}>(args?: Subset<T, clients$reportsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$reportsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     checklist_items<T extends clients$checklist_itemsArgs<ExtArgs> = {}>(args?: Subset<T, clients$checklist_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     checklist_progress<T extends clients$checklist_progressArgs<ExtArgs> = {}>(args?: Subset<T, clients$checklist_progressArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$checklist_progressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    integrations<T extends clients$integrationsArgs<ExtArgs> = {}>(args?: Subset<T, clients$integrationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -12395,6 +12499,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: Checklist_progressScalarFieldEnum | Checklist_progressScalarFieldEnum[]
+  }
+
+  /**
+   * clients.integrations
+   */
+  export type clients$integrationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    where?: client_integrationsWhereInput
+    orderBy?: client_integrationsOrderByWithRelationInput | client_integrationsOrderByWithRelationInput[]
+    cursor?: client_integrationsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Client_integrationsScalarFieldEnum | Client_integrationsScalarFieldEnum[]
   }
 
   /**
@@ -24291,6 +24419,1142 @@ export namespace Prisma {
 
 
   /**
+   * Model client_integrations
+   */
+
+  export type AggregateClient_integrations = {
+    _count: Client_integrationsCountAggregateOutputType | null
+    _min: Client_integrationsMinAggregateOutputType | null
+    _max: Client_integrationsMaxAggregateOutputType | null
+  }
+
+  export type Client_integrationsMinAggregateOutputType = {
+    id: string | null
+    client_id: string | null
+    provider: string | null
+    shop_id: string | null
+    merchant_id: string | null
+    region: string | null
+    access_token: string | null
+    refresh_token: string | null
+    token_expiry: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Client_integrationsMaxAggregateOutputType = {
+    id: string | null
+    client_id: string | null
+    provider: string | null
+    shop_id: string | null
+    merchant_id: string | null
+    region: string | null
+    access_token: string | null
+    refresh_token: string | null
+    token_expiry: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+  }
+
+  export type Client_integrationsCountAggregateOutputType = {
+    id: number
+    client_id: number
+    provider: number
+    shop_id: number
+    merchant_id: number
+    region: number
+    access_token: number
+    refresh_token: number
+    token_expiry: number
+    created_at: number
+    updated_at: number
+    _all: number
+  }
+
+
+  export type Client_integrationsMinAggregateInputType = {
+    id?: true
+    client_id?: true
+    provider?: true
+    shop_id?: true
+    merchant_id?: true
+    region?: true
+    access_token?: true
+    refresh_token?: true
+    token_expiry?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Client_integrationsMaxAggregateInputType = {
+    id?: true
+    client_id?: true
+    provider?: true
+    shop_id?: true
+    merchant_id?: true
+    region?: true
+    access_token?: true
+    refresh_token?: true
+    token_expiry?: true
+    created_at?: true
+    updated_at?: true
+  }
+
+  export type Client_integrationsCountAggregateInputType = {
+    id?: true
+    client_id?: true
+    provider?: true
+    shop_id?: true
+    merchant_id?: true
+    region?: true
+    access_token?: true
+    refresh_token?: true
+    token_expiry?: true
+    created_at?: true
+    updated_at?: true
+    _all?: true
+  }
+
+  export type Client_integrationsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which client_integrations to aggregate.
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of client_integrations to fetch.
+     */
+    orderBy?: client_integrationsOrderByWithRelationInput | client_integrationsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: client_integrationsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` client_integrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` client_integrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned client_integrations
+    **/
+    _count?: true | Client_integrationsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Client_integrationsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Client_integrationsMaxAggregateInputType
+  }
+
+  export type GetClient_integrationsAggregateType<T extends Client_integrationsAggregateArgs> = {
+        [P in keyof T & keyof AggregateClient_integrations]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateClient_integrations[P]>
+      : GetScalarType<T[P], AggregateClient_integrations[P]>
+  }
+
+
+
+
+  export type client_integrationsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: client_integrationsWhereInput
+    orderBy?: client_integrationsOrderByWithAggregationInput | client_integrationsOrderByWithAggregationInput[]
+    by: Client_integrationsScalarFieldEnum[] | Client_integrationsScalarFieldEnum
+    having?: client_integrationsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Client_integrationsCountAggregateInputType | true
+    _min?: Client_integrationsMinAggregateInputType
+    _max?: Client_integrationsMaxAggregateInputType
+  }
+
+  export type Client_integrationsGroupByOutputType = {
+    id: string
+    client_id: string
+    provider: string
+    shop_id: string | null
+    merchant_id: string | null
+    region: string | null
+    access_token: string | null
+    refresh_token: string | null
+    token_expiry: Date | null
+    created_at: Date | null
+    updated_at: Date | null
+    _count: Client_integrationsCountAggregateOutputType | null
+    _min: Client_integrationsMinAggregateOutputType | null
+    _max: Client_integrationsMaxAggregateOutputType | null
+  }
+
+  type GetClient_integrationsGroupByPayload<T extends client_integrationsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Client_integrationsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Client_integrationsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Client_integrationsGroupByOutputType[P]>
+            : GetScalarType<T[P], Client_integrationsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type client_integrationsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    client_id?: boolean
+    provider?: boolean
+    shop_id?: boolean
+    merchant_id?: boolean
+    region?: boolean
+    access_token?: boolean
+    refresh_token?: boolean
+    token_expiry?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    clients?: boolean | clientsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["client_integrations"]>
+
+  export type client_integrationsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    client_id?: boolean
+    provider?: boolean
+    shop_id?: boolean
+    merchant_id?: boolean
+    region?: boolean
+    access_token?: boolean
+    refresh_token?: boolean
+    token_expiry?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    clients?: boolean | clientsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["client_integrations"]>
+
+  export type client_integrationsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    client_id?: boolean
+    provider?: boolean
+    shop_id?: boolean
+    merchant_id?: boolean
+    region?: boolean
+    access_token?: boolean
+    refresh_token?: boolean
+    token_expiry?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+    clients?: boolean | clientsDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["client_integrations"]>
+
+  export type client_integrationsSelectScalar = {
+    id?: boolean
+    client_id?: boolean
+    provider?: boolean
+    shop_id?: boolean
+    merchant_id?: boolean
+    region?: boolean
+    access_token?: boolean
+    refresh_token?: boolean
+    token_expiry?: boolean
+    created_at?: boolean
+    updated_at?: boolean
+  }
+
+  export type client_integrationsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "client_id" | "provider" | "shop_id" | "merchant_id" | "region" | "access_token" | "refresh_token" | "token_expiry" | "created_at" | "updated_at", ExtArgs["result"]["client_integrations"]>
+  export type client_integrationsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    clients?: boolean | clientsDefaultArgs<ExtArgs>
+  }
+  export type client_integrationsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    clients?: boolean | clientsDefaultArgs<ExtArgs>
+  }
+  export type client_integrationsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    clients?: boolean | clientsDefaultArgs<ExtArgs>
+  }
+
+  export type $client_integrationsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "client_integrations"
+    objects: {
+      clients: Prisma.$clientsPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      client_id: string
+      provider: string
+      shop_id: string | null
+      merchant_id: string | null
+      region: string | null
+      access_token: string | null
+      refresh_token: string | null
+      token_expiry: Date | null
+      created_at: Date | null
+      updated_at: Date | null
+    }, ExtArgs["result"]["client_integrations"]>
+    composites: {}
+  }
+
+  type client_integrationsGetPayload<S extends boolean | null | undefined | client_integrationsDefaultArgs> = $Result.GetResult<Prisma.$client_integrationsPayload, S>
+
+  type client_integrationsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<client_integrationsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Client_integrationsCountAggregateInputType | true
+    }
+
+  export interface client_integrationsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['client_integrations'], meta: { name: 'client_integrations' } }
+    /**
+     * Find zero or one Client_integrations that matches the filter.
+     * @param {client_integrationsFindUniqueArgs} args - Arguments to find a Client_integrations
+     * @example
+     * // Get one Client_integrations
+     * const client_integrations = await prisma.client_integrations.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends client_integrationsFindUniqueArgs>(args: SelectSubset<T, client_integrationsFindUniqueArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Client_integrations that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {client_integrationsFindUniqueOrThrowArgs} args - Arguments to find a Client_integrations
+     * @example
+     * // Get one Client_integrations
+     * const client_integrations = await prisma.client_integrations.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends client_integrationsFindUniqueOrThrowArgs>(args: SelectSubset<T, client_integrationsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Client_integrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {client_integrationsFindFirstArgs} args - Arguments to find a Client_integrations
+     * @example
+     * // Get one Client_integrations
+     * const client_integrations = await prisma.client_integrations.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends client_integrationsFindFirstArgs>(args?: SelectSubset<T, client_integrationsFindFirstArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Client_integrations that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {client_integrationsFindFirstOrThrowArgs} args - Arguments to find a Client_integrations
+     * @example
+     * // Get one Client_integrations
+     * const client_integrations = await prisma.client_integrations.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends client_integrationsFindFirstOrThrowArgs>(args?: SelectSubset<T, client_integrationsFindFirstOrThrowArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Client_integrations that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {client_integrationsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Client_integrations
+     * const client_integrations = await prisma.client_integrations.findMany()
+     * 
+     * // Get first 10 Client_integrations
+     * const client_integrations = await prisma.client_integrations.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const client_integrationsWithIdOnly = await prisma.client_integrations.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends client_integrationsFindManyArgs>(args?: SelectSubset<T, client_integrationsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Client_integrations.
+     * @param {client_integrationsCreateArgs} args - Arguments to create a Client_integrations.
+     * @example
+     * // Create one Client_integrations
+     * const Client_integrations = await prisma.client_integrations.create({
+     *   data: {
+     *     // ... data to create a Client_integrations
+     *   }
+     * })
+     * 
+     */
+    create<T extends client_integrationsCreateArgs>(args: SelectSubset<T, client_integrationsCreateArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Client_integrations.
+     * @param {client_integrationsCreateManyArgs} args - Arguments to create many Client_integrations.
+     * @example
+     * // Create many Client_integrations
+     * const client_integrations = await prisma.client_integrations.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends client_integrationsCreateManyArgs>(args?: SelectSubset<T, client_integrationsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Client_integrations and returns the data saved in the database.
+     * @param {client_integrationsCreateManyAndReturnArgs} args - Arguments to create many Client_integrations.
+     * @example
+     * // Create many Client_integrations
+     * const client_integrations = await prisma.client_integrations.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Client_integrations and only return the `id`
+     * const client_integrationsWithIdOnly = await prisma.client_integrations.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends client_integrationsCreateManyAndReturnArgs>(args?: SelectSubset<T, client_integrationsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Client_integrations.
+     * @param {client_integrationsDeleteArgs} args - Arguments to delete one Client_integrations.
+     * @example
+     * // Delete one Client_integrations
+     * const Client_integrations = await prisma.client_integrations.delete({
+     *   where: {
+     *     // ... filter to delete one Client_integrations
+     *   }
+     * })
+     * 
+     */
+    delete<T extends client_integrationsDeleteArgs>(args: SelectSubset<T, client_integrationsDeleteArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Client_integrations.
+     * @param {client_integrationsUpdateArgs} args - Arguments to update one Client_integrations.
+     * @example
+     * // Update one Client_integrations
+     * const client_integrations = await prisma.client_integrations.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends client_integrationsUpdateArgs>(args: SelectSubset<T, client_integrationsUpdateArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Client_integrations.
+     * @param {client_integrationsDeleteManyArgs} args - Arguments to filter Client_integrations to delete.
+     * @example
+     * // Delete a few Client_integrations
+     * const { count } = await prisma.client_integrations.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends client_integrationsDeleteManyArgs>(args?: SelectSubset<T, client_integrationsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Client_integrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {client_integrationsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Client_integrations
+     * const client_integrations = await prisma.client_integrations.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends client_integrationsUpdateManyArgs>(args: SelectSubset<T, client_integrationsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Client_integrations and returns the data updated in the database.
+     * @param {client_integrationsUpdateManyAndReturnArgs} args - Arguments to update many Client_integrations.
+     * @example
+     * // Update many Client_integrations
+     * const client_integrations = await prisma.client_integrations.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Client_integrations and only return the `id`
+     * const client_integrationsWithIdOnly = await prisma.client_integrations.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends client_integrationsUpdateManyAndReturnArgs>(args: SelectSubset<T, client_integrationsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Client_integrations.
+     * @param {client_integrationsUpsertArgs} args - Arguments to update or create a Client_integrations.
+     * @example
+     * // Update or create a Client_integrations
+     * const client_integrations = await prisma.client_integrations.upsert({
+     *   create: {
+     *     // ... data to create a Client_integrations
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Client_integrations we want to update
+     *   }
+     * })
+     */
+    upsert<T extends client_integrationsUpsertArgs>(args: SelectSubset<T, client_integrationsUpsertArgs<ExtArgs>>): Prisma__client_integrationsClient<$Result.GetResult<Prisma.$client_integrationsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Client_integrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {client_integrationsCountArgs} args - Arguments to filter Client_integrations to count.
+     * @example
+     * // Count the number of Client_integrations
+     * const count = await prisma.client_integrations.count({
+     *   where: {
+     *     // ... the filter for the Client_integrations we want to count
+     *   }
+     * })
+    **/
+    count<T extends client_integrationsCountArgs>(
+      args?: Subset<T, client_integrationsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Client_integrationsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Client_integrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Client_integrationsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Client_integrationsAggregateArgs>(args: Subset<T, Client_integrationsAggregateArgs>): Prisma.PrismaPromise<GetClient_integrationsAggregateType<T>>
+
+    /**
+     * Group by Client_integrations.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {client_integrationsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends client_integrationsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: client_integrationsGroupByArgs['orderBy'] }
+        : { orderBy?: client_integrationsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, client_integrationsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetClient_integrationsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the client_integrations model
+   */
+  readonly fields: client_integrationsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for client_integrations.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__client_integrationsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    clients<T extends clientsDefaultArgs<ExtArgs> = {}>(args?: Subset<T, clientsDefaultArgs<ExtArgs>>): Prisma__clientsClient<$Result.GetResult<Prisma.$clientsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the client_integrations model
+   */
+  interface client_integrationsFieldRefs {
+    readonly id: FieldRef<"client_integrations", 'String'>
+    readonly client_id: FieldRef<"client_integrations", 'String'>
+    readonly provider: FieldRef<"client_integrations", 'String'>
+    readonly shop_id: FieldRef<"client_integrations", 'String'>
+    readonly merchant_id: FieldRef<"client_integrations", 'String'>
+    readonly region: FieldRef<"client_integrations", 'String'>
+    readonly access_token: FieldRef<"client_integrations", 'String'>
+    readonly refresh_token: FieldRef<"client_integrations", 'String'>
+    readonly token_expiry: FieldRef<"client_integrations", 'DateTime'>
+    readonly created_at: FieldRef<"client_integrations", 'DateTime'>
+    readonly updated_at: FieldRef<"client_integrations", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * client_integrations findUnique
+   */
+  export type client_integrationsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * Filter, which client_integrations to fetch.
+     */
+    where: client_integrationsWhereUniqueInput
+  }
+
+  /**
+   * client_integrations findUniqueOrThrow
+   */
+  export type client_integrationsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * Filter, which client_integrations to fetch.
+     */
+    where: client_integrationsWhereUniqueInput
+  }
+
+  /**
+   * client_integrations findFirst
+   */
+  export type client_integrationsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * Filter, which client_integrations to fetch.
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of client_integrations to fetch.
+     */
+    orderBy?: client_integrationsOrderByWithRelationInput | client_integrationsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for client_integrations.
+     */
+    cursor?: client_integrationsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` client_integrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` client_integrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of client_integrations.
+     */
+    distinct?: Client_integrationsScalarFieldEnum | Client_integrationsScalarFieldEnum[]
+  }
+
+  /**
+   * client_integrations findFirstOrThrow
+   */
+  export type client_integrationsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * Filter, which client_integrations to fetch.
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of client_integrations to fetch.
+     */
+    orderBy?: client_integrationsOrderByWithRelationInput | client_integrationsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for client_integrations.
+     */
+    cursor?: client_integrationsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` client_integrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` client_integrations.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of client_integrations.
+     */
+    distinct?: Client_integrationsScalarFieldEnum | Client_integrationsScalarFieldEnum[]
+  }
+
+  /**
+   * client_integrations findMany
+   */
+  export type client_integrationsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * Filter, which client_integrations to fetch.
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of client_integrations to fetch.
+     */
+    orderBy?: client_integrationsOrderByWithRelationInput | client_integrationsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing client_integrations.
+     */
+    cursor?: client_integrationsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` client_integrations from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` client_integrations.
+     */
+    skip?: number
+    distinct?: Client_integrationsScalarFieldEnum | Client_integrationsScalarFieldEnum[]
+  }
+
+  /**
+   * client_integrations create
+   */
+  export type client_integrationsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a client_integrations.
+     */
+    data: XOR<client_integrationsCreateInput, client_integrationsUncheckedCreateInput>
+  }
+
+  /**
+   * client_integrations createMany
+   */
+  export type client_integrationsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many client_integrations.
+     */
+    data: client_integrationsCreateManyInput | client_integrationsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * client_integrations createManyAndReturn
+   */
+  export type client_integrationsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * The data used to create many client_integrations.
+     */
+    data: client_integrationsCreateManyInput | client_integrationsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * client_integrations update
+   */
+  export type client_integrationsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a client_integrations.
+     */
+    data: XOR<client_integrationsUpdateInput, client_integrationsUncheckedUpdateInput>
+    /**
+     * Choose, which client_integrations to update.
+     */
+    where: client_integrationsWhereUniqueInput
+  }
+
+  /**
+   * client_integrations updateMany
+   */
+  export type client_integrationsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update client_integrations.
+     */
+    data: XOR<client_integrationsUpdateManyMutationInput, client_integrationsUncheckedUpdateManyInput>
+    /**
+     * Filter which client_integrations to update
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * Limit how many client_integrations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * client_integrations updateManyAndReturn
+   */
+  export type client_integrationsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * The data used to update client_integrations.
+     */
+    data: XOR<client_integrationsUpdateManyMutationInput, client_integrationsUncheckedUpdateManyInput>
+    /**
+     * Filter which client_integrations to update
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * Limit how many client_integrations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * client_integrations upsert
+   */
+  export type client_integrationsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the client_integrations to update in case it exists.
+     */
+    where: client_integrationsWhereUniqueInput
+    /**
+     * In case the client_integrations found by the `where` argument doesn't exist, create a new client_integrations with this data.
+     */
+    create: XOR<client_integrationsCreateInput, client_integrationsUncheckedCreateInput>
+    /**
+     * In case the client_integrations was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<client_integrationsUpdateInput, client_integrationsUncheckedUpdateInput>
+  }
+
+  /**
+   * client_integrations delete
+   */
+  export type client_integrationsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+    /**
+     * Filter which client_integrations to delete.
+     */
+    where: client_integrationsWhereUniqueInput
+  }
+
+  /**
+   * client_integrations deleteMany
+   */
+  export type client_integrationsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which client_integrations to delete
+     */
+    where?: client_integrationsWhereInput
+    /**
+     * Limit how many client_integrations to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * client_integrations without action
+   */
+  export type client_integrationsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the client_integrations
+     */
+    select?: client_integrationsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the client_integrations
+     */
+    omit?: client_integrationsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: client_integrationsInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -24561,6 +25825,23 @@ export namespace Prisma {
   };
 
   export type AnalystsScalarFieldEnum = (typeof AnalystsScalarFieldEnum)[keyof typeof AnalystsScalarFieldEnum]
+
+
+  export const Client_integrationsScalarFieldEnum: {
+    id: 'id',
+    client_id: 'client_id',
+    provider: 'provider',
+    shop_id: 'shop_id',
+    merchant_id: 'merchant_id',
+    region: 'region',
+    access_token: 'access_token',
+    refresh_token: 'refresh_token',
+    token_expiry: 'token_expiry',
+    created_at: 'created_at',
+    updated_at: 'updated_at'
+  };
+
+  export type Client_integrationsScalarFieldEnum = (typeof Client_integrationsScalarFieldEnum)[keyof typeof Client_integrationsScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -25252,6 +26533,7 @@ export namespace Prisma {
     reports?: ReportsListRelationFilter
     checklist_items?: Checklist_itemsListRelationFilter
     checklist_progress?: Checklist_progressListRelationFilter
+    integrations?: Client_integrationsListRelationFilter
   }
 
   export type clientsOrderByWithRelationInput = {
@@ -25276,6 +26558,7 @@ export namespace Prisma {
     reports?: reportsOrderByRelationAggregateInput
     checklist_items?: checklist_itemsOrderByRelationAggregateInput
     checklist_progress?: checklist_progressOrderByRelationAggregateInput
+    integrations?: client_integrationsOrderByRelationAggregateInput
   }
 
   export type clientsWhereUniqueInput = Prisma.AtLeast<{
@@ -25303,6 +26586,7 @@ export namespace Prisma {
     reports?: ReportsListRelationFilter
     checklist_items?: Checklist_itemsListRelationFilter
     checklist_progress?: Checklist_progressListRelationFilter
+    integrations?: Client_integrationsListRelationFilter
   }, "id">
 
   export type clientsOrderByWithAggregationInput = {
@@ -26140,6 +27424,92 @@ export namespace Prisma {
     created_by?: UuidNullableWithAggregatesFilter<"Analysts"> | string | null
   }
 
+  export type client_integrationsWhereInput = {
+    AND?: client_integrationsWhereInput | client_integrationsWhereInput[]
+    OR?: client_integrationsWhereInput[]
+    NOT?: client_integrationsWhereInput | client_integrationsWhereInput[]
+    id?: UuidFilter<"client_integrations"> | string
+    client_id?: UuidFilter<"client_integrations"> | string
+    provider?: StringFilter<"client_integrations"> | string
+    shop_id?: StringNullableFilter<"client_integrations"> | string | null
+    merchant_id?: StringNullableFilter<"client_integrations"> | string | null
+    region?: StringNullableFilter<"client_integrations"> | string | null
+    access_token?: StringNullableFilter<"client_integrations"> | string | null
+    refresh_token?: StringNullableFilter<"client_integrations"> | string | null
+    token_expiry?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    clients?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
+  }
+
+  export type client_integrationsOrderByWithRelationInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    provider?: SortOrder
+    shop_id?: SortOrderInput | SortOrder
+    merchant_id?: SortOrderInput | SortOrder
+    region?: SortOrderInput | SortOrder
+    access_token?: SortOrderInput | SortOrder
+    refresh_token?: SortOrderInput | SortOrder
+    token_expiry?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    updated_at?: SortOrderInput | SortOrder
+    clients?: clientsOrderByWithRelationInput
+  }
+
+  export type client_integrationsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    client_id_provider?: client_integrationsClient_idProviderCompoundUniqueInput
+    AND?: client_integrationsWhereInput | client_integrationsWhereInput[]
+    OR?: client_integrationsWhereInput[]
+    NOT?: client_integrationsWhereInput | client_integrationsWhereInput[]
+    client_id?: UuidFilter<"client_integrations"> | string
+    provider?: StringFilter<"client_integrations"> | string
+    shop_id?: StringNullableFilter<"client_integrations"> | string | null
+    merchant_id?: StringNullableFilter<"client_integrations"> | string | null
+    region?: StringNullableFilter<"client_integrations"> | string | null
+    access_token?: StringNullableFilter<"client_integrations"> | string | null
+    refresh_token?: StringNullableFilter<"client_integrations"> | string | null
+    token_expiry?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    clients?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
+  }, "id" | "client_id_provider">
+
+  export type client_integrationsOrderByWithAggregationInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    provider?: SortOrder
+    shop_id?: SortOrderInput | SortOrder
+    merchant_id?: SortOrderInput | SortOrder
+    region?: SortOrderInput | SortOrder
+    access_token?: SortOrderInput | SortOrder
+    refresh_token?: SortOrderInput | SortOrder
+    token_expiry?: SortOrderInput | SortOrder
+    created_at?: SortOrderInput | SortOrder
+    updated_at?: SortOrderInput | SortOrder
+    _count?: client_integrationsCountOrderByAggregateInput
+    _max?: client_integrationsMaxOrderByAggregateInput
+    _min?: client_integrationsMinOrderByAggregateInput
+  }
+
+  export type client_integrationsScalarWhereWithAggregatesInput = {
+    AND?: client_integrationsScalarWhereWithAggregatesInput | client_integrationsScalarWhereWithAggregatesInput[]
+    OR?: client_integrationsScalarWhereWithAggregatesInput[]
+    NOT?: client_integrationsScalarWhereWithAggregatesInput | client_integrationsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"client_integrations"> | string
+    client_id?: UuidWithAggregatesFilter<"client_integrations"> | string
+    provider?: StringWithAggregatesFilter<"client_integrations"> | string
+    shop_id?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
+    merchant_id?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
+    region?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
+    access_token?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
+    refresh_token?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
+    token_expiry?: DateTimeNullableWithAggregatesFilter<"client_integrations"> | Date | string | null
+    created_at?: DateTimeNullableWithAggregatesFilter<"client_integrations"> | Date | string | null
+    updated_at?: DateTimeNullableWithAggregatesFilter<"client_integrations"> | Date | string | null
+  }
+
   export type activity_logCreateInput = {
     id?: string
     action: string
@@ -26689,6 +28059,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateInput = {
@@ -26713,6 +28084,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUpdateInput = {
@@ -26737,6 +28109,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateInput = {
@@ -26761,6 +28134,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsCreateManyInput = {
@@ -27659,6 +29033,103 @@ export namespace Prisma {
     created_by?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
+  export type client_integrationsCreateInput = {
+    id?: string
+    provider: string
+    shop_id?: string | null
+    merchant_id?: string | null
+    region?: string | null
+    access_token?: string | null
+    refresh_token?: string | null
+    token_expiry?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    clients: clientsCreateNestedOneWithoutIntegrationsInput
+  }
+
+  export type client_integrationsUncheckedCreateInput = {
+    id?: string
+    client_id: string
+    provider: string
+    shop_id?: string | null
+    merchant_id?: string | null
+    region?: string | null
+    access_token?: string | null
+    refresh_token?: string | null
+    token_expiry?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type client_integrationsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clients?: clientsUpdateOneRequiredWithoutIntegrationsNestedInput
+  }
+
+  export type client_integrationsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    client_id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type client_integrationsCreateManyInput = {
+    id?: string
+    client_id: string
+    provider: string
+    shop_id?: string | null
+    merchant_id?: string | null
+    region?: string | null
+    access_token?: string | null
+    refresh_token?: string | null
+    token_expiry?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type client_integrationsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type client_integrationsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    client_id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -28319,6 +29790,12 @@ export namespace Prisma {
     none?: checklist_progressWhereInput
   }
 
+  export type Client_integrationsListRelationFilter = {
+    every?: client_integrationsWhereInput
+    some?: client_integrationsWhereInput
+    none?: client_integrationsWhereInput
+  }
+
   export type activity_logOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -28348,6 +29825,10 @@ export namespace Prisma {
   }
 
   export type checklist_progressOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type client_integrationsOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -28984,6 +30465,53 @@ export namespace Prisma {
     analyses_count?: SortOrder
   }
 
+  export type client_integrationsClient_idProviderCompoundUniqueInput = {
+    client_id: string
+    provider: string
+  }
+
+  export type client_integrationsCountOrderByAggregateInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    provider?: SortOrder
+    shop_id?: SortOrder
+    merchant_id?: SortOrder
+    region?: SortOrder
+    access_token?: SortOrder
+    refresh_token?: SortOrder
+    token_expiry?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type client_integrationsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    provider?: SortOrder
+    shop_id?: SortOrder
+    merchant_id?: SortOrder
+    region?: SortOrder
+    access_token?: SortOrder
+    refresh_token?: SortOrder
+    token_expiry?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
+  export type client_integrationsMinOrderByAggregateInput = {
+    id?: SortOrder
+    client_id?: SortOrder
+    provider?: SortOrder
+    shop_id?: SortOrder
+    merchant_id?: SortOrder
+    region?: SortOrder
+    access_token?: SortOrder
+    refresh_token?: SortOrder
+    token_expiry?: SortOrder
+    created_at?: SortOrder
+    updated_at?: SortOrder
+  }
+
   export type clientsCreateNestedOneWithoutActivity_logInput = {
     create?: XOR<clientsCreateWithoutActivity_logInput, clientsUncheckedCreateWithoutActivity_logInput>
     connectOrCreate?: clientsCreateOrConnectWithoutActivity_logInput
@@ -29476,6 +31004,13 @@ export namespace Prisma {
     connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
   }
 
+  export type client_integrationsCreateNestedManyWithoutClientsInput = {
+    create?: XOR<client_integrationsCreateWithoutClientsInput, client_integrationsUncheckedCreateWithoutClientsInput> | client_integrationsCreateWithoutClientsInput[] | client_integrationsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: client_integrationsCreateOrConnectWithoutClientsInput | client_integrationsCreateOrConnectWithoutClientsInput[]
+    createMany?: client_integrationsCreateManyClientsInputEnvelope
+    connect?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+  }
+
   export type activity_logUncheckedCreateNestedManyWithoutClientsInput = {
     create?: XOR<activity_logCreateWithoutClientsInput, activity_logUncheckedCreateWithoutClientsInput> | activity_logCreateWithoutClientsInput[] | activity_logUncheckedCreateWithoutClientsInput[]
     connectOrCreate?: activity_logCreateOrConnectWithoutClientsInput | activity_logCreateOrConnectWithoutClientsInput[]
@@ -29544,6 +31079,13 @@ export namespace Prisma {
     connectOrCreate?: checklist_progressCreateOrConnectWithoutClientInput | checklist_progressCreateOrConnectWithoutClientInput[]
     createMany?: checklist_progressCreateManyClientInputEnvelope
     connect?: checklist_progressWhereUniqueInput | checklist_progressWhereUniqueInput[]
+  }
+
+  export type client_integrationsUncheckedCreateNestedManyWithoutClientsInput = {
+    create?: XOR<client_integrationsCreateWithoutClientsInput, client_integrationsUncheckedCreateWithoutClientsInput> | client_integrationsCreateWithoutClientsInput[] | client_integrationsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: client_integrationsCreateOrConnectWithoutClientsInput | client_integrationsCreateOrConnectWithoutClientsInput[]
+    createMany?: client_integrationsCreateManyClientsInputEnvelope
+    connect?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
   }
 
   export type activity_logUpdateManyWithoutClientsNestedInput = {
@@ -29686,6 +31228,20 @@ export namespace Prisma {
     deleteMany?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
   }
 
+  export type client_integrationsUpdateManyWithoutClientsNestedInput = {
+    create?: XOR<client_integrationsCreateWithoutClientsInput, client_integrationsUncheckedCreateWithoutClientsInput> | client_integrationsCreateWithoutClientsInput[] | client_integrationsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: client_integrationsCreateOrConnectWithoutClientsInput | client_integrationsCreateOrConnectWithoutClientsInput[]
+    upsert?: client_integrationsUpsertWithWhereUniqueWithoutClientsInput | client_integrationsUpsertWithWhereUniqueWithoutClientsInput[]
+    createMany?: client_integrationsCreateManyClientsInputEnvelope
+    set?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    disconnect?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    delete?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    connect?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    update?: client_integrationsUpdateWithWhereUniqueWithoutClientsInput | client_integrationsUpdateWithWhereUniqueWithoutClientsInput[]
+    updateMany?: client_integrationsUpdateManyWithWhereWithoutClientsInput | client_integrationsUpdateManyWithWhereWithoutClientsInput[]
+    deleteMany?: client_integrationsScalarWhereInput | client_integrationsScalarWhereInput[]
+  }
+
   export type activity_logUncheckedUpdateManyWithoutClientsNestedInput = {
     create?: XOR<activity_logCreateWithoutClientsInput, activity_logUncheckedCreateWithoutClientsInput> | activity_logCreateWithoutClientsInput[] | activity_logUncheckedCreateWithoutClientsInput[]
     connectOrCreate?: activity_logCreateOrConnectWithoutClientsInput | activity_logCreateOrConnectWithoutClientsInput[]
@@ -29824,6 +31380,20 @@ export namespace Prisma {
     update?: checklist_progressUpdateWithWhereUniqueWithoutClientInput | checklist_progressUpdateWithWhereUniqueWithoutClientInput[]
     updateMany?: checklist_progressUpdateManyWithWhereWithoutClientInput | checklist_progressUpdateManyWithWhereWithoutClientInput[]
     deleteMany?: checklist_progressScalarWhereInput | checklist_progressScalarWhereInput[]
+  }
+
+  export type client_integrationsUncheckedUpdateManyWithoutClientsNestedInput = {
+    create?: XOR<client_integrationsCreateWithoutClientsInput, client_integrationsUncheckedCreateWithoutClientsInput> | client_integrationsCreateWithoutClientsInput[] | client_integrationsUncheckedCreateWithoutClientsInput[]
+    connectOrCreate?: client_integrationsCreateOrConnectWithoutClientsInput | client_integrationsCreateOrConnectWithoutClientsInput[]
+    upsert?: client_integrationsUpsertWithWhereUniqueWithoutClientsInput | client_integrationsUpsertWithWhereUniqueWithoutClientsInput[]
+    createMany?: client_integrationsCreateManyClientsInputEnvelope
+    set?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    disconnect?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    delete?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    connect?: client_integrationsWhereUniqueInput | client_integrationsWhereUniqueInput[]
+    update?: client_integrationsUpdateWithWhereUniqueWithoutClientsInput | client_integrationsUpdateWithWhereUniqueWithoutClientsInput[]
+    updateMany?: client_integrationsUpdateManyWithWhereWithoutClientsInput | client_integrationsUpdateManyWithWhereWithoutClientsInput[]
+    deleteMany?: client_integrationsScalarWhereInput | client_integrationsScalarWhereInput[]
   }
 
   export type usersCreateNestedOneWithoutConfigurationsInput = {
@@ -30647,6 +32217,20 @@ export namespace Prisma {
     update?: XOR<XOR<usersUpdateToOneWithWhereWithoutAnalysts_createdInput, usersUpdateWithoutAnalysts_createdInput>, usersUncheckedUpdateWithoutAnalysts_createdInput>
   }
 
+  export type clientsCreateNestedOneWithoutIntegrationsInput = {
+    create?: XOR<clientsCreateWithoutIntegrationsInput, clientsUncheckedCreateWithoutIntegrationsInput>
+    connectOrCreate?: clientsCreateOrConnectWithoutIntegrationsInput
+    connect?: clientsWhereUniqueInput
+  }
+
+  export type clientsUpdateOneRequiredWithoutIntegrationsNestedInput = {
+    create?: XOR<clientsCreateWithoutIntegrationsInput, clientsUncheckedCreateWithoutIntegrationsInput>
+    connectOrCreate?: clientsCreateOrConnectWithoutIntegrationsInput
+    upsert?: clientsUpsertWithoutIntegrationsInput
+    connect?: clientsWhereUniqueInput
+    update?: XOR<XOR<clientsUpdateToOneWithWhereWithoutIntegrationsInput, clientsUpdateWithoutIntegrationsInput>, clientsUncheckedUpdateWithoutIntegrationsInput>
+  }
+
   export type NestedUuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -31005,6 +32589,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutActivity_logInput = {
@@ -31028,6 +32613,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutActivity_logInput = {
@@ -31112,6 +32698,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutActivity_logInput = {
@@ -31135,6 +32722,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type usersUpsertWithoutActivity_logInput = {
@@ -31209,6 +32797,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutAd_metricsInput = {
@@ -31232,6 +32821,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutAd_metricsInput = {
@@ -31308,6 +32898,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutAd_metricsInput = {
@@ -31331,6 +32922,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type productsUpsertWithoutAd_metricsInput = {
@@ -31397,6 +32989,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutAi_requestsInput = {
@@ -31420,6 +33013,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutAi_requestsInput = {
@@ -31504,6 +33098,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutAi_requestsInput = {
@@ -31527,6 +33122,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type usersUpsertWithoutAi_requestsInput = {
@@ -31601,6 +33197,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutAnalysesInput = {
@@ -31624,6 +33221,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutAnalysesInput = {
@@ -31798,6 +33396,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutAnalysesInput = {
@@ -31821,6 +33420,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type usersUpsertWithoutCreated_analysesInput = {
@@ -32043,6 +33643,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutChat_conversationsInput = {
@@ -32066,6 +33667,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutChat_conversationsInput = {
@@ -32178,6 +33780,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChat_conversationsInput = {
@@ -32201,6 +33804,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type usersUpsertWithoutChat_conversationsInput = {
@@ -32304,6 +33908,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutChat_messagesInput = {
@@ -32327,6 +33932,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutChat_messagesInput = {
@@ -32434,6 +34040,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChat_messagesInput = {
@@ -32457,6 +34064,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type chat_conversationsUpsertWithoutChat_messagesInput = {
@@ -32871,6 +34479,42 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type client_integrationsCreateWithoutClientsInput = {
+    id?: string
+    provider: string
+    shop_id?: string | null
+    merchant_id?: string | null
+    region?: string | null
+    access_token?: string | null
+    refresh_token?: string | null
+    token_expiry?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type client_integrationsUncheckedCreateWithoutClientsInput = {
+    id?: string
+    provider: string
+    shop_id?: string | null
+    merchant_id?: string | null
+    region?: string | null
+    access_token?: string | null
+    refresh_token?: string | null
+    token_expiry?: Date | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type client_integrationsCreateOrConnectWithoutClientsInput = {
+    where: client_integrationsWhereUniqueInput
+    create: XOR<client_integrationsCreateWithoutClientsInput, client_integrationsUncheckedCreateWithoutClientsInput>
+  }
+
+  export type client_integrationsCreateManyClientsInputEnvelope = {
+    data: client_integrationsCreateManyClientsInput | client_integrationsCreateManyClientsInput[]
+    skipDuplicates?: boolean
+  }
+
   export type activity_logUpsertWithWhereUniqueWithoutClientsInput = {
     where: activity_logWhereUniqueInput
     update: XOR<activity_logUpdateWithoutClientsInput, activity_logUncheckedUpdateWithoutClientsInput>
@@ -33152,6 +34796,39 @@ export namespace Prisma {
     updated_at?: DateTimeNullableFilter<"checklist_progress"> | Date | string | null
   }
 
+  export type client_integrationsUpsertWithWhereUniqueWithoutClientsInput = {
+    where: client_integrationsWhereUniqueInput
+    update: XOR<client_integrationsUpdateWithoutClientsInput, client_integrationsUncheckedUpdateWithoutClientsInput>
+    create: XOR<client_integrationsCreateWithoutClientsInput, client_integrationsUncheckedCreateWithoutClientsInput>
+  }
+
+  export type client_integrationsUpdateWithWhereUniqueWithoutClientsInput = {
+    where: client_integrationsWhereUniqueInput
+    data: XOR<client_integrationsUpdateWithoutClientsInput, client_integrationsUncheckedUpdateWithoutClientsInput>
+  }
+
+  export type client_integrationsUpdateManyWithWhereWithoutClientsInput = {
+    where: client_integrationsScalarWhereInput
+    data: XOR<client_integrationsUpdateManyMutationInput, client_integrationsUncheckedUpdateManyWithoutClientsInput>
+  }
+
+  export type client_integrationsScalarWhereInput = {
+    AND?: client_integrationsScalarWhereInput | client_integrationsScalarWhereInput[]
+    OR?: client_integrationsScalarWhereInput[]
+    NOT?: client_integrationsScalarWhereInput | client_integrationsScalarWhereInput[]
+    id?: UuidFilter<"client_integrations"> | string
+    client_id?: UuidFilter<"client_integrations"> | string
+    provider?: StringFilter<"client_integrations"> | string
+    shop_id?: StringNullableFilter<"client_integrations"> | string | null
+    merchant_id?: StringNullableFilter<"client_integrations"> | string | null
+    region?: StringNullableFilter<"client_integrations"> | string | null
+    access_token?: StringNullableFilter<"client_integrations"> | string | null
+    refresh_token?: StringNullableFilter<"client_integrations"> | string | null
+    token_expiry?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    created_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    updated_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+  }
+
   export type usersCreateWithoutConfigurationsInput = {
     id?: string
     name: string
@@ -33431,6 +35108,7 @@ export namespace Prisma {
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutProductsInput = {
@@ -33454,6 +35132,7 @@ export namespace Prisma {
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutProductsInput = {
@@ -33509,6 +35188,7 @@ export namespace Prisma {
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutProductsInput = {
@@ -33532,6 +35212,7 @@ export namespace Prisma {
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type reportsCreateWithoutReport_metricsInput = {
@@ -33704,6 +35385,7 @@ export namespace Prisma {
     products?: productsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutReportsInput = {
@@ -33727,6 +35409,7 @@ export namespace Prisma {
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutReportsInput = {
@@ -33844,6 +35527,7 @@ export namespace Prisma {
     products?: productsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutReportsInput = {
@@ -33867,6 +35551,7 @@ export namespace Prisma {
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type activity_logCreateWithoutUsersInput = {
@@ -34577,6 +36262,7 @@ export namespace Prisma {
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutChecklist_itemsInput = {
@@ -34600,6 +36286,7 @@ export namespace Prisma {
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutChecklist_itemsInput = {
@@ -34682,6 +36369,7 @@ export namespace Prisma {
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChecklist_itemsInput = {
@@ -34705,6 +36393,7 @@ export namespace Prisma {
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsCreateWithoutChecklist_progressInput = {
@@ -34728,6 +36417,7 @@ export namespace Prisma {
     products?: productsCreateNestedManyWithoutClientsInput
     reports?: reportsCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    integrations?: client_integrationsCreateNestedManyWithoutClientsInput
   }
 
   export type clientsUncheckedCreateWithoutChecklist_progressInput = {
@@ -34751,6 +36441,7 @@ export namespace Prisma {
     products?: productsUncheckedCreateNestedManyWithoutClientsInput
     reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
     checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    integrations?: client_integrationsUncheckedCreateNestedManyWithoutClientsInput
   }
 
   export type clientsCreateOrConnectWithoutChecklist_progressInput = {
@@ -34862,6 +36553,7 @@ export namespace Prisma {
     products?: productsUpdateManyWithoutClientsNestedInput
     reports?: reportsUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    integrations?: client_integrationsUpdateManyWithoutClientsNestedInput
   }
 
   export type clientsUncheckedUpdateWithoutChecklist_progressInput = {
@@ -34885,6 +36577,7 @@ export namespace Prisma {
     products?: productsUncheckedUpdateManyWithoutClientsNestedInput
     reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
     checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    integrations?: client_integrationsUncheckedUpdateManyWithoutClientsNestedInput
   }
 
   export type checklist_itemsUpsertWithoutProgressInput = {
@@ -35065,6 +36758,118 @@ export namespace Prisma {
     created_analyses?: analysesUncheckedUpdateManyWithoutCreatorNestedInput
     checklist_executions?: checklist_progressUncheckedUpdateManyWithoutAnalystNestedInput
     created_users?: usersUncheckedUpdateManyWithoutCreatorNestedInput
+  }
+
+  export type clientsCreateWithoutIntegrationsInput = {
+    id?: string
+    name: string
+    owner_name: string
+    shop_url?: string | null
+    followers?: number | null
+    rating?: Decimal | DecimalJsLike | number | string | null
+    registration_date?: Date | string | null
+    product_count?: number | null
+    response_rate?: Decimal | DecimalJsLike | number | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    activity_log?: activity_logCreateNestedManyWithoutClientsInput
+    ad_metrics?: ad_metricsCreateNestedManyWithoutClientsInput
+    ai_requests?: ai_requestsCreateNestedManyWithoutClientsInput
+    analyses?: analysesCreateNestedManyWithoutClientsInput
+    chat_conversations?: chat_conversationsCreateNestedManyWithoutClientsInput
+    chat_messages?: chat_messagesCreateNestedManyWithoutClientsInput
+    products?: productsCreateNestedManyWithoutClientsInput
+    reports?: reportsCreateNestedManyWithoutClientsInput
+    checklist_items?: checklist_itemsCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressCreateNestedManyWithoutClientInput
+  }
+
+  export type clientsUncheckedCreateWithoutIntegrationsInput = {
+    id?: string
+    name: string
+    owner_name: string
+    shop_url?: string | null
+    followers?: number | null
+    rating?: Decimal | DecimalJsLike | number | string | null
+    registration_date?: Date | string | null
+    product_count?: number | null
+    response_rate?: Decimal | DecimalJsLike | number | string | null
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+    activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
+    ad_metrics?: ad_metricsUncheckedCreateNestedManyWithoutClientsInput
+    ai_requests?: ai_requestsUncheckedCreateNestedManyWithoutClientsInput
+    analyses?: analysesUncheckedCreateNestedManyWithoutClientsInput
+    chat_conversations?: chat_conversationsUncheckedCreateNestedManyWithoutClientsInput
+    chat_messages?: chat_messagesUncheckedCreateNestedManyWithoutClientsInput
+    products?: productsUncheckedCreateNestedManyWithoutClientsInput
+    reports?: reportsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_items?: checklist_itemsUncheckedCreateNestedManyWithoutClientsInput
+    checklist_progress?: checklist_progressUncheckedCreateNestedManyWithoutClientInput
+  }
+
+  export type clientsCreateOrConnectWithoutIntegrationsInput = {
+    where: clientsWhereUniqueInput
+    create: XOR<clientsCreateWithoutIntegrationsInput, clientsUncheckedCreateWithoutIntegrationsInput>
+  }
+
+  export type clientsUpsertWithoutIntegrationsInput = {
+    update: XOR<clientsUpdateWithoutIntegrationsInput, clientsUncheckedUpdateWithoutIntegrationsInput>
+    create: XOR<clientsCreateWithoutIntegrationsInput, clientsUncheckedCreateWithoutIntegrationsInput>
+    where?: clientsWhereInput
+  }
+
+  export type clientsUpdateToOneWithWhereWithoutIntegrationsInput = {
+    where?: clientsWhereInput
+    data: XOR<clientsUpdateWithoutIntegrationsInput, clientsUncheckedUpdateWithoutIntegrationsInput>
+  }
+
+  export type clientsUpdateWithoutIntegrationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    owner_name?: StringFieldUpdateOperationsInput | string
+    shop_url?: NullableStringFieldUpdateOperationsInput | string | null
+    followers?: NullableIntFieldUpdateOperationsInput | number | null
+    rating?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    product_count?: NullableIntFieldUpdateOperationsInput | number | null
+    response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    activity_log?: activity_logUpdateManyWithoutClientsNestedInput
+    ad_metrics?: ad_metricsUpdateManyWithoutClientsNestedInput
+    ai_requests?: ai_requestsUpdateManyWithoutClientsNestedInput
+    analyses?: analysesUpdateManyWithoutClientsNestedInput
+    chat_conversations?: chat_conversationsUpdateManyWithoutClientsNestedInput
+    chat_messages?: chat_messagesUpdateManyWithoutClientsNestedInput
+    products?: productsUpdateManyWithoutClientsNestedInput
+    reports?: reportsUpdateManyWithoutClientsNestedInput
+    checklist_items?: checklist_itemsUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUpdateManyWithoutClientNestedInput
+  }
+
+  export type clientsUncheckedUpdateWithoutIntegrationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    owner_name?: StringFieldUpdateOperationsInput | string
+    shop_url?: NullableStringFieldUpdateOperationsInput | string | null
+    followers?: NullableIntFieldUpdateOperationsInput | number | null
+    rating?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    product_count?: NullableIntFieldUpdateOperationsInput | number | null
+    response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
+    ad_metrics?: ad_metricsUncheckedUpdateManyWithoutClientsNestedInput
+    ai_requests?: ai_requestsUncheckedUpdateManyWithoutClientsNestedInput
+    analyses?: analysesUncheckedUpdateManyWithoutClientsNestedInput
+    chat_conversations?: chat_conversationsUncheckedUpdateManyWithoutClientsNestedInput
+    chat_messages?: chat_messagesUncheckedUpdateManyWithoutClientsNestedInput
+    products?: productsUncheckedUpdateManyWithoutClientsNestedInput
+    reports?: reportsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_items?: checklist_itemsUncheckedUpdateManyWithoutClientsNestedInput
+    checklist_progress?: checklist_progressUncheckedUpdateManyWithoutClientNestedInput
   }
 
   export type analysis_resultsCreateManyAnalysesInput = {
@@ -35323,6 +37128,19 @@ export namespace Prisma {
     analyst_name?: string | null
     execution_count?: number
     execution_history?: JsonNullValueInput | InputJsonValue
+    created_at?: Date | string | null
+    updated_at?: Date | string | null
+  }
+
+  export type client_integrationsCreateManyClientsInput = {
+    id?: string
+    provider: string
+    shop_id?: string | null
+    merchant_id?: string | null
+    region?: string | null
+    access_token?: string | null
+    refresh_token?: string | null
+    token_expiry?: Date | string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -35663,6 +37481,45 @@ export namespace Prisma {
     analyst_name?: NullableStringFieldUpdateOperationsInput | string | null
     execution_count?: IntFieldUpdateOperationsInput | number
     execution_history?: JsonNullValueInput | InputJsonValue
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type client_integrationsUpdateWithoutClientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type client_integrationsUncheckedUpdateWithoutClientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type client_integrationsUncheckedUpdateManyWithoutClientsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    provider?: StringFieldUpdateOperationsInput | string
+    shop_id?: NullableStringFieldUpdateOperationsInput | string | null
+    merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
+    region?: NullableStringFieldUpdateOperationsInput | string | null
+    access_token?: NullableStringFieldUpdateOperationsInput | string | null
+    refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
+    token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }

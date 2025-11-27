@@ -43,10 +43,25 @@ export async function buildAuthUrlAsync(params: { state: string; redirectUrl?: s
 
 export async function getAccessToken(args: { code: string; shop_id: string }) {
   const path = '/api/v2/auth/token/get';
-  const timestamp = getTimestamp();
-  const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}${args.code}`;
+  // Usa timestamp do servidor da Shopee (como em buildAuthUrlAsync)
+  const timestamp = await getShopeeServerTimestamp();
+  
+  // BaseString para /api/v2/auth/token/get: partner_id + path + timestamp
+  const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
-  const url = `${SHOPEE_BASE_URL}${path}`;
+  
+  // Adiciona partner_id, timestamp e sign como query parameters
+  const url = `${SHOPEE_BASE_URL}${path}?partner_id=${SHOPEE_PARTNER_ID}&timestamp=${timestamp}&sign=${sign}`;
+  
+  console.log(`DEBUG: getAccessToken request:`, {
+    url,
+    partner_id: SHOPEE_PARTNER_ID,
+    shop_id: args.shop_id,
+    code_length: args.code?.length || 0,
+    timestamp,
+    baseString,
+    sign
+  });
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -55,7 +70,6 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
       shop_id: Number(args.shop_id),
       partner_id: Number(SHOPEE_PARTNER_ID),
       timestamp,
-      sign,
     }),
   });
   if (!res.ok) {
@@ -63,6 +77,14 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
     throw new Error(`Shopee token/get failed: ${res.status} ${text}`);
   }
   const data = await res.json();
+  
+  console.log(`DEBUG: Resposta da Shopee getAccessToken:`, {
+    status: res.status,
+    data: data,
+    has_access_token: !!data?.access_token,
+    has_refresh_token: !!data?.refresh_token
+  });
+  
   return data as {
     access_token: string;
     refresh_token: string;
