@@ -1,355 +1,315 @@
 'use client';
 
 import React from 'react';
+import Image from "next/image";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Plus, ShoppingBag, TrendingUp, Users, Eye, Target, DollarSign, BarChart3, PieChart, LineChart } from "lucide-react";
-import Link from "next/link";
+import {
+  FileSpreadsheet,
+  Plus,
+  ShoppingBag,
+  TrendingUp,
+  Eye,
+  Target,
+  DollarSign,
+  MapPin,
+} from "lucide-react";
 import { useDashboardConfig } from "@/hooks/use-dashboard-config";
-import { ChartData } from "@/types/dashboard";
-import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import logo from "@/assets/logo.png";
 
 const formatCurrency = (value: number) => `R$ ${value.toLocaleString()}`;
-const formatPercentage = (value: number) => `${value}%`;
 const formatNumber = (value: number) => value.toLocaleString();
 
-// Dados simulados para os gráficos baseados nas configurações
-const generateChartData = (config: any): ChartData => {
-  // Total de vendas: 77.300.000 (77 milhões e 300 mil)
-  const totalVendas = 77300000;
-  
-  // Distribuição mensal com crescimento ao longo do ano
-  // Meses 6, 7 e 8 terão mais vendas (Black Friday, Natal, etc.)
-  // Total: 100% = R$ 77.300.000
-  // Jan(10%) + Fev(8%) + Mar(12%) + Abr(13%) + Mai(14%) + Jun(16%) + Jul(18%) + Ago(9%) = 100%
-  const vendasMensais = [
-    { name: "Jan", vendas: Math.round(totalVendas * 0.10) }, // 10% - Início do ano
-    { name: "Fev", vendas: Math.round(totalVendas * 0.08) }, // 8% - Carnaval
-    { name: "Mar", vendas: Math.round(totalVendas * 0.12) }, // 12% - Recuperação
-    { name: "Abr", vendas: Math.round(totalVendas * 0.13) }, // 13% - Crescimento
-    { name: "Mai", vendas: Math.round(totalVendas * 0.14) }, // 14% - Maio
-    { name: "Jun", vendas: Math.round(totalVendas * 0.16) }, // 16% - Junho (mais vendas)
-    { name: "Jul", vendas: Math.round(totalVendas * 0.18) }, // 18% - Julho (mais vendas)
-    { name: "Ago", vendas: Math.round(totalVendas * 0.09) }, // 9% - Agosto
-  ];
+const weeklyEvolution = [
+  { label: "Há 7 semanas", sellers: 120, pedidos: 2100, gmv: 320000, ticket: 152, conversao: 2.3 },
+  { label: "Há 6 semanas", sellers: 154, pedidos: 2450, gmv: 385000, ticket: 157, conversao: 2.5 },
+  { label: "Há 5 semanas", sellers: 189, pedidos: 2760, gmv: 421000, ticket: 163, conversao: 2.7 },
+  { label: "Há 4 semanas", sellers: 213, pedidos: 2980, gmv: 472000, ticket: 169, conversao: 2.9 },
+  { label: "Há 3 semanas", sellers: 247, pedidos: 3250, gmv: 518000, ticket: 176, conversao: 3.1 },
+  { label: "Há 2 semanas", sellers: 281, pedidos: 3520, gmv: 563000, ticket: 180, conversao: 3.3 },
+  { label: "Última semana", sellers: 308, pedidos: 3890, gmv: 612000, ticket: 187, conversao: 3.6 },
+];
 
-  return {
-    vendasMensais,
-    distribuicaoNichos: [
-      { name: "Casa e Construção", value: 18, color: "#f97316" },
-      { name: "Saúde e Beleza", value: 15, color: "#3b82f6" },
-      { name: "Moda", value: 22, color: "#10b981" },
-      { name: "Artigos de Papelaria", value: 8, color: "#8b5cf6" },
-      { name: "Eletrônico", value: 20, color: "#ef4444" },
-      { name: "Esporte e Lazer", value: 12, color: "#06b6d4" },
-      { name: "Casa e Decoração", value: 16, color: "#f59e0b" },
-      { name: "Eletrodoméstico", value: 14, color: "#84cc16" },
-      { name: "Artigo de Festa", value: 5, color: "#ec4899" },
-    ],
-    trafegoConversao: [
-      { name: "Jan", visitas: Math.round(config.numeroVisitas * 0.8), conversoes: Math.round(config.numeroPedidos * 0.8) },
-      { name: "Fev", visitas: Math.round(config.numeroVisitas * 0.7), conversoes: Math.round(config.numeroPedidos * 0.7) },
-      { name: "Mar", visitas: Math.round(config.numeroVisitas * 0.9), conversoes: Math.round(config.numeroPedidos * 0.9) },
-      { name: "Abr", visitas: Math.round(config.numeroVisitas * 0.8), conversoes: Math.round(config.numeroPedidos * 0.8) },
-      { name: "Mai", visitas: Math.round(config.numeroVisitas * 1.0), conversoes: Math.round(config.numeroPedidos * 1.0) },
-      { name: "Jun", visitas: Math.round(config.numeroVisitas * 1.2), conversoes: Math.round(config.numeroPedidos * 1.2) },
-      { name: "Jul", visitas: Math.round(config.numeroVisitas * 1.4), conversoes: Math.round(config.numeroPedidos * 1.4) },
-      { name: "Ago", visitas: Math.round(config.numeroVisitas * 1.1), conversoes: Math.round(config.numeroPedidos * 1.1) },
-    ]
-  };
-};
+const topGrowth = [
+  { ranking: 1, conta: "lojax_oficial", nicho: "Moda Feminina", gmvAtual: 182000, variacao: "+38%", gmvAnterior: 132000 },
+  { ranking: 2, conta: "supercasa_br", nicho: "Casa & Decoração", gmvAtual: 165000, variacao: "+33%", gmvAnterior: 124000 },
+  { ranking: 3, conta: "techprime_store", nicho: "Eletrônicos", gmvAtual: 154000, variacao: "+29%", gmvAnterior: 119000 },
+  { ranking: 4, conta: "beleza_viva", nicho: "Saúde & Beleza", gmvAtual: 141000, variacao: "+26%", gmvAnterior: 112000 },
+  { ranking: 5, conta: "kidsworld_oficial", nicho: "Infantil", gmvAtual: 132000, variacao: "+24%", gmvAnterior: 106000 },
+];
 
-// Cores para o gráfico de pizza
-const COLORS = ['#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#06b6d4', '#f59e0b', '#84cc16', '#ec4899'];
+const mapPins = [
+  { top: "18%", left: "32%" },
+  { top: "26%", left: "48%" },
+  { top: "34%", left: "41%" },
+  { top: "42%", left: "55%" },
+  { top: "50%", left: "37%" },
+  { top: "58%", left: "62%" },
+  { top: "66%", left: "45%" },
+  { top: "72%", left: "53%" },
+  { top: "80%", left: "30%" },
+];
 
-// Componente personalizado para o tooltip do gráfico de pizza
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
-        <p className="font-semibold text-gray-900 dark:text-white">{payload[0].name}</p>
-        <p className="text-gray-600 dark:text-gray-300">
-          {payload[0].value}% do total
+function MapPanel() {
+  return (
+    <div className="relative h-72 w-full rounded-2xl bg-gradient-to-br from-sky-900/70 via-slate-900/70 to-slate-950/80 border border-sky-500/40 overflow-hidden">
+      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,_#22d3ee_0,_transparent_55%),radial-gradient(circle_at_bottom,_#0ea5e9_0,_transparent_60%)]" />
+      <div className="absolute inset-4">
+        <div className="h-full w-full rounded-xl border border-sky-500/30 bg-slate-950/40 backdrop-blur-sm relative">
+          {mapPins.map((pin, index) => (
+            <span
+              key={index}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{ top: pin.top, left: pin.left }}
+            >
+              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-500/40 ring-2 ring-emerald-300/80">
+                <MapPin className="h-3 w-3 text-slate-950" />
+              </span>
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="absolute bottom-4 left-5">
+        <p className="text-xs font-semibold text-sky-100/90 uppercase tracking-wide">
+          Distribuição de lojas monitoradas
+        </p>
+        <p className="text-[11px] text-sky-100/80">
+          Mapa ilustrativo da concentração de clientes por região.
         </p>
       </div>
-    );
-  }
-  return null;
-};
+    </div>
+  );
+}
 
 export default function Home() {
   const { config, getCalculatedMetrics } = useDashboardConfig();
-  const chartData = generateChartData(config);
   const metrics = getCalculatedMetrics();
 
+  const totalSellers = weeklyEvolution[weeklyEvolution.length - 1].sellers;
+  const totalPedidos = config.numeroPedidos;
+  const totalGmv = config.gmvGeral;
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Visão geral das estatísticas da sua loja Shopee
-          </p>
-        </div>
-        <Link href="/analise">
-          <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-            <Plus className="mr-2 h-4 w-4" /> Nova Análise
-          </Button>
-        </Link>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-orange-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">GMV Geral</p>
-                <p className="text-2xl font-bold text-orange-600">{formatCurrency(config.gmvGeral)}</p>
-              </div>
-              <div className="rounded-full p-3 bg-orange-100 dark:bg-orange-900/20">
-                <DollarSign className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-              <span className="text-green-500 font-medium">+{metrics.roi}% </span>
-              <span className="text-muted-foreground ml-1">ROI sobre investimento</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Investimento ADS</p>
-                <p className="text-2xl font-bold text-blue-600">{formatCurrency(config.investimentoAds)}</p>
-              </div>
-              <div className="rounded-full p-3 bg-blue-100 dark:bg-blue-900/20">
-                <Target className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <span className="text-muted-foreground">Acumulado no mês</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-green-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">CTR Geral</p>
-                <p className="text-2xl font-bold text-green-600">{config.ctrGeral}%</p>
-              </div>
-              <div className="rounded-full p-3 bg-green-100 dark:bg-green-900/20">
-                <BarChart3 className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-              <span className="text-green-500 font-medium">+0.5% </span>
-              <span className="text-muted-foreground ml-1">vs mês anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-purple-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">CPA Médio</p>
-                <p className="text-2xl font-bold text-purple-600">{formatCurrency(config.cpaMedio)}</p>
-              </div>
-              <div className="rounded-full p-3 bg-purple-100 dark:bg-purple-900/20">
-                <Target className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <span className="text-muted-foreground">Custo por aquisição</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-indigo-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pedidos</p>
-                <p className="text-2xl font-bold text-indigo-600">{formatNumber(config.numeroPedidos)}</p>
-              </div>
-              <div className="rounded-full p-3 bg-indigo-100 dark:bg-indigo-900/20">
-                <ShoppingBag className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <TrendingUp className="mr-1 h-4 w-4 text-green-500" />
-              <span className="text-green-500 font-medium">+8% </span>
-              <span className="text-muted-foreground ml-1">vs mês anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-teal-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Visitas</p>
-                <p className="text-2xl font-bold text-teal-600">{formatNumber(config.numeroVisitas)}</p>
-              </div>
-              <div className="rounded-full p-3 bg-teal-100 dark:bg-teal-900/20">
-                <Eye className="h-6 w-6 text-teal-600 dark:text-teal-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <span className="text-muted-foreground">Taxa de conversão: {metrics.taxaConversao}%</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-rose-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">ROI Total</p>
-                <p className="text-2xl font-bold text-rose-600">{metrics.roi}%</p>
-              </div>
-              <div className="rounded-full p-3 bg-rose-100 dark:bg-rose-900/20">
-                <TrendingUp className="h-6 w-6 text-rose-600 dark:text-rose-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <span className="text-muted-foreground">Retorno sobre investimento</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-amber-500 hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Relatórios</p>
-                <p className="text-2xl font-bold text-amber-600">12</p>
-              </div>
-              <div className="rounded-full p-3 bg-amber-100 dark:bg-amber-900/20">
-                <FileSpreadsheet className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-              </div>
-            </div>
-            <div className="mt-3 flex items-center text-sm">
-              <span className="text-muted-foreground">Último gerado: 2 dias atrás</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4 hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-6 w-6 text-blue-600" />
-              Vendas Mensais 
-            <span className="ml-4 text-base font-normal text-muted-foreground">
-              Total: {formatCurrency(chartData.vendasMensais.reduce((acc, item) => acc + item.vendas, 0))}
-            </span>
-            </CardTitle> 
-            <CardDescription>Desempenho de vendas dos últimos 8 meses</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <BarChart3 className="h-16 w-16 text-blue-200 mx-auto" />
-                <div>
-                  <h3 className="text-lg font-semibold text-muted-foreground">Gráfico de Vendas</h3>
-                  <p className="text-sm text-muted-foreground">Dados baseados nas suas configurações</p>
-                </div>
-                <div className="grid grid-cols-8 gap-2 text-xs">
-                  {chartData.vendasMensais.map((item, index) => (
-                    <div key={index} className="text-center">
-                      <div className="bg-blue-100 dark:bg-blue-900/20 rounded p-2 mb-1">
-                        <div className="text-blue-600 font-semibold">{formatCurrency(item.vendas)}</div>
-                      </div>
-                      <div className="text-muted-foreground">{item.name}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3 hover:shadow-lg transition-shadow w-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <PieChart className="h-6 w-6 text-green-600" />
-              Distribuição de Nichos
-            </CardTitle>
-            <CardDescription>Categorias mais vendidas por nicho</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={chartData.distribuicaoNichos}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    fontSize={12}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {chartData.distribuicaoNichos.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                </RechartsPieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="hover:shadow-lg transition-shadow w-full lg:col-span-3">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LineChart className=" w-12 text-purple-600" />
-            Tráfego vs Conversões
-          </CardTitle>
-          <CardDescription>Relação entre visitas e vendas concretizadas</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80 flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <LineChart className="h-17 w-16 text-purple-200 mx-auto" />
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground">Métricas de Conversão</h3>
-                <p className="text-sm text-muted-foreground">Visitas vs Pedidos por mês</p>
-              </div>
-              <div className="grid grid-cols-8 gap-2 text-xs">
-                {chartData.trafegoConversao.map((item, index) => (
-                  <div key={index} className="text-center space-y-1">
-                    <div className="bg-purple-100 dark:bg-purple-900/20 rounded p-2">
-                      <div className="text-purple-600 font-semibold">{formatNumber(item.visitas)}</div>
-                      <div className="text-xs text-muted-foreground">visitas</div>
-                    </div>
-                    <div className="bg-green-100 dark:bg-green-900/20 rounded p-2">
-                      <div className="text-green-600 font-semibold">{formatNumber(item.conversoes)}</div>
-                      <div className="text-xs text-muted-foreground">pedidos</div>
-                    </div>
-                    <div className="text-muted-foreground">{item.name}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+    <div className="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-50 py-6">
+      <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Painel de Performance</h1>
+            <p className="text-sm text-slate-300 mt-1">
+              Visão executiva das lojas acompanhadas com IA e integrações Shopee.
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <Link href="/analise">
+            <Button className="bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-500/30">
+              <Plus className="mr-2 h-4 w-4" /> Nova Análise
+            </Button>
+          </Link>
+        </div>
+
+        <Card className="bg-slate-900/70 border-slate-800 shadow-2xl shadow-sky-900/30 backdrop-blur-xl">
+          <CardHeader className="pb-4 border-b border-slate-800/80 flex flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="relative h-12 w-12 rounded-xl bg-slate-950/80 border border-slate-700 flex items-center justify-center overflow-hidden">
+                <Image
+                  src={logo}
+                  alt="Logo"
+                  className="object-contain"
+                  fill
+                />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold text-slate-50">
+                  Visão Geral Mentoria & Escalada de Lojas
+                </CardTitle>
+                <CardDescription className="text-slate-300">
+                  Dados consolidados dos últimos 30 dias para todas as contas conectadas.
+                </CardDescription>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 text-right text-xs">
+              <div>
+                <p className="text-slate-400 uppercase tracking-wide">Lojas Ativas</p>
+                <p className="text-lg font-semibold text-emerald-400">
+                  {formatNumber(totalSellers)}
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400 uppercase tracking-wide">GMV Total 30d</p>
+                <p className="text-lg font-semibold text-sky-400">
+                  {formatCurrency(totalGmv)}
+                </p>
+              </div>
+              <div>
+                <p className="text-slate-400 uppercase tracking-wide">Pedidos 30d</p>
+                <p className="text-lg font-semibold text-amber-400">
+                  {formatNumber(totalPedidos)}
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className="pt-4 space-y-6">
+            <div className="grid gap-6 lg:grid-cols-[2fr,3fr]">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-3 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-slate-300">GMV Geral</span>
+                      <DollarSign className="h-4 w-4 text-emerald-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-emerald-300">
+                      {formatCurrency(config.gmvGeral)}
+                    </p>
+                    <p className="text-[11px] text-emerald-200/80 mt-1">
+                      ROI médio {metrics.roi}% nas contas ativas.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-sky-500/30 bg-sky-500/5 px-3 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-slate-300">Investimento Ads</span>
+                      <Target className="h-4 w-4 text-sky-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-sky-300">
+                      {formatCurrency(config.investimentoAds)}
+                    </p>
+                    <p className="text-[11px] text-sky-200/80 mt-1">
+                      CPA médio de {formatCurrency(config.cpaMedio)} por pedido.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/5 px-3 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-slate-300">Pedidos</span>
+                      <ShoppingBag className="h-4 w-4 text-indigo-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-indigo-300">
+                      {formatNumber(config.numeroPedidos)}
+                    </p>
+                    <p className="text-[11px] text-indigo-200/80 mt-1">
+                      Conversão média de {metrics.taxaConversao}% das visitas.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 px-3 py-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-slate-300">Visitas</span>
+                      <Eye className="h-4 w-4 text-rose-400" />
+                    </div>
+                    <p className="text-lg font-semibold text-rose-300">
+                      {formatNumber(config.numeroVisitas)}
+                    </p>
+                    <p className="text-[11px] text-rose-200/80 mt-1">
+                      Tráfego consolidado de campanhas e orgânico.
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-700 bg-slate-900/60 px-3 py-3 text-xs">
+                  <p className="text-slate-300 font-medium mb-1">
+                    KPIs dos últimos 7 ciclos semanais
+                  </p>
+                  <p className="text-slate-400 text-[11px]">
+                    Evolução contínua de GMV, número de sellers e eficiência de funil por semana,
+                    com base nas configurações atuais e dados das integrações.
+                  </p>
+                </div>
+              </div>
+
+              <MapPanel />
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-[3fr,2fr]">
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/40 backdrop-blur-md overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-200 uppercase tracking-wide">
+                      Evolução últimas semanas
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Funil consolidado das lojas com Great Mall ativo.
+                    </p>
+                  </div>
+                </div>
+                <div className="max-h-64 overflow-auto">
+                  <table className="w-full text-xs text-slate-200">
+                    <thead className="bg-slate-900/80 text-[11px] uppercase tracking-wide text-slate-400">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Semana</th>
+                        <th className="px-3 py-2 text-right">Sellers</th>
+                        <th className="px-3 py-2 text-right">Pedidos</th>
+                        <th className="px-3 py-2 text-right">GMV</th>
+                        <th className="px-3 py-2 text-right">Ticket médio</th>
+                        <th className="px-3 py-2 text-right">Conversão</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {weeklyEvolution.map((row, index) => (
+                        <tr
+                          key={row.label}
+                          className={index % 2 === 0 ? "bg-slate-900/40" : "bg-slate-900/10"}
+                        >
+                          <td className="px-3 py-2">{row.label}</td>
+                          <td className="px-3 py-2 text-right">{formatNumber(row.sellers)}</td>
+                          <td className="px-3 py-2 text-right">{formatNumber(row.pedidos)}</td>
+                          <td className="px-3 py-2 text-right">{formatCurrency(row.gmv)}</td>
+                          <td className="px-3 py-2 text-right">{formatCurrency(row.ticket)}</td>
+                          <td className="px-3 py-2 text-right">{row.conversao.toFixed(1)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-800 bg-slate-950/40 backdrop-blur-md overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-200 uppercase tracking-wide">
+                      Top 5 Crescimento em Faturamento
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Contas com maior aceleração de GMV nas últimas 4 semanas.
+                    </p>
+                  </div>
+                  <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div className="max-h-64 overflow-auto">
+                  <table className="w-full text-xs text-slate-200">
+                    <thead className="bg-slate-900/80 text-[11px] uppercase tracking-wide text-slate-400">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Ranking</th>
+                        <th className="px-3 py-2 text-left">Conta</th>
+                        <th className="px-3 py-2 text-left">Nicho</th>
+                        <th className="px-3 py-2 text-right">GMV atual</th>
+                        <th className="px-3 py-2 text-right">Variação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topGrowth.map((row) => (
+                        <tr key={row.ranking} className="border-b border-slate-900/40 last:border-0">
+                          <td className="px-3 py-2 text-left text-slate-400">
+                            #{row.ranking}
+                          </td>
+                          <td className="px-3 py-2 text-left font-medium">
+                            {row.conta}
+                          </td>
+                          <td className="px-3 py-2 text-left text-slate-300">
+                            {row.nicho}
+                          </td>
+                          <td className="px-3 py-2 text-right">
+                            {formatCurrency(row.gmvAtual)}
+                          </td>
+                          <td className="px-3 py-2 text-right text-emerald-400 font-semibold">
+                            {row.variacao}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

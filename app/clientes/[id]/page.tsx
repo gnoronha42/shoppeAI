@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClientForm } from "@/components/client/client-form";
 import { ClientChecklist } from "@/components/client/client-checklist";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import {
   FileText,
   BarChart,
@@ -58,7 +59,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { PERMISSIONS } from "@/lib/permissions";
-
+import shopeeLogo from "../../../assets/shoppeLogo.png";
 // Importar marked dinamicamente para evitar erros de SSR
 import { marked } from "marked";
 
@@ -1241,7 +1242,7 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <img src="/assets/shopee-logo.png" alt="Shopee" className="h-6 w-6" />
+                <Image width={24} height={24} src={shopeeLogo} alt="Shopee" />
                 Integração com Shopee
               </CardTitle>
               <CardDescription>
