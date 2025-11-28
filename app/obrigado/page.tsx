@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 import { useSearchParams } from "next/navigation";
-import logoefeito from "@/assets/logoe.png";
+import logoefeito from "../../assets/shoppeLogo.png";
 
 // Componente interno que usa useSearchParams
 function ObrigadoContent() {

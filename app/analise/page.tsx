@@ -20,6 +20,9 @@ import {
 import { ClientSelector } from "@/components/client/client-selector";
 import { AnalysisTypeSelector } from "@/components/analysis/analysis-type-selector";
 import { FileUpload } from "@/components/analysis/file-upload";
+import { DateRangePicker } from "@/components/analysis/date-range-picker";
+import { DateRange } from "react-day-picker";
+import { subDays } from "date-fns";
 import { useSelector } from "react-redux";
 import {
   selectSelectedClientId,
@@ -48,6 +51,12 @@ export default function AnalisePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<any[]>([]);
   const { toast } = useToast();
+  
+  // Estado para o período selecionado (padrão: últimos 30 dias)
+  const [dateRange, setDateRange] = useState<DateRange>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
   const [apiError, setApiError] = useState<string | null>(null);
   const [customMarkdown, setCustomMarkdown] = useState<string>("");
   const [showMarkdownImport, setShowMarkdownImport] = useState<boolean>(false);
@@ -65,15 +74,11 @@ export default function AnalisePage() {
 
   // Função helper para obter URL base
   const getBaseUrl = () => {
-    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const baseUrl = "https://analysis-micro.onrender.com";
-    
-    console.log('🌐 Ambiente detectado:', {
-      isLocalhost,
-      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server-side',
-      baseUrl
-    });
-    
+    const baseUrl = process.env.NEXT_PUBLIC_ANALYSIS_BASE_URL;
+    if (!baseUrl) {
+      throw new Error("Variável de ambiente NEXT_PUBLIC_ANALYSIS_BASE_URL não definida");
+    }
+    console.log('🌐 Base URL da análise:', baseUrl);
     return baseUrl;
   };
 
@@ -157,7 +162,7 @@ export default function AnalisePage() {
     console.log("📡 Enviando requisição CSV para microserviço com dados corretos...");
     
     // USAR ENDPOINT CORRIGIDO
-    const baseUrl = "https://analysis-micro.onrender.com";
+    const baseUrl = getBaseUrl();
     
     const response = await fetch(`${baseUrl}/analise-csv`, {
       method: "POST",
@@ -398,7 +403,7 @@ export default function AnalisePage() {
   // Função para obter métricas avançadas
   const obterMetricasAvancadas = async (dados: any) => {
     try {
-      const baseUrl =  "https://analysis-micro.onrender.com";
+      const baseUrl = getBaseUrl();
       
       const response = await fetch(`${baseUrl}/api/metricas-avancadas`, {
         method: "POST",
@@ -423,7 +428,7 @@ export default function AnalisePage() {
   // Função para gerar relatório personalizado
   const gerarRelatorioPersonalizado = async (dados: any, tipoRelatorio: string = 'completo') => {
     try {
-      const baseUrl =  "https://analysis-micro.onrender.com";
+      const baseUrl = getBaseUrl();
       
       const response = await fetch(`${baseUrl}/api/relatorio-personalizado`, {
         method: "POST",
@@ -468,7 +473,7 @@ export default function AnalisePage() {
 
     console.log("📡 Enviando requisição para análise de imagens...");
 
-    const baseUrl = "https://analysis-micro.onrender.com";
+    const baseUrl = getBaseUrl();
 
     const response = await fetch(`${baseUrl}/analise`, {
       method: "POST",
@@ -700,8 +705,20 @@ export default function AnalisePage() {
       if (!statusRes.ok || !statusData?.connected) {
         throw new Error("Cliente não está conectado à Shopee");
       }
-      // 2) Buscar dados reais
-      const dataRes = await fetch(`/api/shopee/data?client_id=${selectedClientId}`, { cache: 'no-store' });
+      // 2) Buscar dados reais com período selecionado
+      const params = new URLSearchParams({
+        client_id: selectedClientId,
+      });
+      
+      // Adicionar parâmetros de data se disponíveis
+      if (dateRange?.from) {
+        params.append('date_from', dateRange.from.toISOString());
+      }
+      if (dateRange?.to) {
+        params.append('date_to', dateRange.to.toISOString());
+      }
+      
+      const dataRes = await fetch(`/api/shopee/data?${params.toString()}`, { cache: 'no-store' });
       const dataJson = await dataRes.json();
       if (!dataRes.ok) {
         if (dataRes.status === 401 && dataJson?.reconnect_required) {
@@ -734,11 +751,13 @@ export default function AnalisePage() {
         roas: 0,
         conversao: 0,
       };
-      const baseUrl = "https://analysis-micro.onrender.com";
+      const baseUrl = getBaseUrl();
       const extras = {
         shopName: agg?.shopName || selectedClient?.name || 'Loja',
         period: agg?.period || null,
-        topProducts: agg?.topProductsLast30Days || []
+        topProducts: agg?.topProductsLast30Days || [],
+        totalProducts: agg?.totalProducts || 0,
+        activeProducts: agg?.activeProducts || 0
       };
       // Chama o microserviço para gerar o markdown a partir dos dados reais
       const mdRes = await fetch(`${baseUrl}/api/relatorio-shopee-markdown`, {
@@ -868,6 +887,25 @@ export default function AnalisePage() {
                 : analysisType === "whatsapp-consultivo"
                 ? "Análise consultiva no formato WhatsApp com diagnóstico semanal, métricas visuais e recomendações práticas em linguagem humana"
                 : "Análise semanal expressa com diagnóstico técnico do funil, gargalos identificados e ações estratégicas prioritárias"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Período de Análise</CardTitle>
+            <CardDescription>
+              Selecione o período para análise dos dados da Shopee
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DateRangePicker
+              value={dateRange}
+              onChange={(range) => range && setDateRange(range)}
+              placeholder="Selecione o período de análise"
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              Este período será usado para buscar dados de vendas, visitantes e métricas da integração Shopee
             </p>
           </CardContent>
         </Card>

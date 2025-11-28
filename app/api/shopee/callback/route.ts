@@ -61,12 +61,15 @@ export async function GET(request: Request) {
     const expiresAt = new Date(Date.now() + (tokenRes.expire_in ?? 0) * 1000);
     const finalShopId = String(tokenRes.shop_id || shop_id);
 
-    console.log(`DEBUG: Token recebido da Shopee:`, {
+    console.log(`📅 DEBUG: Token recebido da Shopee:`, {
       has_access_token: !!tokenRes.access_token,
       has_refresh_token: !!tokenRes.refresh_token,
       access_token_length: tokenRes.access_token?.length || 0,
       refresh_token_length: tokenRes.refresh_token?.length || 0,
-      expire_in: tokenRes.expire_in,
+      expire_in_seconds: tokenRes.expire_in,
+      expire_in_hours: tokenRes.expire_in ? Math.round(tokenRes.expire_in / 3600) : 'N/A',
+      expire_in_days: tokenRes.expire_in ? Math.round(tokenRes.expire_in / (3600 * 24)) : 'N/A',
+      expires_at: expiresAt.toISOString(),
       shop_id: finalShopId
     });
 

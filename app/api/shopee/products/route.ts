@@ -17,9 +17,17 @@ async function getValidAccessToken(integration: ShopeeIntegration) {
   const now = new Date();
   const expiry = integration.token_expiry ? new Date(integration.token_expiry) : null;
   const expiryValid = !!expiry && !isNaN(expiry.getTime());
-  const bufferSeconds = 60;
+  // Buffer de 1 hora em vez de 1 minuto
+  const bufferSeconds = 3600;
   const isExpired = expiryValid && expiry!.getTime() < now.getTime();
   const nearExpiry = expiryValid && expiry!.getTime() - now.getTime() < bufferSeconds * 1000;
+
+  console.log(`🔍 [Products] Verificando token para shop ${integration.shop_id}:`, {
+    expires_in_hours: expiryValid ? Math.round((expiry!.getTime() - now.getTime()) / (1000 * 60 * 60)) : 'N/A',
+    is_expired: isExpired,
+    near_expiry: nearExpiry,
+    buffer_hours: bufferSeconds / 3600
+  });
 
   if ((isExpired || nearExpiry) && integration.refresh_token) {
     try {
