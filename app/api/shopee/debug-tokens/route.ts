@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     }
 
     const now = new Date();
-    const expiry = new Date(integration.token_expiry);
+    const expiry = new Date(integration.token_expiry || '');
     const expiryValid = !isNaN(expiry.getTime());
     
     const debugInfo = {
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
         token_seems_valid: expiryValid && expiry.getTime() > now.getTime(),
         expires_soon: expiryValid && (expiry.getTime() - now.getTime()) < (24 * 60 * 60 * 1000), // menos de 24h
         needs_refresh: expiryValid && expiry.getTime() < now.getTime(),
-        suspicious_short_duration: expiryValid && (expiry.getTime() - new Date(integration.created_at).getTime()) < (7 * 24 * 60 * 60 * 1000) // menos de 7 dias de duração total
+        suspicious_short_duration: expiryValid && (expiry.getTime() - new Date(integration.created_at || '').getTime()) < (7 * 24 * 60 * 60 * 1000) // menos de 7 dias de duração total
       }
     });
 
