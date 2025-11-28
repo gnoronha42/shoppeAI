@@ -66,7 +66,7 @@ export default function AnalisePage() {
   // Função helper para obter URL base
   const getBaseUrl = () => {
     const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-    const baseUrl = "http://localhost:3001";
+    const baseUrl = "https://analysis-micro.onrender.com";
     
     console.log('🌐 Ambiente detectado:', {
       isLocalhost,
@@ -157,7 +157,7 @@ export default function AnalisePage() {
     console.log("📡 Enviando requisição CSV para microserviço com dados corretos...");
     
     // USAR ENDPOINT CORRIGIDO
-    const baseUrl = "http://localhost:3001";
+    const baseUrl = "https://analysis-micro.onrender.com";
     
     const response = await fetch(`${baseUrl}/analise-csv`, {
       method: "POST",
@@ -398,7 +398,7 @@ export default function AnalisePage() {
   // Função para obter métricas avançadas
   const obterMetricasAvancadas = async (dados: any) => {
     try {
-      const baseUrl =  "http://localhost:3001";
+      const baseUrl =  "https://analysis-micro.onrender.com";
       
       const response = await fetch(`${baseUrl}/api/metricas-avancadas`, {
         method: "POST",
@@ -423,7 +423,7 @@ export default function AnalisePage() {
   // Função para gerar relatório personalizado
   const gerarRelatorioPersonalizado = async (dados: any, tipoRelatorio: string = 'completo') => {
     try {
-      const baseUrl =  "http://localhost:3001";
+      const baseUrl =  "https://analysis-micro.onrender.com";
       
       const response = await fetch(`${baseUrl}/api/relatorio-personalizado`, {
         method: "POST",
@@ -468,7 +468,7 @@ export default function AnalisePage() {
 
     console.log("📡 Enviando requisição para análise de imagens...");
 
-    const baseUrl = "http://localhost:3001";
+    const baseUrl = "https://analysis-micro.onrender.com";
 
     const response = await fetch(`${baseUrl}/analise`, {
       method: "POST",
@@ -734,7 +734,7 @@ export default function AnalisePage() {
         roas: 0,
         conversao: 0,
       };
-      const baseUrl = "http://localhost:3001";
+      const baseUrl = "https://analysis-micro.onrender.com";
       const extras = {
         shopName: agg?.shopName || selectedClient?.name || 'Loja',
         period: agg?.period || null,
