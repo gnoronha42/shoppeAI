@@ -95,12 +95,31 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
   };
 }
 
+/**
+ * 🔄 REFRESH TOKEN CORRIGIDO - Usa timestamp do servidor Shopee e sempre atualiza refresh_token
+ * 
+ * CRÍTICO: A Shopee retorna um NOVO refresh_token a cada refresh.
+ * Sempre devemos salvar o novo refresh_token, nunca manter o antigo.
+ */
 export async function refreshAccessToken(args: { refresh_token: string }) {
   const path = '/api/v2/auth/token/refresh';
-  const timestamp = getTimestamp();
+  
+  // ✅ CORREÇÃO: Usa timestamp do servidor Shopee (mesmo padrão de getAccessToken)
+  const timestamp = await getShopeeServerTimestamp();
+  
+  // BaseString: partner_id + path + timestamp + refresh_token
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}${args.refresh_token}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
   const url = `${SHOPEE_BASE_URL}${path}`;
+  
+  console.log(`🔄 [refreshAccessToken] Request:`, {
+    path,
+    timestamp,
+    refresh_token_preview: args.refresh_token?.slice(0, 8) + '...' + args.refresh_token?.slice(-4),
+    baseString_preview: baseString.slice(0, 50) + '...',
+    sign_preview: sign.slice(0, 16) + '...'
+  });
+  
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -111,11 +130,36 @@ export async function refreshAccessToken(args: { refresh_token: string }) {
       sign,
     }),
   });
+  
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Shopee token/refresh failed: ${res.status} ${text}`);
+    const errorMsg = `Shopee token/refresh failed: ${res.status} ${text}`;
+    console.error(`❌ [refreshAccessToken] Erro:`, errorMsg);
+    
+    // Detecta se o refresh_token expirou (geralmente após 30 dias)
+    if (res.status === 403 || text.includes('invalid') || text.includes('expired')) {
+      throw Object.assign(new Error('Refresh token expirado - reautenticação necessária'), { 
+        code: 'REFRESH_TOKEN_EXPIRED',
+        status: res.status,
+        response: text 
+      });
+    }
+    
+    throw new Error(errorMsg);
   }
+  
   const data = await res.json();
+  
+  console.log(`✅ [refreshAccessToken] Sucesso:`, {
+    has_access_token: !!data?.access_token,
+    has_refresh_token: !!data?.refresh_token,
+    expire_in_seconds: data?.expire_in,
+    expire_in_hours: data?.expire_in ? Math.round(data.expire_in / 3600) : 'N/A',
+    expire_in_days: data?.expire_in ? Math.round(data.expire_in / (3600 * 24)) : 'N/A',
+    // Log para confirmar que recebemos novo refresh_token
+    refresh_token_changed: data?.refresh_token && data.refresh_token !== args.refresh_token
+  });
+  
   return data as {
     access_token: string;
     refresh_token: string;
@@ -136,7 +180,8 @@ export async function shopeeFetch<T = unknown>(args: {
 }) {
   const path = args.path.startsWith('/') ? args.path : `/${args.path}`;
   const method = args.method || 'GET';
-  const timestamp = getTimestamp();
+  // ✅ CORREÇÃO 3: Usar timestamp do servidor Shopee para consistência
+  const timestamp = await getShopeeServerTimestamp();
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}${args.access_token}${args.shop_id}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
   const search = new URLSearchParams();
@@ -149,16 +194,75 @@ export async function shopeeFetch<T = unknown>(args: {
     if (v !== undefined) search.set(k, String(v));
   }
   const url = `${SHOPEE_BASE_URL}${path}?${search.toString()}`;
+  
+  // 📋 LOG COMPLETO DA REQUEST
+  const requestBody = method === 'POST' && args.body ? JSON.stringify(args.body) : null;
+  const requestDetails = {
+    endpoint: `${SHOPEE_BASE_URL}${path}`,
+    method: method,
+    shop_id: String(args.shop_id),
+    query_params: Object.fromEntries(search.entries()),
+    body: requestBody ? JSON.parse(requestBody) : null,
+    full_url: url,
+    timestamp: timestamp,
+    date_range: args.query?.time_from && args.query?.time_to ? {
+      from: new Date(Number(args.query.time_from) * 1000).toISOString(),
+      to: new Date(Number(args.query.time_to) * 1000).toISOString(),
+      from_timestamp: args.query.time_from,
+      to_timestamp: args.query.time_to,
+      days: args.query.time_from && args.query.time_to ? 
+        Math.ceil((Number(args.query.time_to) - Number(args.query.time_from)) / (24 * 60 * 60)) : null
+    } : null
+  };
+  
+  console.log('\n' + '='.repeat(80));
+  console.log('📡 [shopeeFetch] REQUEST COMPLETA PARA SHOPEE API');
+  console.log('='.repeat(80));
+  console.log('🔗 Endpoint:', requestDetails.endpoint);
+  console.log('📋 Method:', requestDetails.method);
+  console.log('🏪 Shop ID:', requestDetails.shop_id);
+  console.log('📅 Timestamp:', requestDetails.timestamp);
+  if (requestDetails.date_range) {
+    console.log('📆 Intervalo de Datas:');
+    console.log('   From:', requestDetails.date_range.from);
+    console.log('   To:', requestDetails.date_range.to);
+    console.log('   Days:', requestDetails.date_range.days);
+  }
+  console.log('🔑 Query Params:', JSON.stringify(requestDetails.query_params, null, 2));
+  if (requestBody) {
+    console.log('📦 Body:', JSON.stringify(JSON.parse(requestBody), null, 2));
+  }
+  console.log('🌐 Full URL:', requestDetails.full_url);
+  console.log('='.repeat(80) + '\n');
+  
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: method === 'POST' && args.body ? JSON.stringify(args.body) : undefined,
+    body: requestBody || undefined,
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Shopee API ${path} failed: ${res.status} ${text}`);
+  
+  const responseText = await res.text();
+  let responseData: any;
+  try {
+    responseData = JSON.parse(responseText);
+  } catch {
+    responseData = responseText;
   }
-  return (await res.json()) as T;
+  
+  // 📋 LOG COMPLETO DA RESPONSE
+  console.log('\n' + '='.repeat(80));
+  console.log('📥 [shopeeFetch] RESPONSE DA SHOPEE API');
+  console.log('='.repeat(80));
+  console.log('🔗 Endpoint:', requestDetails.endpoint);
+  console.log('📊 Status:', res.status, res.statusText);
+  console.log('📦 Response Body:', JSON.stringify(responseData, null, 2));
+  console.log('📏 Response Size:', responseText.length, 'bytes');
+  console.log('='.repeat(80) + '\n');
+  
+  if (!res.ok) {
+    throw new Error(`Shopee API ${path} failed: ${res.status} ${responseText}`);
+  }
+  return responseData as T;
 }
 
 export function ensureShopeeEnv() {
@@ -179,5 +283,3 @@ export function getShopeeEnv() {
     redirectUrl: SHOPEE_REDIRECT_URL,
   };
 }
-
-

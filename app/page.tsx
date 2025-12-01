@@ -114,7 +114,7 @@ export default function Home() {
   }));
 
   return (
-    <div className="min-h-screen w-full bg-[url('/bg-texture.png')] bg-cover bg-fixed bg-slate-950 text-slate-50">
+    <div className="">
         {/* Overlay laranja translúcido global */}
         <div className="fixed inset-0 bg-gradient-to-br from-orange-900/10 via-slate-950/90 to-slate-950 pointer-events-none" />
         

@@ -742,14 +742,16 @@ export default function AnalisePage() {
       const gmv = Number(agg?.gmvLast30Days) || 0;
       const ticketMedio = Number(agg?.ticketMedioLast30Days) || (pedidos > 0 ? gmv / pedidos : 0);
 
-      // 3) Montar payload para o microserviço
+      // 3) Montar payload para o microserviço com dados reais da API
       const dados = {
         gmv,
         pedidos,
         ticketMedio,
-        visitantes: 0,
-        roas: 0,
-        conversao: 0,
+        visitantes: Number(agg?.visitors) || 0,
+        roas: Number(agg?.ads?.roas) || 0,
+        conversao: Number(agg?.conversionRate) || 0,
+        adsSpend: Number(agg?.ads?.spend) || 0,
+        pageViews: Number(agg?.pageViews) || 0,
       };
       const baseUrl = getBaseUrl();
       const extras = {
