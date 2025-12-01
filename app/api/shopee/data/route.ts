@@ -447,7 +447,7 @@ export async function GET(request: Request) {
           time_from: timeFrom, 
           time_to: timeTo 
         },
-        date_range: { from: new Date(timeFrom * 1000), to: new Date(timeTo * 1000), days: periodDays }
+        body: { from: new Date(timeFrom * 1000), to:   new Date(timeTo * 1000), days: periodDays }
       });
       
       if (insightResp?.response) {
@@ -484,7 +484,7 @@ export async function GET(request: Request) {
           time_to: timeTo,
           granularity: 'daily'
         },
-        date_range: { from: new Date(timeFrom * 1000), to: new Date(timeTo * 1000), days: periodDays }
+        body: { from: new Date(timeFrom * 1000), to: new Date(timeTo * 1000), days: periodDays }
       });
       
       if (adsResp?.response?.data) {
