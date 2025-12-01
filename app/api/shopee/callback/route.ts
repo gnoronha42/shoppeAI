@@ -96,6 +96,7 @@ export async function GET(request: Request) {
       clientId = created.id;
     }
 
+    // ✅ CRÍTICO: Sempre salva o refresh_token recebido (Shopee retorna novo a cada refresh)
     const upsertResult = await prisma.client_integrations.upsert({
       where: { client_id_provider: { client_id: clientId!, provider: 'shopee' } },
       create: {
@@ -105,14 +106,14 @@ export async function GET(request: Request) {
         merchant_id: tokenRes.merchant_id ? String(tokenRes.merchant_id) : null,
         region: decoded.region || 'BR',
         access_token: tokenRes.access_token,
-        refresh_token: tokenRes.refresh_token,
+        refresh_token: tokenRes.refresh_token, // ✅ Sempre salva o novo refresh_token
         token_expiry: expiresAt,
       },
       update: {
         shop_id: finalShopId,
         merchant_id: tokenRes.merchant_id ? String(tokenRes.merchant_id) : null,
         access_token: tokenRes.access_token,
-        refresh_token: tokenRes.refresh_token,
+        refresh_token: tokenRes.refresh_token, // ✅ Sempre atualiza o refresh_token (nunca mantém o antigo)
         token_expiry: expiresAt,
         updated_at: new Date(),
       },

@@ -2,47 +2,69 @@ import prisma from '@/lib/prisma';
 import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
 
 // Helper para refrescar o token se estiver expirando ou já expirado
+// ✅ ATUALIZADO: Usa mesma lógica corrigida do /api/shopee/data
 export async function getValidAccessToken(integration: any) {
   const now = new Date();
-  const expiry = new Date(integration.token_expiry);
-  // Buffer de 1 hora (3600 segundos) para evitar refreshes desnecessários
-  const bufferSeconds = 3600; 
-  const expiryValid = !isNaN(expiry.getTime());
+  const expiry = integration.token_expiry ? new Date(integration.token_expiry) : null;
+  const expiryValid = !!expiry && !isNaN(expiry.getTime());
   
-  // Tenta refresh se:
-  // 1. Há refresh_token
-  // 2. Token está perto de expirar OU já expirou
+  // ✅ Buffer reduzido: 30 minutos (evita refreshes desnecessários)
+  const bufferSeconds = 1800;
+  const remainingSeconds = expiryValid && expiry ? Math.floor((expiry.getTime() - now.getTime()) / 1000) : 0;
+  
   const shouldRefresh =
     Boolean(integration.refresh_token) &&
     expiryValid &&
-    (expiry.getTime() <= now.getTime() + bufferSeconds * 1000); // <= para incluir tokens já expirados
+    (remainingSeconds <= bufferSeconds);
 
   if (shouldRefresh) {
     try {
-      console.log(`🔄 Token para shop ${integration.shop_id} está expirado/expirando, atualizando...`);
+      console.log(`🔄 [shopee-stats] Token expirado/expirando, renovando...`);
       const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token });
       
       const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
       
-      // Atualiza o token no banco de dados
+      // ✅ CRÍTICO: Sempre salva o novo refresh_token (Shopee retorna novo a cada refresh)
       const updatedIntegration = await prisma.client_integrations.update({
         where: { id: integration.id },
         data: {
           access_token: refreshed.access_token,
-          refresh_token: refreshed.refresh_token ?? integration.refresh_token,
+          refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza (nunca mantém o antigo)
           token_expiry: newExpiry,
+          updated_at: new Date(),
         },
       });
-      console.log(`✅ Token para shop ${integration.shop_id} atualizado com sucesso.`);
+      console.log(`✅ [shopee-stats] Token atualizado com sucesso.`);
       return updatedIntegration;
     } catch (e: any) {
-      console.error('❌ Falha ao refrescar token Shopee:', e?.message || e);
+      console.error('❌ [shopee-stats] Falha ao refrescar token:', e?.message || e);
+      if (e?.code === 'REFRESH_TOKEN_EXPIRED') {
+        throw Object.assign(new Error('Refresh token expirado'), { code: 'REFRESH_TOKEN_EXPIRED' });
+      }
       throw Object.assign(new Error('Falha ao atualizar token'), { code: 'RECONNECT_REQUIRED' });
     }
   }
   
   // Se não precisa refresh, verifica se o token ainda é válido
   if (!integration.access_token) {
+    if (integration.refresh_token) {
+      try {
+        const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token });
+        const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
+        const updated = await prisma.client_integrations.update({
+          where: { id: integration.id },
+          data: {
+            access_token: refreshed.access_token,
+            refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza
+            token_expiry: newExpiry,
+            updated_at: new Date(),
+          },
+        });
+        return updated;
+      } catch (e: any) {
+        throw Object.assign(new Error('Falha ao obter access token via refresh'), { code: 'RECONNECT_REQUIRED' });
+      }
+    }
     throw Object.assign(new Error('Access token ausente'), { code: 'RECONNECT_REQUIRED' });
   }
   
