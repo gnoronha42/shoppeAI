@@ -125,13 +125,13 @@ export async function GET(request: Request) {
 
     // Gerar recomendações
     if (periodsWithOrders.length === 0) {
-      summary.recommendations.push('🤔 Nenhum pedido encontrado em nenhum período - a loja pode ser nova ou não ter vendas ainda');
-      summary.recommendations.push('💡 Verifique se a loja tem pedidos no painel da Shopee');
-      summary.recommendations.push('📅 Tente períodos mais antigos ou verifique se a integração foi feita recentemente');
+      summary.recommendations.push(' Nenhum pedido encontrado em nenhum período - a loja pode ser nova ou não ter vendas ainda' as never);
+      summary.recommendations.push('💡 Verifique se a loja tem pedidos no painel da Shopee' as never);
+      summary.recommendations.push('📅 Tente períodos mais antigos ou verifique se a integração foi feita recentemente' as never);
     } else {
-      summary.recommendations.push(`✅ Encontrados pedidos no período: ${bestPeriod.period}`);
-      summary.recommendations.push(`📊 Use o período de ${bestPeriod.days} dias para gerar relatórios com dados reais`);
-      summary.recommendations.push(`💰 GMV encontrado: R$${bestPeriod.gmv}`);
+      summary.recommendations.push(` Encontrados pedidos no período: ${bestPeriod?.period}` as never);
+      summary.recommendations.push(` Use o período de ${bestPeriod?.days} dias para gerar relatórios com dados reais` as never);
+      summary.recommendations.push(` GMV encontrado: R$${bestPeriod?.gmv}` as never);
     }
 
     return NextResponse.json({

@@ -102,7 +102,7 @@ export async function GET(request: Request) {
           path: endpoint.path,
           status: 'success',
           response_size: JSON.stringify(response).length,
-          has_data: !!response?.response || !!response?.data,
+          has_data: !!(response as any)?.response || !!(response as any)?.data,
           sample_response: JSON.stringify(response).substring(0, 500) + '...'
         });
 
@@ -148,25 +148,25 @@ export async function GET(request: Request) {
 
     // Gerar recomendações
     if (workingEndpoints.length > 0) {
-      summary.recommendations.push(`✅ Encontrados ${workingEndpoints.length} endpoints funcionando!`);
-      summary.recommendations.push('💡 Use os endpoints que funcionam para buscar dados de Ads');
+      summary.recommendations.push(` Encontrados ${workingEndpoints.length} endpoints funcion ando!` as never);
+      summary.recommendations.push(' Use os endpoints que funcionam para buscar dados de Ads' as never);
       workingEndpoints.forEach(ep => {
-        summary.recommendations.push(`🔗 ${ep.endpoint}: ${ep.path}`);
+        summary.recommendations.push(`${ep.endpoint}: ${ep.path}` as never);
       });
     } else {
-      summary.recommendations.push('❌ Nenhum endpoint de Ads está funcionando');
+      summary.recommendations.push(' Nenhum endpoint de Ads está funcionando' as never);
       
       if (forbiddenEndpoints.length > 0) {
-        summary.recommendations.push('🔐 Alguns endpoints existem mas você não tem permissão');
-        summary.recommendations.push('💡 Verifique as permissões da sua aplicação no Shopee Partner Center');
+        summary.recommendations.push(' Alguns endpoints existem mas você não tem permissão' as never);
+        summary.recommendations.push(' Verifique as permissões da sua aplicação no Shopee Partner Center' as never);
       }
       
       if (notFoundEndpoints.length === results.length) {
-        summary.recommendations.push('🤔 Todos os endpoints retornaram 404 - pode ser que a API mudou');
-        summary.recommendations.push('📚 Verifique a documentação mais recente da Shopee');
+        summary.recommendations.push(' Todos os endpoints retornaram 404 - pode ser que a API mudou' as never );
+        summary.recommendations.push(' Verifique a documentação mais recente da Shopee' as never);
       }
       
-      summary.recommendations.push('🔄 Como fallback, use estimativas baseadas no GMV quando houver vendas');
+      summary.recommendations.push(' Como fallback, use estimativas baseadas no GMV quando houver vendas' as never);
     }
 
     return NextResponse.json({
