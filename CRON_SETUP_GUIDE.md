@@ -9,25 +9,30 @@
 
 ## 🚀 **OPÇÕES DE CONFIGURAÇÃO:**
 
-### **1. VERCEL CRON (RECOMENDADO para produção)**
+### **1. GITHUB ACTIONS (RECOMENDADO - GRATUITO) ⭐**
 
-Se você está usando Vercel, adicione no `vercel.json`:
+Crie `.github/workflows/refresh-shopee-tokens.yml`:
 
-```json
-{
-  "crons": [
-    {
-      "path": "/api/shopee/cron-refresh-tokens",
-      "schedule": "0 3 * * *"
-    }
-  ]
-}
+```yaml
+name: 🔄 Refresh Shopee Tokens
+on:
+  schedule:
+    - cron: '0 */3 * * *'  # A cada 3 horas
+  workflow_dispatch:
+
+jobs:
+  refresh-tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh Tokens
+        run: |
+          curl -X GET "${{ secrets.APP_URL }}/api/shopee/cron-refresh-tokens"
 ```
 
-**Frequência:** Diariamente às 3:00 AM
-**Vantagem:** Totalmente automático, não depende de servidor próprio
+**Frequência:** A cada 3 horas (8x por dia)
+**Vantagem:** Gratuito, confiável, logs detalhados
 
-### **2. GITHUB ACTIONS (GRATUITO)**
+### **2. VERCEL CRON (PAGO)**
 
 Crie `.github/workflows/refresh-tokens.yml`:
 
