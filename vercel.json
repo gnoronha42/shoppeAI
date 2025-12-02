@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/shopee/cron-refresh-tokens",
+      "schedule": "0 */2 * * *"
+    }
+  ]
+}
