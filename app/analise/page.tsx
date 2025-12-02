@@ -1090,9 +1090,9 @@ export default function AnalisePage() {
               : isTestingSystem
               ? "Testando sistemas..."
               : hasCSVFiles()
-              ? "✅ Gerar com CSV (Dados Precisos)"
+              ? "Gerar com CSV (Dados Precisos)"
               : hasImageFiles()
-              ? "⚠️ Gerar com Imagens (Pode ter imprecisões)"
+              ? "Gerar com Imagens (Pode ter imprecisões)"
               : "Gerar Relatório com IA"}
           </Button>
 
@@ -1102,7 +1102,7 @@ export default function AnalisePage() {
             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           >
             <FileSpreadsheet className="mr-2 h-4 w-4" />
-            Gerar com Integração (Shopee)
+            Gerar com Integração 
           </Button>
 
           <Button

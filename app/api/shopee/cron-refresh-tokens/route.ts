@@ -127,22 +127,14 @@ export async function GET(request: Request) {
                        error.message.includes('error_not_found')
         });
 
-        // Se o refresh token expirou, marcar para reautenticação
+        // Se o refresh token expirou, apenas logar - NÃO limpar tokens
         if (error.message.includes('REFRESH_TOKEN_EXPIRED') || 
             error.message.includes('error_not_found')) {
           console.log(`   🚨 Refresh token expirado - cliente precisa reautenticar`);
+          console.log(`   ℹ️ Tokens mantidos no banco para permitir reautenticação manual`);
           
-          // Opcional: Marcar integração como inativa ou enviar notificação
-          await prisma.client_integrations.update({
-            where: { id: integration.id },
-            data: {
-              // Limpar tokens inválidos para forçar reautenticação
-              access_token: null,
-              refresh_token: null,
-              token_expiry: null,
-              updated_at: new Date(),
-            },
-          });
+          // NÃO limpar tokens automaticamente - deixar para o usuário decidir
+          // Isso evita perder a integração acidentalmente
         }
       }
     }
