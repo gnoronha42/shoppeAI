@@ -23,8 +23,8 @@ git push origin main
 2. **Vá em:** Settings → Secrets and variables → Actions  
 3. **Clique:** "New repository secret"
 4. **Adicione EXATAMENTE:**
-   - **Name:** `APP_URL` (maiúsculo, sem espaços)
-   - **Value:** `https://seu-dominio-de-producao.com` (SEM barra no final)
+   - **Name:** `APPURL` (como você já configurou)
+   - **Value:** `https://www.selleria.com.br` (SEM barra no final)
 
 #### **Exemplos de URLs válidas:**
 ```
