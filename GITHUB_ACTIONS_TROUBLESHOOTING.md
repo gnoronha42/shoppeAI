@@ -7,11 +7,11 @@
 🚀 Iniciando refresh de tokens Shopee...
 ⏰ Horário: Tue Dec  2 16:14:43 UTC 2025
 🌐 URL: 
-❌ ERRO: Secret APP_URL não configurado!
+❌ ERRO: Secret APPURL não configurado!
 ```
 
 ### **Causa:**
-O secret `APP_URL` não foi configurado no GitHub.
+O secret `APPURL` não foi configurado no GitHub.
 
 ### **✅ SOLUÇÃO:**
 
