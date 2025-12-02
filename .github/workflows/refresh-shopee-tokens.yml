@@ -23,20 +23,20 @@ jobs:
         run: |
           echo "🚀 Iniciando refresh de tokens Shopee..."
           echo "⏰ Horário: $(date)"
-          echo "🌐 URL: ${{ secrets.APP_URL }}"
+          echo "🌐 URL: ${{ secrets.APPURL }}"
           
-          # Verificar se APP_URL está configurado
-          if [ -z "${{ secrets.APP_URL }}" ]; then
-            echo "❌ ERRO: Secret APP_URL não configurado!"
+          # Verificar se APPURL está configurado
+          if [ -z "${{ secrets.APPURL }}" ]; then
+            echo "❌ ERRO: Secret APPURL não configurado!"
             echo "🔧 Configure em: Settings → Secrets → Actions → New repository secret"
-            echo "📝 Name: APP_URL"
+            echo "📝 Name: APPURL"
             echo "📝 Value: https://seu-dominio.com (sem barra no final)"
             exit 1
           fi
           
           # Fazer chamada para o endpoint de refresh
           response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
-            -X GET "${{ secrets.APP_URL }}/api/shopee/cron-refresh-tokens" \
+            -X GET "${{ secrets.APPURL }}/api/shopee/cron-refresh-tokens" \
             -H "Content-Type: application/json" \
             -H "User-Agent: GitHub-Actions-Cron/1.0")
           
@@ -72,7 +72,7 @@ jobs:
           echo "⏰ Executado em: $(date)"
           echo "🔄 Próxima execução: $(date -d '+3 hours')"
           echo "📍 Timezone: UTC"
-          echo "🌐 Endpoint: ${{ secrets.APP_URL }}/api/shopee/cron-refresh-tokens"
+          echo "🌐 Endpoint: ${{ secrets.APPURL }}/api/shopee/cron-refresh-tokens"
 
       - name: 🚨 Notify on Failure
         if: failure()
