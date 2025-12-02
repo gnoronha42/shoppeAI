@@ -18,13 +18,13 @@ Se você está usando Vercel, adicione no `vercel.json`:
   "crons": [
     {
       "path": "/api/shopee/cron-refresh-tokens",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
 ```
 
-**Frequência:** A cada 2 horas
+**Frequência:** Diariamente às 3:00 AM
 **Vantagem:** Totalmente automático, não depende de servidor próprio
 
 ### **2. GITHUB ACTIONS (GRATUITO)**
@@ -35,7 +35,7 @@ Crie `.github/workflows/refresh-tokens.yml`:
 name: Refresh Shopee Tokens
 on:
   schedule:
-    - cron: '0 */2 * * *'  # A cada 2 horas
+    - cron: '0 3 * * *'  # Diariamente às 3:00 AM UTC
   workflow_dispatch:  # Permite execução manual
 
 jobs:
@@ -57,8 +57,8 @@ jobs:
 # Editar crontab
 crontab -e
 
-# Adicionar linha (executa a cada 2 horas)
-0 */2 * * * curl -X GET "https://seu-dominio.com/api/shopee/cron-refresh-tokens" >/dev/null 2>&1
+# Adicionar linha (executa diariamente às 3:00 AM)
+0 3 * * * curl -X GET "https://seu-dominio.com/api/shopee/cron-refresh-tokens" >/dev/null 2>&1
 ```
 
 ### **4. UPTIMEROBOT (GRATUITO)**
@@ -66,7 +66,7 @@ crontab -e
 1. Acesse https://uptimerobot.com
 2. Crie um monitor HTTP(S)
 3. URL: `https://seu-dominio.com/api/shopee/cron-refresh-tokens`
-4. Intervalo: 120 minutos (2 horas)
+4. Intervalo: 1440 minutos (24 horas)
 5. Ative o monitor
 
 ### **5. CRON-JOB.ORG (GRATUITO)**
@@ -75,7 +75,7 @@ crontab -e
 2. Crie uma conta gratuita
 3. Adicione job:
    - URL: `https://seu-dominio.com/api/shopee/cron-refresh-tokens`
-   - Intervalo: `0 */2 * * *`
+   - Intervalo: `0 3 * * *`
    - Método: GET
 
 ---
@@ -140,11 +140,11 @@ Mostra o status atual de todos os tokens.
 ## ⚙️ **CONFIGURAÇÃO RECOMENDADA:**
 
 ### **Para Desenvolvimento:**
-- **Frequência:** A cada 30 minutos (para testes)
+- **Frequência:** Manual ou a cada 30 minutos (para testes)
 - **Método:** Cron local ou script manual
 
 ### **Para Produção:**
-- **Frequência:** A cada 2 horas
+- **Frequência:** Diariamente às 3:00 AM
 - **Método:** Vercel Cron ou GitHub Actions
 - **Backup:** UptimeRobot como redundância
 
@@ -156,7 +156,7 @@ Mostra o status atual de todos os tokens.
   "crons": [
     {
       "path": "/api/shopee/cron-refresh-tokens",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }

@@ -7,8 +7,8 @@ import { refreshAccessToken } from '@/lib/shopee';
  * 
  * Uso: GET /api/shopee/cron-refresh-tokens
  * 
- * Este endpoint deve ser chamado automaticamente a cada 2 horas por um cron job.
- * Ele verifica todos os tokens que expiram nas próximas 2 horas e os renova proativamente.
+ * Este endpoint deve ser chamado automaticamente 1x por dia (3:00 AM) por um cron job.
+ * Ele verifica todos os tokens que expiram nas próximas 24 horas e os renova proativamente.
  * 
  * IMPORTANTE: Configure um cron job externo (Vercel Cron, GitHub Actions, etc.) 
  * para chamar este endpoint regularmente, mesmo quando ninguém está usando o site.
@@ -19,16 +19,16 @@ export async function GET(request: Request) {
     console.log('\n🔄 ===== CRON JOB: RENOVAÇÃO AUTOMÁTICA DE TOKENS =====');
     console.log(`⏰ Iniciado em: ${new Date().toISOString()}`);
 
-    // Buscar integrações que expiram nas próximas 2 horas (7200 segundos)
-    const twoHoursFromNow = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    // Buscar integrações que expiram nas próximas 24 horas (86400 segundos)
+    const twentyFourHoursFromNow = new Date(Date.now() + 24 * 60 * 60 * 1000);
     
     const integrations = await prisma.client_integrations.findMany({
       where: {
         provider: 'shopee',
         refresh_token: { not: null },
         OR: [
-          // Tokens que expiram nas próximas 2 horas
-          { token_expiry: { lte: twoHoursFromNow } },
+          // Tokens que expiram nas próximas 24 horas
+          { token_expiry: { lte: twentyFourHoursFromNow } },
           // Tokens sem data de expiração (assumir expirados)
           { token_expiry: null }
         ]
@@ -62,8 +62,8 @@ export async function GET(request: Request) {
         
         console.log(`   Expira em: ${expiry?.toISOString() || 'Não definido'} (${hoursUntilExpiry}h)`);
 
-        // Verificar se realmente precisa de refresh
-        if (expiry && hoursUntilExpiry > 2) {
+        // Verificar se realmente precisa de refresh (renova se expira em menos de 24h)
+        if (expiry && hoursUntilExpiry > 24) {
           console.log(`   ⏭️ Pulando: ainda válido por ${hoursUntilExpiry} horas`);
           results.skipped++;
           results.details.push({
@@ -177,7 +177,7 @@ export async function GET(request: Request) {
         'Cron job executado com sucesso' : 
         'Cron job executado com erros',
       summary,
-      next_execution_recommended: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
+      next_execution_recommended: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
     });
 
   } catch (err: any) {
