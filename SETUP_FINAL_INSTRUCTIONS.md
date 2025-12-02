@@ -15,13 +15,28 @@ git commit -m "feat: configurar GitHub Actions para refresh automático de token
 git push origin main
 ```
 
-### **2. Configurar Secret no GitHub:**
+### **2. Configurar Secret no GitHub (OBRIGATÓRIO):**
+
+#### **🚨 ATENÇÃO: Sem isso o GitHub Actions não funciona!**
+
 1. **Acesse:** https://github.com/SEU_USUARIO/SEU_REPOSITORIO
 2. **Vá em:** Settings → Secrets and variables → Actions  
 3. **Clique:** "New repository secret"
-4. **Adicione:**
-   - **Name:** `APP_URL`
+4. **Adicione EXATAMENTE:**
+   - **Name:** `APP_URL` (maiúsculo, sem espaços)
    - **Value:** `https://seu-dominio-de-producao.com` (SEM barra no final)
+
+#### **Exemplos de URLs válidas:**
+```
+✅ https://meuapp.vercel.app
+✅ https://meuapp.netlify.app  
+✅ https://meudominio.com
+✅ https://meuapp.up.railway.app
+
+❌ https://meuapp.vercel.app/  (com barra)
+❌ http://localhost:3000       (localhost)
+❌ meuapp.vercel.app          (sem https)
+```
 
 ### **3. Testar Primeira Execução:**
 1. **Acesse:** Actions → "Refresh Shopee Tokens"
