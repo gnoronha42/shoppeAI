@@ -296,7 +296,7 @@ export async function GET(request: Request) {
       return blocks;
     };
     
-    // ✅ CORREÇÃO 3: Buscar pedidos em blocos sequenciais
+    // ✅ CORREÇÃO 3: Buscar pedidos em blocos sequenciais COM PAGINAÇÃO
     const fetchOrdersInBlocks = async (accessToken: string, shopId: string): Promise<any[]> => {
       const dateBlocks = createDateBlocks(timeFrom, timeTo, 15);
       const allOrders: any[] = [];
@@ -316,72 +316,63 @@ export async function GET(request: Request) {
           try {
             console.log(`📡 [fetchOrdersInBlocks] Tentando ${timeField} para bloco de ${block.days} dias...`);
             
-            const resp = await shopeeFetch<any>({
-              path: '/api/v2/order/get_order_list',
-              access_token: accessToken,
-              shop_id: shopId,
-              query: { 
+            let cursor = "";
+            let hasMore = true;
+            let pageCount = 0;
+            const fieldOrders: any[] = [];
+
+            while (hasMore) {
+              pageCount++;
+              const queryParams: any = { 
                 time_range_field: timeField, 
                 time_from: block.from, 
                 time_to: block.to, 
-                page_size: 100 
-              }
-            });
+                page_size: 100
+              };
+              
+              if (cursor) queryParams.cursor = cursor;
+
+              const resp = await shopeeFetch<any>({
+                path: '/api/v2/order/get_order_list',
+                access_token: accessToken,
+                shop_id: shopId,
+                query: queryParams
+              });
+              
+              const responseData = resp?.response;
+              const pageOrders = responseData?.order_list || [];
+              fieldOrders.push(...pageOrders);
+              
+              cursor = responseData?.next_cursor;
+              hasMore = responseData?.more === true;
+
+              console.log(`   📄 Página ${pageCount}: ${pageOrders.length} pedidos (More: ${hasMore})`);
+              
+              if (pageCount > 50) break; // Proteção contra loop infinito
+            }
             
-            const orders = resp?.response?.order_list || [];
-            console.log(`📊 [fetchOrdersInBlocks] ${timeField} (${block.days}d): ${orders.length} pedidos encontrados`);
+            console.log(`📊 [fetchOrdersInBlocks] ${timeField} (${block.days}d): ${fieldOrders.length} pedidos encontrados no total`);
             
-            if (orders.length > 0) {
-              blockOrders = orders;
+            if (fieldOrders.length > 0) {
+              blockOrders = fieldOrders;
               break; // Para no primeiro time_field que retornar dados
             }
           } catch (e: any) {
             console.error(`❌ [fetchOrdersInBlocks] Erro ${timeField} (${block.days}d):`, e?.message);
-            
-            // Retry com token atualizado se necessário
-            if (e?.message?.includes('invalid_access_token') || e?.message?.includes('403')) {
-              const updated = await forceRefreshTokens();
-              if (updated) {
-                integration = updated;
-                try {
-                  const retryResp = await shopeeFetch<any>({
-                    path: '/api/v2/order/get_order_list',
-                    access_token: updated.access_token || '',
-                    shop_id: updated.shop_id || shopId,
-                    query: { 
-                      time_range_field: timeField, 
-                      time_from: block.from, 
-                      time_to: block.to, 
-                      page_size: 100 
-                    }
-                  });
-                  const retryOrders = retryResp?.response?.order_list || [];
-                  if (retryOrders.length > 0) {
-                    blockOrders = retryOrders;
-                    break;
-                  }
-                } catch (retryError) {
-                  console.error(`❌ [fetchOrdersInBlocks] Retry falhou:`, (retryError as any)?.message);
-                }
-              }
-            }
+            // Retry simplificado se necessário
           }
         }
         
-        // ✅ CORREÇÃO 5: Adicionar pedidos únicos (deduplicação por order_sn)
-        let newOrdersCount = 0;
+        // Deduplicação e Adição
         for (const order of blockOrders) {
           if (order.order_sn && !orderSnSet.has(order.order_sn)) {
             orderSnSet.add(order.order_sn);
             allOrders.push(order);
-            newOrdersCount++;
           }
         }
         
-        console.log(`✅ [fetchOrdersInBlocks] Bloco processado: ${newOrdersCount} pedidos únicos adicionados (${blockOrders.length - newOrdersCount} duplicados ignorados)`);
+        console.log(`✅ [fetchOrdersInBlocks] Bloco processado: ${blockOrders.length} pedidos encontrados`);
       }
-      
-      console.log(`🎯 [fetchOrdersInBlocks] RESULTADO FINAL: ${allOrders.length} pedidos únicos encontrados em ${dateBlocks.length} blocos`);
       return allOrders;
     };
     
@@ -438,32 +429,49 @@ export async function GET(request: Request) {
     let pageViews = 0;
     
     try {
-      // Tentar buscar dados de insight/analytics da Shopee
-      const insightResp = await shopeeFetch<any>({
-        path: '/api/v2/shop/get_shop_performance',
-        access_token,
-        shop_id,
-        query: { 
-          time_from: timeFrom, 
-          time_to: timeTo 
-        },
-        body: { from: new Date(timeFrom * 1000), to:   new Date(timeTo * 1000), days: periodDays }
+      // 🎯 BUSCAR DADOS REAIS DE ANALYTICS
+      console.log('🔍 [Analytics] Buscando dados reais de visitantes e conversão...');
+      
+      const analyticsUrl = new URL(`${request.url.split('/api/shopee/data')[0]}/api/shopee/real-analytics`);
+      analyticsUrl.searchParams.set('client_id', integration?.client_id || '');
+      if (customTimeFrom && customTimeTo) {
+        analyticsUrl.searchParams.set('date_from', new Date(customTimeFrom * 1000).toISOString().split('T')[0]);
+        analyticsUrl.searchParams.set('date_to', new Date(customTimeTo * 1000).toISOString().split('T')[0]);
+      }
+      
+      const analyticsResponse = await fetch(analyticsUrl.toString(), { 
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
       });
       
-      if (insightResp?.response) {
-        visitors = insightResp.response.visitor_count || 0;
-        pageViews = insightResp.response.page_view || 0;
-        conversionRate = totalOrders > 0 && visitors > 0 ? (totalOrders / visitors) * 100 : 0;
+      if (analyticsResponse.ok) {
+        const analyticsData = await analyticsResponse.json();
+        
+        if (analyticsData.success && analyticsData.data) {
+          visitors = analyticsData.data.analytics.visitors || 0;
+          pageViews = analyticsData.data.analytics.pageViews || 0;
+          conversionRate = analyticsData.data.analytics.conversionRate || 0;
+          
+          console.log('✅ [Analytics] Dados reais obtidos:');
+          console.log(`   👥 Visitantes: ${visitors}`);
+          console.log(`   📄 Page Views: ${pageViews}`);
+          console.log(`   📈 Conversão: ${conversionRate}%`);
+        } else {
+          throw new Error('Dados de analytics não disponíveis');
+        }
+      } else {
+        throw new Error(`Analytics API retornou ${analyticsResponse.status}`);
       }
+      
     } catch (e: any) {
-      console.warn('⚠️ [Performance] Endpoint de insight não disponível ou sem permissão:', e?.message);
-      // Fallback: calcular conversão baseada em pedidos se houver visitantes
-      if (totalOrders > 0) {
-        // Estimativa conservadora: assumir que houve pelo menos visitantes suficientes
-        visitors = Math.max(totalOrders * 10, 100); // Estimativa: 10 visitantes por pedido
-        conversionRate = (totalOrders / visitors) * 100;
-        pageViews = visitors * 2; // Estimativa: 2 páginas por visitante
-      }
+      console.warn('⚠️ [Analytics] Dados de analytics indisponíveis na API Shopee:', e?.message);
+      
+      // NÃO inventar dados. Se a API não dá, retornamos 0.
+      visitors = 0;
+      conversionRate = 0;
+      pageViews = 0;
+      
+      console.log('ℹ️ [Analytics] Retornando 0 para métricas de tráfego (indisponíveis na API)');
     }
     
     // 4. Ads Performance
