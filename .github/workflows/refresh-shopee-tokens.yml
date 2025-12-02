@@ -1,0 +1,76 @@
+name: 🔄 Refresh Shopee Tokens
+
+on:
+  schedule:
+    # Executa a cada 3 horas: 00:00, 03:00, 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 UTC
+    - cron: '0 */3 * * *'
+  
+  # Permite execução manual do workflow
+  workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: 'Forçar refresh de todos os tokens'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  refresh-tokens:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 Refresh Shopee Tokens
+        run: |
+          echo "🚀 Iniciando refresh de tokens Shopee..."
+          echo "⏰ Horário: $(date)"
+          echo "🌐 URL: ${{ secrets.APP_URL }}"
+          
+          # Fazer chamada para o endpoint de refresh
+          response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+            -X GET "${{ secrets.APP_URL }}/api/shopee/cron-refresh-tokens" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: GitHub-Actions-Cron/1.0")
+          
+          # Extrair código HTTP
+          http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+          body=$(echo "$response" | sed '/HTTP_CODE:/d')
+          
+          echo "📊 Resposta do servidor:"
+          echo "$body" | jq . 2>/dev/null || echo "$body"
+          
+          echo "🔍 Status HTTP: $http_code"
+          
+          # Verificar se foi bem-sucedido
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Refresh executado com sucesso!"
+            
+            # Verificar se houve erros no JSON de resposta
+            if echo "$body" | jq -e '.success == false' >/dev/null 2>&1; then
+              echo "⚠️ Refresh executado mas com alguns erros:"
+              echo "$body" | jq -r '.summary.errors[]?' 2>/dev/null || echo "Detalhes não disponíveis"
+              exit 1
+            fi
+          else
+            echo "❌ Falha no refresh! Status: $http_code"
+            echo "Resposta: $body"
+            exit 1
+          fi
+
+      - name: 📊 Log Summary
+        if: always()
+        run: |
+          echo "📋 Resumo da execução:"
+          echo "⏰ Executado em: $(date)"
+          echo "🔄 Próxima execução: $(date -d '+3 hours')"
+          echo "📍 Timezone: UTC"
+          echo "🌐 Endpoint: ${{ secrets.APP_URL }}/api/shopee/cron-refresh-tokens"
+
+      - name: 🚨 Notify on Failure
+        if: failure()
+        run: |
+          echo "🚨 ATENÇÃO: Falha no refresh de tokens!"
+          echo "🔧 Ações recomendadas:"
+          echo "   1. Verificar se a aplicação está online"
+          echo "   2. Verificar logs da aplicação"
+          echo "   3. Executar diagnóstico manual: GET /api/shopee/diagnose-tokens"
+          echo "   4. Se necessário, reautenticar contas manualmente"
