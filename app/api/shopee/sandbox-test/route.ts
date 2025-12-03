@@ -5,7 +5,22 @@ export async function GET() {
   try {
     console.log('🧪 [SANDBOX-TEST] Testando conectividade com Shopee Sandbox...');
     
-    const testResults = {
+    const testResults: {
+      timestamp: string;
+      environment: string;
+      base_url: string | undefined;
+      partner_id: string | undefined;
+      partner_key_prefix: string;
+      tests: any[];
+      summary?: {
+        total_tests: number;
+        successful_tests: number;
+        failed_tests: number;
+        success_rate: string;
+        ready_for_oauth: boolean;
+        next_steps: string[];
+      };
+    } = {
       timestamp: new Date().toISOString(),
       environment: 'sandbox',
       base_url: process.env.SHOPEE_BASE_URL,
@@ -19,7 +34,9 @@ export async function GET() {
       console.log('🧪 [SANDBOX-TEST] Teste 1: Endpoint público get_shops_by_partner');
       
       const publicTest = await shopeeFetch<any>({
-        path: '/api/v2/public/get_shops_by_partner',
+        path: '/api/v2/public/get_shops_by_partner',    
+        access_token: '',
+        shop_id: '',
         // Endpoints públicos não precisam de access_token nem shop_id
       });
 

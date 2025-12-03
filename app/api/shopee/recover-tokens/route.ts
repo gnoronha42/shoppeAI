@@ -16,9 +16,11 @@ export async function POST(request: Request) {
 
     // 1. Verificar se a loja ainda está autorizada na Shopee
     try {
-      const authorizedShops = await shopeeFetch<any>({
+      const authorizedShops = await shopeeFetch<any>({ 
         path: '/api/v2/public/get_shops_by_partner',
         // Não precisa de access_token nem shop_id para endpoints públicos
+        access_token: '',
+        shop_id: '',
       });
 
       const shopList = authorizedShops?.response?.authed_shop_list || 

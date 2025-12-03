@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { shopeeFetch, SHOPEE_PARTNER_ID } from '@/lib/shopee';
+import { shopeeFetch} from '@/lib/shopee';
 
 /**
  * 🔄 SINCRONIZAÇÃO MESTRA - Sincroniza lojas autorizadas com a Shopee
