@@ -132,7 +132,7 @@ export async function GET(request: Request) {
         console.log(`   🔄 Fazendo refresh do token...`);
         const refreshed = await refreshAccessToken({ 
           refresh_token: integration.refresh_token!,
-          shop_id: integration.shop_id // ✅ Incluir shop_id para melhor compatibilidade com Shopee API
+          shop_id: integration.shop_id ?? undefined //  ✅ Incluir shop_id para melhor compatibilidade com Shopee API
         });
 
         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
