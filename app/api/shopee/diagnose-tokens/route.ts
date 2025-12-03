@@ -53,8 +53,12 @@ export async function GET(request: Request) {
         // Status dos tokens
         has_access_token: !!integration.access_token,
         access_token_length: integration.access_token?.length || 0,
+        access_token_preview: integration.access_token ? 
+          `${integration.access_token.substring(0, 10)}...${integration.access_token.substring(integration.access_token.length - 4)}` : null,
         has_refresh_token: !!integration.refresh_token,
         refresh_token_length: integration.refresh_token?.length || 0,
+        refresh_token_preview: integration.refresh_token ? 
+          `${integration.refresh_token.substring(0, 10)}...${integration.refresh_token.substring(integration.refresh_token.length - 4)}` : null,
         
         // Status de expiração
         token_expiry: integration.token_expiry,
@@ -77,6 +81,13 @@ export async function GET(request: Request) {
       if (!integration.access_token) {
         diagnostic.problems.push('❌ Access token ausente');
         diagnostic.recommendations.push('🔧 Reautenticar a conta');
+      }
+      
+      // Verificar se refresh_token está muito curto (suspeito de truncamento)
+      if (integration.refresh_token && integration.refresh_token.length < 50) {
+        diagnostic.problems.push(`⚠️ Refresh token muito curto (${integration.refresh_token.length} chars) - pode estar truncado`);
+        diagnostic.recommendations.push('🔧 Reconectar a conta para obter token completo');
+        diagnostic.recommendations.push('🔍 Verificar logs do callback para ver tamanho do token recebido');
       }
 
       if (!integration.refresh_token) {

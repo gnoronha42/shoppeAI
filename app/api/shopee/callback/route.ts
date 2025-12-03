@@ -124,6 +124,10 @@ export async function GET(request: Request) {
       shop_id: upsertResult.shop_id,
       has_access_token_saved: !!upsertResult.access_token,
       access_token_length_saved: upsertResult.access_token?.length || 0,
+      has_refresh_token_saved: !!upsertResult.refresh_token,
+      refresh_token_length_saved: upsertResult.refresh_token?.length || 0,
+      refresh_token_received_length: tokenRes.refresh_token?.length || 0,
+      tokens_match: upsertResult.refresh_token === tokenRes.refresh_token,
       token_expiry: upsertResult.token_expiry
     });
 
