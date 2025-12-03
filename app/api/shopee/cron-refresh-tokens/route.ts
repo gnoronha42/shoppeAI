@@ -128,11 +128,51 @@ export async function GET(request: Request) {
           continue;
         }
 
-        // Tentar refresh
-        console.log(`   🔄 Fazendo refresh do token...`);
+        // ✅ USAR SMART REFRESH PARA MAIOR ROBUSTEZ
+        console.log(`   🧠 Fazendo smart refresh do token...`);
+        
+        try {
+          // Tentar smart refresh primeiro
+          const smartRefreshUrl = new URL(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/shopee/smart-refresh`);
+          const smartRefreshResponse = await fetch(smartRefreshUrl.toString(), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              client_id: integration.client_id, 
+              force: true 
+            })
+          });
+
+          if (smartRefreshResponse.ok) {
+            const smartResult = await smartRefreshResponse.json();
+            
+            if (smartResult.success) {
+              console.log(`   ✅ Smart refresh bem-sucedido usando: ${smartResult.strategy_used}`);
+              
+              results.successful_refreshes++;
+              results.details.push({
+                client_id: integration.client_id,
+                client_name: clientName,
+                shop_id: integration.shop_id,
+                status: 'refreshed',
+                method: 'smart_refresh',
+                strategy_used: smartResult.strategy_used,
+                old_expiry: expiry?.toISOString(),
+                new_expiry: smartResult.new_expiry,
+                hours_extended: smartResult.hours_until_new_expiry
+              });
+              continue; // Próxima integração
+            }
+          }
+        } catch (smartError) {
+          console.warn(`   ⚠️ Smart refresh falhou, tentando método tradicional:`, smartError);
+        }
+
+        // Fallback: método tradicional
+        console.log(`   🔄 Fallback: refresh tradicional...`);
         const refreshed = await refreshAccessToken({ 
           refresh_token: integration.refresh_token!,
-          shop_id: integration.shop_id ?? undefined //  ✅ Incluir shop_id para melhor compatibilidade com Shopee API
+          shop_id: integration.shop_id ?? undefined
         });
 
         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
@@ -154,6 +194,7 @@ export async function GET(request: Request) {
           client_name: clientName,
           shop_id: integration.shop_id,
           status: 'refreshed',
+          method: 'traditional_refresh',
           old_expiry: expiry?.toISOString(),
           new_expiry: newExpiry.toISOString(),
           hours_extended: Math.round((refreshed.expire_in ?? 0) / 3600)

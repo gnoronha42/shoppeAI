@@ -50,8 +50,13 @@ export async function GET() {
       activeStores: validResults.map(r => ({
         name: r.shopName,
         gmv: r.gmv,
-        orders: r.orders
+        orders: r.orders,
+        ads: r.ads || { spend: 0, roas: 0, impressions: 0, clicks: 0, ctr: 0, cpa: 0 }
       })),
+      storeDetails: validResults, // Para cálculo de ads
+      topProducts: validResults.flatMap(r => r.topProducts || [])
+        .sort((a, b) => (b.sales || 0) - (a.sales || 0))
+        .slice(0, 10) // Top 10 produtos
     });
 
   } catch (err: any) {

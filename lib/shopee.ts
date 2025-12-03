@@ -102,37 +102,44 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
  * Sempre devemos salvar o novo refresh_token, nunca manter o antigo.
  */
 export async function refreshAccessToken(args: { refresh_token: string; shop_id?: number | string }) {
-  const path = '/api/v2/auth/token/refresh';
+  // ✅ CORREÇÃO: Endpoint correto conforme documentação oficial
+  const path = '/api/v2/auth/access_token/get';
   
-  // ✅ CORREÇÃO: Usa timestamp do servidor Shopee (mesmo padrão de getAccessToken)
+  // ✅ CORREÇÃO: Usa timestamp do servidor Shopee
   const timestamp = await getShopeeServerTimestamp();
   
-  // BaseString: partner_id + path + timestamp + refresh_token
-  const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}${args.refresh_token}`;
+  // ✅ CORREÇÃO: BaseString conforme documentação - SEM refresh_token na assinatura
+  const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
-  const url = `${SHOPEE_BASE_URL}${path}`;
   
-  console.log(`🔄 [refreshAccessToken] Request:`, {
+  // ✅ CORREÇÃO: Query parameters conforme documentação oficial
+  const queryParams = new URLSearchParams({
+    partner_id: SHOPEE_PARTNER_ID.toString(),
+    timestamp: timestamp.toString(),
+    sign: sign
+  });
+  
+  const url = `${SHOPEE_BASE_URL}${path}?${queryParams.toString()}`;
+  
+  console.log(`🔄 [refreshAccessToken] Request (CORRIGIDO):`, {
     path,
     timestamp,
     refresh_token_preview: args.refresh_token?.slice(0, 8) + '...' + args.refresh_token?.slice(-4),
     refresh_token_length: args.refresh_token?.length || 0,
     shop_id: args.shop_id,
-    baseString_preview: baseString.slice(0, 50) + '...',
-    baseString_full: baseString, // Log completo para debug
+    baseString_corrected: baseString, // ✅ Sem refresh_token na assinatura
     sign_preview: sign.slice(0, 16) + '...',
     partner_id: SHOPEE_PARTNER_ID,
-    url: url
+    url: url.replace(sign, '***SIGN***') // Ocultar sign no log
   });
   
+  // ✅ CORREÇÃO: Payload conforme documentação oficial - SEM timestamp e sign
   const payload: any = {
     refresh_token: args.refresh_token,
-    partner_id: Number(SHOPEE_PARTNER_ID),
-    timestamp,
-    sign,
+    partner_id: Number(SHOPEE_PARTNER_ID)
   };
 
-  // Adiciona shop_id se fornecido
+  // ✅ CORREÇÃO: shop_id é obrigatório conforme documentação
   if (args.shop_id) {
     payload.shop_id = Number(args.shop_id);
   }

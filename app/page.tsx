@@ -13,68 +13,33 @@ import {
   Eye,
   Target,
   DollarSign,
-  MapPin,
   Store,
   Loader2,
+  Award,
+  Megaphone,
+  BarChart3,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const formatCurrency = (value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatNumber = (value: number) => value.toLocaleString('pt-BR');
 
-// Mock para evolução semanal (será ajustado visualmente, mas dados hardcoded por enquanto pois histórico requer armazenamento)
-const weeklyEvolutionMock = [
-  { label: "Há 7 semanas", factor: 0.6 },
-  { label: "Há 6 semanas", factor: 0.65 },
-  { label: "Há 5 semanas", factor: 0.7 },
-  { label: "Há 4 semanas", factor: 0.78 },
-  { label: "Há 3 semanas", factor: 0.85 },
-  { label: "Há 2 semanas", factor: 0.92 },
-  { label: "Última semana", factor: 1.0 },
-];
-
-const mapPins = [
-  { top: "18%", left: "32%" },
-  { top: "26%", left: "48%" },
-  { top: "34%", left: "41%" },
-  { top: "42%", left: "55%" },
-  { top: "50%", left: "37%" },
-  { top: "58%", left: "62%" },
-  { top: "66%", left: "45%" },
-  { top: "72%", left: "53%" },
-  { top: "80%", left: "30%" },
-];
-
-function MapPanel() {
-  return (
-    <div className="relative h-72 w-full rounded-2xl bg-gradient-to-br from-orange-950/30 via-slate-900/50 to-slate-950 border border-orange-500/20 overflow-hidden">
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_#f97316_0,_transparent_50%),radial-gradient(circle_at_bottom,_#ea580c_0,_transparent_50%)]" />
-      <div className="absolute inset-4">
-        <div className="h-full w-full rounded-xl border border-orange-500/10 bg-slate-950/20 backdrop-blur-sm relative">
-          {mapPins.map((pin, index) => (
-            <span
-              key={index}
-              className="absolute -translate-x-1/2 -translate-y-1/2"
-              style={{ top: pin.top, left: pin.left }}
-            >
-              <span className="flex items-center justify-center h-4 w-4 rounded-full bg-orange-500 shadow-lg shadow-orange-500/50 ring-2 ring-orange-400/30 animate-pulse">
-                <MapPin className="h-2.5 w-2.5 text-white" />
-              </span>
-            </span>
-          ))}
-        </div>
-      </div>
-      <div className="absolute bottom-4 left-5">
-        <p className="text-xs font-semibold text-orange-200/90 uppercase tracking-wide">
-          Distribuição de lojas
-        </p>
-        <p className="text-[11px] text-orange-200/60">
-          Concentração regional de vendas
-        </p>
-      </div>
-    </div>
-  );
-}
+// Função para calcular métricas de ads baseadas nos dados reais
+const calculateAdsMetrics = (stores: any[]) => {
+  const totalSpend = stores.reduce((acc, store) => acc + (store.ads?.spend || 0), 0);
+  const totalImpressions = stores.reduce((acc, store) => acc + (store.ads?.impressions || 0), 0);
+  const totalClicks = stores.reduce((acc, store) => acc + (store.ads?.clicks || 0), 0);
+  const totalConversions = stores.reduce((acc, store) => acc + (store.ads?.conversions || 0), 0);
+  const avgRoas = stores.length > 0 ? stores.reduce((acc, store) => acc + (store.ads?.roas || 0), 0) / stores.length : 0;
+  
+  return {
+    totalSpend,
+    impressions: totalImpressions,
+    clicks: totalClicks,
+    conversions: totalConversions,
+    roas: avgRoas
+  };
+};
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -83,7 +48,15 @@ export default function Home() {
     totalGmv: 0,
     totalPedidos: 0,
     ticketMedio: 0,
-    activeStores: [] as any[]
+    activeStores: [] as any[],
+    topProducts: [] as any[],
+    adsData: {
+      totalSpend: 0,
+      impressions: 0,
+      clicks: 0,
+      conversions: 0,
+      roas: 0
+    }
   });
 
   useEffect(() => {
@@ -92,7 +65,14 @@ export default function Home() {
         const res = await fetch('/api/dashboard/stats');
         const data = await res.json();
         if (data && !data.error) {
-          setMetrics(data);
+          // Calcular métricas de ads baseadas nos dados reais das lojas
+          const adsData = calculateAdsMetrics(data.storeDetails || []);
+          
+          setMetrics({
+            ...data,
+            adsData,
+            topProducts: data.topProducts || []
+          });
         }
       } catch (error) {
         console.error("Falha ao carregar estatísticas", error);
@@ -103,27 +83,14 @@ export default function Home() {
     fetchStats();
   }, []);
 
-  // Gerar dados de evolução baseados no total atual
-  const currentEvolution = weeklyEvolutionMock.map(item => ({
-    ...item,
-    sellers: Math.round(metrics.totalSellers * item.factor) || metrics.totalSellers, // Sellers constant mostly
-    pedidos: Math.round(metrics.totalPedidos * item.factor / 4.5), // Spread over weeks approx
-    gmv: metrics.totalGmv * item.factor / 4.5,
-    ticket: metrics.ticketMedio * (0.9 + Math.random() * 0.2), // Slight variation
-    conversao: 1.5 + Math.random() * 2
-  }));
-
   return (
-    <div className="">
-        {/* Overlay laranja translúcido global */}
-        <div className="fixed inset-0 bg-gradient-to-br from-orange-900/10 via-slate-950/90 to-slate-950 pointer-events-none" />
-        
-        <div className="relative z-10 w-full px-6 py-8 space-y-8">
+    <div className="min-h-screen bg-gray-50">
+        <div className="w-full px-6 py-8 space-y-8">
             {/* Header */}
-            <div className="flex justify-between items-center border-b border-orange-500/10 pb-6">
+            <div className="flex justify-between items-center border-b border-gray-200 pb-6 bg-white rounded-lg px-6 py-4 shadow-sm">
             <div className="flex items-center gap-4">
-                <div className="relative h-14 w-14 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-700 p-0.5 shadow-xl shadow-orange-900/20">
-                    <div className="h-full w-full bg-slate-950 rounded-[14px] flex items-center justify-center overflow-hidden relative">
+                <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 p-0.5 shadow-lg">
+                    <div className="h-full w-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden relative">
                         <Image
                         src={logo}
                         alt="Logo"
@@ -133,172 +100,325 @@ export default function Home() {
                     </div>
                 </div>
                 <div>
-                    <h1 className="text-4xl font-bold tracking-tight text-white">
-                        Painel Integrado
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                        Dashboard Shopee
                     </h1>
-                    <p className="text-sm text-orange-200/60 font-light tracking-wide">
-                        Monitoramento em tempo real das operações Shopee
+                    <p className="text-sm text-gray-600 font-medium">
+                        Visão geral das suas vendas e performance
                     </p>
                 </div>
             </div>
             <Link href="/analise">
-                <Button className="bg-orange-600 hover:bg-orange-500 text-white border border-orange-400/20 shadow-lg shadow-orange-900/40 transition-all duration-300 hover:scale-105">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-md transition-all duration-200 hover:shadow-lg">
                 <Plus className="mr-2 h-4 w-4" /> Nova Análise IA
                 </Button>
             </Link>
             </div>
 
             {loading ? (
-                 <div className="h-[60vh] w-full flex items-center justify-center">
+                 <div className="h-[60vh] w-full flex items-center justify-center bg-white rounded-lg shadow-sm">
                     <div className="flex flex-col items-center gap-4">
                         <Loader2 className="h-12 w-12 animate-spin text-orange-500" />
-                        <p className="text-orange-200/50 animate-pulse">Sincronizando dados das lojas...</p>
+                        <p className="text-gray-600 animate-pulse">Sincronizando dados das lojas...</p>
                     </div>
                  </div>
             ) : (
             <>
                 {/* KPIs Principais */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <Card className="bg-slate-900/40 border-orange-500/20 backdrop-blur-md hover:bg-slate-900/60 transition-colors">
+                    <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-orange-200/70 uppercase tracking-wider">GMV Total (30d)</CardTitle>
-                            <DollarSign className="h-4 w-4 text-orange-500" />
+                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">GMV Total (30d)</CardTitle>
+                            <DollarSign className="h-5 w-5 text-green-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-white">{formatCurrency(metrics.totalGmv)}</div>
-                            <p className="text-xs text-orange-200/40 mt-1">+12.5% vs mês anterior</p>
+                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.totalGmv)}</div>
+                            <p className="text-xs text-green-600 mt-1 font-medium">+12.5% vs mês anterior</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-900/40 border-orange-500/20 backdrop-blur-md hover:bg-slate-900/60 transition-colors">
+                    <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-orange-200/70 uppercase tracking-wider">Pedidos (30d)</CardTitle>
-                            <ShoppingBag className="h-4 w-4 text-orange-500" />
+                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Pedidos (30d)</CardTitle>
+                            <ShoppingBag className="h-5 w-5 text-blue-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-white">{formatNumber(metrics.totalPedidos)}</div>
-                            <p className="text-xs text-orange-200/40 mt-1">Taxa de conversão global ~2.4%</p>
+                            <div className="text-3xl font-bold text-gray-900">{formatNumber(metrics.totalPedidos)}</div>
+                            <p className="text-xs text-gray-500 mt-1">Taxa de conversão ~2.4%</p>
                         </CardContent>
                     </Card>
-                    <Card className="bg-slate-900/40 border-orange-500/20 backdrop-blur-md hover:bg-slate-900/60 transition-colors">
+                    <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-orange-200/70 uppercase tracking-wider">Lojas Ativas</CardTitle>
-                            <Store className="h-4 w-4 text-orange-500" />
+                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Lojas Ativas</CardTitle>
+                            <Store className="h-5 w-5 text-orange-500" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-white">{metrics.totalSellers}</div>
-                            <p className="text-xs text-orange-200/40 mt-1">Lojas conectadas e sincronizadas</p>
+                            <div className="text-3xl font-bold text-gray-900">{metrics.totalSellers}</div>
+                            <p className="text-xs text-gray-500 mt-1">Conectadas e sincronizadas</p>
                         </CardContent>
                     </Card>
-                     <Card className="bg-slate-900/40 border-orange-500/20 backdrop-blur-md hover:bg-slate-900/60 transition-colors">
+                     <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-orange-200/70 uppercase tracking-wider">Ticket Médio</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-orange-500" />
+                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Ticket Médio</CardTitle>
+                            <TrendingUp className="h-5 w-5 text-purple-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-white">{formatCurrency(metrics.ticketMedio)}</div>
-                            <p className="text-xs text-orange-200/40 mt-1">Média consolidada</p>
+                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.ticketMedio)}</div>
+                            <p className="text-xs text-gray-500 mt-1">Média consolidada</p>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Conteúdo Principal - Mapa e Tabelas */}
-                <div className="grid grid-cols-1 lg:grid-cols-[1fr,400px] gap-8 h-full">
+                {/* Conteúdo Principal - 3 Colunas */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
-                    {/* Coluna Esquerda: Tabela de Evolução e Mapa */}
-                    <div className="space-y-8 flex flex-col">
-                        
-                         {/* Mapa */}
-                         <div className="w-full">
-                            <div className="mb-4 flex items-center justify-between">
-                                <h3 className="text-lg font-semibold text-orange-100">Geolocalização</h3>
-                            </div>
-                            <MapPanel />
-                        </div>
-
-                        {/* Tabela Evolução */}
-                        <div className="flex-1 rounded-2xl border border-orange-500/10 bg-slate-900/30 backdrop-blur-sm overflow-hidden">
-                            <div className="px-6 py-4 border-b border-orange-500/10 bg-orange-950/10 flex items-center justify-between">
+                    {/* Coluna 1: Ranking de Produtos */}
+                    <Card className="bg-white border-gray-200 shadow-sm">
+                        <CardHeader className="border-b border-gray-100">
+                            <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-base font-semibold text-orange-100">Performance Histórica</h3>
-                                    <p className="text-xs text-orange-200/50">Consolidado das últimas 7 semanas</p>
+                                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                        <Award className="h-5 w-5 text-yellow-500" />
+                                        Top Produtos
+                                    </CardTitle>
+                                    <CardDescription className="text-sm text-gray-600">
+                                        Itens mais vendidos este mês
+                                    </CardDescription>
                                 </div>
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-orange-950/20 text-orange-200/70 uppercase text-xs font-medium">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left">Período</th>
-                                            <th className="px-6 py-3 text-right">Pedidos</th>
-                                            <th className="px-6 py-3 text-right">GMV</th>
-                                            <th className="px-6 py-3 text-right">Ticket</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-orange-500/5 text-slate-300">
-                                        {currentEvolution.map((row, i) => (
-                                            <tr key={i} className="hover:bg-orange-500/5 transition-colors">
-                                                <td className="px-6 py-4 font-medium text-orange-100/90">{row.label}</td>
-                                                <td className="px-6 py-4 text-right font-mono text-slate-400">{formatNumber(row.pedidos)}</td>
-                                                <td className="px-6 py-4 text-right font-mono text-emerald-400">{formatCurrency(row.gmv)}</td>
-                                                <td className="px-6 py-4 text-right font-mono text-amber-400">{formatCurrency(row.ticket)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Coluna Direita: Lojas e Insights */}
-                    <div className="space-y-8">
-                         <div className="rounded-2xl border border-orange-500/10 bg-slate-900/30 backdrop-blur-sm overflow-hidden h-full">
-                            <div className="px-6 py-4 border-b border-orange-500/10 bg-orange-950/10 flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-base font-semibold text-orange-100">Lojas Integradas</h3>
-                                    <p className="text-xs text-orange-200/50">Ranking de performance atual</p>
-                                </div>
-                                <Store className="h-4 w-4 text-orange-500" />
-                            </div>
-                            <div className="p-0">
-                                {metrics.activeStores.length === 0 ? (
-                                    <div className="p-8 text-center text-orange-200/40 text-sm">
-                                        Nenhuma loja integrada no momento.
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {metrics.topProducts.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <div className="text-gray-400 mb-4">
+                                        <Award className="h-12 w-12 mx-auto" />
                                     </div>
-                                ) : (
-                                    <table className="w-full text-sm">
-                                        <tbody className="divide-y divide-orange-500/5">
-                                            {metrics.activeStores.map((store, idx) => (
-                                                <tr key={idx} className="hover:bg-orange-500/5">
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 font-bold text-xs">
-                                                                {idx + 1}
-                                                            </div>
-                                                            <span className="font-medium text-orange-50">{store.name}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <div className="font-mono text-emerald-400">{formatCurrency(store.gmv)}</div>
-                                                        <div className="text-xs text-slate-500">{store.orders} pedidos</div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                )}
+                                    <p className="text-sm text-gray-500 mb-2">
+                                        Dados de produtos não disponíveis
+                                    </p>
+                                    <p className="text-xs text-gray-400">
+                                        Os produtos mais vendidos aparecerão aqui quando houver dados suficientes
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {metrics.topProducts.slice(0, 5).map((product: any, index: number) => (
+                                        <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600 font-bold text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                        {product.name || 'Produto sem nome'}
+                                                    </p>
+                                                    <div className="flex items-center gap-4 mt-1">
+                                                        <span className="text-xs text-gray-500">
+                                                            {product.sales || 0} vendas
+                                                        </span>
+                                                        <span className="text-xs font-medium text-green-600">
+                                                            {formatCurrency(product.revenue || 0)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Coluna 2: Investimento em Ads */}
+                    <Card className="bg-white border-gray-200 shadow-sm">
+                        <CardHeader className="border-b border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                        <Megaphone className="h-5 w-5 text-blue-500" />
+                                        Investimento em Ads
+                                    </CardTitle>
+                                    <CardDescription className="text-sm text-gray-600">
+                                        Performance das campanhas
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6 space-y-6">
+                            {metrics.adsData.totalSpend === 0 && metrics.adsData.impressions === 0 ? (
+                                <div className="text-center py-8">
+                                    <div className="text-gray-400 mb-4">
+                                        <Megaphone className="h-12 w-12 mx-auto" />
+                                    </div>
+                                    <p className="text-sm text-gray-500 mb-2">
+                                        Dados de publicidade não disponíveis
+                                    </p>
+                                    <p className="text-xs text-gray-400">
+                                        As métricas de ads aparecerão aqui quando houver campanhas ativas
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="text-center p-4 bg-blue-50 rounded-lg">
+                                            <div className="text-2xl font-bold text-blue-600">
+                                                {formatCurrency(metrics.adsData.totalSpend)}
+                                            </div>
+                                            <div className="text-xs text-gray-600 mt-1">Investimento Total</div>
+                                        </div>
+                                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                                            <div className="text-2xl font-bold text-green-600">
+                                                {metrics.adsData.roas > 0 ? `${metrics.adsData.roas.toFixed(1)}x` : '-'}
+                                            </div>
+                                            <div className="text-xs text-gray-600 mt-1">ROAS</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Impressões</span>
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {formatNumber(metrics.adsData.impressions)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Cliques</span>
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {formatNumber(metrics.adsData.clicks)}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">Conversões</span>
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {metrics.adsData.conversions}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm text-gray-600">CTR</span>
+                                            <span className="text-sm font-medium text-gray-900">
+                                                {metrics.adsData.impressions > 0 
+                                                    ? `${((metrics.adsData.clicks / metrics.adsData.impressions) * 100).toFixed(2)}%`
+                                                    : '-'
+                                                }
+                                            </span>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Coluna 3: Lojas Ativas */}
+                    <Card className="bg-white border-gray-200 shadow-sm">
+                        <CardHeader className="border-b border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                        <Store className="h-5 w-5 text-orange-500" />
+                                        Lojas Ativas
+                                    </CardTitle>
+                                    <CardDescription className="text-sm text-gray-600">
+                                        Ranking de performance
+                                    </CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {metrics.activeStores.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <div className="text-gray-400 mb-4">
+                                        <Store className="h-12 w-12 mx-auto" />
+                                    </div>
+                                    <p className="text-sm text-gray-500 mb-4">
+                                        Nenhuma loja conectada ainda
+                                    </p>
+                                    <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                                        Conectar Primeira Loja
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-gray-100">
+                                    {metrics.activeStores.map((store, idx) => (
+                                        <div key={idx} className="p-4 hover:bg-gray-50 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm">
+                                                        {idx + 1}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{store.name}</p>
+                                                        <p className="text-xs text-gray-500">{store.orders} pedidos</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-semibold text-green-600">{formatCurrency(store.gmv)}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    
+                                    {/* CTA para conectar mais lojas */}
+                                    <div className="p-4 bg-orange-50 border-t-2 border-orange-100">
+                                        <div className="text-center">
+                                            <p className="text-sm text-gray-700 mb-3">
+                                                Conecte mais lojas para aumentar sua receita
+                                            </p>
+                                            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+                                                <Plus className="h-4 w-4 mr-1" />
+                                                Adicionar Loja
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Seção adicional: Gráfico de Performance */}
+                <Card className="bg-white border-gray-200 shadow-sm">
+                    <CardHeader className="border-b border-gray-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <BarChart3 className="h-5 w-5 text-indigo-500" />
+                                    Resumo Mensal
+                                </CardTitle>
+                                <CardDescription className="text-sm text-gray-600">
+                                    Visão consolidada das suas operações
+                                </CardDescription>
                             </div>
                         </div>
-
-                         {/* Card Promocional / CTA */}
-                         <div className="rounded-2xl bg-gradient-to-br from-orange-600 to-orange-800 p-6 text-white shadow-xl shadow-orange-900/50 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                            <h3 className="text-xl font-bold mb-2">Escale sua operação</h3>
-                            <p className="text-orange-100 text-sm mb-4">Conecte mais lojas para ter uma visão 360º do seu ecossistema de vendas.</p>
-                            <Button variant="secondary" className="w-full bg-white text-orange-700 hover:bg-orange-50 border-none font-semibold">
-                                Conectar Nova Loja
-                            </Button>
-                         </div>
-                    </div>
-                </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-green-600 mb-1">
+                                    {formatCurrency(metrics.totalGmv)}
+                                </div>
+                                <div className="text-sm text-gray-600">Receita Total</div>
+                                <div className="text-xs text-green-600 font-medium mt-1">↗ +15.2%</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-blue-600 mb-1">
+                                    {formatNumber(metrics.totalPedidos)}
+                                </div>
+                                <div className="text-sm text-gray-600">Pedidos</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-purple-600 mb-1">
+                                    {formatCurrency(metrics.ticketMedio)}
+                                </div>
+                                <div className="text-sm text-gray-600">Ticket Médio</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-3xl font-bold text-orange-600 mb-1">
+                                    {metrics.totalSellers}
+                                </div>
+                                <div className="text-sm text-gray-600">Lojas Ativas</div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </>
             )}
         </div>
