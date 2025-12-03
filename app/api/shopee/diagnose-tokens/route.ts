@@ -58,7 +58,9 @@ export async function GET(request: Request) {
         has_refresh_token: !!integration.refresh_token,
         refresh_token_length: integration.refresh_token?.length || 0,
         refresh_token_preview: integration.refresh_token ? 
-          `${integration.refresh_token.substring(0, 10)}...${integration.refresh_token.substring(integration.refresh_token.length - 4)}` : null,
+          (integration.refresh_token.length > 14 ? 
+            `${integration.refresh_token.substring(0, 10)}...${integration.refresh_token.substring(integration.refresh_token.length - 4)}` :
+            integration.refresh_token.substring(0, 20) + '...') : null,
         
         // Status de expiração
         token_expiry: integration.token_expiry,
