@@ -22,28 +22,33 @@ export async function GET(request: Request) {
     console.log('\n🔄 ===== CRON JOB: RENOVAÇÃO AUTOMÁTICA DE TOKENS =====');
     console.log(`⏰ Iniciado em: ${new Date().toISOString()}`);
 
-    // Buscar integrações que expiram nas próximas 6 horas
-    // Isso garante que sempre renovamos tokens antes de expirarem
-    // Access tokens Shopee geralmente expiram em 4 horas, então renovar 6h antes é seguro
+    // Buscar TODAS as integrações Shopee com refresh_token
+    // Vamos verificar cada uma para ver se precisa de refresh
+    // Isso garante que não perdemos nenhuma integração
     const sixHoursFromNow = new Date(Date.now() + 6 * 60 * 60 * 1000);
     
-    const integrations = await prisma.client_integrations.findMany({
+    const allIntegrationsWithRefresh = await prisma.client_integrations.findMany({
       where: {
         provider: 'shopee',
-        refresh_token: { not: null },
-        OR: [
-          // Tokens que expiram nas próximas 6 horas
-          { token_expiry: { lte: sixHoursFromNow } },
-          // Tokens sem data de expiração (assumir expirados)
-          { token_expiry: null }
-        ]
+        refresh_token: { not: null }
       },
       include: {
         clients: { select: { id: true, name: true } }
       }
     });
 
-    console.log(`📊 Encontradas ${integrations.length} integrações que precisam de refresh`);
+    console.log(`📊 Encontradas ${allIntegrationsWithRefresh.length} integrações Shopee com refresh_token`);
+
+    // Filtrar apenas as que precisam de refresh (expiram em <= 6 horas ou sem data)
+    const integrations = allIntegrationsWithRefresh.filter(integration => {
+      if (!integration.token_expiry) {
+        return true; // Sem data de expiração = precisa renovar
+      }
+      const expiryDate = new Date(integration.token_expiry);
+      return expiryDate <= sixHoursFromNow;
+    });
+
+    console.log(`🔄 ${integrations.length} integração(ões) precisam de refresh (expiram em <= 6 horas ou sem data)`);
 
     // Debug: Contar todas as integrações Shopee para entender por que não há nada para renovar
     const allIntegrations = await prisma.client_integrations.findMany({
@@ -55,21 +60,32 @@ export async function GET(request: Request) {
 
     const debugStats = {
       total_integrations: allIntegrations.length,
-      with_refresh_token: allIntegrations.filter(i => i.refresh_token).length,
+      with_refresh_token: allIntegrationsWithRefresh.length,
       with_access_token: allIntegrations.filter(i => i.access_token).length,
       without_refresh_token: allIntegrations.filter(i => !i.refresh_token).length,
       expired_tokens: allIntegrations.filter(i => {
         if (!i.token_expiry) return true;
         return new Date(i.token_expiry) <= new Date();
       }).length,
-      tokens_valid_more_than_6h: allIntegrations.filter(i => {
+      tokens_valid_more_than_6h: allIntegrationsWithRefresh.filter(i => {
         if (!i.token_expiry) return false;
         const hoursUntilExpiry = (new Date(i.token_expiry).getTime() - Date.now()) / (1000 * 60 * 60);
         return hoursUntilExpiry > 6;
-      }).length
+      }).length,
+      needs_refresh: integrations.length,
+      details: allIntegrationsWithRefresh.map(i => ({
+        client_name: i.clients?.name || 'Desconhecido',
+        shop_id: i.shop_id,
+        has_token_expiry: !!i.token_expiry,
+        token_expiry: i.token_expiry,
+        hours_until_expiry: i.token_expiry ? 
+          Math.round((new Date(i.token_expiry).getTime() - Date.now()) / (1000 * 60 * 60)) : 
+          null,
+        needs_refresh: !i.token_expiry || new Date(i.token_expiry) <= sixHoursFromNow
+      }))
     };
 
-    console.log(`🔍 Debug - Estatísticas de integrações:`, debugStats);
+    console.log(`🔍 Debug - Estatísticas de integrações:`, JSON.stringify(debugStats, null, 2));
 
     const results = {
       total_checked: integrations.length,
@@ -78,7 +94,7 @@ export async function GET(request: Request) {
       skipped: 0,
       errors: [] as string[],
       details: [] as any[],
-      debug_stats: integrations.length === 0 ? debugStats : undefined
+      debug_stats: debugStats // Sempre retornar estatísticas para debug
     };
 
     for (const integration of integrations) {
