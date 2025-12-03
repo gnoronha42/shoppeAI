@@ -123,16 +123,18 @@ export async function GET(request: Request) {
           shop_id: integration.shop_id,
           status: 'error',
           error: error.message,
-          // Apenas marcar que precisa reautenticar, sem limpar tokens automaticamente
           needs_reauth: error.message.includes('REFRESH_TOKEN_EXPIRED') || 
                        error.message.includes('error_not_found')
         });
 
-        // Se o refresh token expirou, apenas logar e marcar para reautenticação.
-        // NÃO limpar tokens aqui para evitar "perder" integrações à toa.
+        // Se o refresh token expirou, apenas logar - NÃO limpar tokens
         if (error.message.includes('REFRESH_TOKEN_EXPIRED') || 
             error.message.includes('error_not_found')) {
-          console.log(`   🚨 Refresh token expirado - cliente precisa reautenticar (tokens mantidos no banco)`);
+          console.log(`   🚨 Refresh token expirado - cliente precisa reautenticar`);
+          console.log(`   ℹ️ Tokens mantidos no banco para permitir reautenticação manual`);
+          
+          // NÃO limpar tokens automaticamente - deixar para o usuário decidir
+          // Isso evita perder a integração acidentalmente
         }
       }
     }
