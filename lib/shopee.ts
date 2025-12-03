@@ -116,8 +116,12 @@ export async function refreshAccessToken(args: { refresh_token: string }) {
     path,
     timestamp,
     refresh_token_preview: args.refresh_token?.slice(0, 8) + '...' + args.refresh_token?.slice(-4),
+    refresh_token_length: args.refresh_token?.length || 0,
     baseString_preview: baseString.slice(0, 50) + '...',
-    sign_preview: sign.slice(0, 16) + '...'
+    baseString_full: baseString, // Log completo para debug
+    sign_preview: sign.slice(0, 16) + '...',
+    partner_id: SHOPEE_PARTNER_ID,
+    url: url
   });
   
   const res = await fetch(url, {
@@ -134,12 +138,32 @@ export async function refreshAccessToken(args: { refresh_token: string }) {
   if (!res.ok) {
     const text = await res.text();
     const errorMsg = `Shopee token/refresh failed: ${res.status} ${text}`;
-    console.error(`❌ [refreshAccessToken] Erro:`, errorMsg);
+    console.error(`❌ [refreshAccessToken] Erro completo:`, {
+      status: res.status,
+      statusText: res.statusText,
+      error_response: text,
+      url: url,
+      partner_id: SHOPEE_PARTNER_ID,
+      refresh_token_length: args.refresh_token?.length || 0,
+      refresh_token_preview: args.refresh_token?.slice(0, 10) + '...' + args.refresh_token?.slice(-4),
+      timestamp: timestamp,
+      baseString: baseString,
+      sign: sign
+    });
     
     // Detecta se o refresh_token expirou (geralmente após 30 dias)
     if (res.status === 403 || text.includes('invalid') || text.includes('expired')) {
       throw Object.assign(new Error('Refresh token expirado - reautenticação necessária'), { 
         code: 'REFRESH_TOKEN_EXPIRED',
+        status: res.status,
+        response: text 
+      });
+    }
+    
+    // 404 pode significar que o token não foi encontrado ou não está válido ainda
+    if (res.status === 404) {
+      throw Object.assign(new Error('Refresh token não encontrado (404) - pode precisar aguardar alguns minutos após geração'), { 
+        code: 'REFRESH_TOKEN_NOT_FOUND',
         status: res.status,
         response: text 
       });
