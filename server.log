@@ -1,0 +1,31 @@
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "node-linker". This will stop working in the next major version of npm.
+
+> shopee-analytics@0.1.0 dev
+> next dev
+
+npm warn Unknown env config "node-linker". This will stop working in the next major version of npm.
+npm warn Unknown env config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+npm warn Unknown project config "node-linker". This will stop working in the next major version of npm.
+  ▲ Next.js 13.5.1
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env
+  - Experiments (use at your own risk):
+     · serverComponentsExternalPackages
+
+ ✓ Ready in 3.1s
+ ✓ Compiled /middleware in 389ms (54 modules)
+ ✓ Compiled /api/shopee/sandbox-test/route in 195ms (34 modules)
+🧪 [SANDBOX-TEST] Testando conectividade com Shopee Sandbox...
+🧪 [SANDBOX-TEST] Teste 1: Endpoint público get_shops_by_partner
+📡 [shopeeFetch] GET /api/v2/public/get_shops_by_partner | Public: true | Shop: N/A
+❌ [SANDBOX-TEST] Teste 1 falhou: Shopee API /api/v2/public/get_shops_by_partner failed: 403 {"error":"error_sign","message":"Wrong sign.","request_id":"e3e3e7f344ffa975c7adaded47ed0c01"}
+🧪 [SANDBOX-TEST] Teste 2: Verificação de credenciais
+✅ [SANDBOX-TEST] Teste 2 passou - Credenciais OK
+🧪 [SANDBOX-TEST] Teste 3: URL de callback
+✅ [SANDBOX-TEST] Teste 3 - URL callback: https://bob-disquieting-unstoutly.ngrok-free.dev/api/shopee/callback
+📊 [SANDBOX-TEST] Resumo: 2/3 testes passaram
+ ✓ Compiled in 65ms (34 modules)
+ ✓ Compiled in 15ms
+ ✓ Compiled in 929ms (237 modules)
