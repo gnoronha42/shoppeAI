@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     }
 
     let tokenToTest = refresh_token;
+    let shopIdToUse: string | undefined;
 
     // Se forneceu client_id, buscar refresh_token do banco
     if (!tokenToTest && client_id) {
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
       }
 
       tokenToTest = integration.refresh_token;
+      shopIdToUse = integration.shop_id || undefined;
 
       console.log(`🔍 [TEST-REFRESH] Usando refresh_token do banco para:`, {
         client_id,
@@ -68,12 +70,16 @@ export async function POST(request: Request) {
       token_length: tokenToTest.length,
       token_preview: tokenToTest.substring(0, 10) + '...' + tokenToTest.substring(tokenToTest.length - 4),
       environment: process.env.SHOPEE_BASE_URL,
-      partner_id: process.env.SHOPEE_PARTNER_ID
+      partner_id: process.env.SHOPEE_PARTNER_ID,
+      shop_id: shopIdToUse
     });
 
     // Tentar fazer refresh
     try {
-      const refreshed = await refreshAccessToken({ refresh_token: tokenToTest });
+      const refreshed = await refreshAccessToken({ 
+        refresh_token: tokenToTest,
+        shop_id: shopIdToUse
+      });
 
       console.log(`✅ [TEST-REFRESH] Refresh bem-sucedido!`, {
         has_access_token: !!refreshed.access_token,
@@ -149,4 +155,3 @@ export async function POST(request: Request) {
     }, { status: 500 });
   }
 }
-

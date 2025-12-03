@@ -41,7 +41,7 @@ async function getValidAccessToken(integration: any) {
     Boolean(integration.refresh_token) &&
     expiryValid &&
     (remainingSeconds <= bufferSeconds);
-  
+
   if (shouldRefresh) {
     try {
       console.log(`🔄 [getValidAccessToken] Token expirado/expirando, renovando...`);
@@ -163,7 +163,7 @@ export async function GET(request: Request) {
 
     // ✅ Garante token válido ANTES de qualquer chamada à API
     try {
-      integration = await getValidAccessToken(integration);
+    integration = await getValidAccessToken(integration);
     } catch (e: any) {
       if (e?.code === 'REFRESH_TOKEN_EXPIRED') {
         return NextResponse.json({ 
@@ -177,38 +177,38 @@ export async function GET(request: Request) {
         reconnect_required: true 
       }, { status: 401 });
     }
-    
+
     const { access_token, shop_id, refresh_token } = integration as any;
     const integrationId = (integration as any).id;
 
     // Helper para refresh forçado em caso de 403 invalid_access_token
     const forceRefreshTokens = async () => {
-       if (!refresh_token) {
+      if (!refresh_token) {
          console.log('⚠️ [forceRefreshTokens] Não é possível fazer refresh: refresh_token ausente');
-         return null;
-       }
-       try {
+        return null;
+      }
+      try {
          console.log('🔄 [forceRefreshTokens] Executando refresh forçado...');
-         const refreshed = await refreshAccessToken({ refresh_token });
-         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
-         const updated = await prisma.client_integrations.update({
-           where: { id: integrationId },
-           data: {
-             access_token: refreshed.access_token,
+        const refreshed = await refreshAccessToken({ refresh_token });
+        const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
+        const updated = await prisma.client_integrations.update({
+          where: { id: integrationId },
+          data: {
+            access_token: refreshed.access_token,
              refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza
-             token_expiry: newExpiry,
-             updated_at: new Date(),
-           },
-         });
+            token_expiry: newExpiry,
+            updated_at: new Date(),
+          },
+        });
          console.log(`✅ [forceRefreshTokens] Refresh forçado concluído. Nova expiração: ${newExpiry.toISOString()}`);
-         return updated;
+        return updated;
        } catch (e: any) {
          console.error('❌ [forceRefreshTokens] Falha:', e?.message || e);
          if (e?.code === 'REFRESH_TOKEN_EXPIRED') {
            throw Object.assign(new Error('Refresh token expirado'), { code: 'REFRESH_TOKEN_EXPIRED' });
          }
-         return null;
-       }
+        return null;
+      }
     };
 
     // 1. Shop Info e Produtos
@@ -231,23 +231,23 @@ export async function GET(request: Request) {
     } catch (e: any) {
        if (e?.message?.includes('invalid_access_token') || e?.message?.includes('403')) {
           console.log('🔄 [GET] Token inválido detectado, tentando refresh forçado...');
-          const updated = await forceRefreshTokens();
-          if (!updated) {
+        const updated = await forceRefreshTokens();
+        if (!updated) {
             return NextResponse.json({ 
               error: 'access_token inválido e refresh falhou', 
               reconnect_required: true 
             }, { status: 401 });
-          }
+        }
           // Retry com novo token
           integration = updated;
-          shopInfo = await shopeeFetch<any>({ 
-            path: '/api/v2/shop/get_shop_info', 
+        shopInfo = await shopeeFetch<any>({
+          path: '/api/v2/shop/get_shop_info',
             access_token: updated.access_token || '', 
             shop_id: updated.shop_id || shop_id 
-          });
-       } else {
-         throw e;
-       }
+        });
+      } else {
+        throw e;
+      }
     }
 
     // 2. Pedidos e GMV - CORRIGIDO: Divisão em blocos de 15 dias
@@ -258,8 +258,8 @@ export async function GET(request: Request) {
     // ✅ CORREÇÃO 1: Validar que time_from < time_to
     if (timeFrom >= timeTo) {
       console.error('❌ [GET /api/shopee/data] Erro: time_from >= time_to', {
-        time_from: timeFrom,
-        time_to: timeTo,
+              time_from: timeFrom,
+              time_to: timeTo,
         time_from_date: new Date(timeFrom * 1000).toISOString(),
         time_to_date: new Date(timeTo * 1000).toISOString()
       });
@@ -359,7 +359,7 @@ export async function GET(request: Request) {
               blockOrders = fieldOrders;
               break; // Para no primeiro time_field que retornar dados
             }
-          } catch (e: any) {
+    } catch (e: any) {
             console.error(`❌ [fetchOrdersInBlocks] Erro ${timeField} (${block.days}d):`, e?.message);
             // Retry simplificado se necessário
           }
@@ -398,14 +398,14 @@ export async function GET(request: Request) {
         
         for (const chunk of chunks) {
             try {
-              const detailResp = await shopeeFetch<any>({
-                  path: '/api/v2/order/get_order_detail',
+      const detailResp = await shopeeFetch<any>({
+        path: '/api/v2/order/get_order_detail',
                   access_token: (integration as any).access_token,
                   shop_id: (integration as any).shop_id,
                   query: { order_sn_list: chunk.join(','), response_optional_fields: 'item_list,total_amount' }
-              });
+      });
               const details = detailResp?.response?.order_list || [];
-              for (const order of details) {
+      for (const order of details) {
                   gmv += Number(order.total_amount) || 0;
                   
                   // Agregar produtos
@@ -423,7 +423,7 @@ export async function GET(request: Request) {
               }
             }
         }
-    }
+        }
 
     // 3. Performance (Insights) - Visitantes e Conversão
     let visitors = 0;

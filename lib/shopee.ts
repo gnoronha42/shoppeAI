@@ -101,7 +101,7 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
  * CRÍTICO: A Shopee retorna um NOVO refresh_token a cada refresh.
  * Sempre devemos salvar o novo refresh_token, nunca manter o antigo.
  */
-export async function refreshAccessToken(args: { refresh_token: string }) {
+export async function refreshAccessToken(args: { refresh_token: string; shop_id?: number | string }) {
   const path = '/api/v2/auth/token/refresh';
   
   // ✅ CORREÇÃO: Usa timestamp do servidor Shopee (mesmo padrão de getAccessToken)
@@ -117,6 +117,7 @@ export async function refreshAccessToken(args: { refresh_token: string }) {
     timestamp,
     refresh_token_preview: args.refresh_token?.slice(0, 8) + '...' + args.refresh_token?.slice(-4),
     refresh_token_length: args.refresh_token?.length || 0,
+    shop_id: args.shop_id,
     baseString_preview: baseString.slice(0, 50) + '...',
     baseString_full: baseString, // Log completo para debug
     sign_preview: sign.slice(0, 16) + '...',
@@ -124,15 +125,22 @@ export async function refreshAccessToken(args: { refresh_token: string }) {
     url: url
   });
   
+  const payload: any = {
+    refresh_token: args.refresh_token,
+    partner_id: Number(SHOPEE_PARTNER_ID),
+    timestamp,
+    sign,
+  };
+
+  // Adiciona shop_id se fornecido
+  if (args.shop_id) {
+    payload.shop_id = Number(args.shop_id);
+  }
+  
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      refresh_token: args.refresh_token,
-      partner_id: Number(SHOPEE_PARTNER_ID),
-      timestamp,
-      sign,
-    }),
+    body: JSON.stringify(payload),
   });
   
   if (!res.ok) {

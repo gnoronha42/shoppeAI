@@ -70,8 +70,8 @@ jobs:
               echo "⚠️ Refresh executado mas com alguns erros:"
               echo "$body" | jq -r '.summary.errors[]?' 2>/dev/null || echo "Detalhes não disponíveis"
               
-              # Verificar se os erros são apenas de refresh tokens expirados (situação esperada)
-              all_errors_are_expired=$(echo "$body" | jq -r '.summary.details[]?.error // empty' 2>/dev/null | grep -c "error_not_found\|REFRESH_TOKEN_EXPIRED" || echo "0")
+              # Verificar se os erros são apenas de refresh tokens expirados ou não encontrados (situação esperada)
+              all_errors_are_expired=$(echo "$body" | jq -r '.summary.details[]?.error // empty' 2>/dev/null | grep -ic "error_not_found\|REFRESH_TOKEN_EXPIRED\|REFRESH_TOKEN_NOT_FOUND\|não encontrado\|404.*refresh\|refresh.*404" || echo "0")
               total_errors=$(echo "$body" | jq -r '.summary.failed_refreshes // 0')
               
               if [ "$all_errors_are_expired" = "$total_errors" ] && [ "$total_errors" -gt 0 ]; then
@@ -98,8 +98,8 @@ jobs:
               echo ""
               echo "💡 Dica: Execute GET /api/shopee/diagnose-tokens para ver o status detalhado"
             elif [ "$failed_refreshes" -gt 0 ] && [ "$successful_refreshes" -eq 0 ]; then
-              # Verificar se todos os erros são de tokens expirados
-              expired_count=$(echo "$body" | jq -r '[.summary.details[]? | select(.error | contains("error_not_found") or contains("REFRESH_TOKEN_EXPIRED"))] | length' 2>/dev/null || echo "0")
+              # Verificar se todos os erros são de tokens expirados ou não encontrados
+              expired_count=$(echo "$body" | jq -r '[.summary.details[]? | select(.error | test("error_not_found|REFRESH_TOKEN_EXPIRED|REFRESH_TOKEN_NOT_FOUND|não encontrado|404.*refresh|refresh.*404"; "i"))] | length' 2>/dev/null || echo "0")
               if [ "$expired_count" = "$failed_refreshes" ]; then
                 echo ""
                 echo "⚠️ Todas as integrações têm refresh tokens expirados"
