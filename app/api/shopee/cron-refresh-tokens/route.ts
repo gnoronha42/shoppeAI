@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { refreshAccessToken } from '@/lib/shopee';
 
+// Forçar endpoint dinâmico para evitar cache e garantir dados sempre atualizados
+export const dynamic = 'force-dynamic';
+
 /**
  * 🔄 CRON JOB - Renovação Automática de Tokens Shopee
  * 

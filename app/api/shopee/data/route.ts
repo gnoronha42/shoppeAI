@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * 🔄 HELPER ROBUSTO PARA GERENCIAR TOKENS SHOPEE
  * 

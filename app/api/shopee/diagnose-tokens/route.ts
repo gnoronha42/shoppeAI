@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * 🔍 DIAGNÓSTICO COMPLETO DE TOKENS - Identifica problemas na persistência de tokens
  * 
