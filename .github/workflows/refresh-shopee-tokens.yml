@@ -51,13 +51,40 @@ jobs:
           
           # Verificar se foi bem-sucedido
           if [ "$http_code" = "200" ]; then
-            echo "✅ Refresh executado com sucesso!"
+            # Extrair informações do resumo
+            total_checked=$(echo "$body" | jq -r '.summary.total_checked // 0')
+            successful_refreshes=$(echo "$body" | jq -r '.summary.successful_refreshes // 0')
+            failed_refreshes=$(echo "$body" | jq -r '.summary.failed_refreshes // 0')
+            skipped=$(echo "$body" | jq -r '.summary.skipped // 0')
+            
+            echo ""
+            echo "📊 Resumo do Processamento:"
+            echo "   🔍 Total verificado: $total_checked"
+            echo "   ✅ Sucessos: $successful_refreshes"
+            echo "   ❌ Falhas: $failed_refreshes"
+            echo "   ⏭️  Pulados: $skipped"
             
             # Verificar se houve erros no JSON de resposta
             if echo "$body" | jq -e '.success == false' >/dev/null 2>&1; then
+              echo ""
               echo "⚠️ Refresh executado mas com alguns erros:"
               echo "$body" | jq -r '.summary.errors[]?' 2>/dev/null || echo "Detalhes não disponíveis"
               exit 1
+            fi
+            
+            # Se total_checked é 0, pode ser normal (não há tokens para renovar)
+            if [ "$total_checked" = "0" ]; then
+              echo ""
+              echo "ℹ️ Nenhuma integração encontrada para renovar."
+              echo "   Isso é normal se:"
+              echo "   - Não há integrações Shopee conectadas"
+              echo "   - Todos os tokens são válidos por mais de 6 horas"
+              echo "   - As integrações não têm refresh_token válido"
+              echo ""
+              echo "💡 Dica: Execute GET /api/shopee/diagnose-tokens para ver o status detalhado"
+            else
+              echo ""
+              echo "✅ Refresh executado com sucesso!"
             fi
           else
             echo "❌ Falha no refresh! Status: $http_code"

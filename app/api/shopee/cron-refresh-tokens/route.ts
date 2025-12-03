@@ -45,13 +45,40 @@ export async function GET(request: Request) {
 
     console.log(`📊 Encontradas ${integrations.length} integrações que precisam de refresh`);
 
+    // Debug: Contar todas as integrações Shopee para entender por que não há nada para renovar
+    const allIntegrations = await prisma.client_integrations.findMany({
+      where: { provider: 'shopee' },
+      include: {
+        clients: { select: { id: true, name: true } }
+      }
+    });
+
+    const debugStats = {
+      total_integrations: allIntegrations.length,
+      with_refresh_token: allIntegrations.filter(i => i.refresh_token).length,
+      with_access_token: allIntegrations.filter(i => i.access_token).length,
+      without_refresh_token: allIntegrations.filter(i => !i.refresh_token).length,
+      expired_tokens: allIntegrations.filter(i => {
+        if (!i.token_expiry) return true;
+        return new Date(i.token_expiry) <= new Date();
+      }).length,
+      tokens_valid_more_than_6h: allIntegrations.filter(i => {
+        if (!i.token_expiry) return false;
+        const hoursUntilExpiry = (new Date(i.token_expiry).getTime() - Date.now()) / (1000 * 60 * 60);
+        return hoursUntilExpiry > 6;
+      }).length
+    };
+
+    console.log(`🔍 Debug - Estatísticas de integrações:`, debugStats);
+
     const results = {
       total_checked: integrations.length,
       successful_refreshes: 0,
       failed_refreshes: 0,
       skipped: 0,
       errors: [] as string[],
-      details: [] as any[]
+      details: [] as any[],
+      debug_stats: integrations.length === 0 ? debugStats : undefined
     };
 
     for (const integration of integrations) {
@@ -169,13 +196,29 @@ export async function GET(request: Request) {
     const success = results.failed_refreshes === 0 || 
                    results.successful_refreshes > 0;
 
+    let message = success ? 
+      'Cron job executado com sucesso' : 
+      'Cron job executado com erros';
+    
+    // Adicionar mensagem informativa se não houver integrações para processar
+    if (results.total_checked === 0 && results.debug_stats) {
+      const stats = results.debug_stats;
+      if (stats.total_integrations === 0) {
+        message = 'Cron executado: Nenhuma integração Shopee encontrada no banco de dados';
+      } else if (stats.without_refresh_token === stats.total_integrations) {
+        message = 'Cron executado: Todas as integrações precisam ser reconectadas (sem refresh_token)';
+      } else if (stats.tokens_valid_more_than_6h > 0) {
+        message = `Cron executado: ${stats.tokens_valid_more_than_6h} token(s) ainda válido(s) por mais de 6 horas (não precisa renovar agora)`;
+      } else {
+        message = 'Cron executado: Nenhuma integração precisa de refresh no momento';
+      }
+    }
+
     return NextResponse.json({
       success,
-      message: success ? 
-        'Cron job executado com sucesso' : 
-        'Cron job executado com erros',
+      message,
       summary,
-      next_execution_recommended: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      next_execution_recommended: new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString() // Próxima execução em 3 horas
     });
 
   } catch (err: any) {
