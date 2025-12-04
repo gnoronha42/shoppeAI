@@ -31,7 +31,7 @@ const calculateAdsMetrics = (stores: any[]) => {
   const totalClicks = stores.reduce((acc, store) => acc + (store.ads?.clicks || 0), 0);
   const totalConversions = stores.reduce((acc, store) => acc + (store.ads?.conversions || 0), 0);
   const avgRoas = stores.length > 0 ? stores.reduce((acc, store) => acc + (store.ads?.roas || 0), 0) / stores.length : 0;
-  
+
   return {
     totalSpend,
     impressions: totalImpressions,
@@ -99,29 +99,29 @@ export default function Home() {
                         />
                     </div>
                 </div>
-                <div>
+        <div>
                     <h1 className="text-3xl font-bold tracking-tight text-gray-900">
                         Dashboard Shopee
                     </h1>
                     <p className="text-sm text-gray-600 font-medium">
                         Visão geral das suas vendas e performance
-                    </p>
+          </p>
                 </div>
-            </div>
-            <Link href="/analise">
+        </div>
+        <Link href="/analise">
                 <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-md transition-all duration-200 hover:shadow-lg">
                 <Plus className="mr-2 h-4 w-4" /> Nova Análise IA
-                </Button>
-            </Link>
-            </div>
+          </Button>
+        </Link>
+      </div>
 
             {loading ? (
                  <div className="h-[60vh] w-full flex items-center justify-center bg-white rounded-lg shadow-sm">
                     <div className="flex flex-col items-center gap-4">
                         <Loader2 className="h-12 w-12 animate-spin text-orange-500" />
                         <p className="text-gray-600 animate-pulse">Sincronizando dados das lojas...</p>
-                    </div>
-                 </div>
+              </div>
+            </div>
             ) : (
             <>
                 {/* KPIs Principais */}
@@ -134,8 +134,8 @@ export default function Home() {
                         <CardContent>
                             <div className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.totalGmv)}</div>
                             <p className="text-xs text-green-600 mt-1 font-medium">+12.5% vs mês anterior</p>
-                        </CardContent>
-                    </Card>
+          </CardContent>
+        </Card>
                     <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Pedidos (30d)</CardTitle>
@@ -144,8 +144,8 @@ export default function Home() {
                         <CardContent>
                             <div className="text-3xl font-bold text-gray-900">{formatNumber(metrics.totalPedidos)}</div>
                             <p className="text-xs text-gray-500 mt-1">Taxa de conversão ~2.4%</p>
-                        </CardContent>
-                    </Card>
+          </CardContent>
+        </Card>
                     <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Lojas Ativas</CardTitle>
@@ -154,8 +154,8 @@ export default function Home() {
                         <CardContent>
                             <div className="text-3xl font-bold text-gray-900">{metrics.totalSellers}</div>
                             <p className="text-xs text-gray-500 mt-1">Conectadas e sincronizadas</p>
-                        </CardContent>
-                    </Card>
+          </CardContent>
+        </Card>
                      <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Ticket Médio</CardTitle>
@@ -164,9 +164,9 @@ export default function Home() {
                         <CardContent>
                             <div className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.ticketMedio)}</div>
                             <p className="text-xs text-gray-500 mt-1">Média consolidada</p>
-                        </CardContent>
-                    </Card>
-                </div>
+          </CardContent>
+        </Card>
+      </div>
 
                 {/* Conteúdo Principal - 3 Colunas */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -174,8 +174,8 @@ export default function Home() {
                     {/* Coluna 1: Ranking de Produtos */}
                     <Card className="bg-white border-gray-200 shadow-sm">
                         <CardHeader className="border-b border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <div>
+            <div className="flex items-center justify-between">
+              <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                         <Award className="h-5 w-5 text-yellow-500" />
                                         Top Produtos
@@ -219,20 +219,20 @@ export default function Home() {
                                                             {formatCurrency(product.revenue || 0)}
                                                         </span>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
+              </div>
+              </div>
+            </div>
                                     ))}
-                                </div>
+            </div>
                             )}
-                        </CardContent>
-                    </Card>
+          </CardContent>
+        </Card>
 
                     {/* Coluna 2: Investimento em Ads */}
                     <Card className="bg-white border-gray-200 shadow-sm">
                         <CardHeader className="border-b border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <div>
+            <div className="flex items-center justify-between">
+              <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                         <Megaphone className="h-5 w-5 text-blue-500" />
                                         Investimento em Ads
@@ -268,10 +268,10 @@ export default function Home() {
                                         <div className="text-center p-4 bg-green-50 rounded-lg">
                                             <div className="text-2xl font-bold text-green-600">
                                                 {metrics.adsData.roas > 0 ? `${metrics.adsData.roas.toFixed(1)}x` : '-'}
-                                            </div>
+              </div>
                                             <div className="text-xs text-gray-600 mt-1">ROAS</div>
-                                        </div>
-                                    </div>
+              </div>
+            </div>
                                     
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center">
@@ -285,13 +285,13 @@ export default function Home() {
                                             <span className="text-sm font-medium text-gray-900">
                                                 {formatNumber(metrics.adsData.clicks)}
                                             </span>
-                                        </div>
+            </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm text-gray-600">Conversões</span>
                                             <span className="text-sm font-medium text-gray-900">
                                                 {metrics.adsData.conversions}
                                             </span>
-                                        </div>
+              </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm text-gray-600">CTR</span>
                                             <span className="text-sm font-medium text-gray-900">
@@ -300,18 +300,18 @@ export default function Home() {
                                                     : '-'
                                                 }
                                             </span>
-                                        </div>
-                                    </div>
+              </div>
+            </div>
                                 </>
                             )}
-                        </CardContent>
-                    </Card>
+          </CardContent>
+        </Card>
 
                     {/* Coluna 3: Lojas Ativas */}
                     <Card className="bg-white border-gray-200 shadow-sm">
                         <CardHeader className="border-b border-gray-100">
-                            <div className="flex items-center justify-between">
-                                <div>
+            <div className="flex items-center justify-between">
+              <div>
                                     <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                         <Store className="h-5 w-5 text-orange-500" />
                                         Lojas Ativas
@@ -319,8 +319,8 @@ export default function Home() {
                                     <CardDescription className="text-sm text-gray-600">
                                         Ranking de performance
                                     </CardDescription>
-                                </div>
-                            </div>
+              </div>
+            </div>
                         </CardHeader>
                         <CardContent className="p-0">
                             {metrics.activeStores.length === 0 ? (
@@ -334,7 +334,7 @@ export default function Home() {
                                     <Button className="bg-orange-500 hover:bg-orange-600 text-white">
                                         Conectar Primeira Loja
                                     </Button>
-                                </div>
+            </div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
                                     {metrics.activeStores.map((store, idx) => (
@@ -343,18 +343,18 @@ export default function Home() {
                                                 <div className="flex items-center gap-3">
                                                     <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm">
                                                         {idx + 1}
-                                                    </div>
-                                                    <div>
+      </div>
+                <div>
                                                         <p className="font-medium text-gray-900">{store.name}</p>
                                                         <p className="text-xs text-gray-500">{store.orders} pedidos</p>
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="font-semibold text-green-600">{formatCurrency(store.gmv)}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
+                </div>
+                      </div>
+                    </div>
+                  ))}
                                     
                                     {/* CTA para conectar mais lojas */}
                                     <div className="p-4 bg-orange-50 border-t-2 border-orange-100">
@@ -366,13 +366,13 @@ export default function Home() {
                                                 <Plus className="h-4 w-4 mr-1" />
                                                 Adicionar Loja
                                             </Button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
                 </div>
+              </div>
+            </div>
+                            )}
+          </CardContent>
+        </Card>
+      </div>
 
                 {/* Seção adicional: Gráfico de Performance */}
                 <Card className="bg-white border-gray-200 shadow-sm">
@@ -382,13 +382,13 @@ export default function Home() {
                                 <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                     <BarChart3 className="h-5 w-5 text-indigo-500" />
                                     Resumo Mensal
-                                </CardTitle>
+          </CardTitle>
                                 <CardDescription className="text-sm text-gray-600">
                                     Visão consolidada das suas operações
                                 </CardDescription>
                             </div>
                         </div>
-                    </CardHeader>
+        </CardHeader>
                     <CardContent className="p-6">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div className="text-center">
@@ -401,24 +401,24 @@ export default function Home() {
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-blue-600 mb-1">
                                     {formatNumber(metrics.totalPedidos)}
-                                </div>
+              </div>
                                 <div className="text-sm text-gray-600">Pedidos</div>
-                            </div>
+                    </div>
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-purple-600 mb-1">
                                     {formatCurrency(metrics.ticketMedio)}
-                                </div>
+                    </div>
                                 <div className="text-sm text-gray-600">Ticket Médio</div>
-                            </div>
+                  </div>
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-orange-600 mb-1">
                                     {metrics.totalSellers}
-                                </div>
+              </div>
                                 <div className="text-sm text-gray-600">Lojas Ativas</div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
             </>
             )}
         </div>

@@ -298,12 +298,17 @@ export async function GET(request: Request) {
       }
     }
 
-    // 2. Pedidos e GMV - CORRIGIDO: Shopee limita consultas a 15 dias
+    // 2. Pedidos e GMV - MELHORADO: Incluir pedidos pagos e comparativo
     const timeTo = customTimeTo || Math.floor(Date.now() / 1000);
     const maxDays = 15; // ✅ Limite da Shopee
     const requestedDays = customPeriodDays || 15; // Reduzido de 30 para 15
     const periodDays = Math.min(requestedDays, maxDays);
     const timeFrom = customTimeFrom || (timeTo - periodDays * 24 * 60 * 60);
+    
+    // ✅ NOVO: Calcular período anterior para comparativo
+    const previousPeriodDuration = timeTo - timeFrom;
+    const previousTimeFrom = timeFrom - previousPeriodDuration;
+    const previousTimeTo = timeFrom;
     
     if (requestedDays > maxDays) {
       console.warn(`⚠️ Período solicitado (${requestedDays} dias) reduzido para ${maxDays} dias (limite da Shopee)`);
@@ -442,10 +447,22 @@ export async function GET(request: Request) {
     }
 
     let gmv = 0;
-    let totalOrders = orderList.length;
+    // ✅ MELHORADO: Processar pedidos com separação entre totais e pagos
+    let totalOrders = 0;
+    let totalPaidOrders = 0;
+    let totalCancelledOrders = 0;
+    let totalPendingOrders = 0;
+    let gmvPaid = 0;
     const productAgg: Record<string, any> = {};
 
+    // Status de pedidos conforme documentação Shopee
+    const PAID_STATUSES = ['READY_TO_SHIP', 'SHIPPED', 'COMPLETED'];
+    const CANCELLED_STATUSES = ['CANCELLED'];
+    const PENDING_STATUSES = ['UNPAID', 'PROCESSING'];
+
     if (orderList.length > 0) {
+        totalOrders = orderList.length;
+        
         const snList = orderList.map((o: any) => o.order_sn);
         const chunks = [];
         for (let i = 0; i < snList.length; i += 50) chunks.push(snList.slice(i, i + 50));
@@ -454,30 +471,122 @@ export async function GET(request: Request) {
             try {
       const detailResp = await shopeeFetch<any>({
         path: '/api/v2/order/get_order_detail',
-                  access_token: (integration as any).access_token,
-                  shop_id: (integration as any).shop_id,
-                  query: { order_sn_list: chunk.join(','), response_optional_fields: 'item_list,total_amount' }
+                    access_token: (integration as any).access_token,
+                    shop_id: (integration as any).shop_id,
+        query: {
+                        order_sn_list: chunk.join(','), 
+                        response_optional_fields: 'item_list,total_amount,order_status' 
+        }
       });
-              const details = detailResp?.response?.order_list || [];
+
+                const details = detailResp?.response?.order_list || [];
+                
       for (const order of details) {
-                  gmv += Number(order.total_amount) || 0;
-                  
-                  // Agregar produtos
-                  for(const item of (order.item_list || [])) {
-                      const name = item.item_name;
-                      if(!productAgg[name]) productAgg[name] = { name, units: 0, revenue: 0 };
-                      productAgg[name].units += item.model_quantity_purchased || 0;
-                      productAgg[name].revenue += (item.model_discounted_price || item.model_original_price) * (item.model_quantity_purchased || 0);
-                  }
-              }
+                    const orderAmount = Number(order.total_amount) || 0;
+                    const orderStatus = order.order_status;
+                    
+                    // Contabilizar GMV total
+                    gmv += orderAmount;
+                    
+                    // ✅ NOVO: Separar por status de pagamento
+                    if (PAID_STATUSES.includes(orderStatus)) {
+                        totalPaidOrders++;
+                        gmvPaid += orderAmount;
+                    } else if (CANCELLED_STATUSES.includes(orderStatus)) {
+                        totalCancelledOrders++;
+                    } else if (PENDING_STATUSES.includes(orderStatus)) {
+                        totalPendingOrders++;
+        }
+
+                    // Agregar produtos (apenas pedidos pagos para ranking)
+                    if (PAID_STATUSES.includes(orderStatus)) {
+                        for(const item of (order.item_list || [])) {
+                            const name = item.item_name;
+                            if(!productAgg[name]) productAgg[name] = { name, units: 0, revenue: 0 };
+                            productAgg[name].units += item.model_quantity_purchased || 0;
+                            productAgg[name].revenue += (item.model_discounted_price || item.model_original_price) * (item.model_quantity_purchased || 0);
+                        }
+                    }
+                }
             } catch (e: any) {
-              if (e?.message?.includes('invalid_access_token') || e?.message?.includes('403')) {
-                const updated = await forceRefreshTokens();
-                if (updated) integration = updated;
-              }
+                if (e?.message?.includes('invalid_access_token') || e?.message?.includes('403')) {
+                    const updated = await forceRefreshTokens();
+                    if (updated) integration = updated;
+                }
             }
         }
+    }
+
+    // ✅ NOVO: Buscar dados do período anterior para comparativo
+    console.log('📊 [COMPARATIVO] Buscando dados do período anterior...');
+    let previousPeriodData = {
+        totalOrders: 0,
+        totalPaidOrders: 0,
+        gmv: 0,
+        gmvPaid: 0,
+        totalCancelledOrders: 0
+    };
+
+    try {
+        // Criar blocos de data para o período anterior
+        const previousDateBlocks = createDateBlocks(previousTimeFrom, previousTimeTo, 15);
+        
+        for (const block of previousDateBlocks) {
+            const previousBlockOrders = await fetchOrdersInBlocks((integration as any).access_token, (integration as any).shop_id);
+            
+            // Filtrar pedidos do bloco anterior
+            const filteredPreviousOrders = previousBlockOrders.filter((order: any) => {
+                const orderTime = order.create_time || order.update_time;
+                return orderTime >= block.from && orderTime < block.to;
+            });
+
+            if (filteredPreviousOrders.length > 0) {
+                previousPeriodData.totalOrders += filteredPreviousOrders.length;
+                
+                const previousSnList = filteredPreviousOrders.map((o: any) => o.order_sn);
+                const previousChunks = [];
+                for (let i = 0; i < previousSnList.length; i += 50) {
+                    previousChunks.push(previousSnList.slice(i, i + 50));
+                }
+                
+                for (const chunk of previousChunks) {
+                    try {
+                        const detailResp = await shopeeFetch<any>({
+                            path: '/api/v2/order/get_order_detail',
+                            access_token: (integration as any).access_token,
+                            shop_id: (integration as any).shop_id,
+                            query: { 
+                                order_sn_list: chunk.join(','), 
+                                response_optional_fields: 'total_amount,order_status' 
+                            }
+                        });
+                        
+                        const details = detailResp?.response?.order_list || [];
+                        
+                        for (const order of details) {
+                            const orderAmount = Number(order.total_amount) || 0;
+                            const orderStatus = order.order_status;
+                            
+                            previousPeriodData.gmv += orderAmount;
+                            
+                            if (PAID_STATUSES.includes(orderStatus)) {
+                                previousPeriodData.totalPaidOrders++;
+                                previousPeriodData.gmvPaid += orderAmount;
+                            } else if (CANCELLED_STATUSES.includes(orderStatus)) {
+                                previousPeriodData.totalCancelledOrders++;
+                            }
+                        }
+                    } catch (e: any) {
+                        console.warn('⚠️ [COMPARATIVO] Erro ao buscar detalhes do período anterior:', e.message);
+                    }
+                }
+            }
         }
+        
+        console.log('✅ [COMPARATIVO] Dados do período anterior obtidos:', previousPeriodData);
+    } catch (e: any) {
+        console.warn('⚠️ [COMPARATIVO] Erro ao buscar período anterior:', e.message);
+    }
 
     // 3. Performance (Insights) - Visitantes e Conversão
     let visitors = 0;

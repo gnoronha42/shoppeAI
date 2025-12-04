@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     }
 
     // 1. Buscar dados da API Shopee
-    const dataUrl = new URL(`${request.url.split('/api/shopee/generate-report')[0]}/api/shopee/data`);
+    const dataUrl = new URL(`${request.url.split('/api/shopee/generate-report')[0]}/api/shopee/enhanced-data`);
     dataUrl.searchParams.set('client_id', clientId);
     if (dateFromParam) dataUrl.searchParams.set('date_from', dateFromParam);
     if (dateToParam) dataUrl.searchParams.set('date_to', dateToParam);
@@ -61,27 +61,27 @@ export async function GET(request: Request) {
       indicadores: {
         visitantes: data.visitors || 0,
         cpa: data.ads?.cpa || 0,
-        gmv: data.gmvLast30Days || 0,
-        pedidosPagos: data.totalOrdersLast30Days || 0,
+        gmv: data.gmvPaidLast15Days || 0,
+        pedidosPagos: data.totalPaidOrdersLast15Days || 0,
         taxaConversao: data.conversionRate || 0,
         investimentoAds: data.ads?.spend || 0,
-        ticketMedio: data.ticketMedioLast30Days || 0,
+        ticketMedio: data.ticketMedioLast15Days || 0,
         roas: data.ads?.roas || 0
       },
 
       // Análise de vendas
       vendas: {
-        total: data.gmvLast30Days || 0,
-        pagas: data.gmvLast30Days || 0, // ✅ Dados reais - vendas confirmadas na Shopee
+        total: data.gmvPaidLast15Days || 0,
+        pagas: data.gmvPaidLast15Days || 0, // ✅ Dados reais - vendas confirmadas na Shopee
         variacao: 0, // ✅ Sem histórico anterior (dados reais indisponíveis)
         recomendacoes: generateSalesRecommendations(data)
       },
 
       // Análise de pedidos
       pedidos: {
-        feitos: data.totalOrdersLast30Days || 0,
-        pagos: data.totalOrdersLast30Days || 0,
-        itens: data.totalOrdersLast30Days || 0, // ✅ Baseado em pedidos reais
+        feitos: data.totalOrdersLast15Days || 0,
+        pagos: data.totalPaidOrdersLast15Days || 0,
+        itens: data.totalPaidOrdersLast15Days || 0, // ✅ Baseado em pedidos reais
         cancelados: 0, // ✅ Métrica não disponível na API atual
         recomendacoes: generateOrdersRecommendations(data)
       },
@@ -105,8 +105,8 @@ export async function GET(request: Request) {
       ads: {
         impressoes: data.ads?.impressions || 0,
         cliques: data.ads?.clicks || 0,
-        pedidos: data.totalOrdersLast30Days || 0,
-        itensVendidos: data.totalOrdersLast30Days || 0,
+        pedidos: data.totalPaidOrdersLast15Days || 0,
+        itensVendidos: data.totalPaidOrdersLast15Days || 0,
         ctr: data.ads?.ctr || 0,
         investimento: data.ads?.spend || 0,
         roas: data.ads?.roas || 0,
@@ -117,13 +117,13 @@ export async function GET(request: Request) {
       produtos: {
         total: data.totalProducts || 0,
         ativos: data.activeProducts || 0,
-        topProdutos: data.topProductsLast30Days || [],
+        topProdutos: data.topProductsLast15Days || [],
         rankings: {
-          porVisitantes: generateProductRanking(data.topProductsLast30Days, 'visitors'),
-          porVisualizacoes: generateProductRanking(data.topProductsLast30Days, 'views'),
-          porCompras: generateProductRanking(data.topProductsLast30Days, 'sales'),
-          porConversao: generateProductRanking(data.topProductsLast30Days, 'conversion'),
-          porCarrinho: generateProductRanking(data.topProductsLast30Days, 'cart')
+          porVisitantes: generateProductRanking(data.topProductsLast15Days, 'visitors'),
+          porVisualizacoes: generateProductRanking(data.topProductsLast15Days, 'views'),
+          porCompras: generateProductRanking(data.topProductsLast15Days, 'sales'),
+          porConversao: generateProductRanking(data.topProductsLast15Days, 'conversion'),
+          porCarrinho: generateProductRanking(data.topProductsLast15Days, 'cart')
         },
         recomendacoes: generateProductsRecommendations(data)
       },

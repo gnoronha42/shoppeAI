@@ -182,7 +182,7 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
         status: res.status,
         response: text 
       });
-    }
+  }
     
     throw new Error(errorMsg);
   }
