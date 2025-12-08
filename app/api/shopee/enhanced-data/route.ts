@@ -92,6 +92,8 @@ export async function GET(request: Request) {
       }
     });
 
+    const debugErrors: any[] = [];
+
     // ================================
     //  ADS (AMS) - SHOP PERFORMANCE
     // ================================
@@ -109,7 +111,9 @@ export async function GET(request: Request) {
         });
         // Estrutura defensiva: algumas regiões retornam {response:{data:[...]}} outras podem retornar data direto
         const rows = resp?.response?.data || resp?.data || [];
+        
         if (!Array.isArray(rows) || rows.length === 0) {
+          console.log('ℹ️ [ENHANCED-DATA][AMS] Shop performance retornou lista vazia');
           return {
             spend: 0,
             impressions: 0,
@@ -178,6 +182,7 @@ export async function GET(request: Request) {
         };
       } catch (e: any) {
         console.warn('⚠️ [ENHANCED-DATA][AMS] Falha ao buscar shop performance:', e?.message);
+        debugErrors.push({ context: 'Ads Shop Performance', error: e?.message });
         return {
           spend: 0,
           impressions: 0,
@@ -238,6 +243,7 @@ export async function GET(request: Request) {
           .slice(0, 10);
       } catch (e: any) {
         console.warn('⚠️ [ENHANCED-DATA][AMS] Falha ao buscar product performance:', e?.message);
+        debugErrors.push({ context: 'Ads Product Performance', error: e?.message });
         return [];
       }
     };
@@ -261,27 +267,204 @@ export async function GET(request: Request) {
         return Number(balance) || 0;
       } catch (e: any) {
         console.warn('⚠️ [ENHANCED-DATA][ADS] Falha ao buscar saldo de Ads:', e?.message);
+        debugErrors.push({ context: 'Ads Balance', error: e?.message });
         return 0;
       }
     };
 
     // Função para buscar pedidos de um período (com séries diárias)
     const fetchPeriodOrders = async (startTime: number, endTime: number) => {
-      const orderResp = await shopeeFetch<any>({
-        path: '/api/v2/order/get_order_list',
-        access_token,
-        shop_id: String(shop_id ?? ''),
-        query: {
-          time_range_field: 'create_time',
-          time_from: startTime,
-          time_to: endTime,
-          page_size: 100
-        }
-      });
+      try {
+        let allOrderList: any[] = [];
+        
+        // A API da Shopee limita a busca a 15 dias.
+        // Vamos dividir o período em chunks de 14 dias para segurança.
+        const CHUNK_SIZE = 14 * 24 * 60 * 60; 
+        let currentStart = startTime;
 
-      const orderList = orderResp?.response?.order_list || [];
+        while (currentStart < endTime) {
+          let currentEnd = Math.min(currentStart + CHUNK_SIZE, endTime);
+          
+          console.log(`📊 [ENHANCED-DATA] Buscando pedidos chunk: ${new Date(currentStart * 1000).toISOString()} até ${new Date(currentEnd * 1000).toISOString()}`);
+
+          let cursor = "";
+          let more = true;
+          let page = 0;
+
+          while (more) {
+            page++;
+            try {
+              const orderResp = await shopeeFetch<any>({
+                path: '/api/v2/order/get_order_list',
+                access_token,
+                shop_id: String(shop_id ?? ''),
+                query: {
+                  time_range_field: 'create_time',
+                  time_from: currentStart,
+                  time_to: currentEnd,
+                  page_size: 100,
+                  cursor: cursor
+                }
+              });
+
+              // Verificar erro de API (mesmo com status 200)
+              if (orderResp.error) {
+                console.error(`❌ [ENHANCED-DATA] Erro API Shopee (Chunk ${page}):`, orderResp.error, orderResp.message);
+                debugErrors.push({ context: `Order List API Error`, error: orderResp.error, message: orderResp.message });
+                break; // Interrompe este chunk
+              }
+
+              const data = orderResp?.response || {};
+              const list = data.order_list || [];
+              
+              if (list.length > 0) {
+                allOrderList = allOrderList.concat(list);
+              }
+
+              cursor = data.next_cursor || "";
+              more = data.more || false; // A API retorna 'more': true se tiver mais páginas
+
+              // Segurança contra loops infinitos
+              if (page > 50) {
+                console.warn('⚠️ [ENHANCED-DATA] Limite de paginação atingido (50 páginas)');
+                break;
+              }
+            } catch (e: any) {
+              console.error(`❌ [ENHANCED-DATA] Erro na requisição de pedidos:`, e.message);
+              debugErrors.push({ context: 'Order Fetch Request', error: e.message });
+              break;
+            }
+          }
+          
+          // Avança para o próximo chunk (evitando sobreposição exata, mas garantindo continuidade)
+          currentStart = currentEnd;
+          // Se o loop terminasse exatamente em endTime, o while pararia.
+          // Se currentEnd == endTime, o próximo currentStart será endTime e o loop while (currentStart < endTime) encerra.
+        }
+
+        // Remover duplicatas (caso haja sobreposição de bordas)
+        const uniqueMap = new Map();
+        allOrderList.forEach(o => uniqueMap.set(o.order_sn, o));
+        const orderList = Array.from(uniqueMap.values());
       
-      if (orderList.length === 0) {
+        if (orderList.length === 0) {
+          return {
+            totalOrders: 0,
+            paidOrders: 0,
+            cancelledOrders: 0,
+            pendingOrders: 0,
+            gmvTotal: 0,
+            gmvPaid: 0,
+            topProducts: [],
+            daily: [] as Array<{ date: string; totalOrders: number; paidOrders: number; cancelledOrders: number; gmvPaid: number; ticket: number }>
+          };
+        }
+
+        console.log(`📊 [ENHANCED-DATA] Total de pedidos encontrados: ${orderList.length}`);
+
+        // Buscar detalhes dos pedidos
+        const snList = orderList.map((o: any) => o.order_sn);
+        const chunks = [];
+        for (let i = 0; i < snList.length; i += 50) {
+          chunks.push(snList.slice(i, i + 50));
+        }
+
+        let paidOrders = 0;
+        let cancelledOrders = 0;
+        let pendingOrders = 0;
+        let gmvTotal = 0;
+        let gmvPaid = 0;
+        const productAgg: Record<string, any> = {};
+        const dailyMap: Record<string, { totalOrders: number; paidOrders: number; cancelledOrders: number; gmvPaid: number; }> = {};
+
+        // Status de pedidos conforme Shopee
+        const PAID_STATUSES = ['READY_TO_SHIP', 'SHIPPED', 'COMPLETED'];
+        const CANCELLED_STATUSES = ['CANCELLED'];
+        const PENDING_STATUSES = ['UNPAID', 'PROCESSING'];
+
+        for (const chunk of chunks) {
+          try {
+            const detailResp = await shopeeFetch<any>({
+              path: '/api/v2/order/get_order_detail',
+              access_token,
+              shop_id: String(shop_id ?? ''),
+              query: { 
+                order_sn_list: chunk.join(','), 
+                response_optional_fields: 'item_list,total_amount,order_status' 
+              }
+            });
+
+            const details = detailResp?.response?.order_list || [];
+
+            for (const order of details) {
+              const orderAmount = Number(order.total_amount) || 0;
+              const orderStatus = order.order_status;
+              const orderTime = Number(order.create_time ?? order.update_time ?? 0);
+              const dayKey = orderTime ? formatYyyyMmDd(orderTime, tzOffsetHours) : formatYyyyMmDd(startTime, tzOffsetHours);
+
+              gmvTotal += orderAmount;
+
+              // Classificar por status
+              if (PAID_STATUSES.includes(orderStatus)) {
+                paidOrders++;
+                gmvPaid += orderAmount;
+                if (!dailyMap[dayKey]) dailyMap[dayKey] = { totalOrders: 0, paidOrders: 0, cancelledOrders: 0, gmvPaid: 0 };
+                dailyMap[dayKey].paidOrders += 1;
+                dailyMap[dayKey].gmvPaid += orderAmount;
+
+                // Agregar produtos apenas de pedidos pagos
+                for (const item of (order.item_list || [])) {
+                  const name = item.item_name;
+                  if (!productAgg[name]) {
+                    productAgg[name] = { name, units: 0, revenue: 0 };
+                  }
+                  productAgg[name].units += item.model_quantity_purchased || 0;
+                  productAgg[name].revenue += (item.model_discounted_price || item.model_original_price) * (item.model_quantity_purchased || 0);
+                }
+              } else if (CANCELLED_STATUSES.includes(orderStatus)) {
+                cancelledOrders++;
+                if (!dailyMap[dayKey]) dailyMap[dayKey] = { totalOrders: 0, paidOrders: 0, cancelledOrders: 0, gmvPaid: 0 };
+                dailyMap[dayKey].cancelledOrders += 1;
+              } else if (PENDING_STATUSES.includes(orderStatus)) {
+                pendingOrders++;
+              }
+              if (!dailyMap[dayKey]) dailyMap[dayKey] = { totalOrders: 0, paidOrders: 0, cancelledOrders: 0, gmvPaid: 0 };
+              dailyMap[dayKey].totalOrders += 1;
+            }
+          } catch (e: any) {
+            console.warn('⚠️ [ENHANCED-DATA] Erro ao buscar detalhes:', e.message);
+            debugErrors.push({ context: 'Order Details', error: e.message });
+          }
+        }
+
+        const topProducts = Object.values(productAgg)
+          .sort((a: any, b: any) => b.revenue - a.revenue)
+          .slice(0, 10);
+
+        const daily = Object.entries(dailyMap)
+          .map(([date, v]) => ({
+            date,
+            totalOrders: v.totalOrders,
+            paidOrders: v.paidOrders,
+            cancelledOrders: v.cancelledOrders,
+            gmvPaid: v.gmvPaid,
+            ticket: v.paidOrders > 0 ? v.gmvPaid / v.paidOrders : 0,
+          }))
+          .sort((a, b) => (a.date < b.date ? -1 : 1));
+
+        return {
+          totalOrders: orderList.length,
+          paidOrders,
+          cancelledOrders,
+          pendingOrders,
+          gmvTotal,
+          gmvPaid,
+          topProducts,
+          daily
+        };
+      } catch (e: any) {
+        console.error('❌ [ENHANCED-DATA] Falha crítica ao buscar pedidos:', e.message);
+        debugErrors.push({ context: 'Orders List', error: e.message });
         return {
           totalOrders: 0,
           paidOrders: 0,
@@ -290,109 +473,9 @@ export async function GET(request: Request) {
           gmvTotal: 0,
           gmvPaid: 0,
           topProducts: [],
-          daily: [] as Array<{ date: string; totalOrders: number; paidOrders: number; cancelledOrders: number; gmvPaid: number; ticket: number }>
+          daily: []
         };
       }
-
-      // Buscar detalhes dos pedidos
-      const snList = orderList.map((o: any) => o.order_sn);
-      const chunks = [];
-      for (let i = 0; i < snList.length; i += 50) {
-        chunks.push(snList.slice(i, i + 50));
-      }
-
-      let paidOrders = 0;
-      let cancelledOrders = 0;
-      let pendingOrders = 0;
-      let gmvTotal = 0;
-      let gmvPaid = 0;
-      const productAgg: Record<string, any> = {};
-      const dailyMap: Record<string, { totalOrders: number; paidOrders: number; cancelledOrders: number; gmvPaid: number; }> = {};
-
-      // Status de pedidos conforme Shopee
-      const PAID_STATUSES = ['READY_TO_SHIP', 'SHIPPED', 'COMPLETED'];
-      const CANCELLED_STATUSES = ['CANCELLED'];
-      const PENDING_STATUSES = ['UNPAID', 'PROCESSING'];
-
-      for (const chunk of chunks) {
-        try {
-          const detailResp = await shopeeFetch<any>({
-            path: '/api/v2/order/get_order_detail',
-            access_token,
-            shop_id: String(shop_id ?? ''),
-            query: { 
-              order_sn_list: chunk.join(','), 
-              response_optional_fields: 'item_list,total_amount,order_status' 
-            }
-          });
-
-          const details = detailResp?.response?.order_list || [];
-
-          for (const order of details) {
-            const orderAmount = Number(order.total_amount) || 0;
-            const orderStatus = order.order_status;
-            const orderTime = Number(order.create_time ?? order.update_time ?? 0);
-            const dayKey = orderTime ? formatYyyyMmDd(orderTime, tzOffsetHours) : formatYyyyMmDd(startTime, tzOffsetHours);
-
-            gmvTotal += orderAmount;
-
-            // Classificar por status
-            if (PAID_STATUSES.includes(orderStatus)) {
-              paidOrders++;
-              gmvPaid += orderAmount;
-              if (!dailyMap[dayKey]) dailyMap[dayKey] = { totalOrders: 0, paidOrders: 0, cancelledOrders: 0, gmvPaid: 0 };
-              dailyMap[dayKey].paidOrders += 1;
-              dailyMap[dayKey].gmvPaid += orderAmount;
-
-              // Agregar produtos apenas de pedidos pagos
-              for (const item of (order.item_list || [])) {
-                const name = item.item_name;
-                if (!productAgg[name]) {
-                  productAgg[name] = { name, units: 0, revenue: 0 };
-                }
-                productAgg[name].units += item.model_quantity_purchased || 0;
-                productAgg[name].revenue += (item.model_discounted_price || item.model_original_price) * (item.model_quantity_purchased || 0);
-              }
-            } else if (CANCELLED_STATUSES.includes(orderStatus)) {
-              cancelledOrders++;
-              if (!dailyMap[dayKey]) dailyMap[dayKey] = { totalOrders: 0, paidOrders: 0, cancelledOrders: 0, gmvPaid: 0 };
-              dailyMap[dayKey].cancelledOrders += 1;
-            } else if (PENDING_STATUSES.includes(orderStatus)) {
-              pendingOrders++;
-            }
-            if (!dailyMap[dayKey]) dailyMap[dayKey] = { totalOrders: 0, paidOrders: 0, cancelledOrders: 0, gmvPaid: 0 };
-            dailyMap[dayKey].totalOrders += 1;
-          }
-        } catch (e: any) {
-          console.warn('⚠️ [ENHANCED-DATA] Erro ao buscar detalhes:', e.message);
-        }
-      }
-
-      const topProducts = Object.values(productAgg)
-        .sort((a: any, b: any) => b.revenue - a.revenue)
-        .slice(0, 10);
-
-      const daily = Object.entries(dailyMap)
-        .map(([date, v]) => ({
-          date,
-          totalOrders: v.totalOrders,
-          paidOrders: v.paidOrders,
-          cancelledOrders: v.cancelledOrders,
-          gmvPaid: v.gmvPaid,
-          ticket: v.paidOrders > 0 ? v.gmvPaid / v.paidOrders : 0,
-        }))
-        .sort((a, b) => (a.date < b.date ? -1 : 1));
-
-      return {
-        totalOrders: orderList.length,
-        paidOrders,
-        cancelledOrders,
-        pendingOrders,
-        gmvTotal,
-        gmvPaid,
-        topProducts,
-        daily
-      };
     };
 
     // Buscar dados do período atual

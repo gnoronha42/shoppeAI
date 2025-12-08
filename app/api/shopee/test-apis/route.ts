@@ -62,13 +62,13 @@ export async function GET(request: Request) {
         query: { page_size: 10, offset: 0 }
       },
       {
-        name: 'Order List (30 days)',
+        name: 'Order List (14 days)',
         path: '/api/v2/order/get_order_list',
-        description: 'Lista de pedidos dos últimos 30 dias',
+        description: 'Lista de pedidos dos últimos 14 dias',
         expectedFields: ['order_list'],
         query: {
           time_range_field: 'create_time',
-          time_from: Math.floor((Date.now() - 30 * 24 * 60 * 60 * 1000) / 1000),
+          time_from: Math.floor((Date.now() - 14 * 24 * 60 * 60 * 1000) / 1000),
           time_to: Math.floor(Date.now() / 1000),
           page_size: 10
         }

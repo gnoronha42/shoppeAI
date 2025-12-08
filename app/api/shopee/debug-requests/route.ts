@@ -45,7 +45,7 @@ export async function GET(request: Request) {
     }
 
     const timeTo = customTimeTo || Math.floor(Date.now() / 1000);
-    const periodDays = customPeriodDays || 30;
+    const periodDays = customPeriodDays || 14; // Default to 14 days to avoid API errors
     const timeFrom = customTimeFrom || (timeTo - periodDays * 24 * 60 * 60);
 
     // Buscar integração
