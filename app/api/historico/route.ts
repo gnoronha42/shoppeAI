@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     
-    console.log('📊 Buscando histórico de análises:', { type, search, page, limit });
+    console.log('Buscando histórico de análises:', { type, search, page, limit });
     
     // Construir filtros
     let where: any = {};
@@ -134,12 +134,11 @@ export async function GET(request: NextRequest) {
       }
     };
     
-    console.log(`✅ Retornando ${formattedAnalyses.length} análises de ${total} total`);
-    
+  
     return NextResponse.json(response);
     
   } catch (error) {
-    console.error('❌ Erro ao buscar histórico:', error);
+    console.error(' Erro ao buscar histórico:', error);
     return NextResponse.json(
       { 
         error: 'Erro interno do servidor',

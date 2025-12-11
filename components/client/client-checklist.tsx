@@ -140,7 +140,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       
         setBlocks(data.blocks || []);
       } else {
-        console.error('❌ Erro ao recarregar dados:', response.status);
+        console.error(' Erro ao recarregar dados:', response.status);
       }
 
       toast({ title: "Checklist salvo!", description: "Progresso salvo com sucesso.", variant: "default" });
@@ -289,7 +289,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Erro na resposta do servidor:', response.status, errorText);
+        console.error(' Erro na resposta do servidor:', response.status, errorText);
         throw new Error(`Erro ${response.status}: ${errorText}`);
       }
       
@@ -304,7 +304,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       URL.revokeObjectURL(url);
       toast({ title: "PDF gerado!", description: "Checklist de itens concluídos baixado em PDF.", variant: "default" });
     } catch (error) {
-      console.error('❌ Erro ao gerar PDF:', error);
+      console.error(' Erro ao gerar PDF:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({ title: "Erro ao gerar PDF", description: `Não foi possível gerar o PDF: ${errorMessage}`, variant: "destructive" });
     }

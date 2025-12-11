@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     
     const { nome, email, telefone } = body;
     
-    // Validações básicas
+    
     if (!nome || !email) {
       console.log(' Dados obrigatórios faltando');
       return NextResponse.json(
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
     
-    // Verificar se o email já existe
+    
     const existingAnalyst = await prisma.analysts.findUnique({
       where: { email: email }
     });
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     });
     
   } catch (error) {
-    console.error('❌ Erro ao criar analista:', error);
+    console.error('Erro ao criar analista:', error);
     return NextResponse.json(
       { 
         error: "Erro interno do servidor",
@@ -82,7 +82,6 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    console.log('📋 Listando analistas...');
     
     const analysts = await prisma.analysts.findMany({
       select: {
@@ -123,7 +122,7 @@ export async function GET() {
     });
     
   } catch (error) {
-    console.error('❌ Erro ao listar analistas:', error);
+    console.error(' Erro ao listar analistas:', error);
     return NextResponse.json(
       { 
         error: "Erro interno do servidor",

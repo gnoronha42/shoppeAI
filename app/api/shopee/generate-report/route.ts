@@ -72,8 +72,8 @@ export async function GET(request: Request) {
       // Análise de vendas
       vendas: {
         total: data.gmvPaidLast15Days || 0,
-        pagas: data.gmvPaidLast15Days || 0, // ✅ Dados reais - vendas confirmadas na Shopee
-        variacao: 0, // ✅ Sem histórico anterior (dados reais indisponíveis)
+        pagas: data.gmvPaidLast15Days || 0, // 
+        variacao: 0, 
         recomendacoes: generateSalesRecommendations(data)
       },
 
@@ -81,8 +81,8 @@ export async function GET(request: Request) {
       pedidos: {
         feitos: data.totalOrdersLast15Days || 0,
         pagos: data.totalPaidOrdersLast15Days || 0,
-        itens: data.totalPaidOrdersLast15Days || 0, // ✅ Baseado em pedidos reais
-        cancelados: 0, // ✅ Métrica não disponível na API atual
+        itens: data.totalPaidOrdersLast15Days || 0, // 
+        cancelados: 0, 
         recomendacoes: generateOrdersRecommendations(data)
       },
 
@@ -90,7 +90,7 @@ export async function GET(request: Request) {
       conversao: {
         visitantesConfirmados: data.conversionRate || 0,
         pagos: data.conversionRate || 0,
-        benchmark: 1.5, // Benchmark de mercado (referência externa, não estimativa)
+        benchmark: 1.5,
         recomendacoes: generateConversionRecommendations(data)
       },
 
@@ -150,7 +150,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro ao gerar relatório:', err);
+    console.error(' Erro ao gerar relatório:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno ao gerar relatório',
@@ -317,7 +317,6 @@ function generateGrowthProjections(data: any): any {
     investimento: data.ads?.spend || 0
   };
 
-  // ✅ Projeções baseadas nos dados reais atuais, não em números fictícios
   const baseGmv = current.gmv || 100; // Mínimo para cálculo
   const basePedidos = current.pedidos || 1;
   const baseTicket = current.ticketMedio || baseGmv / basePedidos;

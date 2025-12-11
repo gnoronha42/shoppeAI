@@ -271,7 +271,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro no debug:', err);
+    console.error(' Erro no debug:', err);
     return NextResponse.json({ 
       error: err.message || 'Erro interno',
       stack: process.env.NODE_ENV === 'development' ? err.stack : undefined

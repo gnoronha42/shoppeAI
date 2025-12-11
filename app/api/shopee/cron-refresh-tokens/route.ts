@@ -22,8 +22,8 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const startTime = Date.now();
-    console.log('\n🔄 ===== CRON JOB: RENOVAÇÃO AUTOMÁTICA DE TOKENS =====');
-    console.log(`⏰ Iniciado em: ${new Date().toISOString()}`);
+    console.log('\n===== CRON JOB: RENOVAÇÃO AUTOMÁTICA DE TOKENS =====');
+    console.log(` Iniciado em: ${new Date().toISOString()}`);
 
     // Buscar TODAS as integrações Shopee com refresh_token
     // Vamos verificar cada uma para ver se precisa de refresh
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       }
     });
 
-    console.log(`📊 Encontradas ${allIntegrationsWithRefresh.length} integrações Shopee com refresh_token`);
+    console.log(`Encontradas ${allIntegrationsWithRefresh.length} integrações Shopee com refresh_token`);
 
     // Filtrar apenas as que precisam de refresh (expiram em <= 6 horas ou sem data)
     const integrations = allIntegrationsWithRefresh.filter(integration => {
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       return expiryDate <= sixHoursFromNow;
     });
 
-    console.log(`🔄 ${integrations.length} integração(ões) precisam de refresh (expiram em <= 6 horas ou sem data)`);
+    console.log(`${integrations.length} integração(ões) precisam de refresh (expiram em <= 6 horas ou sem data)`);
 
     // Debug: Contar todas as integrações Shopee para entender por que não há nada para renovar
     const allIntegrations = await prisma.client_integrations.findMany({
@@ -88,7 +88,6 @@ export async function GET(request: Request) {
       }))
     };
 
-    console.log(`🔍 Debug - Estatísticas de integrações:`, JSON.stringify(debugStats, null, 2));
 
     const results = {
       total_checked: integrations.length,
@@ -104,7 +103,7 @@ export async function GET(request: Request) {
       const clientName = integration.clients?.name || 'Cliente Desconhecido';
       
       try {
-        console.log(`\n🔄 Processando: ${clientName} (${integration.client_id})`);
+        console.log(`\n Processando: ${clientName} (${integration.client_id})`);
         console.log(`   Shop ID: ${integration.shop_id}`);
         
         const now = new Date();
@@ -116,7 +115,7 @@ export async function GET(request: Request) {
         // Verificar se realmente precisa de refresh (renova se expira em menos de 6h)
         // Isso garante que sempre renovamos tokens antes de expirarem
         if (expiry && hoursUntilExpiry > 6) {
-          console.log(`   ⏭️ Pulando: ainda válido por ${hoursUntilExpiry} horas (renovaremos quando faltar 6h)`);
+
           results.skipped++;
           results.details.push({
             client_id: integration.client_id,
@@ -129,7 +128,7 @@ export async function GET(request: Request) {
         }
 
         // ✅ USAR SMART REFRESH PARA MAIOR ROBUSTEZ
-        console.log(`   🧠 Fazendo smart refresh do token...`);
+        console.log(`    Fazendo smart refresh do token...`);
         
         try {
           // Tentar smart refresh primeiro
@@ -147,7 +146,7 @@ export async function GET(request: Request) {
             const smartResult = await smartRefreshResponse.json();
             
             if (smartResult.success) {
-              console.log(`   ✅ Smart refresh bem-sucedido usando: ${smartResult.strategy_used}`);
+              console.log(`    Smart refresh bem-sucedido usando: ${smartResult.strategy_used}`);
               
               results.successful_refreshes++;
               results.details.push({
@@ -169,7 +168,7 @@ export async function GET(request: Request) {
         }
 
         // Fallback: método tradicional
-        console.log(`   🔄 Fallback: refresh tradicional...`);
+        
         const refreshed = await refreshAccessToken({ 
           refresh_token: integration.refresh_token!,
           shop_id: integration.shop_id ?? undefined
@@ -200,7 +199,7 @@ export async function GET(request: Request) {
           hours_extended: Math.round((refreshed.expire_in ?? 0) / 3600)
         });
 
-        console.log(`   ✅ Sucesso! Novo token válido até: ${newExpiry.toISOString()}`);
+        console.log(`   Sucesso! Novo token válido até: ${newExpiry.toISOString()}`);
 
         // Pausa entre requests para não sobrecarregar a API
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -224,8 +223,8 @@ export async function GET(request: Request) {
         // Se o refresh token expirou, apenas logar - NÃO limpar tokens
         if (error.message.includes('REFRESH_TOKEN_EXPIRED') || 
             error.message.includes('error_not_found')) {
-          console.log(`   🚨 Refresh token expirado - cliente precisa reautenticar`);
-          console.log(`   ℹ️ Tokens mantidos no banco para permitir reautenticação manual`);
+          console.log(`    Refresh token expirado - cliente precisa reautenticar`);
+          console.log(`   ℹ Tokens mantidos no banco para permitir reautenticação manual`);
           
           // NÃO limpar tokens automaticamente - deixar para o usuário decidir
           // Isso evita perder a integração acidentalmente
@@ -241,15 +240,15 @@ export async function GET(request: Request) {
       ...results
     };
 
-    console.log(`\n📊 ===== RESUMO DO CRON JOB =====`);
-    console.log(`⏱️ Tempo de execução: ${summary.execution_time_seconds}s`);
-    console.log(`✅ Sucessos: ${results.successful_refreshes}`);
-    console.log(`❌ Falhas: ${results.failed_refreshes}`);
-    console.log(`⏭️ Pulados: ${results.skipped}`);
-    console.log(`🔄 Total processados: ${results.total_checked}`);
+    console.log(`\n ===== RESUMO DO CRON JOB =====`);
+    console.log(` Tempo de execução: ${summary.execution_time_seconds}s`);
+    console.log(` Sucessos: ${results.successful_refreshes}`);
+    console.log(` Falhas: ${results.failed_refreshes}`);
+    console.log(` Pulados: ${results.skipped}`);
+    console.log(` Total processados: ${results.total_checked}`);
 
     if (results.errors.length > 0) {
-      console.log(`\n🚨 ERROS ENCONTRADOS:`);
+      console.log(`\n ERROS ENCONTRADOS:`);
       results.errors.forEach(error => console.log(`   - ${error}`));
     }
 

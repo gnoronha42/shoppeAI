@@ -87,7 +87,7 @@ export async function GET(request: Request) {
     const results = [];
 
     for (const endpoint of adsEndpoints) {
-      console.log(`\n🧪 [testAdsEndpoints] Testando: ${endpoint.name}`);
+      console.log(`\n [testAdsEndpoints] Testando: ${endpoint.name}`);
       
       try {
         const response = await shopeeFetch({
@@ -106,7 +106,7 @@ export async function GET(request: Request) {
           sample_response: JSON.stringify(response).substring(0, 500) + '...'
         });
 
-        console.log(`✅ [testAdsEndpoints] ${endpoint.name}: SUCCESS`);
+        console.log(` [testAdsEndpoints] ${endpoint.name}: SUCCESS`);
         
       } catch (error: any) {
         const errorMsg = error.message || 'Erro desconhecido';
@@ -124,7 +124,7 @@ export async function GET(request: Request) {
                         errorMsg.includes('401') ? 'Token inválido' : 'Erro desconhecido'
         });
 
-        console.log(`❌ [testAdsEndpoints] ${endpoint.name}: ${status} - ${errorMsg}`);
+        console.log(`[testAdsEndpoints] ${endpoint.name}: ${status} - ${errorMsg}`);
       }
 
       // Pausa entre requisições para não sobrecarregar a API
@@ -179,7 +179,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro no teste de endpoints de Ads:', err);
+    console.error(' Erro no teste de endpoints de Ads:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

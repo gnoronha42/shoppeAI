@@ -81,16 +81,7 @@ export async function GET(request: Request) {
     const previousTimeTo = timeFrom - 1;
     const previousTimeFrom = previousTimeTo - periodSeconds + 1;
 
-    console.log('📊 [ENHANCED-DATA] Períodos configurados:', {
-      current: {
-        from: new Date(timeFrom * 1000).toISOString(),
-        to: new Date(timeTo * 1000).toISOString()
-      },
-      previous: {
-        from: new Date(previousTimeFrom * 1000).toISOString(),
-        to: new Date(previousTimeTo * 1000).toISOString()
-      }
-    });
+
 
     const debugErrors: any[] = [];
 
@@ -113,7 +104,6 @@ export async function GET(request: Request) {
         const rows = resp?.response?.data || resp?.data || [];
         
         if (!Array.isArray(rows) || rows.length === 0) {
-          console.log('ℹ️ [ENHANCED-DATA][AMS] Shop performance retornou lista vazia');
           return {
             spend: 0,
             impressions: 0,
@@ -285,7 +275,6 @@ export async function GET(request: Request) {
         while (currentStart < endTime) {
           let currentEnd = Math.min(currentStart + CHUNK_SIZE, endTime);
           
-          console.log(`📊 [ENHANCED-DATA] Buscando pedidos chunk: ${new Date(currentStart * 1000).toISOString()} até ${new Date(currentEnd * 1000).toISOString()}`);
 
           let cursor = "";
           let more = true;
@@ -309,7 +298,7 @@ export async function GET(request: Request) {
 
               // Verificar erro de API (mesmo com status 200)
               if (orderResp.error) {
-                console.error(`❌ [ENHANCED-DATA] Erro API Shopee (Chunk ${page}):`, orderResp.error, orderResp.message);
+                console.error(`[ENHANCED-DATA] Erro API Shopee (Chunk ${page}):`, orderResp.error, orderResp.message);
                 debugErrors.push({ context: `Order List API Error`, error: orderResp.error, message: orderResp.message });
                 break; // Interrompe este chunk
               }
@@ -330,7 +319,7 @@ export async function GET(request: Request) {
                 break;
               }
             } catch (e: any) {
-              console.error(`❌ [ENHANCED-DATA] Erro na requisição de pedidos:`, e.message);
+              console.error(` [ENHANCED-DATA] Erro na requisição de pedidos:`, e.message);
               debugErrors.push({ context: 'Order Fetch Request', error: e.message });
               break;
             }
@@ -360,7 +349,6 @@ export async function GET(request: Request) {
           };
         }
 
-        console.log(`📊 [ENHANCED-DATA] Total de pedidos encontrados: ${orderList.length}`);
 
         // Buscar detalhes dos pedidos
         const snList = orderList.map((o: any) => o.order_sn);
@@ -463,7 +451,7 @@ export async function GET(request: Request) {
           daily
         };
       } catch (e: any) {
-        console.error('❌ [ENHANCED-DATA] Falha crítica ao buscar pedidos:', e.message);
+        console.error(' [ENHANCED-DATA] Falha crítica ao buscar pedidos:', e.message);
         debugErrors.push({ context: 'Orders List', error: e.message });
         return {
           totalOrders: 0,
@@ -479,11 +467,9 @@ export async function GET(request: Request) {
     };
 
     // Buscar dados do período atual
-    console.log('📊 [ENHANCED-DATA] Buscando período atual...');
     const currentData = await fetchPeriodOrders(timeFrom, timeTo);
 
     // Buscar dados do período anterior
-    console.log('📊 [ENHANCED-DATA] Buscando período anterior...');
     const previousData = await fetchPeriodOrders(previousTimeFrom, previousTimeTo);
 
     // Calcular variações
@@ -587,17 +573,12 @@ export async function GET(request: Request) {
       }
     };
 
-    console.log('✅ [ENHANCED-DATA] Dados processados com sucesso:', {
-      currentOrders: currentData.totalOrders,
-      currentPaid: currentData.paidOrders,
-      previousOrders: previousData.totalOrders,
-      previousPaid: previousData.paidOrders
-    });
+  
 
     return NextResponse.json(result);
 
   } catch (err: any) {
-    console.error('❌ [ENHANCED-DATA] Erro:', err);
+    console.error(' [ENHANCED-DATA] Erro:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

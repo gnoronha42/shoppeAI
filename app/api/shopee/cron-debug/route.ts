@@ -106,7 +106,7 @@ export async function GET() {
     });
 
   } catch (err: any) {
-    console.error('❌ [CRON-DEBUG] Erro:', err);
+    console.error(' [CRON-DEBUG] Erro:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

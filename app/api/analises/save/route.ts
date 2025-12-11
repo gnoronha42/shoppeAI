@@ -78,14 +78,13 @@ const extractKeyInsights = (markdown: string, analysisType: string) => {
 
 export async function POST(request: Request) {
   try {
-    console.log('🔄 Recebida requisição para salvar análise');
     
     // Obter usuário logado
     const authResult = await getCurrentUser(request);
     const userId = 'user' in authResult ? authResult.user.id : null;
     
     const body = await request.json();
-    console.log('📋 Dados recebidos:', {
+    console.log('Dados recebidos:', {
       hasMarkdown: !!body.markdown,
       markdownLength: body.markdown?.length,
       clientId: body.clientId,
@@ -108,7 +107,7 @@ export async function POST(request: Request) {
     
     // Se não tiver o ID mas tiver o nome, buscar o cliente pelo nome
     if (!clientId && body.clientName) {
-      console.log('🔍 Buscando cliente pelo nome:', body.clientName);
+      console.log(' Buscando cliente pelo nome:', body.clientName);
       const client = await prisma.clients.findFirst({
         where: {
           name: body.clientName
@@ -116,7 +115,7 @@ export async function POST(request: Request) {
       });
       
       if (!client) {
-        console.log('❌ Cliente não encontrado:', body.clientName);
+        console.log(' Cliente não encontrado:', body.clientName);
         return NextResponse.json(
           { error: 'Cliente não encontrado' },
           { status: 404 }
@@ -124,7 +123,7 @@ export async function POST(request: Request) {
       }
       
       clientId = client.id;
-      console.log('✅ Cliente encontrado:', clientId);
+      console.log(' Cliente encontrado:', clientId);
     }
     
     // Se ainda não tiver o ID do cliente, retornar erro
@@ -142,7 +141,7 @@ export async function POST(request: Request) {
     const analysisType = originalAnalysisType === 'express' ? 'account' : originalAnalysisType;
     const title = `Análise de ${originalAnalysisType === 'account' ? 'Conta' : originalAnalysisType === 'ads' ? 'Anúncios' : 'Express'} - ${new Date().toLocaleDateString('pt-BR')}`;
 
-    console.log('💾 Criando análise no banco:', {
+    console.log(' Criando análise no banco:', {
       clientId,
       originalAnalysisType,
       analysisType,
@@ -159,13 +158,19 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log(' Análise criada:', analysis.id);
+    console.log('Análise criada:', analysis.id);
 
     // 🧠 NOVO: Extrair insights chave para comparações futuras
     const keyInsights = extractKeyInsights(body.markdown, originalAnalysisType);
     
     // Salvar o conteúdo markdown como resultado de análise
-
+    const analysisResult = await prisma.analysis_results.create({
+      data: {
+        analysis_id: analysis.id,
+        content: body.markdown,
+        processed_by: 'markdown-pdf'
+      }
+    });
 
     console.log('Resultado salvo:', analysisResult.id);
 
@@ -191,10 +196,10 @@ export async function POST(request: Request) {
         }
       });
 
-      console.log('✅ Insights salvos para comparações futuras');
+      console.log(' Insights salvos para comparações futuras');
       
     } catch (insightsError) {
-      console.warn('⚠️ Erro ao salvar insights (não crítico):', insightsError);
+      console.warn(' Erro ao salvar insights (não crítico):', insightsError);
     }
 
     // Retornar os IDs da análise e do resultado
@@ -205,7 +210,7 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
-    console.error('❌ Erro ao salvar análise:', error);
+    console.error(' Erro ao salvar análise:', error);
     return NextResponse.json(
       { error: 'Erro ao salvar análise' },
       { status: 500 }

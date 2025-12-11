@@ -420,12 +420,10 @@ export default function ClientDetailsPage() {
         }),
       });
 
-      // Verificar se o PDF precisa ser regenerado
       if (pdfResponse.status === 422) {
         const errorData = await pdfResponse.json();
 
         if (errorData.shouldRegenerate) {
-          console.log("⚠️ Relatório incompleto detectado. Seções faltantes:", errorData.missingSections);
 
           toast({
             title: "Relatório incompleto detectado",

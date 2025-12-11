@@ -168,7 +168,7 @@ export async function GET() {
     });
 
   } catch (err: any) {
-    console.error('❌ [TEST-CRON] Erro:', err);
+    console.error(' [TEST-CRON] Erro:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

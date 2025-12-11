@@ -16,14 +16,14 @@ export async function GET(request: Request) {
     const authResult = await validatePermissions(request, ['view_clients']);
     
     if ('error' in authResult) {
-      console.log('❌ Falha na autenticação:', authResult);
+      console.log('Falha na autenticação:', authResult);
       return NextResponse.json(
         { error: authResult.error },
         { status: authResult.status }
       );
     }
 
-    console.log('✅ Usuário autenticado:', authResult.user);
+    console.log(' Usuário autenticado:', authResult.user);
 
     // Obter parâmetros de paginação e busca
     const { searchParams } = new URL(request.url);
@@ -94,8 +94,6 @@ export async function GET(request: Request) {
     // Calcular total de páginas
     const totalPages = Math.ceil(total / pageSize);
     
-    console.log('✅ Busca concluída com sucesso');
-    console.log('Retornando:', { total, totalPages, clientsCount: mappedClients.length });
     
     return NextResponse.json({
       data: mappedClients,
@@ -107,7 +105,7 @@ export async function GET(request: Request) {
       }
     });
   } catch (error) {
-    console.error('❌ ERRO GERAL:', error);
+    console.error(' ERRO GERAL:', error);
     
     // Verificar se é um erro do Prisma
     if (error instanceof PrismaClientKnownRequestError) {

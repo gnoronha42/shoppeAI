@@ -20,7 +20,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
 
-    console.log('\n🔍 ===== DIAGNÓSTICO COMPLETO DE TOKENS =====');
 
     // 1. Verificar todas as integrações Shopee
     const allIntegrations = await prisma.client_integrations.findMany({
@@ -33,7 +32,7 @@ export async function GET(request: Request) {
       orderBy: { created_at: 'desc' }
     });
 
-    console.log(`📊 Total de integrações Shopee encontradas: ${allIntegrations.length}`);
+    console.log(`Total de integrações Shopee encontradas: ${allIntegrations.length}`);
 
     const diagnostics = [];
 
@@ -208,7 +207,7 @@ export async function GET(request: Request) {
       summary.recommendations.push('🚨 Problema sistêmico - verificar fluxo de refresh');
     }
 
-    console.log('✅ Diagnóstico completo finalizado');
+    console.log('Diagnóstico completo finalizado');
 
     return NextResponse.json({
       success: true,
@@ -228,7 +227,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro no diagnóstico de tokens:', err);
+    console.error(' Erro no diagnóstico de tokens:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno no diagnóstico',

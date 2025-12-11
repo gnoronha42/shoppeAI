@@ -154,7 +154,7 @@ export async function validatePermissions(
     };
 
   } catch (error) {
-    console.error('❌ Erro na validação de permissões:', error);
+    console.error(' Erro na validação de permissões:', error);
     return { error: 'Erro interno de autenticação', status: 500 };
   }
 }

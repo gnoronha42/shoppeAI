@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Função para calcular CPA (copiada do microserviço)
 function calcularCPA(markdown: string): string {
-  console.log('🧮 Iniciando cálculo do CPA...');
+
   
   // Múltiplas estratégias para encontrar investimento e pedidos
   let investimento: number | null = null;
@@ -12,22 +12,22 @@ function calcularCPA(markdown: string): string {
   const investimentoLinha = markdown.match(/\|\s*Investimento\s+em\s+Ads\s*\|\s*R\$\s*([\d.,]+)\s*\|/i);
   if (investimentoLinha) {
     investimento = parseFloat(investimentoLinha[1].replace(/\./g, '').replace(',', '.'));
-    console.log('📊 Investimento encontrado:', investimento);
+    console.log(' Investimento encontrado:', investimento);
   }
   
   const pedidosLinha = markdown.match(/\|\s*Pedidos\s+Pagos\s+Mês\s*\|\s*(\d+)\s*\|/i);
   if (pedidosLinha) {
     pedidos = parseInt(pedidosLinha[1]);
-    console.log('📦 Pedidos encontrados:', pedidos);
+    console.log('Pedidos encontrados:', pedidos);
   }
 
-  console.log('💰 Investimento final:', investimento);
-  console.log('📦 Pedidos finais:', pedidos);
+  console.log('Investimento final:', investimento);
+  console.log('Pedidos finais:', pedidos);
 
   if (investimento && pedidos && pedidos > 0 && !isNaN(investimento)) {
     const cpa = (investimento / pedidos).toFixed(2);
     const cpaFormatado = cpa.replace('.', ',');
-    console.log('🎯 CPA calculado:', cpaFormatado);
+    console.log(' CPA calculado:', cpaFormatado);
     
     let markdownAtualizado = markdown;
     
@@ -46,10 +46,10 @@ function calcularCPA(markdown: string): string {
       `$1${cpaFormatado}$2`
     );
     
-    console.log('✅ CPA atualizado no markdown');
+    console.log(' CPA atualizado no markdown');
     return markdownAtualizado;
   } else {
-    console.log('⚠️ Não foi possível calcular CPA');
+    console.log(' Não foi possível calcular CPA');
     // Mesmo sem cálculo, limpar linha malformada
     let markdownLimpo = markdown.replace(
       /\|\s*CPA\s*\|\s*R\$[\d.,]+\s*\|\s*CPA\s*\|\s*[\d.,]+\s*\|/gi,
@@ -78,7 +78,7 @@ Objetivo: Diagnóstico completo e orientações estratégicas para crescimento s
 | Ticket Médio Mês      | R$123,61   |
 | ROAS                  | 5,61       |`;
 
-    console.log('🧪 Testando CPA malformado...');
+
     const markdownCorrigido = calcularCPA(markdownMalformado);
     
     return NextResponse.json({
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Markdown é obrigatório" }, { status: 400 });
     }
     
-    console.log('🧪 Testando CPA com markdown real...');
+    
     const markdownComCPA = calcularCPA(markdown);
     
          // Verificar se a linha malformada foi corrigida

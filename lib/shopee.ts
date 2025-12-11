@@ -1,12 +1,10 @@
 import crypto from 'crypto';
 
-// Config via variáveis de ambiente (sem defaults inline)
 const SHOPEE_BASE_URL = process.env.SHOPEE_BASE_URL || '';
 const SHOPEE_PARTNER_ID = process.env.SHOPEE_PARTNER_ID || '';
 const SHOPEE_PARTNER_KEY = process.env.SHOPEE_PARTNER_KEY || '';
 const SHOPEE_REDIRECT_URL = process.env.SHOPEE_REDIRECT_URL || '';
 
-// Usa a chave completa (incluindo eventual prefixo "shpk") para o HMAC
 const SHOPEE_SECRET = SHOPEE_PARTNER_KEY;
 
 function toHexHmacSHA256(payload: string, secret: string): string {
@@ -43,14 +41,11 @@ export async function buildAuthUrlAsync(params: { state: string; redirectUrl?: s
 
 export async function getAccessToken(args: { code: string; shop_id: string }) {
   const path = '/api/v2/auth/token/get';
-  // Usa timestamp do servidor da Shopee (como em buildAuthUrlAsync)
   const timestamp = await getShopeeServerTimestamp();
   
-  // BaseString para /api/v2/auth/token/get: partner_id + path + timestamp
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
   
-  // Adiciona partner_id, timestamp e sign como query parameters
   const url = `${SHOPEE_BASE_URL}${path}?partner_id=${SHOPEE_PARTNER_ID}&timestamp=${timestamp}&sign=${sign}`;
   
   console.log(`DEBUG: getAccessToken request:`, {
@@ -96,23 +91,19 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
 }
 
 /**
- * 🔄 REFRESH TOKEN CORRIGIDO - Usa timestamp do servidor Shopee e sempre atualiza refresh_token
+ *  REFRESH TOKEN CORRIGIDO - Usa timestamp do servidor Shopee e sempre atualiza refresh_token
  * 
  * CRÍTICO: A Shopee retorna um NOVO refresh_token a cada refresh.
  * Sempre devemos salvar o novo refresh_token, nunca manter o antigo.
  */
 export async function refreshAccessToken(args: { refresh_token: string; shop_id?: number | string }) {
-  // ✅ CORREÇÃO: Endpoint correto conforme documentação oficial
   const path = '/api/v2/auth/access_token/get';
   
-  // ✅ CORREÇÃO: Usa timestamp do servidor Shopee
   const timestamp = await getShopeeServerTimestamp();
   
-  // ✅ CORREÇÃO: BaseString conforme documentação - SEM refresh_token na assinatura
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
   
-  // ✅ CORREÇÃO: Query parameters conforme documentação oficial
   const queryParams = new URLSearchParams({
     partner_id: SHOPEE_PARTNER_ID.toString(),
     timestamp: timestamp.toString(),
@@ -122,13 +113,11 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
   const url = `${SHOPEE_BASE_URL}${path}?${queryParams.toString()}`;
 
   
-  // ✅ CORREÇÃO: Payload conforme documentação oficial - SEM timestamp e sign
   const payload: any = {
     refresh_token: args.refresh_token,
     partner_id: Number(SHOPEE_PARTNER_ID)
   };
 
-  // ✅ CORREÇÃO: shop_id é obrigatório conforme documentação
   if (args.shop_id) {
     payload.shop_id = Number(args.shop_id);
   }
@@ -142,7 +131,7 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
   if (!res.ok) {
     const text = await res.text();
     const errorMsg = `Shopee token/refresh failed: ${res.status} ${text}`;
-    console.error(`❌ [refreshAccessToken] Erro completo:`, {
+    console.error(`[refreshAccessToken] Erro completo:`, {
       status: res.status,
       statusText: res.statusText,
       error_response: text,
@@ -155,7 +144,6 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
       sign: sign
     });
     
-    // Detecta se o refresh_token expirou (geralmente após 30 dias)
     if (res.status === 403 || text.includes('invalid') || text.includes('expired')) {
       throw Object.assign(new Error('Refresh token expirado - reautenticação necessária'), { 
         code: 'REFRESH_TOKEN_EXPIRED',
@@ -164,7 +152,6 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
       });
     }
     
-    // 404 pode significar que o token não foi encontrado ou não está válido ainda
     if (res.status === 404) {
       throw Object.assign(new Error('Refresh token não encontrado (404) - pode precisar aguardar alguns minutos após geração'), { 
         code: 'REFRESH_TOKEN_NOT_FOUND',
@@ -200,7 +187,6 @@ export async function shopeeFetch<T = unknown>(args: {
 }) {
   const path = args.path.startsWith('/') ? args.path : `/${args.path}`;
   const method = args.method || 'GET';
-  // ✅ CORREÇÃO 3: Usar timestamp do servidor Shopee para consistência
   const timestamp = await getShopeeServerTimestamp();
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}${args.access_token}${args.shop_id}`;
   const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
@@ -215,7 +201,6 @@ export async function shopeeFetch<T = unknown>(args: {
   }
   const url = `${SHOPEE_BASE_URL}${path}?${search.toString()}`;
   
-  // 📋 LOG COMPLETO DA REQUEST
   const requestBody = method === 'POST' && args.body ? JSON.stringify(args.body) : null;
   const requestDetails = {
     endpoint: `${SHOPEE_BASE_URL}${path}`,
@@ -269,7 +254,6 @@ export async function shopeeFetch<T = unknown>(args: {
     responseData = responseText;
   }
   
-  // 📋 LOG COMPLETO DA RESPONSE
   console.log('\n' + '='.repeat(80));
   console.log(' [shopeeFetch] RESPONSE DA SHOPEE API');
   console.log('='.repeat(80));

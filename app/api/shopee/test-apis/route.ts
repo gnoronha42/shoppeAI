@@ -130,7 +130,6 @@ export async function GET(request: Request) {
 
     // Testar cada API
     for (const api of apisToTest) {
-      console.log(`\n🧪 Testando: ${api.name} (${api.path})`);
       
       const testResult = {
         name: api.name,
@@ -151,7 +150,7 @@ export async function GET(request: Request) {
         const response = await shopeeFetch<any>({
           path: api.path,
           access_token,
-          shop_id: shop_id || '', // ✅ Garantir que shop_id não seja null
+          shop_id: shop_id || '', // 
           query: api.query || {}
         });
 
@@ -201,9 +200,9 @@ export async function GET(request: Request) {
           testResult.data_summary = { error: 'Resposta sem campo response' };
         }
 
-        console.log(`✅ ${api.name}: ${testResult.status.toUpperCase()} (${testResult.response_time_ms}ms)`);
+        console.log(` ${api.name}: ${testResult.status.toUpperCase()} (${testResult.response_time_ms}ms)`);
         if (testResult.has_data) {
-          console.log(`   📊 Dados encontrados:`, Object.keys(testResult.data_summary));
+          console.log(`    Dados encontrados:`, Object.keys(testResult.data_summary));
         }
 
       } catch (error: any) {
@@ -217,7 +216,7 @@ export async function GET(request: Request) {
         else if (error.message.includes('401')) testResult.http_code = 401;
         else testResult.http_code = 500;
 
-        console.log(`❌ ${api.name}: ERRO - ${error.message}`);
+        console.log(` ${api.name}: ERRO - ${error.message}`);
       }
 
       results.apis_tested.push(testResult);
@@ -267,7 +266,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro no teste de APIs:', err);
+    console.error(' Erro no teste de APIs:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

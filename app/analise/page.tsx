@@ -52,7 +52,6 @@ export default function AnalisePage() {
   const [analysisResults, setAnalysisResults] = useState<any[]>([]);
   const { toast } = useToast();
   
-  // Estado para o período selecionado (padrão: últimos 30 dias)
   const [dateRange, setDateRange] = useState<DateRange>({
     from: subDays(new Date(), 30),
     to: new Date(),
@@ -72,13 +71,12 @@ export default function AnalisePage() {
     setIsClient(true);
   }, []);
 
-  // Função helper para obter URL base
   const getBaseUrl = () => {
     const baseUrl = process.env.NEXT_PUBLIC_ANALYSIS_BASE_URL;
     if (!baseUrl) {
       throw new Error("Variável de ambiente NEXT_PUBLIC_ANALYSIS_BASE_URL não definida");
     }
-    console.log('🌐 Base URL da análise:', baseUrl);
+    console.log('Base URL da análise:', baseUrl);
     return baseUrl;
   };
 
@@ -149,19 +147,16 @@ export default function AnalisePage() {
   const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType) => {
     setApiError(null);
 
-    console.log(`🔍 Iniciando análise CSV CORRIGIDA do tipo: ${type}`);
-    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
-    console.log(`Tamanho do CSV: ${csvContent.length} caracteres`);
-
+    
     const requestBody = {
       csvContent: csvContent,
       analysisType: type,
       clientName: selectedClient?.name || "Cliente",
     };
 
-    console.log("📡 Enviando requisição CSV para microserviço com dados corretos...");
     
-    // USAR ENDPOINT CORRIGIDO
+    
+    
     const baseUrl = getBaseUrl();
     
     const response = await fetch(`${baseUrl}/analise-csv`, {
@@ -194,19 +189,15 @@ export default function AnalisePage() {
     return data.analysis;
   };
 
-  // Nova função para testar todos os sistemas
   const testAllSystems = async (csvFiles: File[]) => {
     setIsTestingSystem(true);
     setApiError(null);
     
     try {
-      console.log('🧪 Testando todos os sistemas de análise...');
       
-      // Primeiro, testar conectividade
-      console.log('🔍 Verificando conectividade...');
     
       
-      // Ler conteúdo de todos os CSVs
+     
       const csvFilesContent = await Promise.all(
         csvFiles.map(async (file) => {
           const content = await readCSVFile(file);
@@ -219,7 +210,7 @@ export default function AnalisePage() {
 
       const baseUrl = getBaseUrl();
       const fullUrl = `${baseUrl}/test-todas-solucoes`;
-      console.log('🔗 URL completa para teste:', fullUrl);
+      
         
       const response = await fetch(fullUrl, {
         method: "POST",
@@ -234,7 +225,7 @@ export default function AnalisePage() {
       }
 
       const data = await response.json();
-      console.log('🧪 Resultado dos testes:', data);
+     
       
       setTestResults(data);
       
@@ -246,8 +237,8 @@ export default function AnalisePage() {
       
       return data;
     } catch (error) {
-      console.error('❌ Erro no teste:', error);
-      console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack');
+      console.error(' Erro no teste:', error);
+      console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack');
       
       const errorMessage = error instanceof Error ? error.message : 'Erro no teste';
       setApiError(`Erro no teste: ${errorMessage}`);
@@ -264,13 +255,13 @@ export default function AnalisePage() {
     }
   };
 
-  // Nova função para análise com método específico
+
   const analyzeWithSpecificMethod = async (csvFiles: File[], method: string, type: AnalysisType) => {
     setApiError(null);
 
-    console.log(`🔄 Iniciando análise com método: ${method}`);
+
     
-    // Ler conteúdo de todos os CSVs
+    
     const csvFilesContent = await Promise.all(
       csvFiles.map(async (file) => {
         const content = await readCSVFile(file);
@@ -297,17 +288,15 @@ export default function AnalisePage() {
         endpoint = "/analise-csv-robusta";
         break;
       case 'debug':
-        endpoint = "/analise-csv"; // usa o sistema original com debug
+        endpoint = "/analise-csv"; 
         break;
     }
 
-    console.log(`📡 Chamando endpoint: ${endpoint}`);
+
 
     const baseUrl = getBaseUrl();
     const fullUrl = `${baseUrl}${endpoint}`;
-    console.log('🔗 URL completa para análise:', fullUrl);
-    console.log('📍 Endpoint:', endpoint);
-    console.log('🔧 Método:', method);
+  
 
     const response = await fetch(fullUrl, {
       method: "POST",
@@ -339,7 +328,6 @@ export default function AnalisePage() {
     return data.analysis;
   };
 
-  // Nova função para analisar múltiplos CSVs para análise de conta
   const analyzeMultipleCSVsWithOpenAI = async (csvFiles: File[], type: AnalysisType) => {
     setApiError(null);
 
@@ -348,12 +336,10 @@ export default function AnalisePage() {
     console.log(`Número de arquivos CSV: ${csvFiles.length}`);
     console.log(`Método selecionado: ${selectedAnalysisMethod}`);
 
-    // Se método é 'auto', testar todos os sistemas primeiro
     if (selectedAnalysisMethod === 'auto') {
       try {
         const testData = await testAllSystems(csvFiles);
         
-        // Usar o primeiro sistema que funcionou
         if (testData.sistemasComSucesso > 0) {
           const bestMethod = Object.keys(testData.resultados).find(
             key => testData.resultados[key].sucesso
@@ -366,7 +352,7 @@ export default function AnalisePage() {
           };
           
           const method = methodMap[bestMethod!] || 'bypass';
-          console.log(`🎯 Usando método recomendado: ${method}`);
+         
           
           toast({
             title: "Sistema automático",
@@ -379,28 +365,26 @@ export default function AnalisePage() {
           throw new Error('Nenhum sistema de análise funcionou');
         }
       } catch (error) {
-        console.error('❌ Erro no modo automático:', error);
-        // Fallback para bypass
-        console.log('🔄 Tentando fallback para bypass...');
+        console.error(' Erro no modo automático:', error);
+      
+        
         return await analyzeWithSpecificMethod(csvFiles, 'bypass', type);
       }
     } else {
-      // Usar método específico selecionado
+    
       return await analyzeWithSpecificMethod(csvFiles, selectedAnalysisMethod, type);
     }
   };
 
-  // Função para detectar se há arquivos CSV
+  
   const hasCSVFiles = () => {
     return files.some(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
   };
 
-  // Função para detectar se há arquivos de imagem
   const hasImageFiles = () => {
     return files.some(file => file.type.startsWith('image/'));
   };
 
-  // Função para obter métricas avançadas
   const obterMetricasAvancadas = async (dados: any) => {
     try {
       const baseUrl = getBaseUrl();
@@ -425,7 +409,6 @@ export default function AnalisePage() {
     }
   };
 
-  // Função para gerar relatório personalizado
   const gerarRelatorioPersonalizado = async (dados: any, tipoRelatorio: string = 'completo') => {
     try {
       const baseUrl = getBaseUrl();
@@ -458,11 +441,7 @@ export default function AnalisePage() {
   ) => {
     setApiError(null);
 
-    console.log(`⚠️ Iniciando análise de IMAGENS do tipo: ${type}`);
-    console.log(`Cliente: ${selectedClient?.name || "Cliente"}`);
-    console.log(`Número de imagens: ${base64Images.length}`);
-    console.log(`Textos OCR: ${ocrTexts.length} extraídos`);
-    console.log(`⚠️ AVISO: Análise de imagens pode ter imprecisões matemáticas. Para dados precisos, use CSV.`);
+  
 
     const requestBody = {
       images: base64Images,
@@ -471,7 +450,7 @@ export default function AnalisePage() {
       ocrTexts: ocrTexts,
     };
 
-    console.log("📡 Enviando requisição para análise de imagens...");
+    
 
     const baseUrl = getBaseUrl();
 
@@ -507,13 +486,7 @@ export default function AnalisePage() {
 
   const saveAnalysisToDatabase = async (markdown: string) => {
     try {
-      console.log("🔄 Iniciando salvamento da análise...");
-      console.log("📋 Dados para salvar:", {
-        clientId: selectedClientId,
-        clientName: selectedClient?.name,
-        analysisType: analysisType,
-        markdownLength: markdown.length
-      });
+     
       
       setSaveStatus("Salvando...");
 
@@ -524,7 +497,7 @@ export default function AnalisePage() {
         analysisType: analysisType,
       };
 
-      console.log("📤 Enviando requisição para /api/analises/save");
+      console.log(" Enviando requisição para /api/analises/save");
 
       const response = await fetch("/api/analises/save", {
         method: "POST",
@@ -534,16 +507,16 @@ export default function AnalisePage() {
         body: JSON.stringify(requestBody),
       });
 
-      console.log("📡 Status da resposta:", response.status);
+      console.log(" Status da resposta:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Erro da API:", errorText);
+        console.error(" Erro da API:", errorText);
         throw new Error(`Erro ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log("✅ Análise salva com sucesso:", result);
+      console.log("Análise salva com sucesso:", result);
 
       setSaveStatus("Salva com sucesso!");
       toast({
@@ -559,7 +532,7 @@ export default function AnalisePage() {
 
       return result;
     } catch (error) {
-      console.error("❌ Erro ao salvar análise:", error);
+      console.error(" Erro ao salvar análise:", error);
       setSaveStatus("Erro ao salvar");
       toast({
         title: "Erro ao salvar análise",
@@ -597,18 +570,16 @@ export default function AnalisePage() {
     try {
       setIsAnalyzing(true);
 
-      // Separe os arquivos
+  
       const csvFiles = files.filter(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
       const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
       let analysisResult: string;
 
       if (csvFiles.length > 0) {
-        // ✅ ANÁLISE VIA CSV (DADOS CORRETOS GARANTIDOS)
-        console.log('🔍 Usando análise CSV - dados 100% precisos!');
         
         if (analysisType === "ads") {
-          // Para análise de ADS, usar apenas 1 CSV
+ 
           if (csvFiles.length > 1) {
             toast({ title: "Múltiplos CSVs", description: "Para análise de Ads, use apenas 1 arquivo CSV", variant: "destructive" });
             setIsAnalyzing(false);
@@ -617,10 +588,10 @@ export default function AnalisePage() {
           const csvContent = await readCSVFile(csvFiles[0]);
           analysisResult = await analyzeCSVWithOpenAI(csvContent, analysisType);
         } else if (analysisType === "account") {
-          // Para análise de ACCOUNT, aceitar múltiplos CSVs
+        
           analysisResult = await analyzeMultipleCSVsWithOpenAI(csvFiles, analysisType);
         } else if (analysisType === "whatsapp-consultivo") {
-          // Para análise WhatsApp Consultivo, usar análise de imagens
+        
           if (imageFiles.length === 0) {
             toast({ title: "Erro", description: "Para análise WhatsApp Consultivo, é necessário pelo menos uma imagem", variant: "destructive" });
             return;
@@ -634,8 +605,6 @@ export default function AnalisePage() {
           return;
         }
       } else if (imageFiles.length > 0) {
-        // ⚠️ ANÁLISE VIA IMAGENS (PODE TER IMPRECISÕES)
-        console.log('⚠️ Usando análise de imagens - dados podem ter imprecisões matemáticas');
         
         const ocrTexts = await ocrAllImages(imageFiles);
         const base64Images = await Promise.all(imageFiles.map(convertImageToBase64));
@@ -655,15 +624,12 @@ export default function AnalisePage() {
       });
 
 
-      console.log('🗄️ Tentando salvar análise no banco...');
-      console.log('📊 Markdown content length:', analysisResult.length);
-      console.log('👤 Selected client ID:', selectedClientId);
-      console.log('📋 Analysis type:', analysisType);
+     
       
       try {
         await saveAnalysisToDatabase(analysisResult);
       } catch (saveError) {
-        console.error("❌ Erro ao salvar no banco (análise gerada com sucesso):", saveError);
+        console.error(" Erro ao salvar no banco (análise gerada com sucesso):", saveError);
       
         toast({
           title: "Análise gerada com sucesso",
@@ -675,7 +641,7 @@ export default function AnalisePage() {
       setIsAnalyzing(false);
       setFiles([]);
     } catch (error: any) {
-      console.error("❌ Erro completo na geração da análise:", error);
+      console.error("Erro completo na geração da análise:", error);
       setIsAnalyzing(false); 
       toast({
         title: "Erro ao gerar relatório",
@@ -687,7 +653,6 @@ export default function AnalisePage() {
     }
   };
 
-  // Gera relatório usando dados reais via integração Shopee (sem CSV/prints)
   const handleGenerateWithShopeeIntegration = async () => {
     if (!selectedClientId) {
       toast({
@@ -699,18 +664,17 @@ export default function AnalisePage() {
     }
     try {
       setIsAnalyzing(true);
-      // 1) Verificar status da integração
       const statusRes = await fetch(`/api/shopee/status?client_id=${selectedClientId}`, { cache: 'no-store' });
       const statusData = await statusRes.json();
       if (!statusRes.ok || !statusData?.connected) {
         throw new Error("Cliente não está conectado à Shopee");
       }
-      // 2) Buscar dados reais com período selecionado
+      
       const params = new URLSearchParams({
         client_id: selectedClientId,
       });
       
-      // Adicionar parâmetros de data se disponíveis
+      
       if (dateRange?.from) {
         params.append('date_from', dateRange.from.toISOString());
       }
@@ -727,7 +691,6 @@ export default function AnalisePage() {
             description: "É necessário reconectar a conta na aba Integrações do cliente.",
             variant: "destructive",
           });
-          // Redireciona para a aba de integrações do cliente para reconectar
           try {
             const successUrl = new URL(`/clientes/${selectedClientId}`, window.location.origin);
             successUrl.searchParams.set('tab', 'integrations');
@@ -742,7 +705,6 @@ export default function AnalisePage() {
       const gmv = Number(agg?.gmvLast30Days) || 0;
       const ticketMedio = Number(agg?.ticketMedioLast30Days) || (pedidos > 0 ? gmv / pedidos : 0);
 
-      // 3) Montar payload para o microserviço com dados reais da API
       const dados = {
         gmv,
         pedidos,
@@ -761,7 +723,6 @@ export default function AnalisePage() {
         totalProducts: agg?.totalProducts || 0,
         activeProducts: agg?.activeProducts || 0
       };
-      // Chama o microserviço para gerar o markdown a partir dos dados reais
       const mdRes = await fetch(`${baseUrl}/api/relatorio-shopee-markdown`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -787,12 +748,11 @@ export default function AnalisePage() {
         description: "Conteúdo pronto para visualização e PDF",
         variant: "default",
       });
-      // 4) Salvar no banco
       try {
         await saveAnalysisToDatabase(markdown);
       } catch (_) {}
     } catch (error: any) {
-      console.error("❌ Erro ao gerar com integração Shopee:", error);
+      console.error(" Erro ao gerar com integração Shopee:", error);
       toast({
         title: "Erro ao gerar com dados reais",
         description: error?.message || "Não foi possível usar os dados da Shopee",

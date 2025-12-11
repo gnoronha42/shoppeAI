@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, client_id } = body;
 
-    console.log(`\n🔧 ===== CORREÇÃO DE TOKENS: ${action} =====`);
+   
 
     const results = {
       action,
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }
 
   } catch (err: any) {
-    console.error('❌ Erro na correção de tokens:', err);
+    console.error(' Erro na correção de tokens:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno na correção',
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 }
 
 async function refreshAllTokens(results: any) {
-  console.log('🔄 Iniciando refresh em massa...');
+
 
   const integrations = await prisma.client_integrations.findMany({
     where: { 
@@ -81,7 +81,7 @@ async function refreshAllTokens(results: any) {
 
       // Só faz refresh se expirado ou expira em menos de 2 horas
       if (isExpired || hoursUntilExpiry < 2) {
-        console.log(`🔄 Refreshing token para client ${integration.client_id}...`);
+
 
         const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token! });
         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
@@ -104,7 +104,6 @@ async function refreshAllTokens(results: any) {
           new_expiry: newExpiry.toISOString()
         });
 
-        console.log(`✅ Token refreshed para client ${integration.client_id}`);
       } else {
         results.details.push({
           client_id: integration.client_id,
@@ -168,22 +167,21 @@ async function cleanOrphanedIntegrations(results: any) {
         status: 'deleted'
       });
 
-      console.log(`🗑️ Integração órfã removida: ${integration.id} (shop_id: ${integration.shop_id})`);
 
     } catch (e: any) {
-      console.error(`❌ Erro ao remover integração órfã ${integration.id}:`, e.message);
+      console.error(`Erro ao remover integração órfã ${integration.id}:`, e.message);
       results.errors.push(`Integration ${integration.id}: ${e.message}`);
     }
   }
 
   results.success = results.fixed > 0;
-  console.log(`✅ Limpeza finalizada: ${results.fixed} integrações órfãs removidas`);
+  console.log(` Limpeza finalizada: ${results.fixed} integrações órfãs removidas`);
 
   return NextResponse.json(results);
 }
 
 async function mergeDuplicateShopIds(results: any) {
-  console.log('🔍 Consolidando shop_ids duplicados...');
+  console.log(' Consolidando shop_ids duplicados...');
 
   // Encontrar shop_ids duplicados
   const duplicates = await prisma.client_integrations.groupBy({
@@ -233,25 +231,24 @@ async function mergeDuplicateShopIds(results: any) {
           shop_id: duplicate.shop_id
         });
 
-        console.log(`🔗 Merged: mantido ${keepIntegration.id}, removido ${removeIntegration.id} (shop_id: ${duplicate.shop_id})`);
       }
 
       results.fixed++;
 
     } catch (e: any) {
-      console.error(`❌ Erro ao consolidar shop_id ${duplicate.shop_id}:`, e.message);
+      console.error(` Erro ao consolidar shop_id ${duplicate.shop_id}:`, e.message);
       results.errors.push(`Shop ID ${duplicate.shop_id}: ${e.message}`);
     }
   }
 
   results.success = results.fixed > 0 || results.processed === 0;
-  console.log(`✅ Consolidação finalizada: ${results.fixed} grupos de duplicatas processados`);
+  console.log(`Consolidação finalizada: ${results.fixed} grupos de duplicatas processados`);
 
   return NextResponse.json(results);
 }
 
 async function fixSpecificIntegration(results: any, clientId: string) {
-  console.log(`🔧 Corrigindo integração específica para client ${clientId}...`);
+
 
   const integration = await prisma.client_integrations.findUnique({
     where: { client_id_provider: { client_id: clientId, provider: 'shopee' } },
@@ -289,7 +286,7 @@ async function fixSpecificIntegration(results: any, clientId: string) {
     const isExpired = expiry ? expiry.getTime() < now.getTime() : true;
 
     if (isExpired) {
-      console.log(`🔄 Token expirado, tentando refresh...`);
+      console.log(`Token expirado, tentando refresh...`);
 
       const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token });
       const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
@@ -311,7 +308,7 @@ async function fixSpecificIntegration(results: any, clientId: string) {
         new_expiry: newExpiry.toISOString()
       });
 
-      console.log(`✅ Token refreshed com sucesso para client ${clientId}`);
+      console.log(` Token refreshed com sucesso para client ${clientId}`);
     } else {
       results.details.push({
         client_id: clientId,
@@ -323,7 +320,7 @@ async function fixSpecificIntegration(results: any, clientId: string) {
     results.success = true;
 
   } catch (e: any) {
-    console.error(`❌ Erro ao corrigir integração para client ${clientId}:`, e.message);
+    console.error(` Erro ao corrigir integração para client ${clientId}:`, e.message);
     results.errors.push(e.message);
     
     if (e.message.includes('REFRESH_TOKEN_EXPIRED')) {

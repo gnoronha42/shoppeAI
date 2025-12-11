@@ -5,14 +5,12 @@ const nextConfig = {
   },
   images: { unoptimized: true },
   webpack: (config, { dev, isServer }) => {
-    // Adiciona suporte para o Prisma
     config.externals = [...(config.externals || []), '@prisma/client'];
 
     if (dev && isServer) {
       config.cache = false;
     }
 
-    // Configuração específica para o Puppeteer
     if (isServer) {
       config.externals.push({
         'puppeteer': 'puppeteer',
@@ -21,7 +19,6 @@ const nextConfig = {
       });
     }
 
-    // Adiciona suporte para binários do Chrome
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -37,7 +34,6 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['puppeteer', 'puppeteer-core'],
   },
-  // ++ Adicionado para normalizar URLs de middleware e proxy reverso (ngrok)
   skipMiddlewareUrlNormalize: true, 
   skipTrailingSlashRedirect: true,
 };

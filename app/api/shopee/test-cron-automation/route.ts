@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     const scenario = searchParams.get('scenario') || 'all';
     const clientId = searchParams.get('client_id') || '9e79b6af-fa26-4e7e-89c7-9e2cdd05c6fa';
 
-    console.log(`🧪 [TEST-CRON] Iniciando teste de automação - Cenário: ${scenario}`);
+
 
     const results = {
       timestamp: new Date().toISOString(),
@@ -320,7 +320,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ [TEST-CRON] Erro no teste de automação:', err);
+    console.error(' [TEST-CRON] Erro no teste de automação:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

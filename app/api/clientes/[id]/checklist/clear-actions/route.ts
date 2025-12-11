@@ -19,8 +19,7 @@ export async function POST(
 
     const clientId = params.id;
 
-    console.log('🧹 Iniciando limpeza de ações para cliente:', clientId);
-    console.log('👤 Usuário solicitante:', authResult.user.name);
+ 
 
     // Contar registros antes da limpeza
     const countBefore = await prisma.checklist_progress.count({
@@ -29,7 +28,6 @@ export async function POST(
       }
     });
 
-    console.log('📊 Registros encontrados antes da limpeza:', countBefore);
 
     // Deletar todos os registros de progresso do cliente
     const deleteResult = await prisma.checklist_progress.deleteMany({
@@ -38,17 +36,10 @@ export async function POST(
       }
     });
 
-    console.log('✅ Registros deletados:', deleteResult.count);
+   
 
     // Log da ação para auditoria
-    console.log('🗂️ Ação de limpeza executada:', {
-      clientId,
-      analystId: authResult.user.id,
-      analystName: authResult.user.name,
-      recordsDeleted: deleteResult.count,
-      timestamp: new Date().toISOString()
-    });
-
+   
     return NextResponse.json({
       success: true,
       message: 'Todas as ações foram limpas com sucesso',
@@ -58,7 +49,7 @@ export async function POST(
     });
 
   } catch (error) {
-    console.error("❌ Erro ao limpar ações do checklist:", error);
+    console.error("Erro ao limpar ações do checklist:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor ao limpar ações" },
       { status: 500 }

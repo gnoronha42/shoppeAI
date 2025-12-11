@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    console.log(`🔄 [RECOVER-TOKENS] Tentando recuperar tokens para client_id: ${client_id}, shop_id: ${shop_id}`);
+    console.log(`[RECOVER-TOKENS] Tentando recuperar tokens para client_id: ${client_id}, shop_id: ${shop_id}`);
 
     // 1. Verificar se a loja ainda está autorizada na Shopee
     try {
@@ -41,10 +41,10 @@ export async function POST(request: Request) {
         });
       }
 
-      console.log(`✅ [RECOVER-TOKENS] Loja encontrada na Shopee:`, targetShop);
+      console.log(`[RECOVER-TOKENS] Loja encontrada na Shopee:`, targetShop);
 
     } catch (e: any) {
-      console.error(`❌ [RECOVER-TOKENS] Erro ao verificar lojas autorizadas:`, e?.message);
+      console.error(` [RECOVER-TOKENS] Erro ao verificar lojas autorizadas:`, e?.message);
       return NextResponse.json({
         success: false,
         error: 'Falha ao verificar autorização na Shopee',

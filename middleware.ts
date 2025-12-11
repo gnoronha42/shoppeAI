@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Rotas públicas
+
 
 const publicRoutes = ['/login', '/api/auth', '/api/analysts', '/api/shopee', '/selleria', '/obrigado', '/calculadora'];
 

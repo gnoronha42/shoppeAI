@@ -45,9 +45,9 @@ export async function POST(request: Request) {
       });
     }
 
-    console.log(`🧠 [SMART-REFRESH] Iniciando refresh inteligente para ${client_id}`);
-    console.log(`   ⏰ Token expira em: ${hoursUntilExpiry} horas`);
-    console.log(`   🎯 Modo: ${force ? 'FORÇADO' : 'AUTOMÁTICO'}`);
+    console.log(` [SMART-REFRESH] Iniciando refresh inteligente para ${client_id}`);
+    console.log(`   Token expira em: ${hoursUntilExpiry} horas`);
+    console.log(`   Modo: ${force ? 'FORÇADO' : 'AUTOMÁTICO'}`);
 
     // Estratégias de refresh (em ordem de prioridade)
     const strategies = [
@@ -68,8 +68,8 @@ export async function POST(request: Request) {
 
     for (const strategy of strategies) {
       try {
-        console.log(`🔄 [SMART-REFRESH] Tentando estratégia: ${strategy.name}`);
-        console.log(`   📝 ${strategy.description}`);
+        console.log(`[SMART-REFRESH] Tentando estratégia: ${strategy.name}`);
+        console.log(`    ${strategy.description}`);
 
         const refreshResult = await refreshAccessToken({
           refresh_token: integration.refresh_token,
@@ -84,15 +84,15 @@ export async function POST(request: Request) {
           where: { id: integration.id },
           data: {
             access_token: refreshResult.access_token,
-            refresh_token: refreshResult.refresh_token, // ✅ CRÍTICO: Salvar novo refresh token
+            refresh_token: refreshResult.refresh_token, 
             token_expiry: newExpiryDate,
             updated_at: new Date()
           }
         });
 
         successStrategy = strategy.name;
-        console.log(`✅ [SMART-REFRESH] Sucesso com estratégia: ${strategy.name}`);
-        console.log(`   🔑 Novo token expira em: ${newExpiryDate.toISOString()}`);
+        console.log(`[SMART-REFRESH] Sucesso com estratégia: ${strategy.name}`);
+        console.log(`    Novo token expira em: ${newExpiryDate.toISOString()}`);
 
         return NextResponse.json({
           success: true,
@@ -110,20 +110,20 @@ export async function POST(request: Request) {
 
         // Se for erro 404, pode ser temporário - continua tentando
         if (error.message.includes('404')) {
-          console.log(`   🔄 Erro 404 detectado, tentando próxima estratégia...`);
+          console.log(`    Erro 404 detectado, tentando próxima estratégia...`);
           continue;
         }
 
         // Se for erro de token expirado, para as tentativas
         if ((error as any).code === 'REFRESH_TOKEN_EXPIRED') {
-          console.error(`❌ [SMART-REFRESH] Refresh token expirado - reautenticação necessária`);
+          console.error(`[SMART-REFRESH] Refresh token expirado - reautenticação necessária`);
           break;
         }
       }
     }
 
     // Se chegou aqui, todas as estratégias falharam
-    console.error(`❌ [SMART-REFRESH] Todas as estratégias falharam para ${client_id}`);
+    console.error(` [SMART-REFRESH] Todas as estratégias falharam para ${client_id}`);
 
     // Determinar se precisa de reconexão
     const needsReconnection = (lastError as any)?.code === 'REFRESH_TOKEN_EXPIRED' || 
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     }, { status: needsReconnection ? 401 : 500 });
 
   } catch (err: any) {
-    console.error('❌ [SMART-REFRESH] Erro interno:', err);
+    console.error(' [SMART-REFRESH] Erro interno:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',
@@ -229,7 +229,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ [SMART-REFRESH] Erro no GET:', err);
+    console.error(' [SMART-REFRESH] Erro no GET:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno'

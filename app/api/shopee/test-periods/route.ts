@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       const dateFrom = new Date(now.getTime() - period.days * 24 * 60 * 60 * 1000);
       const dateTo = now;
 
-      console.log(`\n🧪 [testPeriods] Testando período: ${period.name} (${dateFrom.toISOString()} a ${dateTo.toISOString()})`);
+      console.log(`\n[testPeriods] Testando período: ${period.name} (${dateFrom.toISOString()} a ${dateTo.toISOString()})`);
 
       try {
         // Fazer chamada para o endpoint de dados com este período
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
             top_products: data.data?.topProductsLast30Days?.length || 0
           });
 
-          console.log(`✅ [testPeriods] ${period.name}: ${data.data?.totalOrdersLast30Days || 0} pedidos, GMV: R$${data.data?.gmvLast30Days || 0}`);
+          console.log(` [testPeriods] ${period.name}: ${data.data?.totalOrdersLast30Days || 0} pedidos, GMV: R$${data.data?.gmvLast30Days || 0}`);
         } else {
           const errorData = await response.json();
           results.push({
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
             error: errorData.error || `HTTP ${response.status}`
           });
 
-          console.log(`❌ [testPeriods] ${period.name}: Erro - ${errorData.error || response.status}`);
+          console.log(` [testPeriods] ${period.name}: Erro - ${errorData.error || response.status}`);
         }
       } catch (e: any) {
         results.push({
@@ -100,7 +100,7 @@ export async function GET(request: Request) {
           error: e.message
         });
 
-        console.log(`❌ [testPeriods] ${period.name}: Exceção - ${e.message}`);
+        console.log(` [testPeriods] ${period.name}: Exceção - ${e.message}`);
       }
 
       // Pequena pausa entre requisições para não sobrecarregar a API
@@ -144,7 +144,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro no teste de períodos:', err);
+    console.error(' Erro no teste de períodos:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

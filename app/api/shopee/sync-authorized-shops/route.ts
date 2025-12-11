@@ -15,7 +15,6 @@ import { shopeeFetch} from '@/lib/shopee';
  */
 export async function GET(request: Request) {
   try {
-    console.log('\n🔄 ===== SINCRONIZAÇÃO MESTRA DE LOJAS =====');
     
     // 1. Buscar lista de lojas autorizadas na Shopee
     // Nota: Este endpoint é público e usa autenticação de parceiro, não de loja
@@ -35,14 +34,14 @@ export async function GET(request: Request) {
 
     // A estrutura pode variar: response.response.authed_shops ou response.authed_shop_list
     const shopeeShops = response.response?.authed_shop_list || response.authed_shop_list || [];
-    console.log(`📡 Shopee retornou ${shopeeShops.length} lojas autorizadas`);
+    console.log(`Shopee retornou ${shopeeShops.length} lojas autorizadas`);
 
     // 2. Buscar integrações locais
     const localIntegrations = await prisma.client_integrations.findMany({
       where: { provider: 'shopee' },
       include: { clients: true }
     });
-    console.log(`🗄️ Banco local tem ${localIntegrations.length} integrações`);
+    console.log(` Banco local tem ${localIntegrations.length} integrações`);
 
     const results = {
       total_shopee: shopeeShops.length,
@@ -59,7 +58,7 @@ export async function GET(request: Request) {
     // Verificar lojas no banco que não estão mais na Shopee (Revogadas)
     for (const local of localIntegrations) {
       if (local.shop_id && !shopeeShopIds.has(local.shop_id)) {
-        console.log(`⚠️ Loja ${local.shop_id} (${local.clients?.name}) não está mais autorizada na Shopee`);
+        console.log(` Loja ${local.shop_id} (${local.clients?.name}) não está mais autorizada na Shopee`);
         results.revoked_shopee.push({
           shop_id: local.shop_id,
           client_name: local.clients?.name,
@@ -77,7 +76,7 @@ export async function GET(request: Request) {
     for (const shopeeShop of shopeeShops) {
       const shopId = String(shopeeShop.shop_id);
       if (!localShopIds.has(shopId)) {
-        console.log(`🆕 Loja ${shopId} está autorizada na Shopee mas não está no banco local`);
+        console.log(` Loja ${shopId} está autorizada na Shopee mas não está no banco local`);
         results.missing_local.push({
           shop_id: shopId,
           region: shopeeShop.region,
@@ -86,11 +85,11 @@ export async function GET(request: Request) {
       }
     }
 
-    console.log('✅ Sincronização finalizada');
+    console.log('Sincronização finalizada');
     return NextResponse.json({ success: true, results });
 
   } catch (err: any) {
-    console.error('❌ Erro na sincronização mestra:', err);
+    console.error(' Erro na sincronização mestra:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

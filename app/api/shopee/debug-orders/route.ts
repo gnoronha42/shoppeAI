@@ -254,7 +254,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ [DEBUG-ORDERS] Erro:', err);
+    console.error('[DEBUG-ORDERS] Erro:', err);
     return NextResponse.json({ error: err.message || 'Erro interno' }, { status: 500 });
   }
 }

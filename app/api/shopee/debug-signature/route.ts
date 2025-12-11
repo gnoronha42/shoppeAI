@@ -99,7 +99,7 @@ export async function GET(request: Request) {
     });
     
   } catch (err: any) {
-    console.error('❌ [DEBUG-SIGNATURE] Erro:', err);
+    console.error(' [DEBUG-SIGNATURE] Erro:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno'

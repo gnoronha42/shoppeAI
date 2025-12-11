@@ -51,13 +51,7 @@ export async function POST(request: Request) {
       tokenToTest = integration.refresh_token;
       shopIdToUse = integration.shop_id || undefined;
 
-      console.log(`🔍 [TEST-REFRESH] Usando refresh_token do banco para:`, {
-        client_id,
-        client_name: integration.clients?.name,
-        shop_id: integration.shop_id,
-        refresh_token_length: tokenToTest.length,
-        refresh_token_preview: tokenToTest.substring(0, 10) + '...' + tokenToTest.substring(tokenToTest.length - 4)
-      });
+    
     }
 
     if (!tokenToTest) {
@@ -66,14 +60,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    console.log(`🧪 [TEST-REFRESH] Testando refresh_token:`, {
-      token_length: tokenToTest.length,
-      token_preview: tokenToTest.substring(0, 10) + '...' + tokenToTest.substring(tokenToTest.length - 4),
-      environment: process.env.SHOPEE_BASE_URL,
-      partner_id: process.env.SHOPEE_PARTNER_ID,
-      shop_id: shopIdToUse
-    });
-
+   
     // Tentar fazer refresh
     try {
       const refreshed = await refreshAccessToken({ 
@@ -81,7 +68,7 @@ export async function POST(request: Request) {
         shop_id: shopIdToUse
       });
 
-      console.log(`✅ [TEST-REFRESH] Refresh bem-sucedido!`, {
+      console.log(` [TEST-REFRESH] Refresh bem-sucedido!`, {
         has_access_token: !!refreshed.access_token,
         has_refresh_token: !!refreshed.refresh_token,
         access_token_length: refreshed.access_token?.length || 0,
@@ -110,7 +97,7 @@ export async function POST(request: Request) {
       });
 
     } catch (error: any) {
-      console.error(`❌ [TEST-REFRESH] Erro ao fazer refresh:`, {
+      console.error(` [TEST-REFRESH] Erro ao fazer refresh:`, {
         error: error.message,
         code: error.code,
         status: error.status,
@@ -147,7 +134,7 @@ export async function POST(request: Request) {
     }
 
   } catch (err: any) {
-    console.error('❌ [TEST-REFRESH] Erro geral:', err);
+    console.error(' [TEST-REFRESH] Erro geral:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

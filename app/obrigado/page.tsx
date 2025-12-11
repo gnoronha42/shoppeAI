@@ -15,7 +15,6 @@ function ObrigadoContent() {
   
   useEffect(() => {
     try {
-      console.log('🔍 Debugando página obrigado...');
       
       // Priorizar localStorage e sessionStorage (mais confiável que URL)
       const relatorioLocalStorage = typeof window !== 'undefined' ? localStorage.getItem('relatorio') : null;
@@ -23,30 +22,21 @@ function ObrigadoContent() {
       const relatorioParam = searchParams?.get('relatorio');
       const timestamp = typeof window !== 'undefined' ? localStorage.getItem('relatorio_timestamp') : null;
       
-      console.log('💾 localStorage relatorio:', relatorioLocalStorage ? 'Presente (tamanho: ' + relatorioLocalStorage.length + ')' : 'Ausente');
-      console.log('🗂️ sessionStorage relatorio:', relatorioSessionStorage ? 'Presente (tamanho: ' + relatorioSessionStorage.length + ')' : 'Ausente');
-      console.log('📄 Parâmetro URL relatorio:', relatorioParam ? 'Presente (tamanho: ' + relatorioParam.length + ')' : 'Ausente');
-      console.log('⏰ Timestamp:', timestamp ? new Date(parseInt(timestamp)).toLocaleString() : 'Ausente');
+     
       
-      // Prioridade: localStorage > sessionStorage > URL
+     
       if (relatorioLocalStorage) {
-        console.log('✅ Usando relatório do localStorage (prioridade 1)');
-        console.log('📝 Relatório localStorage (primeiros 100 chars):', relatorioLocalStorage.substring(0, 100));
+        
         setRelatorio(relatorioLocalStorage);
       } else if (relatorioSessionStorage) {
-        console.log('✅ Usando relatório do sessionStorage (prioridade 2)');
-        console.log('📝 Relatório sessionStorage (primeiros 100 chars):', relatorioSessionStorage.substring(0, 100));
+       
         setRelatorio(relatorioSessionStorage);
       } else if (relatorioParam) {
-        console.log('✅ Usando relatório da URL (prioridade 3)');
+       
         const decoded = decodeURIComponent(relatorioParam);
-        console.log('📝 Relatório decodificado (primeiros 100 chars):', decoded.substring(0, 100));
         setRelatorio(decoded);
       } else {
-        console.log('❌ Nenhum relatório encontrado');
-        console.log('🔍 URL atual:', window.location.href);
-        console.log('🔍 SearchParams disponíveis:', Array.from(searchParams?.entries() || []));
-        console.log('🔍 localStorage keys:', Object.keys(localStorage));
+       
         
         // Tentar buscar outras possíveis chaves no localStorage
         const possibleKeys = ['relatorio', 'preview', 'analise', 'report'];
@@ -54,7 +44,7 @@ function ObrigadoContent() {
         for (const key of possibleKeys) {
           const value = localStorage.getItem(key);
           if (value) {
-            console.log(`🔍 Encontrou dados em localStorage['${key}']:`, value.substring(0, 100));
+          
             setRelatorio(value);
             found = true;
             break;
@@ -66,7 +56,7 @@ function ObrigadoContent() {
         }
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar relatório:', error);
+      console.error(' Erro ao carregar relatório:', error);
       setRelatorio("Erro ao carregar análise. Por favor, refaça sua análise.");
     }
     

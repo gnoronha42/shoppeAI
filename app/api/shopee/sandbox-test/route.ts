@@ -3,7 +3,7 @@ import { shopeeFetch } from '@/lib/shopee';
 
 export async function GET() {
   try {
-    console.log('🧪 [SANDBOX-TEST] Testando conectividade com Shopee Sandbox...');
+    console.log(' [SANDBOX-TEST] Testando conectividade com Shopee Sandbox...');
     
     const testResults: {
       timestamp: string;
@@ -31,7 +31,7 @@ export async function GET() {
 
     // Teste 1: Verificar se conseguimos acessar o endpoint público
     try {
-      console.log('🧪 [SANDBOX-TEST] Teste 1: Endpoint público get_shops_by_partner');
+      console.log(' [SANDBOX-TEST] Teste 1: Endpoint público get_shops_by_partner');
       
       const publicTest = await shopeeFetch<any>({
         path: '/api/v2/public/get_shops_by_partner',    
@@ -50,7 +50,7 @@ export async function GET() {
         message: 'Endpoint público funcionando'
       });
 
-      console.log('✅ [SANDBOX-TEST] Teste 1 passou - Endpoint público acessível');
+      
 
     } catch (e: any) {
       testResults.tests.push({
@@ -59,12 +59,11 @@ export async function GET() {
         error: e?.message || 'Erro desconhecido',
         message: 'Falha no endpoint público'
       });
-      console.error('❌ [SANDBOX-TEST] Teste 1 falhou:', e?.message);
+      console.error(' [SANDBOX-TEST] Teste 1 falhou:', e?.message);
     }
 
     // Teste 2: Verificar se as credenciais estão corretas
     try {
-      console.log('🧪 [SANDBOX-TEST] Teste 2: Verificação de credenciais');
       
       // Tentar uma chamada que requer autenticação (mas sem tokens específicos)
       const timestamp = Math.floor(Date.now() / 1000);
@@ -77,7 +76,6 @@ export async function GET() {
         message: 'Credenciais carregadas corretamente'
       });
 
-      console.log('✅ [SANDBOX-TEST] Teste 2 passou - Credenciais OK');
 
     } catch (e: any) {
       testResults.tests.push({
@@ -86,12 +84,11 @@ export async function GET() {
         error: e?.message || 'Erro desconhecido',
         message: 'Problema com credenciais'
       });
-      console.error('❌ [SANDBOX-TEST] Teste 2 falhou:', e?.message);
+      console.error(' [SANDBOX-TEST] Teste 2 falhou:', e?.message);
     }
 
     // Teste 3: Verificar URL de callback
     try {
-      console.log('🧪 [SANDBOX-TEST] Teste 3: URL de callback');
       
       const callbackUrl = process.env.SHOPEE_REDIRECT_URL;
       const isValidCallback = callbackUrl && callbackUrl.includes('/api/shopee/callback');
@@ -103,7 +100,7 @@ export async function GET() {
         message: isValidCallback ? 'URL de callback configurada' : 'URL de callback inválida'
       });
 
-      console.log(`${isValidCallback ? '✅' : '❌'} [SANDBOX-TEST] Teste 3 - URL callback: ${callbackUrl}`);
+    
 
     } catch (e: any) {
       testResults.tests.push({
@@ -136,7 +133,7 @@ export async function GET() {
       ]
     };
 
-    console.log(`📊 [SANDBOX-TEST] Resumo: ${successfulTests}/${totalTests} testes passaram`);
+    console.log(`[SANDBOX-TEST] Resumo: ${successfulTests}/${totalTests} testes passaram`);
 
     return NextResponse.json({
       success: successfulTests >= 2,
@@ -147,7 +144,7 @@ export async function GET() {
     });
 
   } catch (err: any) {
-    console.error('❌ [SANDBOX-TEST] Erro geral:', err);
+    console.error(' [SANDBOX-TEST] Erro geral:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

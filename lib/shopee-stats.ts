@@ -1,14 +1,11 @@
 import prisma from '@/lib/prisma';
 import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
 
-// Helper para refrescar o token se estiver expirando ou já expirado
-// ✅ ATUALIZADO: Usa mesma lógica corrigida do /api/shopee/data
 export async function getValidAccessToken(integration: any) {
   const now = new Date();
   const expiry = integration.token_expiry ? new Date(integration.token_expiry) : null;
   const expiryValid = !!expiry && !isNaN(expiry.getTime());
   
-  // ✅ Buffer reduzido: 30 minutos (evita refreshes desnecessários)
   const bufferSeconds = 1800;
   const remainingSeconds = expiryValid && expiry ? Math.floor((expiry.getTime() - now.getTime()) / 1000) : 0;
   
@@ -37,7 +34,7 @@ export async function getValidAccessToken(integration: any) {
       console.log(` [shopee-stats] Token atualizado com sucesso.`);
       return updatedIntegration;
     } catch (e: any) {
-      console.error('❌ [shopee-stats] Falha ao refrescar token:', e?.message || e);
+      console.error(' [shopee-stats] Falha ao refrescar token:', e?.message || e);
       if (e?.code === 'REFRESH_TOKEN_EXPIRED') {
         throw Object.assign(new Error('Refresh token expirado'), { code: 'REFRESH_TOKEN_EXPIRED' });
       }
@@ -96,7 +93,7 @@ export async function forceRefreshTokens(integration: any) {
 }
 
 export async function getShopStats(integration: any, dateFrom?: Date, dateTo?: Date) {
-    // Garante token válido
+    
     integration = await getValidAccessToken(integration);
     let { access_token, shop_id } = integration;
 
@@ -105,7 +102,7 @@ export async function getShopStats(integration: any, dateFrom?: Date, dateTo?: D
     const customTimeFrom = dateFrom ? Math.floor(dateFrom.getTime() / 1000) : null;
     const customPeriodDays = customTimeFrom ? Math.ceil((customTimeTo - customTimeFrom) / (24 * 60 * 60)) : null;
 
-    // 1. Shop Info
+    
     let shopInfo: any = {};
     try {
         shopInfo = await shopeeFetch<any>({
@@ -114,7 +111,7 @@ export async function getShopStats(integration: any, dateFrom?: Date, dateTo?: D
             shop_id,
         });
     } catch (e: any) {
-        // Retry logic for invalid token
+        
          if (e?.message?.includes('invalid_access_token')) {
             const updated = await forceRefreshTokens(integration);
             if (updated) {
@@ -142,14 +139,14 @@ export async function getShopStats(integration: any, dateFrom?: Date, dateTo?: D
         console.warn('Erro ao buscar produtos:', e);
     }
 
-    // 3. Orders (with chunking for 15-day limit)
+    
     const periods = customPeriodDays ? [customPeriodDays] : [30];
     const timeFields = ['create_time', 'update_time'];
     let orderList: any[] = [];
     
     for (const days of periods) {
         const timeFrom = customTimeFrom || (customTimeTo - days * 24 * 60 * 60);
-        // Determine chunks of max 15 days (14 days for safety)
+        
         const CHUNK_SIZE = 14 * 24 * 60 * 60;
         const chunks = [];
         let currentStart = timeFrom;
@@ -187,12 +184,7 @@ export async function getShopStats(integration: any, dateFrom?: Date, dateTo?: D
                         allOrdersInField = allOrdersInField.concat(orders);
                     }
                     
-                    // Handle pagination for this chunk if needed (simplified here, assuming <100 per 14 days for stats summary, 
-                    // but ideally should paginate. For robustness, let's just concat what we get)
-                    // To be fully robust like enhanced-data, we'd need pagination loop here too.
-                    // Given this is likely a quick stats summary, maybe one page is enough? 
-                    // But let's check response.more if we want to be thorough.
-                    // For now, let's stick to basic chunking to fix the 30-day error.
+                    
                 }
 
                 if (!hasError && allOrdersInField.length > 0) {

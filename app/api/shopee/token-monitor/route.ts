@@ -138,7 +138,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ Erro no monitor de tokens:', err);
+    console.error(' Erro no monitor de tokens:', err);
     return NextResponse.json({ 
       success: false,
       error: err.message || 'Erro interno',

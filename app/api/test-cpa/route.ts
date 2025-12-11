@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Função para calcular CPA (copiada do microserviço)
 function calcularCPA(markdown: string): string {
-  console.log('🧮 Iniciando cálculo do CPA...');
-  console.log('📝 Markdown recebido (primeiros 300 chars):', markdown.substring(0, 300));
+ 
+  console.log(' Markdown recebido (primeiros 300 chars):', markdown.substring(0, 300));
   
   // Múltiplas estratégias para encontrar investimento e pedidos
   let investimento: number | null = null;
@@ -14,7 +14,7 @@ function calcularCPA(markdown: string): string {
   if (tabelaMatch) {
     investimento = parseFloat(tabelaMatch[1].replace(/\./g, '').replace(',', '.'));
     pedidos = parseInt(tabelaMatch[2]);
-    console.log('📊 Estratégia 1 - Dados encontrados na tabela:', { investimento, pedidos });
+  
   }
   
   // Estratégia 2: Buscar por padrões de texto mais flexíveis
@@ -23,14 +23,14 @@ function calcularCPA(markdown: string): string {
     const investimentoMatch = markdown.match(/(?:Investimento\s+(?:em\s+)?Ads?|Investimento\s+total\s+em\s+Ads?)\s*[:|]\s*R\$\s*([\d.,]+)/i);
     if (investimentoMatch) {
       investimento = parseFloat(investimentoMatch[1].replace(/\./g, '').replace(',', '.'));
-      console.log('📊 Estratégia 2 - Investimento encontrado:', investimento);
+     
     }
     
     // Buscar pedidos pagos
     const pedidosMatch = markdown.match(/(?:Pedidos\s+Pagos(?:\s+Mês)?|Pedidos\s+via\s+Ads?|Pedidos\s+Pagos\s+Mês)\s*[:|]\s*(\d+)/i);
     if (pedidosMatch) {
       pedidos = parseInt(pedidosMatch[1]);
-      console.log('📊 Estratégia 2 - Pedidos encontrados:', pedidos);
+     
     }
   }
   
@@ -40,25 +40,25 @@ function calcularCPA(markdown: string): string {
     const investimentoLinha = markdown.match(/\|\s*Investimento\s+em\s+Ads\s*\|\s*R\$\s*([\d.,]+)\s*\|/i);
     if (investimentoLinha) {
       investimento = parseFloat(investimentoLinha[1].replace(/\./g, '').replace(',', '.'));
-      console.log('📊 Estratégia 3 - Investimento na linha:', investimento);
+    
     }
     
     // Buscar qualquer número na linha dos pedidos
     const pedidosLinha = markdown.match(/\|\s*Pedidos\s+Pagos\s+Mês\s*\|\s*(\d+)\s*\|/i);
     if (pedidosLinha) {
       pedidos = parseInt(pedidosLinha[1]);
-      console.log('📊 Estratégia 3 - Pedidos na linha:', pedidos);
+      
     }
   }
 
-  console.log('💰 Investimento final:', investimento);
-  console.log('📦 Pedidos finais:', pedidos);
+  console.log('Investimento final:', investimento);
+  console.log(' Pedidos finais:', pedidos);
 
   if (investimento && pedidos && pedidos > 0 && !isNaN(investimento)) {
     const cpa = (investimento / pedidos).toFixed(2);
     const cpaFormatado = `R$${cpa.replace('.', ',')}`;
-    console.log('🎯 CPA calculado:', cpaFormatado);
-    console.log('🧮 Cálculo:', `${investimento} ÷ ${pedidos} = ${cpa}`);
+   
+
     
     let markdownAtualizado = markdown;
     
@@ -83,25 +83,25 @@ function calcularCPA(markdown: string): string {
       `| CPA | ${cpaFormatado} |`
     );
     
-    console.log('✅ CPA atualizado no markdown');
+    console.log('CPA atualizado no markdown');
     
     // Verificação final: confirmar que o CPA foi atualizado
     if (markdownAtualizado.includes(cpaFormatado)) {
-      console.log('✅ Verificação: CPA encontrado no markdown final');
+      console.log(' Verificação: CPA encontrado no markdown final');
       
       // Verificar se ainda há RCPA no resultado
       if (markdownAtualizado.includes('RCPA')) {
-        console.log('⚠️ ATENÇÃO: RCPA ainda presente! Tentando limpeza final...');
+        console.log(' ATENÇÃO: RCPA ainda presente! Tentando limpeza final...');
         markdownAtualizado = markdownAtualizado.replace(/RCPA/g, cpaFormatado);
-        console.log('🧹 Limpeza final aplicada');
+        console.log('Limpeza final aplicada');
       }
     } else {
-      console.log('⚠️ Verificação: CPA NÃO encontrado no markdown final');
+      console.log('Verificação: CPA NÃO encontrado no markdown final');
     }
     
     return markdownAtualizado;
   } else {
-    console.log('⚠️ Não foi possível calcular CPA - dados insuficientes ou inválidos');
+    console.log(' Não foi possível calcular CPA - dados insuficientes ou inválidos');
     console.log('Investimento:', investimento, 'Pedidos:', pedidos);
     
     // Mesmo sem cálculo, limpar RCPA
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Markdown é obrigatório" }, { status: 400 });
     }
     
-    console.log('🧪 Testando CPA na rota interna...');
+
     const markdownComCPA = calcularCPA(markdown);
     
     // CPA esperado: R$625,20 ÷ 32 = 19,54

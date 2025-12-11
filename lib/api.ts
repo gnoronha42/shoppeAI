@@ -70,7 +70,7 @@ export const api = createApi({
           const result = await queryFulfilled;
         
         } catch (error: any) {
-          console.error('❌ Erro na query getClients:', error);
+          console.error(' Erro na query getClients:', error);
           if (error && typeof error === 'object' && 'error' in error) {
             console.error('Detalhes do erro:', error.error);
           }
