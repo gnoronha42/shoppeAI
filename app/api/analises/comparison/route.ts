@@ -22,7 +22,6 @@ const prepareAnalysesForComparison = (analysisResults: any[], maxAnalyses: numbe
   // Limitar número de análises para evitar overflow de tokens
   const limitedResults = sortedResults.slice(0, maxAnalyses);
   
-  console.log(`📊 Processando ${limitedResults.length}/${analysisResults.length} análises (limite: ${maxAnalyses})`);
 
   return limitedResults.map((result, index) => {
     try {
@@ -114,11 +113,7 @@ export async function POST(request: NextRequest) {
     
     const { clientId, startDate, endDate, analysisType, maxAnalyses = 50 } = await request.json();
 
-    console.log('🔍 Iniciando busca de análises para comparação');
-    console.log(`📊 Cliente ID: ${clientId}`);
-    console.log(`📅 Período: ${startDate} a ${endDate}`);
-    console.log(`📈 Tipo: ${analysisType}`);
-    console.log(`🔢 Limite máximo: ${maxAnalyses} análises`);
+   
 
     // 1. Buscar INSIGHTS estruturados primeiro (prioridade)
     const insightResults = await prisma.analysis_results.findMany({
@@ -148,7 +143,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log(`💡 Encontrados ${insightResults.length} insights estruturados`);
 
     // 2. Buscar análises completas para complementar
     const fullAnalysisResults = await prisma.analysis_results.findMany({
@@ -178,7 +172,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log(`📋 Encontradas ${fullAnalysisResults.length} análises completas`);
+    console.log(`Encontradas ${fullAnalysisResults.length} análises completas`);
 
     // 3. Combinar resultados, priorizando insights quando disponíveis
     const combinedResults: any[] = [];
@@ -234,7 +228,7 @@ export async function POST(request: NextRequest) {
       const safeLimit = Math.floor(maxTokensAllowed / (estimatedTokens / optimizedAnalyses.length));
       const safeAnalyses = prepareAnalysesForComparison(combinedResults, safeLimit);
       
-      console.log(`🔄 Reduzindo para ${safeLimit} análises por segurança de tokens`);
+      console.log(` Reduzindo para ${safeLimit} análises por segurança de tokens`);
       
              return NextResponse.json({
          error: 'Muitas análises para processar',
@@ -251,11 +245,7 @@ export async function POST(request: NextRequest) {
     const totalOptimizedSize = optimizedAnalyses.reduce((sum, analysis) => sum + (analysis.optimizedLength || 0), 0);
     const optimizedCount = optimizedAnalyses.filter(a => a.isOptimized).length;
 
-    console.log(`🚀 Otimização realizada:`);
-    console.log(`📊 ${optimizedCount}/${optimizedAnalyses.length} análises otimizadas via insights`);
-    console.log(`📉 Redução de tamanho: ${totalOriginalSize} → ${totalOptimizedSize} chars (${Math.round((1 - totalOptimizedSize/totalOriginalSize) * 100)}% reduzido)`);
-    console.log(`🔢 Tokens estimados: ${estimatedTokens} (limite: ${maxTokensAllowed})`);
-
+    
     // 6. Preparar payload para o microserviço
     const requestBody = {
       clientName: client.name,
@@ -266,7 +256,6 @@ export async function POST(request: NextRequest) {
       analyses: optimizedAnalyses
     };
 
-    console.log('🚀 Enviando para microserviço de comparação...');
 
     // 7. Chamar microserviço de comparação
     const microserviceResponse = await fetch('https://analysis-micro.onrender.com/comparison', {
@@ -288,9 +277,6 @@ export async function POST(request: NextRequest) {
 
     const { comparison, metadata } = await microserviceResponse.json();
 
-    // 8. Salvar resultado da comparação
-    console.log('💾 Salvando resultado da comparação...');
-    
     const savedAnalysis = await prisma.analyses.create({
       data: {
         client_id: clientId,
@@ -321,10 +307,10 @@ export async function POST(request: NextRequest) {
           }
         });
       } catch (error) {
-      console.log('⚠️ Não foi possível salvar o report:', error);
+      console.log('Não foi possível salvar o report:', error);
     }
 
-    console.log('✅ Comparação concluída com sucesso');
+    console.log(' Comparação concluída com sucesso');
     
     return NextResponse.json({
       comparison,

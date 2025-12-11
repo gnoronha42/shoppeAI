@@ -1,14 +1,11 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { Client, Report } from '@/types';
 
-// Função para extrair token de cookies
 
-
-// Base API with authentication
 export const api = createApi({
   baseQuery: fetchBaseQuery({ 
     baseUrl: '/api',
-    credentials: 'include', // ✅ Inclui cookies automaticamente (auth_token)
+    credentials: 'include', 
   }),
   tagTypes: ['Clients', 'Reports', 'Analyses'],
   endpoints: (builder) => ({
@@ -26,7 +23,7 @@ export const api = createApi({
       search?: string;
     }>({
       query: (params = { page: 1, pageSize: 10 }) => {
-        console.log('🚀 Fazendo requisição para /api/clientes com params:', params);
+        console.log(' Fazendo requisição para /api/clientes com params:', params);
         const queryParams = new URLSearchParams();
         
         if (params.page) queryParams.append('page', params.page.toString());
@@ -37,10 +34,10 @@ export const api = createApi({
         return `clientes${queryString ? `?${queryString}` : ''}`;
       },
       transformResponse: (response: any) => {
-        console.log('📥 Response bruta from clients API:', response);
+        console.log('Response bruta from clients API:', response);
         
         if (!response) {
-          console.log('⚠️ Response vazia');
+          console.log(' Response vazia');
           return {
             data: [],
             meta: {
@@ -61,7 +58,6 @@ export const api = createApi({
           totalPages: 1
         };
 
-        console.log('✅ Dados transformados:', { dataLength: data.length, meta });
         
         return {
           data,
@@ -72,12 +68,7 @@ export const api = createApi({
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
           const result = await queryFulfilled;
-          console.log('✅ Query getClients bem-sucedida:', {
-            totalClients: result.data.data.length,
-            currentPage: result.data.meta.page,
-            totalPages: result.data.meta.totalPages,
-            totalRegistros: result.data.meta.total
-          });
+        
         } catch (error: any) {
           console.error('❌ Erro na query getClients:', error);
           if (error && typeof error === 'object' && 'error' in error) {
@@ -89,11 +80,9 @@ export const api = createApi({
     
     getClient: builder.query<Client, string>({
       query: (id) => {
-        console.log('🚀 Fazendo requisição para client específico:', id);
         return `clientes/${id}`;
       },
       transformResponse: (response: unknown, _meta, _arg): Client => {
-        console.log('📥 Response from single client API:', response);
         return response as Client;
       },
       providesTags: (_result, _error, id) => [{ type: 'Clients', id }],
@@ -109,7 +98,6 @@ export const api = createApi({
     
     addClient: builder.mutation<Client, Partial<Client>>({
       query: (client) => {
-        console.log('🚀 Criando novo cliente:', client);
         return {
           url: 'clientes',
           method: 'POST',
@@ -120,16 +108,16 @@ export const api = createApi({
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
           const result = await queryFulfilled;
-          console.log('✅ Cliente criado com sucesso:', result.data);
+          console.log(' Cliente criado com sucesso:', result.data);
         } catch (error: any) {
-          console.error('❌ Erro ao criar cliente:', error);
+          console.error(' Erro ao criar cliente:', error);
         }
       },
     }),
     
     updateClient: builder.mutation<Client, Partial<Client> & { id: string }>({
       query: ({ id, ...client }) => {
-        console.log('🚀 Atualizando cliente:', id, client);
+        console.log('Atualizando cliente:', id, client);
         return {
           url: `clientes`,
           method: 'PATCH',
@@ -143,16 +131,16 @@ export const api = createApi({
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
           const result = await queryFulfilled;
-          console.log('✅ Cliente atualizado com sucesso:', result.data);
+          console.log('Cliente atualizado com sucesso:', result.data);
         } catch (error: any) {
-          console.error('❌ Erro ao atualizar cliente:', error);
+          console.error('Erro ao atualizar cliente:', error);
         }
       },
     }),
     
     deleteClient: builder.mutation<void, string>({
       query: (id) => {
-        console.log('🚀 Deletando cliente:', id);
+        console.log(' Deletando cliente:', id);
         return {
           url: `clientes?id=${id}`,
           method: 'DELETE',
@@ -162,9 +150,9 @@ export const api = createApi({
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
           await queryFulfilled;
-          console.log('✅ Cliente deletado com sucesso');
+          console.log(' Cliente deletado com sucesso');
         } catch (error: any) {
-          console.error('❌ Erro ao deletar cliente:', error);
+          console.error(' Erro ao deletar cliente:', error);
         }
       },
     }),
@@ -183,14 +171,14 @@ export const api = createApi({
     
     getClientAnalyses: builder.query({
       query: (clientId) => {
-        console.log("🚀 Fetching analyses for client:", clientId);
+        
         return {
           url: `analises?clientId=${clientId}`,
           method: 'GET',
         };
       },
       transformResponse: (response) => {
-        console.log("📥 Raw response from analyses API:", response);
+        
         if (Array.isArray(response)) {
           return response.map(analysis => ({
             id: analysis.id,

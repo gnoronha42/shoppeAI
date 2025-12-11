@@ -78,7 +78,7 @@ export default function SelleriaPage() {
       }, 300);
 
       try {
-        console.log('👤 Salvando usuário na base de dados...');
+     
         const userResponse = await fetch("/api/analysts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -86,16 +86,16 @@ export default function SelleriaPage() {
         });
         
         const userData = await userResponse.json();
-        console.log('👤 Resposta do cadastro de usuário:', userData);
+      
         
         if (userData.success) {
-          console.log('✅ Usuário salvo com sucesso:', userData.analyst?.name);
-          console.log('📱 Telefone salvo:', userData.analyst?.telefone);
+          console.log(' Usuário salvo com sucesso:', userData.analyst?.name);
+          console.log(' Telefone salvo:', userData.analyst?.telefone);
         } else {
-          console.log('⚠️ Aviso no cadastro de usuário:', userData.message || userData.error);
+          console.log(' Aviso no cadastro de usuário:', userData.message || userData.error);
         }
       } catch (userError) {
-        console.error('❌ Erro ao salvar usuário (continuando com análise):', userError);
+        console.error('Erro ao salvar usuário (continuando com análise):', userError);
       }
       
       const res = await fetch("https://analysis-micro.onrender.com/api/whatsapp-express", {
@@ -112,24 +112,23 @@ export default function SelleriaPage() {
         const relatorioCompleto = data.preview || data.relatorio || data.analise;
         
         if (relatorioCompleto) {
-          console.log('✅ Análise gerada com sucesso!');
-          console.log('📄 Tamanho da análise:', relatorioCompleto.length, 'caracteres');
+          console.log(' Análise gerada com sucesso!');
+  
           
           try {
             localStorage.setItem('relatorio', relatorioCompleto);
             sessionStorage.setItem('relatorio', relatorioCompleto);
             localStorage.setItem('relatorio_timestamp', Date.now().toString());
             
-            console.log('💾 Análise salva no storage');
-            console.log('🚀 Redirecionando para página de obrigado...');
+           
             
             window.location.href = '/obrigado';
           } catch (error) {
-            console.error('❌ Erro ao processar análise:', error);
+            console.error('Erro ao processar análise:', error);
             setError('Erro ao processar análise. Tente novamente.');
           }
         } else {
-          console.error('❌ Nenhuma análise encontrada na resposta');
+          console.error('Nenhuma análise encontrada na resposta');
           setError('Erro: Análise não foi gerada. Tente novamente.');
         }
         setForm({

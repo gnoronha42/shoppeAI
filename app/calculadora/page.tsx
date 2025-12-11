@@ -299,7 +299,7 @@ export default function CalculadoraPage() {
           margemRealPct: margemRealPct,
           comissaoR: com_R,
           impostosR: imp_R,
-          cpaRealR: cpaRealR,
+          cpaRealR: cpaRealR, 
           cpaPct: cpa_pct_calculado,
           roasReal: roasRealAtual,
           receitaTotal,

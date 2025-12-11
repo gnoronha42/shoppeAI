@@ -19,22 +19,22 @@ export async function getValidAccessToken(integration: any) {
 
   if (shouldRefresh) {
     try {
-      console.log(`🔄 [shopee-stats] Token expirado/expirando, renovando...`);
+      console.log(` [shopee-stats] Token expirado/expirando, renovando...`);
       const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token });
       
       const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
       
-      // ✅ CRÍTICO: Sempre salva o novo refresh_token (Shopee retorna novo a cada refresh)
+      
       const updatedIntegration = await prisma.client_integrations.update({
         where: { id: integration.id },
         data: {
           access_token: refreshed.access_token,
-          refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza (nunca mantém o antigo)
+          refresh_token: refreshed.refresh_token, 
           token_expiry: newExpiry,
           updated_at: new Date(),
         },
       });
-      console.log(`✅ [shopee-stats] Token atualizado com sucesso.`);
+      console.log(` [shopee-stats] Token atualizado com sucesso.`);
       return updatedIntegration;
     } catch (e: any) {
       console.error('❌ [shopee-stats] Falha ao refrescar token:', e?.message || e);
@@ -45,7 +45,7 @@ export async function getValidAccessToken(integration: any) {
     }
   }
   
-  // Se não precisa refresh, verifica se o token ainda é válido
+  
   if (!integration.access_token) {
     if (integration.refresh_token) {
       try {
@@ -55,7 +55,7 @@ export async function getValidAccessToken(integration: any) {
           where: { id: integration.id },
           data: {
             access_token: refreshed.access_token,
-            refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza
+            refresh_token: refreshed.refresh_token, 
             token_expiry: newExpiry,
             updated_at: new Date(),
           },
@@ -90,7 +90,7 @@ export async function forceRefreshTokens(integration: any) {
     });
     return updated;
   } catch (e) {
-    console.error('❌ Refresh forçado falhou:', (e as any)?.message || e);
+    console.error('Refresh forçado falhou:', (e as any)?.message || e);
     return null;
   }
 }

@@ -5,27 +5,27 @@ import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
 export const dynamic = 'force-dynamic';
 
 /**
- * 🔄 HELPER ROBUSTO PARA GERENCIAR TOKENS SHOPEE
+ * HELPER ROBUSTO PARA GERENCIAR TOKENS SHOPEE
  * 
  * Problemas corrigidos:
- * 1. ✅ Sempre atualiza refresh_token quando recebido (Shopee retorna novo a cada refresh)
- * 2. ✅ Buffer reduzido para 30 minutos (evita refreshes desnecessários)
- * 3. ✅ Tratamento específico para refresh_token expirado
- * 4. ✅ Logs detalhados para debug
+ * 1. Sempre atualiza refresh_token quando recebido (Shopee retorna novo a cada refresh)
+ * 2. Buffer reduzido para 30 minutos (evita refreshes desnecessários)
+ * 3. Tratamento específico para refresh_token expirado
+ * 4. Logs detalhados para debug
  */
 async function getValidAccessToken(integration: any) {
   const now = new Date();
   const expiry = integration.token_expiry ? new Date(integration.token_expiry) : null;
   const expiryValid = !!expiry && !isNaN(expiry.getTime());
   
-  // ✅ Buffer reduzido: 30 minutos (1800s) em vez de 1 hora
+  // Buffer reduzido: 30 minutos (1800s) em vez de 1 hora
   // Access tokens Shopee geralmente expiram em 4 horas, então renovar 30min antes é suficiente
   const bufferSeconds = 1800; // 30 minutos
   
   const remainingSeconds = expiryValid && expiry ? Math.floor((expiry.getTime() - now.getTime()) / 1000) : 0;
   const remainingHours = remainingSeconds > 0 ? Math.round(remainingSeconds / 3600) : 0;
   
-  console.log(`🔍 [getValidAccessToken] Verificando token para shop ${integration.shop_id}:`, {
+  console.log(`[getValidAccessToken] Verificando token para shop ${integration.shop_id}:`, {
     token_expiry: integration.token_expiry,
     remaining_seconds: remainingSeconds,
     remaining_hours: remainingHours,
@@ -44,11 +44,11 @@ async function getValidAccessToken(integration: any) {
 
   if (shouldRefresh) {
     try {
-      console.log(`🔄 [getValidAccessToken] Token expirado/expirando, renovando...`);
+      console.log(`[getValidAccessToken] Token expirado/expirando, renovando...`);
       
       const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token });
       
-      console.log(`📅 [getValidAccessToken] Novo token recebido:`, {
+      console.log(`[getValidAccessToken] Novo token recebido:`, {
         expire_in_seconds: refreshed.expire_in,
         expire_in_hours: refreshed.expire_in ? Math.round(refreshed.expire_in / 3600) : 'N/A',
         expire_in_days: refreshed.expire_in ? Math.round(refreshed.expire_in / (3600 * 24)) : 'N/A',
@@ -58,32 +58,32 @@ async function getValidAccessToken(integration: any) {
       
       const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
       
-      // ✅ CRÍTICO: Sempre salva o novo refresh_token (Shopee retorna novo a cada refresh)
+      // Sempre salva o novo refresh_token (Shopee retorna novo a cada refresh)
       // Se não atualizarmos, o refresh_token antigo pode expirar e perderemos a conexão
       const updatedIntegration = await prisma.client_integrations.update({
         where: { id: integration.id },
         data: {
           access_token: refreshed.access_token,
-          // ✅ SEMPRE usa o novo refresh_token (nunca mantém o antigo)
-          refresh_token: refreshed.refresh_token, // Removido o fallback ?? integration.refresh_token
+          // Sempre usa o novo refresh_token (nunca mantém o antigo)
+          refresh_token: refreshed.refresh_token,
           token_expiry: newExpiry,
           updated_at: new Date(),
         },
       });
       
-      console.log(`✅ [getValidAccessToken] Token atualizado com sucesso. Nova expiração: ${newExpiry.toISOString()}`);
+      console.log(`[getValidAccessToken] Token atualizado com sucesso. Nova expiração: ${newExpiry.toISOString()}`);
       return updatedIntegration;
       
     } catch (e: any) {
-      console.error('❌ [getValidAccessToken] Falha ao refrescar token:', {
+      console.error('[getValidAccessToken] Falha ao refrescar token:', {
         error: e?.message || e,
         code: e?.code,
         status: e?.status
       });
       
-      // ✅ Detecta se o refresh_token expirou (após ~30 dias)
+      // Detecta se o refresh_token expirou (após ~30 dias)
       if (e?.code === 'REFRESH_TOKEN_EXPIRED' || e?.message?.includes('expired') || e?.message?.includes('invalid')) {
-        console.error('🚨 [getValidAccessToken] Refresh token expirado - reautenticação necessária');
+        console.error('[getValidAccessToken] Refresh token expirado - reautenticação necessária');
         throw Object.assign(new Error('Refresh token expirado - reautenticação necessária'), { 
           code: 'REFRESH_TOKEN_EXPIRED' 
         });
@@ -97,7 +97,7 @@ async function getValidAccessToken(integration: any) {
   if (!integration.access_token) {
     // Se não tem access_token mas tem refresh_token, tenta usar o refresh_token
     if (integration.refresh_token) {
-      console.log(`🔄 [getValidAccessToken] Access token ausente, tentando renovar com refresh_token...`);
+      console.log(`[getValidAccessToken] Access token ausente, tentando renovar com refresh_token...`);
       try {
         const refreshed = await refreshAccessToken({ refresh_token: integration.refresh_token });
         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
@@ -105,7 +105,7 @@ async function getValidAccessToken(integration: any) {
           where: { id: integration.id },
           data: {
             access_token: refreshed.access_token,
-            refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza
+            refresh_token: refreshed.refresh_token,
             token_expiry: newExpiry,
             updated_at: new Date(),
           },
@@ -118,7 +118,7 @@ async function getValidAccessToken(integration: any) {
     throw Object.assign(new Error('Access token ausente'), { code: 'RECONNECT_REQUIRED' });
   }
   
-  console.log(`✅ [getValidAccessToken] Token válido por mais ${remainingHours} horas`);
+  console.log(`[getValidAccessToken] Token válido por mais ${remainingHours} horas`);
   return integration;
 }
 
@@ -149,7 +149,7 @@ export async function GET(request: Request) {
           customPeriodDays = Math.ceil((customTimeTo - customTimeFrom) / (24 * 60 * 60));
         }
       } catch (e) {
-        console.warn('⚠️ Erro ao processar datas personalizadas:', e);
+        console.warn('[GET /api/shopee/data] Erro ao processar datas personalizadas:', e);
       }
     }
 
@@ -161,7 +161,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Integração Shopee não encontrada para este cliente' }, { status: 404 });
     }
 
-    // ✅ Garante token válido ANTES de qualquer chamada à API
+    // Garante token válido ANTES de qualquer chamada à API
     try {
     integration = await getValidAccessToken(integration);
     } catch (e: any) {
@@ -184,26 +184,26 @@ export async function GET(request: Request) {
     // Helper para refresh forçado em caso de 403 invalid_access_token
     const forceRefreshTokens = async () => {
       if (!refresh_token) {
-         console.log('⚠️ [forceRefreshTokens] Não é possível fazer refresh: refresh_token ausente');
+         console.log('[forceRefreshTokens] Não é possível fazer refresh: refresh_token ausente');
         return null;
       }
       try {
-         console.log('🔄 [forceRefreshTokens] Executando refresh forçado...');
+         console.log('[forceRefreshTokens] Executando refresh forçado...');
         const refreshed = await refreshAccessToken({ refresh_token });
         const newExpiry = new Date(Date.now() + (refreshed.expire_in ?? 0) * 1000);
         const updated = await prisma.client_integrations.update({
           where: { id: integrationId },
           data: {
             access_token: refreshed.access_token,
-             refresh_token: refreshed.refresh_token, // ✅ Sempre atualiza
+             refresh_token: refreshed.refresh_token,
             token_expiry: newExpiry,
             updated_at: new Date(),
           },
         });
-         console.log(`✅ [forceRefreshTokens] Refresh forçado concluído. Nova expiração: ${newExpiry.toISOString()}`);
+         console.log(`[forceRefreshTokens] Refresh forçado concluído. Nova expiração: ${newExpiry.toISOString()}`);
         return updated;
        } catch (e: any) {
-         console.error('❌ [forceRefreshTokens] Falha:', e?.message || e);
+         console.error('[forceRefreshTokens] Falha:', e?.message || e);
          if (e?.code === 'REFRESH_TOKEN_EXPIRED') {
            throw Object.assign(new Error('Refresh token expirado'), { code: 'REFRESH_TOKEN_EXPIRED' });
          }
@@ -222,12 +222,12 @@ export async function GET(request: Request) {
         shop_id,
       });
       
-      // ✅ CORREÇÃO: A API retorna dados diretamente, não em response.campo
+      // A API retorna dados diretamente, não em response.campo
       if (shopInfo && !shopInfo.response && shopInfo.shop_name) {
         shopInfo = { response: shopInfo };
       }
 
-      // ✅ CORREÇÃO: Testar endpoint correto de produtos
+      // Testar endpoint correto de produtos
       try {
         productInfo = await shopeeFetch<any>({
           path: '/api/v2/product/get_item_list',
@@ -236,17 +236,17 @@ export async function GET(request: Request) {
           query: { offset: 0, page_size: 50, item_status: 'NORMAL' }
         });
       } catch (productError: any) {
-        console.warn('⚠️ Endpoint get_item_list falhou:', productError?.message);
+        console.warn('[GET /api/shopee/data] Endpoint get_item_list falhou:', productError?.message);
         // Se falhar, definir resposta vazia
         productInfo = { response: { item: [], total_count: 0 } };
       }
     } catch (e: any) {
        if (e?.message?.includes('invalid_access_token') || e?.message?.includes('403')) {
-          console.log('🔄 [GET] Token inválido detectado, tentando refresh forçado...');
+          console.log('[GET] Token inválido detectado, tentando refresh forçado...');
         const updated = await forceRefreshTokens();
         if (!updated) {
-            // ✅ FALLBACK GRACIOSO: Retornar dados vazios em vez de erro 401
-            console.log('⚠️ [GET] Refresh falhou, retornando dados vazios para manter UX');
+            // FALLBACK GRACIOSO: Retornar dados vazios em vez de erro 401
+            console.log('[GET] Refresh falhou, retornando dados vazios para manter UX');
             return NextResponse.json({
               success: false,
               error: 'Token expirado - dados indisponíveis',
@@ -284,7 +284,7 @@ export async function GET(request: Request) {
               },
               needs_reconnection: true,
               message: 'Dados indisponíveis devido a token expirado. Clique em "Reconectar" na página de integrações.'
-            }, { status: 200 }); // ✅ 200 para não quebrar o frontend
+            }, { status: 200 });
         }
           // Retry com novo token
           integration = updated;
@@ -300,23 +300,23 @@ export async function GET(request: Request) {
 
     // 2. Pedidos e GMV - MELHORADO: Incluir pedidos pagos e comparativo
     const timeTo = customTimeTo || Math.floor(Date.now() / 1000);
-    const maxDays = 15; // ✅ Limite da Shopee
-    const requestedDays = customPeriodDays || 15; // Reduzido de 30 para 15
+    const maxDays = 15;
+    const requestedDays = customPeriodDays || 15;
     const periodDays = Math.min(requestedDays, maxDays);
     const timeFrom = customTimeFrom || (timeTo - periodDays * 24 * 60 * 60);
     
-    // ✅ NOVO: Calcular período anterior para comparativo
+    // Calcular período anterior para comparativo
     const previousPeriodDuration = timeTo - timeFrom;
     const previousTimeFrom = timeFrom - previousPeriodDuration;
     const previousTimeTo = timeFrom;
     
     if (requestedDays > maxDays) {
-      console.warn(`⚠️ Período solicitado (${requestedDays} dias) reduzido para ${maxDays} dias (limite da Shopee)`);
+      console.warn(`[GET /api/shopee/data] Período solicitado (${requestedDays} dias) reduzido para ${maxDays} dias (limite da Shopee)`);
     }
     
-    // ✅ CORREÇÃO 1: Validar que time_from < time_to
+    // Validar que time_from < time_to
     if (timeFrom >= timeTo) {
-      console.error('❌ [GET /api/shopee/data] Erro: time_from >= time_to', {
+      console.error('[GET /api/shopee/data] Erro: time_from >= time_to', {
               time_from: timeFrom,
               time_to: timeTo,
         time_from_date: new Date(timeFrom * 1000).toISOString(),
@@ -327,7 +327,7 @@ export async function GET(request: Request) {
       }, { status: 400 });
     }
     
-    // ✅ CORREÇÃO 2: Função para dividir intervalo em blocos de 15 dias
+    // Função para dividir intervalo em blocos de 15 dias
     const createDateBlocks = (startTime: number, endTime: number, maxDays: number = 15): Array<{from: number, to: number, days: number}> => {
       const blocks: Array<{from: number, to: number, days: number}> = [];
       const maxSeconds = maxDays * 24 * 60 * 60;
@@ -346,7 +346,7 @@ export async function GET(request: Request) {
         currentStart = currentEnd;
       }
       
-      console.log(`📅 [createDateBlocks] Dividindo período em ${blocks.length} blocos:`, 
+      console.log(`[createDateBlocks] Dividindo período em ${blocks.length} blocos:`, 
         blocks.map(b => ({
           from: new Date(b.from * 1000).toISOString(),
           to: new Date(b.to * 1000).toISOString(),
@@ -357,15 +357,15 @@ export async function GET(request: Request) {
       return blocks;
     };
     
-    // ✅ CORREÇÃO 3: Buscar pedidos em blocos sequenciais COM PAGINAÇÃO
+    // Buscar pedidos em blocos sequenciais COM PAGINAÇÃO
     const fetchOrdersInBlocks = async (accessToken: string, shopId: string): Promise<any[]> => {
       const dateBlocks = createDateBlocks(timeFrom, timeTo, 15);
       const allOrders: any[] = [];
-      const orderSnSet = new Set<string>(); // ✅ CORREÇÃO 5: Deduplicação
+      const orderSnSet = new Set<string>();
       const timeFields = ['create_time', 'update_time'];
       
       for (const block of dateBlocks) {
-        console.log(`🔍 [fetchOrdersInBlocks] Buscando pedidos no bloco:`, {
+        console.log(`[fetchOrdersInBlocks] Buscando pedidos no bloco:`, {
           from: new Date(block.from * 1000).toISOString(),
           to: new Date(block.to * 1000).toISOString(),
           days: block.days
@@ -375,7 +375,7 @@ export async function GET(request: Request) {
         
         for (const timeField of timeFields) {
           try {
-            console.log(`📡 [fetchOrdersInBlocks] Tentando ${timeField} para bloco de ${block.days} dias...`);
+            console.log(`[fetchOrdersInBlocks] Tentando ${timeField} para bloco de ${block.days} dias...`);
             
             let cursor = "";
             let hasMore = true;
@@ -407,20 +407,19 @@ export async function GET(request: Request) {
               cursor = responseData?.next_cursor;
               hasMore = responseData?.more === true;
 
-              console.log(`   📄 Página ${pageCount}: ${pageOrders.length} pedidos (More: ${hasMore})`);
+              console.log(`   [fetchOrdersInBlocks] Página ${pageCount}: ${pageOrders.length} pedidos (More: ${hasMore})`);
               
               if (pageCount > 50) break; // Proteção contra loop infinito
             }
             
-            console.log(`📊 [fetchOrdersInBlocks] ${timeField} (${block.days}d): ${fieldOrders.length} pedidos encontrados no total`);
+            console.log(`[fetchOrdersInBlocks] ${timeField} (${block.days}d): ${fieldOrders.length} pedidos encontrados no total`);
             
             if (fieldOrders.length > 0) {
               blockOrders = fieldOrders;
-              break; // Para no primeiro time_field que retornar dados
+              break;
             }
     } catch (e: any) {
-            console.error(`❌ [fetchOrdersInBlocks] Erro ${timeField} (${block.days}d):`, e?.message);
-            // Retry simplificado se necessário
+            console.error(`[fetchOrdersInBlocks] Erro ${timeField} (${block.days}d):`, e?.message);
           }
         }
         
@@ -432,7 +431,7 @@ export async function GET(request: Request) {
           }
         }
         
-        console.log(`✅ [fetchOrdersInBlocks] Bloco processado: ${blockOrders.length} pedidos encontrados`);
+        console.log(`[fetchOrdersInBlocks] Bloco processado: ${blockOrders.length} pedidos encontrados`);
       }
       return allOrders;
     };
@@ -442,12 +441,11 @@ export async function GET(request: Request) {
     try {
       orderList = await fetchOrdersInBlocks((integration as any).access_token, (integration as any).shop_id);
     } catch (e: any) {
-      console.error('❌ [GET /api/shopee/data] Erro ao buscar pedidos em blocos:', e?.message);
-      // Continua com lista vazia se falhar
+      console.error('[GET /api/shopee/data] Erro ao buscar pedidos em blocos:', e?.message);
     }
 
     let gmv = 0;
-    // ✅ MELHORADO: Processar pedidos com separação entre totais e pagos
+    // Processar pedidos com separação entre totais e pagos
     let totalOrders = 0;
     let totalPaidOrders = 0;
     let totalCancelledOrders = 0;
@@ -488,7 +486,7 @@ export async function GET(request: Request) {
                     // Contabilizar GMV total
                     gmv += orderAmount;
                     
-                    // ✅ NOVO: Separar por status de pagamento
+                    // Separar por status de pagamento
                     if (PAID_STATUSES.includes(orderStatus)) {
                         totalPaidOrders++;
                         gmvPaid += orderAmount;
@@ -517,8 +515,8 @@ export async function GET(request: Request) {
         }
     }
 
-    // ✅ NOVO: Buscar dados do período anterior para comparativo
-    console.log('📊 [COMPARATIVO] Buscando dados do período anterior...');
+    // Buscar dados do período anterior para comparativo
+    console.log('[COMPARATIVO] Buscando dados do período anterior...');
     let previousPeriodData = {
         totalOrders: 0,
         totalPaidOrders: 0,
@@ -577,15 +575,15 @@ export async function GET(request: Request) {
                             }
                         }
                     } catch (e: any) {
-                        console.warn('⚠️ [COMPARATIVO] Erro ao buscar detalhes do período anterior:', e.message);
+                        console.warn('[COMPARATIVO] Erro ao buscar detalhes do período anterior:', e.message);
                     }
                 }
             }
         }
         
-        console.log('✅ [COMPARATIVO] Dados do período anterior obtidos:', previousPeriodData);
+        console.log('[COMPARATIVO] Dados do período anterior obtidos:', previousPeriodData);
     } catch (e: any) {
-        console.warn('⚠️ [COMPARATIVO] Erro ao buscar período anterior:', e.message);
+        console.warn('[COMPARATIVO] Erro ao buscar período anterior:', e.message);
     }
 
     // 3. Performance (Insights) - Visitantes e Conversão
@@ -593,8 +591,8 @@ export async function GET(request: Request) {
     let conversionRate = 0;
     let pageViews = 0;
     
-    // ✅ CORREÇÃO: APIs de analytics não existem na Shopee V2
-    console.log('ℹ️ [Analytics] APIs de visitantes/conversão não disponíveis na Shopee Open Platform V2');
+    // APIs de analytics não existem na Shopee V2
+    console.log('[Analytics] APIs de visitantes/conversão não disponíveis na Shopee Open Platform V2');
     
     // Retornar 0 para todas as métricas de tráfego (dados não disponíveis)
     visitors = 0;
@@ -608,8 +606,8 @@ export async function GET(request: Request) {
     let adsClicks = 0;
     let adsCtr = 0;
     
-    // ✅ CORREÇÃO: API de ads não existe na Shopee Open Platform V2
-    console.log('ℹ️ [Ads] API de publicidade não disponível na Shopee Open Platform V2');
+    // API de ads não existe na Shopee Open Platform V2
+    console.log('[Ads] API de publicidade não disponível na Shopee Open Platform V2');
     
     // Retornar 0 para todas as métricas de ads (dados não disponíveis)
     adsSpend = 0;
@@ -661,7 +659,7 @@ export async function GET(request: Request) {
     });
 
   } catch (err: any) {
-    console.error('❌ [GET /api/shopee/data] Erro:', err);
+    console.error('[GET /api/shopee/data] Erro:', err);
     if (err?.code === 'REFRESH_TOKEN_EXPIRED') {
       return NextResponse.json({ 
         error: 'Refresh token expirado - reautenticação necessária', 

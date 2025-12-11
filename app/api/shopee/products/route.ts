@@ -22,7 +22,7 @@ async function getValidAccessToken(integration: ShopeeIntegration) {
   const isExpired = expiryValid && expiry!.getTime() < now.getTime();
   const nearExpiry = expiryValid && expiry!.getTime() - now.getTime() < bufferSeconds * 1000;
 
-  console.log(`🔍 [Products] Verificando token para shop ${integration.shop_id}:`, {
+  console.log(` [Products] Verificando token para shop ${integration.shop_id}:`, {
     expires_in_hours: expiryValid ? Math.round((expiry!.getTime() - now.getTime()) / (1000 * 60 * 60)) : 'N/A',
     is_expired: isExpired,
     near_expiry: nearExpiry,

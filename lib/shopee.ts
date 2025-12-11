@@ -120,18 +120,7 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
   });
   
   const url = `${SHOPEE_BASE_URL}${path}?${queryParams.toString()}`;
-  
-  console.log(`🔄 [refreshAccessToken] Request (CORRIGIDO):`, {
-    path,
-    timestamp,
-    refresh_token_preview: args.refresh_token?.slice(0, 8) + '...' + args.refresh_token?.slice(-4),
-    refresh_token_length: args.refresh_token?.length || 0,
-    shop_id: args.shop_id,
-    baseString_corrected: baseString, // ✅ Sem refresh_token na assinatura
-    sign_preview: sign.slice(0, 16) + '...',
-    partner_id: SHOPEE_PARTNER_ID,
-    url: url.replace(sign, '***SIGN***') // Ocultar sign no log
-  });
+
   
   // ✅ CORREÇÃO: Payload conforme documentação oficial - SEM timestamp e sign
   const payload: any = {
@@ -189,15 +178,7 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
   
   const data = await res.json();
   
-  console.log(`✅ [refreshAccessToken] Sucesso:`, {
-    has_access_token: !!data?.access_token,
-    has_refresh_token: !!data?.refresh_token,
-    expire_in_seconds: data?.expire_in,
-    expire_in_hours: data?.expire_in ? Math.round(data.expire_in / 3600) : 'N/A',
-    expire_in_days: data?.expire_in ? Math.round(data.expire_in / (3600 * 24)) : 'N/A',
-    // Log para confirmar que recebemos novo refresh_token
-    refresh_token_changed: data?.refresh_token && data.refresh_token !== args.refresh_token
-  });
+
   
   return data as {
     access_token: string;
@@ -255,23 +236,23 @@ export async function shopeeFetch<T = unknown>(args: {
   };
   
   console.log('\n' + '='.repeat(80));
-  console.log('📡 [shopeeFetch] REQUEST COMPLETA PARA SHOPEE API');
+  console.log(' [shopeeFetch] REQUEST COMPLETA PARA SHOPEE API');
   console.log('='.repeat(80));
-  console.log('🔗 Endpoint:', requestDetails.endpoint);
-  console.log('📋 Method:', requestDetails.method);
-  console.log('🏪 Shop ID:', requestDetails.shop_id);
-  console.log('📅 Timestamp:', requestDetails.timestamp);
+  console.log(' Endpoint:', requestDetails.endpoint);
+  console.log(' Method:', requestDetails.method);
+  console.log('Shop ID:', requestDetails.shop_id);
+  console.log(' Timestamp:', requestDetails.timestamp);
   if (requestDetails.date_range) {
-    console.log('📆 Intervalo de Datas:');
+    console.log('Intervalo de Datas:');
     console.log('   From:', requestDetails.date_range.from);
     console.log('   To:', requestDetails.date_range.to);
     console.log('   Days:', requestDetails.date_range.days);
   }
-  console.log('🔑 Query Params:', JSON.stringify(requestDetails.query_params, null, 2));
+  console.log(' Query Params:', JSON.stringify(requestDetails.query_params, null, 2));
   if (requestBody) {
-    console.log('📦 Body:', JSON.stringify(JSON.parse(requestBody), null, 2));
+    console.log(' Body:', JSON.stringify(JSON.parse(requestBody), null, 2));
   }
-  console.log('🌐 Full URL:', requestDetails.full_url);
+  console.log('Full URL:', requestDetails.full_url);
   console.log('='.repeat(80) + '\n');
   
   const res = await fetch(url, {
@@ -290,12 +271,12 @@ export async function shopeeFetch<T = unknown>(args: {
   
   // 📋 LOG COMPLETO DA RESPONSE
   console.log('\n' + '='.repeat(80));
-  console.log('📥 [shopeeFetch] RESPONSE DA SHOPEE API');
+  console.log(' [shopeeFetch] RESPONSE DA SHOPEE API');
   console.log('='.repeat(80));
-  console.log('🔗 Endpoint:', requestDetails.endpoint);
-  console.log('📊 Status:', res.status, res.statusText);
-  console.log('📦 Response Body:', JSON.stringify(responseData, null, 2));
-  console.log('📏 Response Size:', responseText.length, 'bytes');
+  console.log(' Endpoint:', requestDetails.endpoint);
+  console.log('Status:', res.status, res.statusText);
+  console.log(' Response Body:', JSON.stringify(responseData, null, 2));
+  console.log(' Response Size:', responseText.length, 'bytes');
   console.log('='.repeat(80) + '\n');
   
   if (!res.ok) {

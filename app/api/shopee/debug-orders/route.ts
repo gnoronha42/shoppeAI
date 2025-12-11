@@ -67,15 +67,7 @@ export async function GET(request: Request) {
     const timeFrom = Math.floor(dateFrom.getTime() / 1000);
     const timeTo = Math.floor(dateTo.getTime() / 1000);
 
-    console.log('🔍 [DEBUG-ORDERS] Parâmetros:', {
-      dateFromParam,
-      dateToParam,
-      timeFrom,
-      timeTo,
-      timeFromDate: new Date(timeFrom * 1000).toISOString(),
-      timeToDate: new Date(timeTo * 1000).toISOString()
-    });
-
+ 
     const debugResults: any = {
       parameters: {
         client_id: clientId,
@@ -92,7 +84,7 @@ export async function GET(request: Request) {
 
     // Teste 1: Buscar com create_time
     try {
-      console.log('🧪 [DEBUG-ORDERS] Teste 1: create_time');
+   ;
       const createTimeResp = await shopeeFetch<any>({
         path: '/api/v2/order/get_order_list',
         access_token,
@@ -125,7 +117,7 @@ export async function GET(request: Request) {
 
     // Teste 2: Buscar com update_time
     try {
-      console.log('🧪 [DEBUG-ORDERS] Teste 2: update_time');
+    
       const updateTimeResp = await shopeeFetch<any>({
         path: '/api/v2/order/get_order_list',
         access_token,
@@ -161,7 +153,7 @@ export async function GET(request: Request) {
     const now = Math.floor(Date.now() / 1000);
 
     try {
-      console.log('🧪 [DEBUG-ORDERS] Teste 3: últimos 30 dias');
+      
       const wideRangeResp = await shopeeFetch<any>({
         path: '/api/v2/order/get_order_list',
         access_token,
@@ -196,7 +188,7 @@ export async function GET(request: Request) {
 
     // Teste 4: Sem response_optional_fields
     try {
-      console.log('🧪 [DEBUG-ORDERS] Teste 4: sem response_optional_fields');
+      console.log(' [DEBUG-ORDERS] Teste 4: sem response_optional_fields');
       const basicResp = await shopeeFetch<any>({
         path: '/api/v2/order/get_order_list',
         access_token,
@@ -229,7 +221,7 @@ export async function GET(request: Request) {
     
     for (const status of orderStatuses) {
       try {
-        console.log(`🧪 [DEBUG-ORDERS] Teste 5: order_status=${status}`);
+        console.log(` [DEBUG-ORDERS] Teste 5: order_status=${status}`);
         const statusResp = await shopeeFetch<any>({
           path: '/api/v2/order/get_order_list',
           access_token,

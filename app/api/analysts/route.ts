@@ -3,16 +3,15 @@ import prisma from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    console.log('📝 Iniciando criação de analista...');
+    
     
     const body = await request.json();
-    console.log('📊 Dados recebidos:', JSON.stringify(body, null, 2));
     
     const { nome, email, telefone } = body;
     
     // Validações básicas
     if (!nome || !email) {
-      console.log('❌ Dados obrigatórios faltando');
+      console.log(' Dados obrigatórios faltando');
       return NextResponse.json(
         { error: "Nome e email são obrigatórios." },
         { status: 400 }
@@ -25,7 +24,7 @@ export async function POST(request: Request) {
     });
     
     if (existingAnalyst) {
-      console.log('⚠️ Analista já existe:', email);
+      console.log(' Analista já existe:', email);
       return NextResponse.json({
         success: true,
         message: "Analista já cadastrado",
@@ -42,7 +41,7 @@ export async function POST(request: Request) {
     // Usar o telefone no campo password (adaptação do schema existente)
     const telefoneFormatado = telefone ? telefone.replace(/\D/g, '') : '';
     
-    console.log('📱 Salvando telefone para:', email, '- Telefone:', telefoneFormatado);
+  
     
     // Criar novo analista
     const newAnalyst = await prisma.analysts.create({
@@ -55,7 +54,7 @@ export async function POST(request: Request) {
       }
     });
     
-    console.log('✅ Analista criado com sucesso:', newAnalyst.id);
+    console.log('Analista criado com sucesso:', newAnalyst.id);
     
     return NextResponse.json({
       success: true,
@@ -115,7 +114,7 @@ export async function GET() {
       analyses_count: analyst.analyses_count
     }));
     
-    console.log(`✅ ${analysts.length} analistas encontrados`);
+    console.log(` ${analysts.length} analistas encontrados`);
     
     return NextResponse.json({
       success: true,

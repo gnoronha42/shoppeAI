@@ -85,15 +85,14 @@ export async function validatePermissions(
     const token = authHeader?.replace('Bearer ', '') || request.headers.get('cookie')?.split('token=')[1]?.split(';')[0];
     
     if (!token) {
-      console.log('❌ Token não encontrado');
-      return { error: 'Token de acesso não fornecido', status: 401 };
+       return { error: 'Token de acesso não fornecido', status: 401 };
     }
 
     console.log('Token extraído: presente');
 
     // Verificar e decodificar o token
     const decoded = verify(token, JWT_SECRET) as { userId: string };
-    console.log('✅ Token JWT válido para usuário:', decoded.userId);
+    console.log(' Token JWT válido para usuário:', decoded.userId);
 
     // Buscar usuário no banco
     const user = await prisma.users.findUnique({
@@ -108,15 +107,10 @@ export async function validatePermissions(
     });
 
     if (!user) {
-      console.log('❌ Usuário não encontrado');
+      console.log(' Usuário não encontrado');
       return { error: 'Usuário não encontrado', status: 404 };
     }
 
-    console.log('✅ Usuário encontrado:', {
-      id: user.id,
-      email: user.email,
-      role: user.role
-    });
 
     // Obter permissões do usuário (do banco ou padrão do role)
     let userPermissions: string[] = [];
@@ -138,7 +132,7 @@ export async function validatePermissions(
     );
 
     if (!hasAllPermissions) {
-      console.log('❌ Permissões insuficientes');
+      console.log('Permissões insuficientes');
       console.log('Necessárias:', requiredPermissions);
       console.log('Usuário possui:', userPermissions);
       return { 
@@ -147,7 +141,7 @@ export async function validatePermissions(
       };
     }
 
-    console.log('✅ Permissões validadas com sucesso');
+    console.log(' Permissões validadas com sucesso');
 
     return {
       user: {

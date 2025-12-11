@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const SHOPEE_PARTNER_KEY = process.env.SHOPEE_PARTNER_KEY || '';
     const SHOPEE_BASE_URL = process.env.SHOPEE_BASE_URL || '';
     
-    console.log('🔍 [DEBUG-SIGNATURE] Configurações:');
+    console.log(' [DEBUG-SIGNATURE] Configurações:');
     console.log(`   Partner ID: ${SHOPEE_PARTNER_ID}`);
     console.log(`   Partner Key: ${SHOPEE_PARTNER_KEY.substring(0, 10)}...`);
     console.log(`   Base URL: ${SHOPEE_BASE_URL}`);
@@ -21,30 +21,21 @@ export async function GET(request: Request) {
     const authBaseString = `${SHOPEE_PARTNER_ID}${authPath}${testTimestamp}`;
     const authSign = crypto.createHmac('sha256', SHOPEE_PARTNER_KEY).update(authBaseString).digest('hex');
     
-    console.log('🔐 [DEBUG-SIGNATURE] Auth Partner:');
-    console.log(`   Path: ${authPath}`);
-    console.log(`   Base String: ${authBaseString}`);
-    console.log(`   Signature: ${authSign}`);
+   
     
     // Teste 2: Assinatura para token/get
     const tokenPath = '/api/v2/auth/token/get';
     const tokenBaseString = `${SHOPEE_PARTNER_ID}${tokenPath}${testTimestamp}`;
     const tokenSign = crypto.createHmac('sha256', SHOPEE_PARTNER_KEY).update(tokenBaseString).digest('hex');
     
-    console.log('🔐 [DEBUG-SIGNATURE] Token Get:');
-    console.log(`   Path: ${tokenPath}`);
-    console.log(`   Base String: ${tokenBaseString}`);
-    console.log(`   Signature: ${tokenSign}`);
+ 
     
     // Teste 3: Assinatura para endpoint público
     const publicPath = '/api/v2/public/get_shops_by_partner';
     const publicBaseString = `${SHOPEE_PARTNER_ID}${publicPath}${testTimestamp}`;
     const publicSign = crypto.createHmac('sha256', SHOPEE_PARTNER_KEY).update(publicBaseString).digest('hex');
     
-    console.log('🔐 [DEBUG-SIGNATURE] Public Endpoint:');
-    console.log(`   Path: ${publicPath}`);
-    console.log(`   Base String: ${publicBaseString}`);
-    console.log(`   Signature: ${publicSign}`);
+ 
     
     // Teste 4: Verificar se a Partner Key está correta
     const keyTests = {
@@ -58,7 +49,7 @@ export async function GET(request: Request) {
     const keyWithoutPrefix = keyTests.key_without_prefix;
     const authSignNoPrefix = crypto.createHmac('sha256', keyWithoutPrefix).update(authBaseString).digest('hex');
     
-    console.log('🔐 [DEBUG-SIGNATURE] Teste sem prefixo:');
+    console.log(' [DEBUG-SIGNATURE] Teste sem prefixo:');
     console.log(`   Key sem prefixo: ${keyWithoutPrefix.substring(0, 10)}...`);
     console.log(`   Signature sem prefixo: ${authSignNoPrefix}`);
     

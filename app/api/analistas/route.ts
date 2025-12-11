@@ -113,15 +113,15 @@ export async function POST(request: Request) {
     // Usar a CHAVE da permissão, não a descrição
     const authResult = await validatePermissions(request, ['manage_users']);
     if ('error' in authResult) {
-      console.log('❌ Erro de permissão ao criar analista:', authResult.error);
+      console.log(' Erro de permissão ao criar analista:', authResult.error);
       return NextResponse.json(
         { error: authResult.error },
         { status: authResult.status }
       );
     }
 
-    console.log('✅ Usuário autorizado a criar analista:', authResult.user?.name);
-    console.log('🔑 Permissões do usuário:', authResult.permissions);
+    console.log('Usuário autorizado a criar analista:', authResult.user?.name);
+    console.log('Permissões do usuário:', authResult.permissions);
 
     const body = await request.json();
     const { name, email, password, role = 'analyst' } = body;
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
     }
 
     console.log('Criando usuário:', { name, email, role }); // Log para debug
-    console.log('📋 Permissões padrão para role:', role, DEFAULT_PERMISSIONS[role as keyof typeof DEFAULT_PERMISSIONS]);
+    console.log(' Permissões padrão para role:', role, DEFAULT_PERMISSIONS[role as keyof typeof DEFAULT_PERMISSIONS]);
 
     // Criar novo usuário com o role especificado e permissões padrão
     const analyst = await prisma.users.create({
@@ -177,7 +177,7 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log('✅ Usuário criado com sucesso:', {
+    console.log('Usuário criado com sucesso:', {
       id: analyst.id,
       name: analyst.name,
       email: analyst.email,

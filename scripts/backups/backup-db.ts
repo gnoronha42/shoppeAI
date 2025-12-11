@@ -9,14 +9,14 @@ async function safelyGetModelData(modelName: string, model: any): Promise<any[]>
   try {
     if (model && typeof model.findMany === 'function') {
       const data = await model.findMany();
-      console.log(`   ✅ ${modelName}: ${data.length} registros`);
+      console.log(`    ${modelName}: ${data.length} registros`);
       return data;
     } else {
-      console.log(`   ⚠️  ${modelName}: modelo não encontrado ou não tem método findMany`);
-      return [];
+      console.log(`    ${modelName}: modelo não encontrado ou não tem método findMany`);
+      return [];  
     }
   } catch (error: any) {
-    console.log(`   ❌ ${modelName}: erro ao buscar dados - ${error?.message || 'Erro desconhecido'}`);
+    console.log(`    ${modelName}: erro ao buscar dados - ${error?.message || 'Erro desconhecido'}`);
     return [];
   }
 }
@@ -34,20 +34,20 @@ async function main(): Promise<void> {
     const fileName = `backup-${date}.json`;
     const filePath = path.join(backupDir, fileName);
 
-    console.log('🔄 Iniciando backup do banco de dados...');
+    console.log('Iniciando backup do banco de dados...');
     
     // Debug: mostrar todas as propriedades disponíveis no prisma client
     const allPrismaKeys = Object.keys(prisma);
-    console.log('🔍 Todas as chaves do Prisma client:', allPrismaKeys);
+    console.log('Todas as chaves do Prisma client:', allPrismaKeys);
     
     // Debug: mostrar tipo da instância
-    console.log('📦 Tipo da instância prisma:', typeof prisma);
-    console.log('🔍 Propriedades da instância:', Object.getOwnPropertyNames(prisma));
+    console.log('Tipo da instância prisma:', typeof prisma);
+    console.log('Propriedades da instância:', Object.getOwnPropertyNames(prisma));
     
     // Testar conexão primeiro
-    console.log('🔗 Testando conexão...');
+    console.log('Testando conexão...');
     await prisma.$connect();
-    console.log('✅ Conectado ao banco de dados');
+    console.log('Conectado ao banco de dados');
     
     // Filtrar apenas os modelos (que têm método findMany)
     const availableModels = allPrismaKeys.filter(key => {
@@ -59,14 +59,14 @@ async function main(): Promise<void> {
              typeof model.findMany === 'function';
     });
     
-    console.log('📋 Modelos disponíveis com findMany:', availableModels);
+    console.log('Modelos disponíveis com findMany:', availableModels);
 
     // Buscar dados de forma segura
     const data: Record<string, any[]> = {};
     
     // Se não encontrou modelos automaticamente, tentar alguns nomes conhecidos
     if (availableModels.length === 0) {
-      console.log('⚠️  Nenhum modelo encontrado automaticamente, tentando nomes específicos...');
+      console.log('Nenhum modelo encontrado automaticamente, tentando nomes específicos...');
       
       const modelsToTry = [
         'users', 'clients', 'analyses', 'products', 'reports',
@@ -78,13 +78,13 @@ async function main(): Promise<void> {
       for (const modelName of modelsToTry) {
         const model = (prisma as any)[modelName];
         if (model && typeof model.findMany === 'function') {
-          console.log(`✅ Modelo encontrado: ${modelName}`);
+          console.log(`Modelo encontrado: ${modelName}`);
           data[modelName] = await safelyGetModelData(modelName, model);
         }
       }
     } else {
       // Usar os modelos encontrados automaticamente
-      console.log('🔄 Fazendo backup dos modelos disponíveis...');
+      console.log('Fazendo backup dos modelos disponíveis...');
       for (const modelName of availableModels) {
         data[modelName] = await safelyGetModelData(modelName, (prisma as any)[modelName]);
       }
@@ -93,11 +93,11 @@ async function main(): Promise<void> {
     // Salvar em arquivo JSON
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 
-    console.log(`✅ Backup criado com sucesso: ${fileName}`);
-    console.log(`📁 Local: ${filePath}`);
+    console.log(`Backup criado com sucesso: ${fileName}`);
+    console.log(`Local: ${filePath}`);
     
     // Mostrar resumo dos dados salvos
-    console.log('📊 Resumo do backup:');
+    console.log('Resumo do backup:');
     const totalRecords = Object.entries(data).reduce((total, [modelName, records]) => {
       if (records.length > 0) {
         console.log(`   - ${modelName}: ${records.length} registros`);
@@ -106,12 +106,12 @@ async function main(): Promise<void> {
       return total;
     }, 0);
     
-    console.log(`\n📈 Total de registros salvos: ${totalRecords}`);
+    console.log(`\nTotal de registros salvos: ${totalRecords}`);
 
   } catch (error: any) {
-    console.error('❌ Erro ao criar backup:', error?.message || error);
+    console.error('Erro ao criar backup:', error?.message || error);
     if (error.stack) {
-      console.error('📋 Stack trace:', error.stack);
+      console.error('Stack trace:', error.stack);
     }
     process.exit(1);
   } finally {

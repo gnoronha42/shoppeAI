@@ -159,27 +159,18 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log('✅ Análise criada:', analysis.id);
+    console.log(' Análise criada:', analysis.id);
 
     // 🧠 NOVO: Extrair insights chave para comparações futuras
-    console.log('🔍 Extraindo insights chave da análise...');
     const keyInsights = extractKeyInsights(body.markdown, originalAnalysisType);
     
     // Salvar o conteúdo markdown como resultado de análise
-    console.log('💾 Salvando resultado da análise...');
-    const analysisResult = await prisma.analysis_results.create({
-      data: {
-        analysis_id: analysis.id,
-        content: body.markdown,
-        processed_by: 'markdown-pdf'
-      }
-    });
 
-    console.log('✅ Resultado salvo:', analysisResult.id);
+
+    console.log('Resultado salvo:', analysisResult.id);
 
     // 🧠 NOVO: Salvar insights como um registro separado para facilitar comparações
     try {
-      console.log('💡 Salvando insights estruturados...');
       
       // Criar uma análise "resumo" para os insights
       const insightsAnalysis = await prisma.analyses.create({

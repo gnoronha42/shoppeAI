@@ -48,8 +48,8 @@ export async function GET(request: Request) {
       timeFrom = timeTo - (7 * 24 * 60 * 60);
     }
 
-    console.log(`\n🔍 ===== BUSCANDO DADOS REAIS DE ANALYTICS =====`);
-    console.log(`📅 Período: ${new Date(timeFrom * 1000).toISOString()} até ${new Date(timeTo * 1000).toISOString()}`);
+    
+    console.log(` Período: ${new Date(timeFrom * 1000).toISOString()} até ${new Date(timeTo * 1000).toISOString()}`);
 
     const results = {
       success: false,
@@ -131,7 +131,6 @@ export async function GET(request: Request) {
     // Testar cada endpoint
     for (const endpoint of analyticsEndpoints) {
       try {
-        console.log(`\n🧪 Testando: ${endpoint.name} (${endpoint.path})`);
         
         const response = await shopeeFetch<any>({
           path: endpoint.path,
@@ -155,8 +154,8 @@ export async function GET(request: Request) {
         results.endpoints_tested.push(testResult);
         results.working_endpoints.push(endpoint.name);
 
-        console.log(`✅ ${endpoint.name}: FUNCIONANDO`);
-        console.log(`📊 Dados disponíveis:`, testResult.data_keys);
+        console.log(` ${endpoint.name}: FUNCIONANDO`);
+        console.log(`Dados disponíveis:`, testResult.data_keys);
 
         // Extrair dados reais baseado na resposta
         if (response?.response) {
@@ -165,21 +164,21 @@ export async function GET(request: Request) {
           // Visitantes e visualizações
           if (data.visitor_count !== undefined) {
             results.analytics.visitors = data.visitor_count;
-            console.log(`👥 Visitantes encontrados: ${data.visitor_count}`);
+            console.log(` Visitantes encontrados: ${data.visitor_count}`);
           }
           if (data.page_view !== undefined) {
             results.analytics.pageViews = data.page_view;
-            console.log(`📄 Page views encontradas: ${data.page_view}`);
+            console.log(` Page views encontradas: ${data.page_view}`);
           }
           if (data.shop_view !== undefined) {
             results.performance.shopViews = data.shop_view;
-            console.log(`🏪 Shop views encontradas: ${data.shop_view}`);
+            console.log(` Shop views encontradas: ${data.shop_view}`);
           }
 
           // Taxa de conversão
           if (data.conversion_rate !== undefined) {
             results.analytics.conversionRate = data.conversion_rate;
-            console.log(`📈 Taxa de conversão encontrada: ${data.conversion_rate}%`);
+            console.log(`Taxa de conversão encontrada: ${data.conversion_rate}%`);
           }
 
           // Outros dados de performance
@@ -225,7 +224,7 @@ export async function GET(request: Request) {
 
     // Se não conseguiu dados reais, buscar de pedidos para calcular conversão
     if (!results.success || results.analytics.visitors === 0) {
-      console.log(`\n🔄 Tentando calcular dados a partir de pedidos...`);
+      console.log(`\nTentando calcular dados a partir de pedidos...`);
       
       try {
         // Buscar pedidos do período
@@ -247,7 +246,7 @@ export async function GET(request: Request) {
           
           // Se temos pedidos mas não temos visitantes, NÃO inventar dados
           if (orders > 0 && results.analytics.visitors === 0) {
-            console.log(`⚠️ API não retornou visitantes. Retornando dados reais de pedidos apenas.`);
+            console.log(` API não retornou visitantes. Retornando dados reais de pedidos apenas.`);
             // Manter visitantes como 0 para indicar ausência de dado oficial
             results.analytics.visitors = 0;
             results.analytics.conversionRate = 0;
@@ -262,12 +261,7 @@ export async function GET(request: Request) {
       }
     }
 
-    console.log(`\n📋 ===== RESUMO DOS TESTES =====`);
-    console.log(`✅ Endpoints funcionando: ${results.working_endpoints.length}`);
-    console.log(`❌ Endpoints com falha: ${results.failed_endpoints.length}`);
-    console.log(`👥 Visitantes: ${results.analytics.visitors}`);
-    console.log(`📄 Page Views: ${results.analytics.pageViews}`);
-    console.log(`📈 Conversão: ${results.analytics.conversionRate}%`);
+
 
     return NextResponse.json({
       success: results.success,

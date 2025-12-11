@@ -35,16 +35,7 @@ export function ClientSelector() {
   // Garantir que clients seja sempre um array
   const clients = Array.isArray(response?.data) ? response.data : [];
   
-  // Debug logs
-  console.log('🔍 ClientSelector Debug:', {
-    isLoading,
-    error,
-    response,
-    clientsCount: clients.length,
-    searchValue,
-    meta: response?.meta,
-    clients: clients.map(c => ({ id: c.id, name: c.name, ownerName: c.ownerName }))
-  });
+
   
   // Os clientes já vêm ordenados alfabeticamente do backend
   const selectedClient = clients.find(client => client.id === selectedClientId);
@@ -56,7 +47,7 @@ export function ClientSelector() {
   }, [clients, dispatch]);
 
   const handleClientSelect = (clientId: string) => {
-    console.log('🎯 Cliente selecionado:', clientId);
+   
     dispatch(selectClient(clientId === selectedClientId ? "" : clientId));
     setOpen(false);
   };
@@ -82,13 +73,7 @@ export function ClientSelector() {
     return clients.filter(client => {
       const clientSearchText = normalizeText(`${client.name} ${client.ownerName}`);
       const matches = clientSearchText.includes(normalizedSearch);
-      console.log('🔎 Verificando cliente:', {
-        name: client.name,
-        ownerName: client.ownerName,
-        clientSearchText,
-        normalizedSearch,
-        matches
-      });
+  
       return matches;
     });
   }, [clients, searchValue]);
@@ -129,12 +114,7 @@ export function ClientSelector() {
             <CommandGroup>
               {filteredClients.map((client: Client) => {
                 const searchValue = normalizeText(`${client.name} ${client.ownerName}`);
-                console.log('🔎 Renderizando cliente:', {
-                  id: client.id,
-                  name: client.name,
-                  ownerName: client.ownerName,
-                  searchValue
-                });
+              
                 
                 return (
                   <CommandItem

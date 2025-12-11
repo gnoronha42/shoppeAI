@@ -25,28 +25,25 @@ const RESTORE_ORDER = [
   'report_metrics'
 ];
 
-// Helper function to safely restore data to a model
 async function safelyRestoreModelData(modelName: string, records: any[]): Promise<void> {
   try {
     const model = (prisma as any)[modelName];
     
     if (!model || typeof model.createMany !== 'function') {
-      console.log(`   ⚠️  ${modelName}: modelo não encontrado ou não tem método createMany`);
+      console.log(`${modelName}: modelo não encontrado ou não tem método createMany`);
       return;
     }
 
     if (records.length === 0) {
-      console.log(`   ⏭️  ${modelName}: nenhum registro para restaurar`);
+      console.log(`${modelName}: nenhum registro para restaurar`);
       return;
     }
 
-    // Limpar registros existentes primeiro (cuidado com dependências)
     if (typeof model.deleteMany === 'function') {
       await model.deleteMany({});
-      console.log(`   🗑️  ${modelName}: registros existentes removidos`);
+      console.log(`${modelName}: registros existentes removidos`);
     }
 
-    // Para modelos que podem ter problemas com createMany, usar create individual
     const problematicModels = ['analyses', 'analysis_results'];
     
     if (problematicModels.includes(modelName)) {
@@ -55,10 +52,8 @@ async function safelyRestoreModelData(modelName: string, records: any[]): Promis
       
       for (const record of records) {
         try {
-          // Remover campos que podem causar conflito
           const cleanRecord = { ...record };
           
-          // Para análises, garantir que created_by seja null se não existir
           if (modelName === 'analyses' && !cleanRecord.created_by) {
             cleanRecord.created_by = null;
           }
@@ -66,11 +61,11 @@ async function safelyRestoreModelData(modelName: string, records: any[]): Promis
           await model.create({ data: cleanRecord });
           successCount++;
         } catch (error: any) {
-          console.log(`   ⚠️  ${modelName}: erro ao inserir registro ${record.id || 'sem ID'}: ${error.message}`);
+          console.log(`${modelName}: erro ao inserir registro ${record.id || 'sem ID'}: ${error.message}`);
         }
       }
       
-      console.log(`   ✅ ${modelName}: ${successCount}/${records.length} registros restaurados`);
+      console.log(`${modelName}: ${successCount}/${records.length} registros restaurados`);
     } else {
       // Usar createMany para outros modelos
       try {
@@ -79,12 +74,12 @@ async function safelyRestoreModelData(modelName: string, records: any[]): Promis
           skipDuplicates: true
         });
         
-        console.log(`   ✅ ${modelName}: ${result.count || records.length} registros restaurados`);
+        console.log(`  ${modelName}: ${result.count || records.length} registros restaurados`);
       } catch (error: any) {
-        console.log(`   ❌ ${modelName}: erro no createMany - ${error.message}`);
+        console.log(`${modelName}: erro no createMany - ${error.message}`);
         
         // Fallback: tentar inserir individualmente
-        console.log(`   🔄 ${modelName}: tentando inserção individual...`);
+        console.log(`${modelName}: tentando inserção individual...`);
         let successCount = 0;
         
         for (const record of records) {
@@ -92,15 +87,15 @@ async function safelyRestoreModelData(modelName: string, records: any[]): Promis
             await model.create({ data: record });
             successCount++;
           } catch (individualError: any) {
-            console.log(`   ⚠️  ${modelName}: erro ao inserir registro individual: ${individualError.message}`);
+            console.log(`${modelName}: erro ao inserir registro individual: ${individualError.message}`);
           }
         }
         
-        console.log(`   ✅ ${modelName}: ${successCount}/${records.length} registros restaurados (individual)`);
+        console.log(`${modelName}: ${successCount}/${records.length} registros restaurados (individual)`);
       }
     }
   } catch (error: any) {
-    console.log(`   ❌ ${modelName}: erro geral na restauração - ${error?.message || 'Erro desconhecido'}`);
+    console.log(`${modelName}: erro geral na restauração - ${error?.message || 'Erro desconhecido'}`);
   }
 }
 
@@ -108,36 +103,35 @@ async function main(): Promise<void> {
   const backupFileName = process.argv[2];
   
   if (!backupFileName) {
-    console.log('❌ Por favor, forneça o nome do arquivo de backup.');
-    console.log('📖 Uso: npm run restore <nome-do-arquivo-backup.json>');
-    console.log('📖 Exemplo: npm run restore backup-2025-07-29T21-54-58-123Z.json');
+    console.log('Por favor, forneça o nome do arquivo de backup.');
+    console.log('Uso: npm run restore <nome-do-arquivo-backup.json>');
+    console.log('Exemplo: npm run restore backup-2025-07-29T21-54-58-123Z.json');
     process.exit(1);
   }
 
   try {
-    // Caminho do arquivo de backup
     const backupPath = path.join(__dirname, backupFileName);
     
     if (!fs.existsSync(backupPath)) {
-      console.log(`❌ Arquivo de backup não encontrado: ${backupPath}`);
-      console.log('📁 Verifique se o arquivo está na pasta scripts/backups/');
+      console.log(`Arquivo de backup não encontrado: ${backupPath}`);
+      console.log('Verifique se o arquivo está na pasta scripts/backups/');
       process.exit(1);
     }
 
-    console.log('🔄 Iniciando restauração do banco de dados...');
-    console.log(`📁 Arquivo: ${backupFileName}`);
+    console.log('Iniciando restauração do banco de dados...');
+    console.log(`Arquivo: ${backupFileName}`);
     
     // Ler arquivo de backup
     const backupData = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-    console.log('✅ Arquivo de backup carregado com sucesso');
+    console.log('Arquivo de backup carregado com sucesso');
     
     // Testar conexão
-    console.log('🔗 Testando conexão...');
+    console.log('Testando conexão...');
     await prisma.$connect();
-    console.log('✅ Conectado ao banco de dados');
+    console.log('Conectado ao banco de dados');
     
     // Mostrar resumo do backup
-    console.log('📊 Resumo do backup:');
+    console.log('Resumo do backup:');
     const totalRecords = Object.entries(backupData).reduce((total, [modelName, records]) => {
       const recordArray = records as any[];
       if (recordArray.length > 0) {
@@ -147,19 +141,19 @@ async function main(): Promise<void> {
       return total;
     }, 0);
     
-    console.log(`\n📈 Total de registros a restaurar: ${totalRecords}`);
+    console.log(`\nTotal de registros a restaurar: ${totalRecords}`);
     
     // Confirmar antes de prosseguir
-    console.log('\n⚠️  ATENÇÃO: Esta operação irá SUBSTITUIR todos os dados existentes!');
-    console.log('🔄 Iniciando restauração em 3 segundos...');
+    console.log('\nATENÇÃO: Esta operação irá SUBSTITUIR todos os dados existentes!');
+    console.log('Iniciando restauração em 3 segundos...');
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     // Restaurar dados na ordem correta
-    console.log('\n🔄 Restaurando dados...');
+    console.log('\nRestaurando dados...');
     
     for (const modelName of RESTORE_ORDER) {
       if (backupData[modelName]) {
-        console.log(`\n📋 Restaurando ${modelName}...`);
+        console.log(`\nRestaurando ${modelName}...`);
         await safelyRestoreModelData(modelName, backupData[modelName]);
       }
     }
@@ -167,13 +161,13 @@ async function main(): Promise<void> {
     // Restaurar dados de modelos que não estão na ordem específica
     for (const [modelName, records] of Object.entries(backupData)) {
       if (!RESTORE_ORDER.includes(modelName)) {
-        console.log(`\n📋 Restaurando ${modelName} (adicional)...`);
+        console.log(`\nRestaurando ${modelName} (adicional)...`);
         await safelyRestoreModelData(modelName, records as any[]);
       }
     }
 
-    console.log('\n✅ Restauração concluída com sucesso!');
-    console.log('📊 Verificando dados restaurados...');
+    console.log('\nRestauração concluída com sucesso!');
+    console.log('Verificando dados restaurados...');
     
     // Verificar dados restaurados
     const verificationData: Record<string, number> = {};
@@ -183,20 +177,20 @@ async function main(): Promise<void> {
         try {
           const count = await model.count();
           verificationData[modelName] = count;
-          console.log(`   ✅ ${modelName}: ${count} registros`);
+          console.log(`    ${modelName}: ${count} registros`);
         } catch (error) {
-          console.log(`   ⚠️  ${modelName}: erro ao verificar contagem`);
+          console.log(`    ${modelName}: erro ao verificar contagem`);
         }
       }
     }
     
     const totalRestored = Object.values(verificationData).reduce((sum, count) => sum + count, 0);
-    console.log(`\n🎉 Total de registros restaurados: ${totalRestored}`);
+    console.log(`\n Total de registros restaurados: ${totalRestored}`);
 
   } catch (error: any) {
-    console.error('❌ Erro durante a restauração:', error?.message || error);
+    console.error(' Erro durante a restauração:', error?.message || error);
     if (error.stack) {
-      console.error('📋 Stack trace:', error.stack);
+      console.error(' Stack trace:', error.stack);
     }
     process.exit(1);
   } finally {

@@ -60,7 +60,7 @@ export async function shopeeFetch<T = unknown>(args: {
   
   // 📋 LOG DA REQUEST
   const requestBody = method === 'POST' && args.body ? JSON.stringify(args.body) : null;
-  console.log(`📡 [shopeeFetch] ${method} ${path} | Public: ${isPublic} | Shop: ${args.shop_id || 'N/A'}`);
+  console.log(`[shopeeFetch] ${method} ${path} | Public: ${isPublic} | Shop: ${args.shop_id || 'N/A'}`);
   
   const res = await fetch(url, {
     method,

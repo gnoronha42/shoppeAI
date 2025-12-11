@@ -129,7 +129,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       );
 
       // Recarregar dados do checklist após salvar
-      console.log('🔄 Recarregando dados do checklist...');
+    
       const response = await fetch(`/api/clientes/${clientId}/checklist`, {
         credentials: 'include',
         cache: 'no-cache', // Evitar cache
@@ -137,7 +137,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
 
       if (response.ok) {
         const data = await response.json();
-        console.log('📊 Dados recarregados:', data);
+      
         setBlocks(data.blocks || []);
       } else {
         console.error('❌ Erro ao recarregar dados:', response.status);
@@ -275,12 +275,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
         return;
       }
       
-      console.log('📊 Dados sendo enviados para PDF de concluídos:', {
-        blocksTotal: blocks.length,
-        completedBlocks: completedBlocks.length,
-        clientName: clientName,
-        exampleItem: completedBlocks[0]?.items[0] // Debug do primeiro item
-      });
+  
       
       const response = await fetch("https://analysis-micro.onrender.com/checklist-completed-pdf", {
         method: "POST",
@@ -385,7 +380,6 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
       }
 
       // Recarregar dados do checklist após limpar
-      console.log('🔄 Recarregando dados após limpar ações...');
       const reloadResponse = await fetch(`/api/clientes/${clientId}/checklist`, {
         credentials: 'include',
         cache: 'no-cache',
@@ -393,7 +387,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
 
       if (reloadResponse.ok) {
         const data = await reloadResponse.json();
-        console.log('📊 Dados recarregados após limpeza:', data);
+       
         setBlocks(data.blocks || []);
       }
 
@@ -403,7 +397,7 @@ export function ClientChecklist({ clientId, clientName }: ClientChecklistProps) 
         variant: "default" 
       });
     } catch (error) {
-      console.error('❌ Erro ao limpar ações:', error);
+      console.error('Erro ao limpar ações:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({ 
         title: "Erro ao limpar ações", 
