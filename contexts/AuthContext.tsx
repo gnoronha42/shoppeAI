@@ -97,22 +97,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const hasPermission = (permission: string): boolean => {
-    console.log('=== DEBUG hasPermission ===');
-    console.log('isAuthenticated:', isAuthenticated);
-    console.log('user:', user);
-    console.log('user?.permissions:', user?.permissions);
-    console.log('permission solicitada:', permission);
-    
     if (!isAuthenticated || !user?.permissions) {
-      console.log('Retornando false - não autenticado ou sem permissões');
       return false;
     }
     
-    const hasIt = user.permissions.includes('all') || user.permissions.includes(permission);
-    console.log('Tem permissão:', hasIt);
-    console.log('========================');
-    
-    return hasIt;
+    return user.permissions.includes('all') || user.permissions.includes(permission);
   };
 
   return (

@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   FileSpreadsheet,
   Plus,
@@ -18,13 +20,15 @@ import {
   Award,
   Megaphone,
   BarChart3,
+  CheckCircle,
+  Calendar,
+  RefreshCw,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 const formatCurrency = (value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const formatNumber = (value: number) => value.toLocaleString('pt-BR');
 
-// Função para calcular métricas de ads baseadas nos dados reais
 const calculateAdsMetrics = (stores: any[]) => {
   const totalSpend = stores.reduce((acc, store) => acc + (store.ads?.spend || 0), 0);
   const totalImpressions = stores.reduce((acc, store) => acc + (store.ads?.impressions || 0), 0);
@@ -46,6 +50,7 @@ export default function Home() {
   const [metrics, setMetrics] = useState({
     totalSellers: 0,
     totalGmv: 0,
+    totalRealPaidValue: 0,
     totalPedidos: 0,
     ticketMedio: 0,
     activeStores: [] as any[],
@@ -59,13 +64,32 @@ export default function Home() {
     }
   });
 
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/dashboard/stats');
+  const [dateFrom, setDateFrom] = useState(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30); // 30 dias atrás
+    return date.toISOString().split('T')[0];
+  });
+  
+  const [dateTo, setDateTo] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
+
+  const [customPeriod, setCustomPeriod] = useState(false);
+
+  const fetchStats = async (fromDate?: string, toDate?: string) => {
+    setLoading(true);
+    try {
+      let url = '/api/dashboard/stats';
+      
+      if (fromDate && toDate) {
+        const timeFrom = Math.floor(new Date(fromDate).getTime() / 1000);
+        const timeTo = Math.floor(new Date(toDate + 'T23:59:59').getTime() / 1000);
+        url += `?time_from=${timeFrom}&time_to=${timeTo}`;
+      }
+      
+      const res = await fetch(url);
         const data = await res.json();
         if (data && !data.error) {
-          // Calcular métricas de ads baseadas nos dados reais das lojas
           const adsData = calculateAdsMetrics(data.storeDetails || []);
           
           setMetrics({
@@ -79,15 +103,42 @@ export default function Home() {
       } finally {
         setLoading(false);
       }
-    }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, []);
+
+  const handleDateChange = () => {
+    if (customPeriod) {
+      fetchStats(dateFrom, dateTo);
+    } else {
+      fetchStats(); 
+    }
+  };
+
+    const formatDateDisplay = (dateStr: string) => {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        // Ajustar fuso horário se necessário, ou usar UTC
+        // Como o input date retorna YYYY-MM-DD, new Date() assume UTC 00:00 se não especificar hora
+        // Para exibição simples DD/MM:
+        const day = date.getDate() + 1; // Ajuste para compensar timezone se necessário, ou usar getUTCDate
+        // Melhor abordagem para string YYYY-MM-DD:
+        const [year, month, d] = dateStr.split('-').map(Number);
+        return `${d.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`;
+    };
+
+    const periodLabel = customPeriod 
+        ? `(${formatDateDisplay(dateFrom)}-${formatDateDisplay(dateTo)})`
+        : '(Últimos 30 Dias)';
 
   return (
     <div className="min-h-screen bg-gray-50">
         <div className="w-full px-6 py-8 space-y-8">
             {/* Header */}
-            <div className="flex justify-between items-center border-b border-gray-200 pb-6 bg-white rounded-lg px-6 py-4 shadow-sm">
+            <div className="bg-white rounded-lg px-6 py-4 shadow-sm space-y-4">
+              <div className="flex justify-between items-center border-b border-gray-200 pb-4">
             <div className="flex items-center gap-4">
                 <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 p-0.5 shadow-lg">
                     <div className="h-full w-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden relative">
@@ -113,6 +164,78 @@ export default function Home() {
                 <Plus className="mr-2 h-4 w-4" /> Nova Análise IA
           </Button>
         </Link>
+          </div>
+
+          {/* Date Picker */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <Label className="text-sm font-medium text-gray-700">Período:</Label>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant={!customPeriod ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setCustomPeriod(false);
+                  fetchStats();
+                }}
+                className={!customPeriod ? "bg-orange-500 hover:bg-orange-600" : ""}
+              >
+                Padrão (30d)
+              </Button>
+              
+              <Button
+                variant={customPeriod ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCustomPeriod(true)}
+                className={customPeriod ? "bg-orange-500 hover:bg-orange-600" : ""}
+              >
+                Personalizado
+              </Button>
+            </div>
+
+            {customPeriod && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="dateFrom" className="text-sm text-gray-600">De:</Label>
+                  <Input
+                    id="dateFrom"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    className="w-auto"
+                  />
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="dateTo" className="text-sm text-gray-600">Até:</Label>
+                  <Input
+                    id="dateTo"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    className="w-auto"
+                  />
+                </div>
+                
+                <Button
+                  onClick={handleDateChange}
+                  size="sm"
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Atualizar
+                </Button>
+              </>
+            )}
+          </div>
       </div>
 
             {loading ? (
@@ -128,22 +251,25 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">GMV Total (30d)</CardTitle>
+                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Vendas {periodLabel}</CardTitle>
                             <DollarSign className="h-5 w-5 text-green-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.totalGmv)}</div>
-                            <p className="text-xs text-green-600 mt-1 font-medium">+12.5% vs mês anterior</p>
+                            <div className="text-3xl font-bold text-gray-900">{formatCurrency(metrics.totalRealPaidValue || metrics.totalGmv)}</div>
+                            <div className="flex items-center gap-1 mt-1">
+                                <CheckCircle className="h-3 w-3 text-green-600" />
+                                <p className="text-xs text-green-600 font-medium">Espelho exato do painel Shopee</p>
+                            </div>
           </CardContent>
         </Card>
                     <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Pedidos (30d)</CardTitle>
+                            <CardTitle className="text-sm font-medium text-gray-600 uppercase tracking-wider">Pedidos {periodLabel}</CardTitle>
                             <ShoppingBag className="h-5 w-5 text-blue-600" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold text-gray-900">{formatNumber(metrics.totalPedidos)}</div>
-                            <p className="text-xs text-gray-500 mt-1">Taxa de conversão ~2.4%</p>
+                            <p className="text-xs text-gray-500 mt-1">Meta: 786 pedidos (painel Shopee)</p>
           </CardContent>
         </Card>
                     <Card className="bg-white border-gray-200 shadow-sm hover:shadow-md transition-shadow">
@@ -351,7 +477,16 @@ export default function Home() {
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="font-semibold text-green-600">{formatCurrency(store.gmv)}</p>
-                </div>
+                                                    {store.isAnnualFallback ? (
+                                                        <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                                                            Anual (2025)
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                                                            {customPeriod ? 'Personalizado' : '30 Dias'}
+                                                        </span>
+                                                    )}
+                                                </div>
                       </div>
                     </div>
                   ))}
@@ -393,10 +528,10 @@ export default function Home() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-green-600 mb-1">
-                                    {formatCurrency(metrics.totalGmv)}
+                                    {formatCurrency(metrics.totalRealPaidValue || metrics.totalGmv)}
                                 </div>
-                                <div className="text-sm text-gray-600">Receita Total</div>
-                                <div className="text-xs text-green-600 font-medium mt-1">↗ +15.2%</div>
+                                <div className="text-sm text-gray-600">Vendas Totais</div>
+                                
                             </div>
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-blue-600 mb-1">

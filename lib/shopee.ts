@@ -197,7 +197,14 @@ export async function shopeeFetch<T = unknown>(args: {
   search.set('shop_id', String(args.shop_id));
   search.set('access_token', args.access_token);
   for (const [k, v] of Object.entries(args.query || {})) {
-    if (v !== undefined) search.set(k, String(v));
+    if (v !== undefined) {
+      if (Array.isArray(v)) {
+        // Para arrays, adicionar múltiplos parâmetros com o mesmo nome
+        v.forEach(item => search.append(k, String(item)));
+      } else {
+        search.set(k, String(v));
+      }
+    }
   }
   const url = `${SHOPEE_BASE_URL}${path}?${search.toString()}`;
   

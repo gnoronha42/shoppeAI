@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
+import { calcularPedidosPagos30Dias } from '../vendas-reais/route';
 
 export const dynamic = 'force-dynamic';
 
@@ -300,324 +301,210 @@ export async function GET(request: Request) {
 
     // 2. Pedidos e GMV - MELHORADO: Incluir pedidos pagos e comparativo
     const timeTo = customTimeTo || Math.floor(Date.now() / 1000);
-    const maxDays = 15;
-    const requestedDays = customPeriodDays || 15;
-    const periodDays = Math.min(requestedDays, maxDays);
-    const timeFrom = customTimeFrom || (timeTo - periodDays * 24 * 60 * 60);
+    const maxDays = 30; // Ajustado para 30 dias para análise completa
+    const requestedDays = customPeriodDays || 30;
+    const timeFrom = customTimeFrom || (timeTo - requestedDays * 24 * 60 * 60);
     
     // Calcular período anterior para comparativo
     const previousPeriodDuration = timeTo - timeFrom;
     const previousTimeFrom = timeFrom - previousPeriodDuration;
     const previousTimeTo = timeFrom;
     
-    if (requestedDays > maxDays) {
-      console.warn(`[GET /api/shopee/data] Período solicitado (${requestedDays} dias) reduzido para ${maxDays} dias (limite da Shopee)`);
-    }
-    
     // Validar que time_from < time_to
     if (timeFrom >= timeTo) {
-      console.error('[GET /api/shopee/data] Erro: time_from >= time_to', {
-              time_from: timeFrom,
-              time_to: timeTo,
-        time_from_date: new Date(timeFrom * 1000).toISOString(),
-        time_to_date: new Date(timeTo * 1000).toISOString()
-      });
+      console.error('[GET /api/shopee/data] Erro: time_from >= time_to');
       return NextResponse.json({ 
         error: 'Intervalo de datas inválido: data inicial deve ser menor que data final' 
       }, { status: 400 });
     }
-    
-    // Função para dividir intervalo em blocos de 15 dias
-    const createDateBlocks = (startTime: number, endTime: number, maxDays: number = 15): Array<{from: number, to: number, days: number}> => {
-      const blocks: Array<{from: number, to: number, days: number}> = [];
-      const maxSeconds = maxDays * 24 * 60 * 60;
-      
-      let currentStart = startTime;
-      while (currentStart < endTime) {
-        const currentEnd = Math.min(currentStart + maxSeconds, endTime);
-        const blockDays = Math.ceil((currentEnd - currentStart) / (24 * 60 * 60));
-        
-        blocks.push({
-          from: currentStart,
-          to: currentEnd,
-          days: blockDays
-        });
-        
-        currentStart = currentEnd;
-      }
-      
-      console.log(`[createDateBlocks] Dividindo período em ${blocks.length} blocos:`, 
-        blocks.map(b => ({
-          from: new Date(b.from * 1000).toISOString(),
-          to: new Date(b.to * 1000).toISOString(),
-          days: b.days
-        }))
-      );
-      
-      return blocks;
-    };
-    
-    // Buscar pedidos em blocos sequenciais COM PAGINAÇÃO
-    const fetchOrdersInBlocks = async (accessToken: string, shopId: string): Promise<any[]> => {
-      const dateBlocks = createDateBlocks(timeFrom, timeTo, 15);
-      const allOrders: any[] = [];
-      const orderSnSet = new Set<string>();
-      const timeFields = ['create_time', 'update_time'];
-      
-      for (const block of dateBlocks) {
-        console.log(`[fetchOrdersInBlocks] Buscando pedidos no bloco:`, {
-          from: new Date(block.from * 1000).toISOString(),
-          to: new Date(block.to * 1000).toISOString(),
-          days: block.days
-        });
-        
-        let blockOrders: any[] = [];
-        
-        for (const timeField of timeFields) {
-          try {
-            console.log(`[fetchOrdersInBlocks] Tentando ${timeField} para bloco de ${block.days} dias...`);
-            
-            let cursor = "";
-            let hasMore = true;
-            let pageCount = 0;
-            const fieldOrders: any[] = [];
 
-            while (hasMore) {
-              pageCount++;
-              const queryParams: any = { 
-                time_range_field: timeField, 
-                time_from: block.from, 
-                time_to: block.to, 
-                page_size: 100
-              };
-              
-              if (cursor) queryParams.cursor = cursor;
-
-              const resp = await shopeeFetch<any>({
-                path: '/api/v2/order/get_order_list',
-                access_token: accessToken,
-                shop_id: shopId,
-                query: queryParams
-              });
-              
-              const responseData = resp?.response;
-              const pageOrders = responseData?.order_list || [];
-              fieldOrders.push(...pageOrders);
-              
-              cursor = responseData?.next_cursor;
-              hasMore = responseData?.more === true;
-
-              console.log(`   [fetchOrdersInBlocks] Página ${pageCount}: ${pageOrders.length} pedidos (More: ${hasMore})`);
-              
-              if (pageCount > 50) break; // Proteção contra loop infinito
-            }
-            
-            console.log(`[fetchOrdersInBlocks] ${timeField} (${block.days}d): ${fieldOrders.length} pedidos encontrados no total`);
-            
-            if (fieldOrders.length > 0) {
-              blockOrders = fieldOrders;
-              break;
-            }
-    } catch (e: any) {
-            console.error(`[fetchOrdersInBlocks] Erro ${timeField} (${block.days}d):`, e?.message);
-          }
-        }
-        
-        // Deduplicação e Adição
-        for (const order of blockOrders) {
-          if (order.order_sn && !orderSnSet.has(order.order_sn)) {
-            orderSnSet.add(order.order_sn);
-            allOrders.push(order);
-          }
-        }
-        
-        console.log(`[fetchOrdersInBlocks] Bloco processado: ${blockOrders.length} pedidos encontrados`);
-      }
-      return allOrders;
-    };
-    
-    // Executar busca em blocos
-    let orderList: any[] = [];
-    try {
-      orderList = await fetchOrdersInBlocks((integration as any).access_token, (integration as any).shop_id);
-    } catch (e: any) {
-      console.error('[GET /api/shopee/data] Erro ao buscar pedidos em blocos:', e?.message);
-    }
-
+    // USAR LÓGICA PRECISA DE VENDAS REAIS (a mesma do dashboard)
+    console.log('[GET /api/shopee/data] Buscando dados precisos via calcularPedidosPagos30Dias...');
     let gmv = 0;
-    // Processar pedidos com separação entre totais e pagos
     let totalOrders = 0;
-    let totalPaidOrders = 0;
-    let totalCancelledOrders = 0;
-    let totalPendingOrders = 0;
-    let gmvPaid = 0;
-    const productAgg: Record<string, any> = {};
-
-    // Status de pedidos conforme documentação Shopee
-    const PAID_STATUSES = ['READY_TO_SHIP', 'SHIPPED', 'COMPLETED'];
-    const CANCELLED_STATUSES = ['CANCELLED'];
-    const PENDING_STATUSES = ['UNPAID', 'PROCESSING'];
-
-    if (orderList.length > 0) {
-        totalOrders = orderList.length;
-        
-        const snList = orderList.map((o: any) => o.order_sn);
-        const chunks = [];
-        for (let i = 0; i < snList.length; i += 50) chunks.push(snList.slice(i, i + 50));
-        
-        for (const chunk of chunks) {
-            try {
-      const detailResp = await shopeeFetch<any>({
-        path: '/api/v2/order/get_order_detail',
-                    access_token: (integration as any).access_token,
-                    shop_id: (integration as any).shop_id,
-        query: {
-                        order_sn_list: chunk.join(','), 
-                        response_optional_fields: 'item_list,total_amount,order_status' 
-        }
-      });
-
-                const details = detailResp?.response?.order_list || [];
-                
-      for (const order of details) {
-                    const orderAmount = Number(order.total_amount) || 0;
-                    const orderStatus = order.order_status;
-                    
-                    // Contabilizar GMV total
-                    gmv += orderAmount;
-                    
-                    // Separar por status de pagamento
-                    if (PAID_STATUSES.includes(orderStatus)) {
-                        totalPaidOrders++;
-                        gmvPaid += orderAmount;
-                    } else if (CANCELLED_STATUSES.includes(orderStatus)) {
-                        totalCancelledOrders++;
-                    } else if (PENDING_STATUSES.includes(orderStatus)) {
-                        totalPendingOrders++;
-        }
-
-                    // Agregar produtos (apenas pedidos pagos para ranking)
-                    if (PAID_STATUSES.includes(orderStatus)) {
-                        for(const item of (order.item_list || [])) {
-                            const name = item.item_name;
-                            if(!productAgg[name]) productAgg[name] = { name, units: 0, revenue: 0 };
-                            productAgg[name].units += item.model_quantity_purchased || 0;
-                            productAgg[name].revenue += (item.model_discounted_price || item.model_original_price) * (item.model_quantity_purchased || 0);
-                        }
-                    }
-                }
-            } catch (e: any) {
-                if (e?.message?.includes('invalid_access_token') || e?.message?.includes('403')) {
-                    const updated = await forceRefreshTokens();
-                    if (updated) integration = updated;
-                }
-            }
-        }
-    }
-
-    // Buscar dados do período anterior para comparativo
-    console.log('[COMPARATIVO] Buscando dados do período anterior...');
-    let previousPeriodData = {
-        totalOrders: 0,
-        totalPaidOrders: 0,
-        gmv: 0,
-        gmvPaid: 0,
-        totalCancelledOrders: 0
-    };
-
+    let ticketMedio = 0;
+    
     try {
-        // Criar blocos de data para o período anterior
-        const previousDateBlocks = createDateBlocks(previousTimeFrom, previousTimeTo, 15);
+        const dadosPrecisos = await calcularPedidosPagos30Dias(
+            (integration as any).access_token,
+            (integration as any).shop_id,
+            timeFrom,
+            timeTo
+        );
         
-        for (const block of previousDateBlocks) {
-            const previousBlockOrders = await fetchOrdersInBlocks((integration as any).access_token, (integration as any).shop_id);
-            
-            // Filtrar pedidos do bloco anterior
-            const filteredPreviousOrders = previousBlockOrders.filter((order: any) => {
-                const orderTime = order.create_time || order.update_time;
-                return orderTime >= block.from && orderTime < block.to;
-            });
-
-            if (filteredPreviousOrders.length > 0) {
-                previousPeriodData.totalOrders += filteredPreviousOrders.length;
-                
-                const previousSnList = filteredPreviousOrders.map((o: any) => o.order_sn);
-                const previousChunks = [];
-                for (let i = 0; i < previousSnList.length; i += 50) {
-                    previousChunks.push(previousSnList.slice(i, i + 50));
-                }
-                
-                for (const chunk of previousChunks) {
-                    try {
-                        const detailResp = await shopeeFetch<any>({
-                            path: '/api/v2/order/get_order_detail',
-                            access_token: (integration as any).access_token,
-                            shop_id: (integration as any).shop_id,
-                            query: { 
-                                order_sn_list: chunk.join(','), 
-                                response_optional_fields: 'total_amount,order_status' 
-                            }
-                        });
-                        
-                        const details = detailResp?.response?.order_list || [];
-                        
-                        for (const order of details) {
-                            const orderAmount = Number(order.total_amount) || 0;
-                            const orderStatus = order.order_status;
-                            
-                            previousPeriodData.gmv += orderAmount;
-                            
-                            if (PAID_STATUSES.includes(orderStatus)) {
-                                previousPeriodData.totalPaidOrders++;
-                                previousPeriodData.gmvPaid += orderAmount;
-                            } else if (CANCELLED_STATUSES.includes(orderStatus)) {
-                                previousPeriodData.totalCancelledOrders++;
-                            }
-                        }
-                    } catch (e: any) {
-                        console.warn('[COMPARATIVO] Erro ao buscar detalhes do período anterior:', e.message);
-                    }
-                }
-            }
-        }
+        gmv = dadosPrecisos.totalVendas;
+        totalOrders = dadosPrecisos.totalPedidos;
+        ticketMedio = totalOrders > 0 ? gmv / totalOrders : 0;
         
-        console.log('[COMPARATIVO] Dados do período anterior obtidos:', previousPeriodData);
+        console.log(`[GET /api/shopee/data] Dados precisos obtidos: GMV R$${gmv}, Pedidos ${totalOrders}`);
+        
     } catch (e: any) {
-        console.warn('[COMPARATIVO] Erro ao buscar período anterior:', e.message);
+        console.error('[GET /api/shopee/data] Erro ao buscar dados precisos:', e);
+        // Fallback para lógica antiga ou zerado se falhar
     }
+
+    /* LÓGICA ANTIGA DE BUSCA POR BLOCOS (COMENTADA PARA USAR A NOVA)
+    // Função para dividir intervalo em blocos de 15 dias
+    const createDateBlocks = ...
+    */
 
     // 3. Performance (Insights) - Visitantes e Conversão
     let visitors = 0;
     let conversionRate = 0;
     let pageViews = 0;
     
-    // APIs de analytics não existem na Shopee V2
-    console.log('[Analytics] APIs de visitantes/conversão não disponíveis na Shopee Open Platform V2');
+    try {
+         console.log('[Analytics] Tentando buscar métricas de visitantes (Business Advisor)...');
+         // Tentativa no endpoint de performance
+         const bizResp = await shopeeFetch<any>({
+            path: '/api/v2/shop/performance',
+            access_token,
+            shop_id,
+            query: { time_from: timeFrom, time_to: timeTo }
+        });
+        
+        if (bizResp && !bizResp.error) {
+             console.log('[Analytics] Dados de visitantes encontrados!', JSON.stringify(bizResp));
+             const data = bizResp.response || {};
+             // Campos comuns em APIs da Shopee (uv = unique visitors, pv = page views)
+             visitors = Number(data.uv || data.visitors || data.visit_uv || 0);
+             pageViews = Number(data.pv || data.page_views || data.visit_pv || 0);
+             
+             if (visitors > 0) {
+                 // Taxa de conversão: Pedidos / Visitantes
+                 conversionRate = (totalOrders / visitors) * 100;
+             }
+        } else {
+             console.log('[Analytics] Endpoint /shop/performance retornou erro ou não existe:', bizResp?.error);
+        }
+    } catch(e: any) {
+        console.log('[Analytics] Falha ao buscar dados (provável falta de permissão):', e.message);
+    }
     
-    // Retornar 0 para todas as métricas de tráfego (dados não disponíveis)
-    visitors = 0;
-    conversionRate = 0;
-    pageViews = 0;
-    
-    // 4. Ads Performance
+    // 4. Ads Performance (Busca Robusta em Múltiplos Endpoints)
     let adsSpend = 0;
     let adsRoas = 0;
     let adsImpressions = 0;
     let adsClicks = 0;
     let adsCtr = 0;
-    
-    // API de ads não existe na Shopee Open Platform V2
-    console.log('[Ads] API de publicidade não disponível na Shopee Open Platform V2');
-    
-    // Retornar 0 para todas as métricas de ads (dados não disponíveis)
-    adsSpend = 0;
-    adsRoas = 0;
-    adsImpressions = 0;
-    adsClicks = 0;
-    adsCtr = 0;
+    let adsConversions = 0;
 
-    const ticketMedio = totalOrders > 0 ? gmv / totalOrders : 0;
-    const topProducts = Object.values(productAgg).sort((a: any, b: any) => b.revenue - a.revenue).slice(0, 5);
+    try {
+        console.log('[Ads] Iniciando busca de métricas de publicidade...');
+
+        // Lista de endpoints possíveis para tentar (em ordem de probabilidade)
+        const adsEndpoints = [
+            '/api/v2/ads/get_account_performance', // Mais provável para dados agregados
+            '/api/v2/ads/get_ads_performance',     // Tentativa anterior
+            '/api/v2/marketing_solution/get_ads_performance',
+             // Novo endpoint sugerido na documentação
+            '/api/v2/ads/get_gms_campaign_performance'
+        ];
+
+        let adsData: any = null;
+        let successEndpoint = '';
+
+        for (const endpoint of adsEndpoints) {
+            try {
+                console.log(`[Ads] Tentando endpoint: ${endpoint}`);
+                const resp = await shopeeFetch<any>({
+                    path: endpoint,
+                    access_token,
+                    shop_id,
+                    query: {
+                        time_from: timeFrom,
+                        time_to: timeTo,
+                        granularity: 'daily'
+                    }
+                });
+
+                if (resp && !resp.error) {
+                    adsData = resp.response || resp.data;
+                    successEndpoint = endpoint;
+                    console.log(`[Ads] SUCESSO no endpoint: ${endpoint}`);
+                    break; // Parar no primeiro que funcionar
+                } else {
+                    console.log(`[Ads] Falha no endpoint ${endpoint}:`, resp?.error || 'Retorno vazio');
+                }
+            } catch (innerErr: any) {
+                console.log(`[Ads] Erro no endpoint ${endpoint}:`, innerErr.message);
+                
+                // Se for 403, nem adianta tentar outros se for problema de permissão global
+                if (innerErr.message?.includes('403')) {
+                    console.warn('[Ads] Permissão negada (403). Verifique se o app tem permissão para Ads.');
+                }
+            }
+        }
+
+        if (adsData) {
+            console.log('[Ads] Processando dados encontrados...');
+            
+            // Normalizar dados (se for lista ou objeto único)
+            const performanceList = Array.isArray(adsData) ? adsData : 
+                                  (adsData.performance_list || adsData.nodes || []);
+            
+            // Se tiver performance_list, iterar e somar
+            if (performanceList.length > 0) {
+                performanceList.forEach((day: any) => {
+                    adsSpend += Number(day.expense || day.spend || day.cost || 0);
+                    adsImpressions += Number(day.impression || day.impressions || 0);
+                    adsClicks += Number(day.click || day.clicks || 0);
+                    adsConversions += Number(day.conversion || day.conversions || day.direct_conversion || 0);
+                    // Tentar capturar GMV direto se disponível para ROAS mais preciso
+                    // adsGmv += Number(day.gmv || day.direct_gmv || 0);
+                });
+            } else if (adsData.total_expense || adsData.expense) {
+                // Se retornar totais diretos
+                adsSpend = Number(adsData.total_expense || adsData.expense || 0);
+                adsImpressions = Number(adsData.total_impression || adsData.impression || 0);
+                adsClicks = Number(adsData.total_click || adsData.click || 0);
+                adsConversions = Number(adsData.total_conversion || adsData.conversion || 0);
+            }
+
+            // Calcular derivados
+            if (adsSpend > 0) {
+                 // Tentar achar GMV de ads na resposta para ROAS
+                 // Se não tiver GMV explícito, não podemos calcular ROAS real aqui
+                 const adsGmv = Number(adsData.total_gmv || adsData.gmv || adsData.direct_gmv || 0); 
+                 
+                 if (adsGmv > 0) {
+                    adsRoas = adsGmv / adsSpend;
+                 }
+                 
+                 adsCtr = adsImpressions > 0 ? (adsClicks / adsImpressions) * 100 : 0;
+            }
+            
+            console.log(`[Ads] Métricas finais: Spend R$${adsSpend.toFixed(2)}, ROAS ${adsRoas.toFixed(2)}x`);
+        } else {
+            console.log('[Ads] Nenhum endpoint retornou dados válidos.');
+            
+            // Teste de conectividade básico (Balance) para diagnosticar permissão
+            try {
+                console.log('[Ads] Testando acesso básico (get_total_balance)...');
+                const balanceResp = await shopeeFetch<any>({
+                    path: '/api/v2/ads/get_total_balance',
+                    access_token,
+                    shop_id
+                });
+                if (balanceResp && !balanceResp.error) {
+                     console.log('[Ads] Acesso ao módulo Ads CONFIRMADO (Balance disponível). Provável erro de endpoint de performance.');
+                } else {
+                     console.log('[Ads] Acesso ao módulo Ads NEGADO ou falho (Balance erro):', balanceResp?.error);
+                }
+            } catch (e) {
+                console.log('[Ads] Falha no teste de Balance.');
+            }
+        }
+
+    } catch (e: any) {
+        console.log('[Ads] Erro geral na busca:', e.message);
+    }
+
+    // Ticket médio já calculado anteriormente
+    // const ticketMedio = totalOrders > 0 ? gmv / totalOrders : 0;
+    
+    // Top products não é retornado pela função simplificada de vendas reais
+    const topProducts: any[] = []; 
 
     const aggregatedData = {
         shopName: shopInfo?.shop_name || 'N/A',
@@ -642,11 +529,12 @@ export async function GET(request: Request) {
             impressions: adsImpressions,
             clicks: adsClicks,
             ctr: adsCtr,
-            cpa: totalOrders > 0 && adsSpend > 0 ? adsSpend / totalOrders : 0
+            conversions: adsConversions, // Adicionado campo de conversões
+            cpa: adsConversions > 0 && adsSpend > 0 ? adsSpend / adsConversions : 0
         },
         
         debug: {
-          periodDays,
+          periodDays: requestedDays,
           totalOrdersFound: totalOrders
         }
     };
@@ -676,3 +564,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: err.message || 'Erro interno' }, { status: 500 });
   }
 }
+  

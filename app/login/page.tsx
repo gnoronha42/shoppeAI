@@ -21,9 +21,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      console.log('Iniciando tentativa de login...');
       await login(email, password);
-      console.log('Login processado com sucesso');
     } catch (error: any) {
       console.error('Erro no login:', error);
       toast({

@@ -78,12 +78,12 @@ export default function AnalistasPage() {
   });
   const { toast } = useToast();
 
-  // Função para carregar analistas
+  
   const loadAnalysts = async () => {
     try {
       setIsLoading(true);
       const response = await fetch("/api/analistas", {
-        credentials: 'include', // Enviar cookies automaticamente
+        credentials: 'include', 
       });
       if (!response.ok) throw new Error("Erro ao carregar analistas");
       const data = await response.json();

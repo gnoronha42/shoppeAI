@@ -953,16 +953,16 @@ export default function AnalisePage() {
                 {Object.entries(testResults.resultados).map(([system, result]: [string, any]) => (
                   <div key={system} className="flex items-center justify-between p-2 rounded border">
                     <span className="font-medium">
-                      {system === 'debugSystem' && '🔍 Sistema Debug'}
-                      {system === 'bypassSystem' && '⚡ Sistema Bypass'}
-                      {system === 'robustSystem' && '🔄 Sistema Robusto'}
+                      {/* {system === 'debugSystem' && '🔍 Sistema Debug'} */}
+                      {/* {system === 'bypassSystem' && '⚡ Sistema Bypass'} */}
+                      {/* {system === 'robustSystem' && '🔄 Sistema Robusto'} */}
                     </span>
                     <span className={`px-2 py-1 rounded text-xs ${
                       result.sucesso 
                         ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' 
                         : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                     }`}>
-                      {result.sucesso ? '✅ Funcionando' : '❌ Falhou'}
+                      {result.sucesso ? 'Funcionando' : ' Falhou'}
                     </span>
                   </div>
                 ))}

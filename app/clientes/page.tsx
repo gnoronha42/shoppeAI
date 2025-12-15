@@ -35,14 +35,6 @@ export default function ClientesPage() {
   const [page, setPage] = useState<number>(1);
   const { hasPermission, user } = useAuth();
   
-  // Adicionar logs para debugar
-  useEffect(() => {
-    console.log('=== DEBUG PERMISSÕES CLIENTE ===');
-    console.log('Usuário:', user);
-    console.log('hasPermission create_clients:', hasPermission('create_clients'));
-    console.log('hasPermission view_clients:', hasPermission('view_clients'));
-  }, [user, hasPermission]);
-
   const { data: response, isLoading, error } = useGetClientsQuery({
     page,
     pageSize: CLIENTS_PER_PAGE,

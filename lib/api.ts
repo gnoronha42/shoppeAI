@@ -23,7 +23,6 @@ export const api = createApi({
       search?: string;
     }>({
       query: (params = { page: 1, pageSize: 10 }) => {
-        console.log(' Fazendo requisição para /api/clientes com params:', params);
         const queryParams = new URLSearchParams();
         
         if (params.page) queryParams.append('page', params.page.toString());
@@ -34,10 +33,7 @@ export const api = createApi({
         return `clientes${queryString ? `?${queryString}` : ''}`;
       },
       transformResponse: (response: any) => {
-        console.log('Response bruta from clients API:', response);
-        
         if (!response) {
-          console.log(' Response vazia');
           return {
             data: [],
             meta: {
@@ -70,10 +66,7 @@ export const api = createApi({
           const result = await queryFulfilled;
         
         } catch (error: any) {
-          console.error(' Erro na query getClients:', error);
-          if (error && typeof error === 'object' && 'error' in error) {
-            console.error('Detalhes do erro:', error.error);
-          }
+          // Erro silencioso na query getClients
         }
       },
     }),
@@ -107,17 +100,15 @@ export const api = createApi({
       invalidatesTags: ['Clients'],
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
-          const result = await queryFulfilled;
-          console.log(' Cliente criado com sucesso:', result.data);
+          await queryFulfilled;
         } catch (error: any) {
-          console.error(' Erro ao criar cliente:', error);
+          // Erro silencioso ao criar cliente
         }
       },
     }),
     
     updateClient: builder.mutation<Client, Partial<Client> & { id: string }>({
       query: ({ id, ...client }) => {
-        console.log('Atualizando cliente:', id, client);
         return {
           url: `clientes`,
           method: 'PATCH',
@@ -130,17 +121,15 @@ export const api = createApi({
       ],
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
-          const result = await queryFulfilled;
-          console.log('Cliente atualizado com sucesso:', result.data);
+          await queryFulfilled;
         } catch (error: any) {
-          console.error('Erro ao atualizar cliente:', error);
+          // Erro silencioso ao atualizar cliente
         }
       },
     }),
     
     deleteClient: builder.mutation<void, string>({
       query: (id) => {
-        console.log(' Deletando cliente:', id);
         return {
           url: `clientes?id=${id}`,
           method: 'DELETE',
@@ -150,9 +139,8 @@ export const api = createApi({
       onQueryStarted: async (arg, { queryFulfilled }) => {
         try {
           await queryFulfilled;
-          console.log(' Cliente deletado com sucesso');
         } catch (error: any) {
-          console.error(' Erro ao deletar cliente:', error);
+          // Erro silencioso ao deletar cliente
         }
       },
     }),
