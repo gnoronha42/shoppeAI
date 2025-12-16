@@ -71,7 +71,9 @@ export default function Home() {
   });
   
   const [dateTo, setDateTo] = useState(() => {
-    return new Date().toISOString().split('T')[0];
+    const date = new Date();
+    date.setDate(date.getDate() - 1); // Ontem (Shopee padrão ignora o dia atual incompleto)
+    return date.toISOString().split('T')[0];
   });
 
   const [customPeriod, setCustomPeriod] = useState(false);
@@ -82,7 +84,8 @@ export default function Home() {
       let url = '/api/dashboard/stats';
       
       if (fromDate && toDate) {
-        const timeFrom = Math.floor(new Date(fromDate).getTime() / 1000);
+        // Ajustar para o fuso horário local (00:00:00 do dia inicial até 23:59:59 do dia final)
+        const timeFrom = Math.floor(new Date(fromDate + 'T00:00:00').getTime() / 1000);
         const timeTo = Math.floor(new Date(toDate + 'T23:59:59').getTime() / 1000);
         url += `?time_from=${timeFrom}&time_to=${timeTo}`;
       }

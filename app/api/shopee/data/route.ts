@@ -323,6 +323,7 @@ export async function GET(request: Request) {
     let gmv = 0;
     let totalOrders = 0;
     let ticketMedio = 0;
+    let topProducts: any[] = [];
     
     try {
         const dadosPrecisos = await calcularPedidosPagos30Dias(
@@ -335,6 +336,7 @@ export async function GET(request: Request) {
         gmv = dadosPrecisos.totalVendas;
         totalOrders = dadosPrecisos.totalPedidos;
         ticketMedio = totalOrders > 0 ? gmv / totalOrders : 0;
+        topProducts = dadosPrecisos.topProducts || []; // Agora disponível
         
         console.log(`[GET /api/shopee/data] Dados precisos obtidos: GMV R$${gmv}, Pedidos ${totalOrders}`);
         
@@ -503,9 +505,6 @@ export async function GET(request: Request) {
     // Ticket médio já calculado anteriormente
     // const ticketMedio = totalOrders > 0 ? gmv / totalOrders : 0;
     
-    // Top products não é retornado pela função simplificada de vendas reais
-    const topProducts: any[] = []; 
-
     const aggregatedData = {
         shopName: shopInfo?.shop_name || 'N/A',
         totalOrdersLast30Days: totalOrders,
