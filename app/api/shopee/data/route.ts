@@ -400,7 +400,9 @@ export async function GET(request: Request) {
             '/api/v2/ads/get_ads_performance',     // Tentativa anterior
             '/api/v2/marketing_solution/get_ads_performance',
              // Novo endpoint sugerido na documentação
-            '/api/v2/ads/get_gms_campaign_performance'
+            '/api/v2/ads/get_gms_campaign_performance',
+            // Endpoint listado na categoria Ads Service
+            '/api/v2/ads/get_all_cpc_ads_daily_performance'
         ];
 
         let adsData: any = null;

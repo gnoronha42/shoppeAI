@@ -163,26 +163,39 @@ export async function calcularPedidosPagos30Dias(
         if (pageOrders.length > 0) {
           const orderSns = pageOrders.map((o: any) => o.order_sn);
           const chunkSize = 50;
+          const detailPromises = [];
 
+          // Preparar promessas de fetch em paralelo
           for (let i = 0; i < orderSns.length; i += chunkSize) {
             const snChunk = orderSns.slice(i, i + chunkSize);
-            try {
-              console.log(`   🔍 Buscando detalhes financeiros para ${snChunk.length} pedidos...`);
-              const detailResp = await shopeeFetch<any>({
-                path: '/api/v2/order/get_order_detail',
-                access_token,
-                shop_id,
-                query: {
-                  order_sn_list: snChunk.join(','),
-                  response_optional_fields: 'total_amount,order_status,create_time,pay_time,item_list'
-                }
-              });
+            const promise = shopeeFetch<any>({
+              path: '/api/v2/order/get_order_detail',
+              access_token,
+              shop_id,
+              query: {
+                order_sn_list: snChunk.join(','),
+                response_optional_fields: 'total_amount,order_status,create_time,pay_time,item_list'
+              }
+            }).then(detailResp => {
+               return detailResp?.response?.order_list || [];
+            }).catch(e => {
+               console.error('    [Vercel Opt] Erro em chunk de detalhes:', e.message);
+               return [];
+            });
+            detailPromises.push(promise);
+          }
+          
+          // Executar todas as buscas de detalhes em paralelo para evitar timeout na Vercel
+          const allDetails = await Promise.all(detailPromises);
+          // Achatar o array de resultados
+          const details = allDetails.flat();
 
-              const details = detailResp?.response?.order_list || [];
-
-              for (const order of details) {
-                const status = order.order_status || 'UNKNOWN';
-                const amount = Number(order.total_amount || 0);
+          // Processar os detalhes retornados
+          for (const order of details) {
+            const status = order.order_status || 'UNKNOWN';
+            const amount = Number(order.total_amount || 0);
+            
+            // ... resto do loop de processamento ...
 
 
                 // Para CANCELLED Exige pay_time 
@@ -231,10 +244,8 @@ export async function calcularPedidosPagos30Dias(
 
                 if (status === 'CANCELLED' && orderTime >= finalTimeFrom && orderTime <= finalTimeTo) { }
               }
-            } catch (e: any) {
-              console.error('    Erro ao buscar detalhes dos pedidos:', e.message);
-            }
-          }
+            
+          
         } else { }
 
 
