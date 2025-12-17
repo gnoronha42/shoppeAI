@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { shopeeFetch } from '@/lib/shopee';
 
+export const runtime = 'edge';
+// export const maxDuration = 60; // Edge tem limite fixo (geralmente 30s), maxDuration é ignorado ou causa erro
+export const dynamic = 'force-dynamic';
+
 // Status pagos conforme painel 
 const PEDIDOS_PAGOS_STATUSES = ['READY_TO_SHIP', 'PROCESSED', 'SHIPPED', 'COMPLETED', 'TO_CONFIRM_RECEIVE', 'TO_SHIP', 'TO_CONFIRM_DELIVER', 'READY_TO_PICKUP', 'TO_RETURN', 'CANCELLED'];
 
@@ -159,9 +163,21 @@ export async function calcularPedidosPagos30Dias(
         const pageOrders = orderResp?.response?.order_list || [];
         console.log(`   Chunk ${chunkIndex + 1} - Página ${pageCount}: ${pageOrders.length} pedidos encontrados`);
 
+        // [OTIMIZAÇÃO] Filtrar apenas status relevantes antes de buscar detalhes
+        // Isso economiza chamadas de API para pedidos UNPAID, etc.
+        const relevantOrders = pageOrders.filter((o: any) => {
+          // Se não vier status, processa para garantir
+          if (!o.order_status) return true;
+          return PEDIDOS_PAGOS_STATUSES.includes(o.order_status);
+        });
+
+        if (relevantOrders.length < pageOrders.length) {
+          console.log(`   [SKIP] Ignorando ${pageOrders.length - relevantOrders.length} pedidos irrelevantes. Processando: ${relevantOrders.length}`);
+        }
+
         // Se encontrou pedidos, buscar os detalhes financeiros (get_order_detail) - OTIMIZADO PARA MÁXIMA VELOCIDADE
-        if (pageOrders.length > 0) {
-          const orderSns = pageOrders.map((o: any) => o.order_sn);
+        if (relevantOrders.length > 0) {
+          const orderSns = relevantOrders.map((o: any) => o.order_sn);
           const chunkSize = 10; // Chunks ultra-pequenos para velocidade máxima
           const CONCURRENCY_LIMIT = 6; // Máxima concorrência possível (chunks pequenos = safe)
           

@@ -1,5 +1,3 @@
-import crypto from 'crypto';
-
 const SHOPEE_BASE_URL = process.env.SHOPEE_BASE_URL || '';
 const SHOPEE_PARTNER_ID = process.env.SHOPEE_PARTNER_ID || '';
 const SHOPEE_PARTNER_KEY = process.env.SHOPEE_PARTNER_KEY || '';
@@ -7,8 +5,24 @@ const SHOPEE_REDIRECT_URL = process.env.SHOPEE_REDIRECT_URL || '';
 
 const SHOPEE_SECRET = SHOPEE_PARTNER_KEY;
 
-function toHexHmacSHA256(payload: string, secret: string): string {
-  return crypto.createHmac('sha256', secret).update(payload).digest('hex');
+async function toHexHmacSHA256(payload: string, secret: string): Promise<string> {
+  const enc = new TextEncoder();
+  const algorithm = { name: "HMAC", hash: "SHA-256" };
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    algorithm,
+    false,
+    ["sign", "verify"]
+  );
+  const signature = await crypto.subtle.sign(
+    algorithm.name,
+    key,
+    enc.encode(payload)
+  );
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 function getTimestamp(): number {
@@ -34,7 +48,7 @@ export async function buildAuthUrlAsync(params: { state: string; redirectUrl?: s
   const timestamp = await getShopeeServerTimestamp();
   const redirect = encodeURIComponent(params.redirectUrl || SHOPEE_REDIRECT_URL);
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
-  const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
+  const sign = await toHexHmacSHA256(baseString, SHOPEE_SECRET);
   const url = `${SHOPEE_BASE_URL}${path}?partner_id=${SHOPEE_PARTNER_ID}&timestamp=${timestamp}&sign=${sign}&redirect=${redirect}&state=${encodeURIComponent(params.state)}`;
   return url;
 }
@@ -44,7 +58,7 @@ export async function getAccessToken(args: { code: string; shop_id: string }) {
   const timestamp = await getShopeeServerTimestamp();
   
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
-  const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
+  const sign = await toHexHmacSHA256(baseString, SHOPEE_SECRET);
   
   const url = `${SHOPEE_BASE_URL}${path}?partner_id=${SHOPEE_PARTNER_ID}&timestamp=${timestamp}&sign=${sign}`;
   
@@ -102,7 +116,7 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
   const timestamp = await getShopeeServerTimestamp();
   
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}`;
-  const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
+  const sign = await toHexHmacSHA256(baseString, SHOPEE_SECRET);
   
   const queryParams = new URLSearchParams({
     partner_id: SHOPEE_PARTNER_ID.toString(),
@@ -165,7 +179,7 @@ export async function refreshAccessToken(args: { refresh_token: string; shop_id?
   
   const data = await res.json();
   
-
+  // LOG DA REQUEST
   
   return data as {
     access_token: string;
@@ -189,7 +203,7 @@ export async function shopeeFetch<T = unknown>(args: {
   const method = args.method || 'GET';
   const timestamp = await getShopeeServerTimestamp();
   const baseString = `${SHOPEE_PARTNER_ID}${path}${timestamp}${args.access_token}${args.shop_id}`;
-  const sign = toHexHmacSHA256(baseString, SHOPEE_SECRET);
+  const sign = await toHexHmacSHA256(baseString, SHOPEE_SECRET);
   const search = new URLSearchParams();
   search.set('partner_id', String(SHOPEE_PARTNER_ID));
   search.set('timestamp', String(timestamp));
