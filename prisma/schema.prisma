@@ -343,3 +343,16 @@ model client_integrations {
   @@index([provider], map: "idx_client_integrations_provider")
   @@index([shop_id], map: "idx_client_integrations_shop_id")
 }
+
+/// Tabela para armazenar resultados de jobs assíncronos (ex: Inngest)
+model JobResult {
+  id         String   @id @default(uuid())
+  jobId      String   @unique
+  status     String   @default("pending") // pending, completed, failed
+  result     Json?
+  error      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([jobId])
+}

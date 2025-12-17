@@ -63,10 +63,10 @@ export async function GET(request: Request) {
         let statusBreakdown: any = {};
         let topProducts: any[] = [];
         try {
-          // Usar período dinâmico baseado nos parâmetros ou últimos 30 dias
+          // Usar processamento ASSÍNCRONO via Inngest + Polling
+          // Isso evita timeouts na Vercel para lojas grandes
           let url = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shopee/vendas-reais?access_token=${integration.access_token}&shop_id=${integration.shop_id}`;
           
-         
           if (timeFromParam && timeToParam) {
             url += `&time_from=${timeFromParam}&time_to=${timeToParam}`;
           }
@@ -79,7 +79,48 @@ export async function GET(request: Request) {
           const vendasResp = await fetch(url);
           if (vendasResp.ok) {
             const vendasData = await vendasResp.json();
-            if (vendasData.success) {
+            
+            // [MODIFICADO] Verificar se é resposta de JOB (Inngest) ou dados reais
+            if (vendasData.jobId) {
+              console.log(`[DASHBOARD] Job Inngest iniciado: ${vendasData.jobId}. Aguardando resultado (Polling)...`);
+              
+              // Polling Server-Side (Até 50s para Vercel Pro ou 8s para Hobby)
+              const MAX_WAIT_TIME = 25000; // 25 segundos
+              const POLLING_INTERVAL = 2000; // 2 segundos
+              const startTime = Date.now();
+
+              while (Date.now() - startTime < MAX_WAIT_TIME) {
+                await new Promise(r => setTimeout(r, POLLING_INTERVAL));
+                
+                try {
+                  // Verificar status do job na API (que agora consulta o banco!)
+                  const checkUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shopee/vendas-reais?job_id=${vendasData.jobId}&access_token=${integration.access_token}&shop_id=${integration.shop_id}`;
+                  const checkResp = await fetch(checkUrl);
+                  const checkData = await checkResp.json();
+
+                  if (checkData.status === 'completed' && checkData.data) {
+                    console.log(`[DASHBOARD] Job ${vendasData.jobId} concluído com sucesso!`);
+                    
+                    vendasReais = checkData.data.vendas || 0;
+                    pedidosReais = checkData.data.pedidos || 0;
+                    statusBreakdown = checkData.data.statusBreakdown || {};
+                    topProducts = checkData.data.topProducts || [];
+                    
+                    console.log(`\n [DASHBOARD] PEDIDOS PAGOS (via Inngest) para loja ${integration.shop_id}:`);
+                    console.log(`   • Vendas: R$ ${vendasReais.toFixed(2)}`);
+                    break; // Sai do loop
+                  } else if (checkData.status === 'failed') {
+                    console.error(`[DASHBOARD] Job ${vendasData.jobId} falhou:`, checkData.error);
+                    break;
+                  }
+                  // Se ainda 'processing', continua o loop
+                } catch (e) { 
+                  console.error('Erro no polling:', e);
+                  break; 
+                }
+              }
+            } else if (vendasData.success && vendasData.data) {
+              // Resposta direta com dados (se a API retornar direto ou se implementarmos polling aqui)
               vendasReais = vendasData.data.vendas || 0;
               pedidosReais = vendasData.data.pedidos || 0;
               statusBreakdown = vendasData.data.statusBreakdown || {};
@@ -89,8 +130,6 @@ export async function GET(request: Request) {
               console.log(`   • Vendas de Pedidos Pagos: R$ ${vendasReais.toFixed(2)}`);
               console.log(`   • Total de Pedidos Pagos: ${pedidosReais}`);
               console.log(`   • Período: ${vendasData.data.periodo?.inicio} até ${vendasData.data.periodo?.fim}`);
-              console.log(`   • Status Pedidos Pagos:`, vendasData.data.criterios?.statusPedidosPagos);
-              console.log(`   • Status Breakdown:`, statusBreakdown);
             }
           } else {
             console.error(`[DASHBOARD] Erro HTTP ${vendasResp.status} ao buscar vendas reais`);
@@ -110,6 +149,7 @@ export async function GET(request: Request) {
              console.log(`[DASHBOARD] Loja ${integration.shop_id} sem vendas no período. Tentando buscar faturamento TOTAL do ano...`);
              
              try {
+                // Fallback Anual com Inngest + Polling
                 const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime(); // 01/01 do ano atual
                 const now = Math.floor(Date.now() / 1000);  
                 let urlAno = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shopee/vendas-reais?access_token=${integration.access_token}&shop_id=${integration.shop_id}&time_from=${Math.floor(startOfYear / 1000)}&time_to=${now}`;
@@ -118,7 +158,29 @@ export async function GET(request: Request) {
                 const respAno = await fetch(urlAno);
                 if (respAno.ok) {
                     const dataAno = await respAno.json();
-                    if (dataAno.success && dataAno.data.vendas > 0) {
+                    
+                    // [MODIFICADO] Tratamento de job/dados para o fallback anual
+                    if (dataAno.jobId) {
+                         console.log(`[FALLBACK] Job Inngest iniciado para dados anuais: ${dataAno.jobId}. Aguardando polling...`);
+                         
+                         // Polling simplificado para fallback
+                         const MAX_WAIT_TIME = 25000;
+                         const startTime = Date.now();
+                         while (Date.now() - startTime < MAX_WAIT_TIME) {
+                            await new Promise(r => setTimeout(r, 2000));
+                            const checkUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shopee/vendas-reais?job_id=${dataAno.jobId}&access_token=${integration.access_token}&shop_id=${integration.shop_id}`;
+                            const checkResp = await fetch(checkUrl);
+                            const checkData = await checkResp.json();
+                            
+                            if (checkData.status === 'completed' && checkData.data && checkData.data.vendas > 0) {
+                                console.log(`[FALLBACK] Dados anuais via Inngest: R$ ${checkData.data.vendas}`);
+                                finalGmv = checkData.data.vendas;
+                                finalOrders = checkData.data.pedidos;
+                                isAnnualFallback = true;
+                                break;
+                            } else if (checkData.status === 'failed') break;
+                         }
+                    } else if (dataAno.success && dataAno.data && dataAno.data.vendas > 0) {
                         console.log(`[FALLBACK] Dados anuais encontrados: R$ ${dataAno.data.vendas} (${dataAno.data.pedidos} pedidos)`);
                         finalGmv = dataAno.data.vendas;
                         finalOrders = dataAno.data.pedidos;
