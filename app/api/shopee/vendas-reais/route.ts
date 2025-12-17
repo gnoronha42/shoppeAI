@@ -64,23 +64,23 @@ export async function GET(request: NextRequest) {
     // 2. MODO SÍNCRONO (force_sync=true)
     // Útil para dashboard rápido ou debug
     if (forceSync) {
-      console.log(`\n${'='.repeat(80)}`);
+    console.log(`\n${'='.repeat(80)}`);
       console.log(` [VENDAS-REAIS] Executando em modo SÍNCRONO (force_sync=true)`);
-      
-      const resultado = await calcularPedidosPagos30Dias(access_token, shop_id, timeFrom, timeTo);
-      
-      return NextResponse.json({
-        success: true,
-        data: {
-          vendas: resultado.totalVendas,
-          pedidos: resultado.totalPedidos,
-          pedidosProcessados: resultado.pedidosProcessados,
-          statusBreakdown: resultado.statusBreakdown,
-          periodo: resultado.periodo,
-          topProducts: resultado.topProducts,
-          criterios: {
-            statusPedidosPagos: PEDIDOS_PAGOS_STATUSES,
-            statusNaoPagos: PEDIDOS_NAO_PAGOS_STATUSES,
+
+    const resultado = await calcularPedidosPagos30Dias(access_token, shop_id, timeFrom, timeTo);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        vendas: resultado.totalVendas,
+        pedidos: resultado.totalPedidos,
+        pedidosProcessados: resultado.pedidosProcessados,
+        statusBreakdown: resultado.statusBreakdown,
+        periodo: resultado.periodo,
+        topProducts: resultado.topProducts,
+        criterios: {
+          statusPedidosPagos: PEDIDOS_PAGOS_STATUSES,
+          statusNaoPagos: PEDIDOS_NAO_PAGOS_STATUSES,
             metodo: 'SÍNCRONO',
             periodo: 'custom'
           }

@@ -53,7 +53,7 @@ export default function AnalisePage() {
   const { toast } = useToast();
   
   const [dateRange, setDateRange] = useState<DateRange>({
-    from: subDays(new Date(), 30),
+    from: subDays(new Date(), 7), // Reduzido para 7 dias para evitar timeouts em lojas grandes
     to: new Date(),
   });
   const [apiError, setApiError] = useState<string | null>(null);

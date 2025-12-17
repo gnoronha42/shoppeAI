@@ -81,7 +81,7 @@ export default function Home() {
   const fetchStats = async (fromDate?: string, toDate?: string) => {
     setLoading(true);
     try {
-      let url = '/api/dashboard/stats';
+      let url = `${process.env.NEXT_PUBLIC_ANALYSIS_BASE_URL}/api/dashboard/stats`;
       
       if (fromDate && toDate) {
         // Ajustar para o fuso horário local (00:00:00 do dia inicial até 23:59:59 do dia final)

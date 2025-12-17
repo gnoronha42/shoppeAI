@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getShopStats } from '@/lib/shopee-stats';
 import { shopeeFetch } from '@/lib/shopee';
+import { calcularPedidosPagos30Dias } from '@/lib/shopee-vendas';
 
 export const dynamic = 'force-dynamic'; 
+export const maxDuration = 60; // Aumentar timeout para suportar espera do Render 
 
 export async function GET(request: Request) {
   try {
@@ -63,32 +65,25 @@ export async function GET(request: Request) {
         let statusBreakdown: any = {};
         let topProducts: any[] = [];
         try {
-          // MODO SÍNCRONO DIRETO (Simplificado para evitar problemas com Inngest/Banco em produção agora)
-          // A rota vendas-reais já está otimizada para ser rápida.
-          let url = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shopee/vendas-reais?access_token=${integration.access_token}&shop_id=${integration.shop_id}&force_sync=true`;
+          // CHAMADA DIRETA AO PROXY (Que chama o Microserviço no Render)
+          // Isso substitui o fetch interno para api/shopee/vendas-reais
+          console.log(`\n [DASHBOARD] Buscando vendas reais para loja ${integration.shop_id} via Proxy -> Microserviço...`);
           
-          if (timeFromParam && timeToParam) {
-            url += `&time_from=${timeFromParam}&time_to=${timeToParam}`;
-          }
-          
-          console.log(`\n [DASHBOARD] Chamando API SÍNCRONA para loja ${integration.shop_id}...`);
-          // console.log(`   URL: ${url.replace(integration.access_token || '', 'TOKEN_HIDDEN')}`);
-          
-          const vendasResp = await fetch(url);
-          if (vendasResp.ok) {
-            const vendasData = await vendasResp.json();
+          const vendasData = await calcularPedidosPagos30Dias(
+            integration.access_token,
+            integration.shop_id,
+            timeFromParam,
+            timeToParam
+          );
+
+          if (vendasData) {
+            vendasReais = vendasData.totalVendas || 0;
+            pedidosReais = vendasData.totalPedidos || 0;
+            statusBreakdown = vendasData.statusBreakdown || {};
+            topProducts = vendasData.topProducts || [];
             
-            if (vendasData.success && vendasData.data) {
-              vendasReais = vendasData.data.vendas || 0;
-              pedidosReais = vendasData.data.pedidos || 0;
-              statusBreakdown = vendasData.data.statusBreakdown || {};
-              topProducts = vendasData.data.topProducts || [];
-              
-              console.log(`\n [DASHBOARD] PEDIDOS PAGOS para loja ${integration.shop_id}:`);
-              console.log(`   • Vendas: R$ ${vendasReais.toFixed(2)}`);
-            }
-          } else {
-            console.error(`[DASHBOARD] Erro HTTP ${vendasResp.status} ao buscar vendas reais`);
+            console.log(`\n [DASHBOARD] PEDIDOS PAGOS para loja ${integration.shop_id}:`);
+            console.log(`   • Vendas: R$ ${vendasReais.toFixed(2)}`);
           }
         } catch (vendasError) {
           console.error(` [DASHBOARD] Erro ao buscar vendas reais para loja ${integration.shop_id}:`, vendasError);
@@ -107,19 +102,21 @@ export async function GET(request: Request) {
              try {
                 const startOfYear = new Date(new Date().getFullYear(), 0, 1).getTime(); // 01/01 do ano atual
                 const now = Math.floor(Date.now() / 1000);  
-                let urlAno = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/shopee/vendas-reais?access_token=${integration.access_token}&shop_id=${integration.shop_id}&time_from=${Math.floor(startOfYear / 1000)}&time_to=${now}&force_sync=true`;
                 
-                console.log(`   🔗 Buscando dados anuais...`);
-                const respAno = await fetch(urlAno);
-                if (respAno.ok) {
-                    const dataAno = await respAno.json();
-                    
-                    if (dataAno.success && dataAno.data && dataAno.data.vendas > 0) {
-                        console.log(`[FALLBACK] Dados anuais encontrados: R$ ${dataAno.data.vendas} (${dataAno.data.pedidos} pedidos)`);
-                        finalGmv = dataAno.data.vendas;
-                        finalOrders = dataAno.data.pedidos;
-                        isAnnualFallback = true;
-                    }
+                console.log(`   🔗 Buscando dados anuais via Proxy -> Microserviço...`);
+                
+                const dataAno = await calcularPedidosPagos30Dias(
+                  integration.access_token,
+                  integration.shop_id,
+                  Math.floor(startOfYear / 1000),
+                  now
+                );
+
+                if (dataAno && dataAno.totalVendas > 0) {
+                    console.log(`[FALLBACK] Dados anuais encontrados: R$ ${dataAno.totalVendas} (${dataAno.totalPedidos} pedidos)`);
+                    finalGmv = dataAno.totalVendas;
+                    finalOrders = dataAno.totalPedidos;
+                    isAnnualFallback = true;
                 }
              } catch (e) {
                  console.error('Erro ao buscar fallback anual:', e);
