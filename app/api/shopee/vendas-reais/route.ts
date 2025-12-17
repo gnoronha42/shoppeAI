@@ -159,36 +159,68 @@ export async function calcularPedidosPagos30Dias(
         const pageOrders = orderResp?.response?.order_list || [];
         console.log(`   Chunk ${chunkIndex + 1} - Página ${pageCount}: ${pageOrders.length} pedidos encontrados`);
 
-        // Se encontrou pedidos, buscar os detalhes financeiros (get_order_detail)
+        // Se encontrou pedidos, buscar os detalhes financeiros (get_order_detail) - OTIMIZADO PARA MÁXIMA VELOCIDADE
         if (pageOrders.length > 0) {
           const orderSns = pageOrders.map((o: any) => o.order_sn);
-          const chunkSize = 50;
-          const detailPromises = [];
-
-          // Preparar promessas de fetch em paralelo
-          for (let i = 0; i < orderSns.length; i += chunkSize) {
-            const snChunk = orderSns.slice(i, i + chunkSize);
-            const promise = shopeeFetch<any>({
-              path: '/api/v2/order/get_order_detail',
-              access_token,
-              shop_id,
-              query: {
-                order_sn_list: snChunk.join(','),
-                response_optional_fields: 'total_amount,order_status,create_time,pay_time,item_list'
-              }
-            }).then(detailResp => {
-               return detailResp?.response?.order_list || [];
-            }).catch(e => {
-               console.error('    [Vercel Opt] Erro em chunk de detalhes:', e.message);
-               return [];
-            });
-            detailPromises.push(promise);
-          }
+          const chunkSize = 10; // Chunks ultra-pequenos para velocidade máxima
+          const CONCURRENCY_LIMIT = 6; // Máxima concorrência possível (chunks pequenos = safe)
           
-          // Executar todas as buscas de detalhes em paralelo para evitar timeout na Vercel
-          const allDetails = await Promise.all(detailPromises);
-          // Achatar o array de resultados
-          const details = allDetails.flat();
+          // Função helper otimizada para máxima velocidade
+          const processInBatches = async <T, R>(
+            items: T[],
+            batchSize: number,
+            concurrency: number,
+            processor: (batch: T[]) => Promise<R[]>
+          ): Promise<R[]> => {
+            const results: R[] = [];
+            const totalBatches = Math.ceil(items.length / batchSize);
+            
+            // Processar todos os batches com controle de concorrência
+            for (let i = 0; i < totalBatches; i += concurrency) {
+              const batchPromises: Promise<R[]>[] = [];
+              
+              // Criar até 'concurrency' promises simultâneas
+              for (let j = 0; j < concurrency && (i + j) < totalBatches; j++) {
+                const startIdx = (i + j) * batchSize;
+                const chunk = items.slice(startIdx, startIdx + batchSize);
+                batchPromises.push(processor(chunk));
+              }
+              
+              // Aguardar todas concluírem e adicionar resultados
+              const batchResults = await Promise.all(batchPromises);
+              results.push(...batchResults.flat());
+              
+              // Delay mínimo apenas entre grupos grandes (não entre cada batch)
+              if (i + concurrency < totalBatches && i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 20)); // Delay mínimo
+              }
+            }
+            return results;
+          };
+
+          // Processar em batches controlados - MÁXIMA VELOCIDADE
+          const details = await processInBatches<string, any>(
+            orderSns,
+            chunkSize,
+            CONCURRENCY_LIMIT,
+            async (snChunk: string[]) => {
+              try {
+                const detailResp = await shopeeFetch<any>({
+                  path: '/api/v2/order/get_order_detail',
+                  access_token,
+                  shop_id,
+                  query: {
+                    order_sn_list: snChunk.join(','),
+                    response_optional_fields: 'total_amount,order_status,create_time,pay_time,item_list'
+                  }
+                });
+                return detailResp?.response?.order_list || [];
+              } catch (e: any) {
+                console.error('    [Erro] Chunk detalhes:', e.message);
+                return [];
+              }
+            }
+          );
 
           // Processar os detalhes retornados
           for (const order of details) {
