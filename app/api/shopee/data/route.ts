@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
-import { calcularPedidosPagos30Dias } from '../vendas-reais/route';
+import { calcularPedidosPagos30Dias } from '@/lib/shopee-vendas';
 
 export const dynamic = 'force-dynamic';
 
