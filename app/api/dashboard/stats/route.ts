@@ -69,21 +69,25 @@ export async function GET(request: Request) {
           // Isso substitui o fetch interno para api/shopee/vendas-reais
           console.log(`\n [DASHBOARD] Buscando vendas reais para loja ${integration.shop_id} via Proxy -> Microserviço...`);
           
-          const vendasData = await calcularPedidosPagos30Dias(
-            integration.access_token,
-            integration.shop_id,
-            timeFromParam,
-            timeToParam
-          );
+          if (integration.access_token && integration.shop_id) {
+            const vendasData = await calcularPedidosPagos30Dias(
+              integration.access_token,
+              integration.shop_id,
+              timeFromParam,
+              timeToParam
+            );
 
-          if (vendasData) {
-            vendasReais = vendasData.totalVendas || 0;
-            pedidosReais = vendasData.totalPedidos || 0;
-            statusBreakdown = vendasData.statusBreakdown || {};
-            topProducts = vendasData.topProducts || [];
-            
-            console.log(`\n [DASHBOARD] PEDIDOS PAGOS para loja ${integration.shop_id}:`);
-            console.log(`   • Vendas: R$ ${vendasReais.toFixed(2)}`);
+            if (vendasData) {
+              vendasReais = vendasData.totalVendas || 0;
+              pedidosReais = vendasData.totalPedidos || 0;
+              statusBreakdown = vendasData.statusBreakdown || {};
+              topProducts = vendasData.topProducts || [];
+              
+              console.log(`\n [DASHBOARD] PEDIDOS PAGOS para loja ${integration.shop_id}:`);
+              console.log(`   • Vendas: R$ ${vendasReais.toFixed(2)}`);
+            }
+          } else {
+             console.warn(`[DASHBOARD] Ignorando loja sem credenciais: ${integration.shop_id}`);
           }
         } catch (vendasError) {
           console.error(` [DASHBOARD] Erro ao buscar vendas reais para loja ${integration.shop_id}:`, vendasError);
@@ -105,18 +109,20 @@ export async function GET(request: Request) {
                 
                 console.log(`   🔗 Buscando dados anuais via Proxy -> Microserviço...`);
                 
-                const dataAno = await calcularPedidosPagos30Dias(
-                  integration.access_token,
-                  integration.shop_id,
-                  Math.floor(startOfYear / 1000),
-                  now
-                );
+                if (integration.access_token && integration.shop_id) {
+                  const dataAno = await calcularPedidosPagos30Dias(
+                    integration.access_token,
+                    integration.shop_id,
+                    Math.floor(startOfYear / 1000),
+                    now
+                  );
 
-                if (dataAno && dataAno.totalVendas > 0) {
-                    console.log(`[FALLBACK] Dados anuais encontrados: R$ ${dataAno.totalVendas} (${dataAno.totalPedidos} pedidos)`);
-                    finalGmv = dataAno.totalVendas;
-                    finalOrders = dataAno.totalPedidos;
-                    isAnnualFallback = true;
+                  if (dataAno && dataAno.totalVendas > 0) {
+                      console.log(`[FALLBACK] Dados anuais encontrados: R$ ${dataAno.totalVendas} (${dataAno.totalPedidos} pedidos)`);
+                      finalGmv = dataAno.totalVendas;
+                      finalOrders = dataAno.totalPedidos;
+                      isAnnualFallback = true;
+                  }
                 }
              } catch (e) {
                  console.error('Erro ao buscar fallback anual:', e);
