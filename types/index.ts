@@ -3,6 +3,15 @@ export interface Client {
   id: string;
   name: string;
   ownerName: string;
+  platform?: string;
+  shopUrl?: string | null;
+  followers?: number | null;
+  rating?: number | null; // Changed from Decimal to number as usually serialized
+  registrationDate?: string | Date | null;
+  productCount?: number | null;
+  responseRate?: number | null; // Changed from Decimal to number
+  createdAt?: string | Date | null;
+  updatedAt?: string | Date | null;
 }
 
 // Analysis types

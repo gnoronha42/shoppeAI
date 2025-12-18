@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/pagination";
 import { ClientForm } from "@/components/client/client-form";
 import { useGetClientsQuery } from "@/lib/api";
-import { Loader2, Plus, User, Search } from "lucide-react";
+import { Loader2, Plus, User, Search, ShoppingBag, Video } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { setClients } from "@/features/clients/clientSlice";
 import { Client } from "@/types";
@@ -30,15 +30,19 @@ const CLIENTS_PER_PAGE = 10;
 export default function ClientesPage() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState<string>("lista");
+  const [activeTab, setActiveTab] = useState<string>("shopee"); // Padrão shopee
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const { hasPermission, user } = useAuth();
   
+  // Passar a plataforma para a query. Se estiver na aba cadastro, não importa muito, mas mantemos shopee.
+  const platformFilter = activeTab === 'cadastro' ? 'shopee' : activeTab;
+
   const { data: response, isLoading, error } = useGetClientsQuery({
     page,
     pageSize: CLIENTS_PER_PAGE,
-    search: searchTerm
+    search: searchTerm,
+    platform: platformFilter
   });
 
   // Garantir que clients seja sempre um array
@@ -55,10 +59,10 @@ export default function ClientesPage() {
     }
   }, [clients, dispatch]);
 
-  // Resetar para primeira página quando buscar
+  // Resetar para primeira página quando buscar ou trocar aba
   useEffect(() => {
     setPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, activeTab]);
   
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
@@ -69,33 +73,22 @@ export default function ClientesPage() {
   };
 
   const handleClientFormSuccess = () => {
-    setActiveTab("lista");
+    setActiveTab("shopee"); // Voltar para shopee após cadastro
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Clientes</h1>
-        <p className="text-muted-foreground">
-          Gerencie os clientes da sua plataforma
-        </p>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-       
-        
-        <TabsContent value="lista" className="space-y-6 mt-6">
+  const ClientList = () => (
+    <div className="space-y-6 mt-6">
           {/* Campo de busca */}
           <div className="flex items-center space-x-2">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Buscar clientes..."
+                placeholder={`Buscar clientes ${activeTab === 'shopee' ? 'Shopee' : 'TikTok'}...`}
                 value={searchTerm}
                 onChange={handleSearchChange}
                 className="pl-8"
@@ -154,7 +147,7 @@ export default function ClientesPage() {
                   </div>
                 ) : (
                   <div>
-                    <p className="text-muted-foreground">Nenhum cliente cadastrado</p>
+                    <p className="text-muted-foreground">Nenhum cliente {activeTab === 'shopee' ? 'Shopee' : 'TikTok'} cadastrado</p>
                     {(user?.role === 'superuser' || user?.role === 'admin') && (
                       <Button 
                         variant="outline" 
@@ -178,7 +171,7 @@ export default function ClientesPage() {
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-12 w-12">
-                        <AvatarFallback className="bg-orange-100 text-orange-800">
+                        <AvatarFallback className={`${activeTab === 'tiktok' ? 'bg-black text-white' : 'bg-orange-100 text-orange-800'}`}>
                           {client.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -188,6 +181,10 @@ export default function ClientesPage() {
                           <User className="inline h-3 w-3 mr-1" />
                           {client.ownerName}
                         </p>
+                        {/* Indicador visual extra se necessário */}
+                        {/* <Badge variant="secondary" className="mt-1 text-xs">
+                          {activeTab === 'tiktok' ? 'TikTok' : 'Shopee'}
+                        </Badge> */}
                       </div>
                     </div>
                   </CardContent>
@@ -246,6 +243,40 @@ export default function ClientesPage() {
               </Pagination>
             </div>
           )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Clientes</h1>
+        <p className="text-muted-foreground">
+          Gerencie os clientes da sua plataforma
+        </p>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
+          <TabsTrigger value="shopee" className="flex items-center gap-2">
+            <ShoppingBag className="h-4 w-4" />
+            Shopee
+          </TabsTrigger>
+          <TabsTrigger value="tiktok" className="flex items-center gap-2">
+            <Video className="h-4 w-4" />
+            TikTok
+          </TabsTrigger>
+          <TabsTrigger value="cadastro" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Novo
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="shopee">
+          <ClientList />
+        </TabsContent>
+
+        <TabsContent value="tiktok">
+          <ClientList />
         </TabsContent>
         
         <TabsContent value="cadastro" className="mt-6">
@@ -253,10 +284,16 @@ export default function ClientesPage() {
             <CardHeader>
               <CardTitle>Cadastrar Novo Cliente</CardTitle>
               <CardDescription>
-                Adicione informações do cliente para gerenciar análises
+                Adicione informações do cliente para gerenciar análises. 
+                Certifique-se de escolher a plataforma correta.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* Nota: O formulário de cliente precisa ser atualizado para aceitar 'platform' ou ser passado como prop */}
+              {/* Como não tenho acesso ao arquivo do formulário, vou assumir que ele pode ser adaptado ou que o usuário vai editar */}
+              <div className="mb-4 p-4 bg-blue-50 text-blue-700 rounded-md text-sm">
+                Nota: Ao cadastrar, defina a plataforma desejada se o formulário permitir, ou ele será criado como padrão.
+              </div>
               <ClientForm onSuccess={handleClientFormSuccess} />
             </CardContent>
           </Card>
@@ -264,4 +301,4 @@ export default function ClientesPage() {
       </Tabs>
     </div>
   );
-} 
+}

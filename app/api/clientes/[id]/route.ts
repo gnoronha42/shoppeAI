@@ -43,8 +43,24 @@ export async function GET(
         { status: 404 }
       );
     }
+
+    const mappedClient = {
+      id: client.id,
+      name: client.name,
+      ownerName: client.owner_name,
+      shopUrl: client.shop_url,
+      followers: client.followers,
+      rating: client.rating,
+      registrationDate: client.registration_date,
+      productCount: client.product_count,
+      responseRate: client.response_rate,
+      platform: client.platform,
+      createdAt: client.created_at,
+      updatedAt: client.updated_at,
+      analyses: client.analyses
+    };
     
-    return NextResponse.json(client);
+    return NextResponse.json(mappedClient);
   } catch (error) {
     console.error('Erro ao buscar cliente:', error);
     return NextResponse.json(

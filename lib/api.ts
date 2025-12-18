@@ -21,13 +21,15 @@ export const api = createApi({
       page?: number;
       pageSize?: number;
       search?: string;
+      platform?: string;
     }>({
-      query: (params = { page: 1, pageSize: 10 }) => {
+      query: (params = { page: 1, pageSize: 10, platform: 'shopee' }) => {
         const queryParams = new URLSearchParams();
         
         if (params.page) queryParams.append('page', params.page.toString());
         if (params.pageSize) queryParams.append('pageSize', params.pageSize.toString());
         if (params.search) queryParams.append('search', params.search);
+        if (params.platform) queryParams.append('platform', params.platform);
         
         const queryString = queryParams.toString();
         return `clientes${queryString ? `?${queryString}` : ''}`;

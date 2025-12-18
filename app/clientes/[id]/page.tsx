@@ -30,6 +30,8 @@ import {
   CalendarIcon,
   TrendingUp,
   Plus,
+  ShoppingBag,
+  Video
 } from "lucide-react";
 import {
   useGetClientQuery,
@@ -732,7 +734,13 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">{client.name}</h1>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              {client.name}
+              <Badge variant="secondary" className={`ml-2 flex gap-1 items-center ${client.platform === 'tiktok' ? 'bg-black text-white hover:bg-gray-800' : 'bg-orange-100 text-orange-800 hover:bg-orange-200'}`}>
+                 {client.platform === 'tiktok' ? <Video size={12}/> : <ShoppingBag size={12}/>}
+                 {client.platform === 'tiktok' ? 'TikTok' : 'Shopee'}
+              </Badge>
+            </h1>
             <p className="text-muted-foreground">
               Visualize e gerencie informações do cliente
             </p>
@@ -778,15 +786,18 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
       </div>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full md:w-[900px] grid-cols-5">
+        <TabsList className={`grid w-full md:w-[900px] ${client.platform === 'tiktok' ? 'grid-cols-2' : 'grid-cols-5'}`}>
           <TabsTrigger value="info">Informações</TabsTrigger>
-          <TabsTrigger value="analyses">
-            Análises ({analyses.length})
-          </TabsTrigger>
-          <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
-          <TabsTrigger value="integrations">Integrações</TabsTrigger>
+          {client.platform !== 'tiktok' && (
+            <>
+              <TabsTrigger value="analyses">
+                Análises ({analyses.length})
+              </TabsTrigger>
+              <TabsTrigger value="historical">Relatório Histórico</TabsTrigger>
+              <TabsTrigger value="integrations">Integrações</TabsTrigger>
+            </>
+          )}
           <TabsTrigger value="checklist">Checklist</TabsTrigger>
-          
         </TabsList>
 
         <TabsContent value="info" className="space-y-4 mt-6">
@@ -837,121 +848,123 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
           </Card>
         </TabsContent>
 
-        <TabsContent value="analyses" className="space-y-4 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {isAnalysesLoading ? (
-              <div className="col-span-full flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        {client.platform !== 'tiktok' && (
+          <>
+            <TabsContent value="analyses" className="space-y-4 mt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {isAnalysesLoading ? (
+                  <div className="col-span-full flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : analyses.length === 0 ? (
+                  <div className="col-span-full text-center py-8 border rounded-lg bg-muted/20">
+                    <p className="text-muted-foreground">
+                      Nenhuma análise encontrada para este cliente
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => router.push("/analise")}
+                    >
+                      <FileSpreadsheet className="mr-2 h-4 w-4" />
+                      Criar Nova Análise
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {analyses.map((analysis) => (
+                      <Card key={analysis.id} className="overflow-hidden">
+                        <CardHeader className="pb-2 flex flex-row items-center">
+                          <div className="flex-1">
+                            <CardTitle className="text-base">
+                              {analysis.title}
+                            </CardTitle>
+                            <CardDescription>
+                              {new Date(analysis.created_at).toLocaleString(
+                                "pt-BR"
+                              )}
+                              {analysis.creator && (
+                                <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded">
+                                  por {analysis.creator.name}
+                                </span>
+                              )}
+                            </CardDescription>
+                          </div>
+                          <Badge
+                            variant={
+                              analysis.type === "account" ? "outline" : "secondary"
+                            }
+                          >
+                            {analysis.type === "account" ? "Conta" : "Anúncios"}
+                          </Badge>
+                        </CardHeader>
+                        <CardContent className="pb-2">
+                          <div className="flex justify-end gap-2 mt-4">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewAnalysis(analysis.id)}
+                            >
+                              <FileText className="mr-2 h-4 w-4" />
+                              Visualizar
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownloadPDF(analysis.id)}
+                            >
+                              <Download className="mr-2 h-4 w-4" />
+                              PDF
+                            </Button>
+                          </div>
+                        </CardContent>
+                        <CardFooter className="pt-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 w-full"
+                            onClick={() => handleDeleteAnalysis(analysis.id)}
+                          >
+                            Excluir Análise
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    ))}
+                  </>
+                )}
               </div>
-            ) : analyses.length === 0 ? (
-              <div className="col-span-full text-center py-8 border rounded-lg bg-muted/20">
-                <p className="text-muted-foreground">
-                  Nenhuma análise encontrada para este cliente
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => router.push("/analise")}
-                >
-                  <FileSpreadsheet className="mr-2 h-4 w-4" />
-                  Criar Nova Análise
-                </Button>
-              </div>
-            ) : (
-              <>
-                {analyses.map((analysis) => (
-                  <Card key={analysis.id} className="overflow-hidden">
-                    <CardHeader className="pb-2 flex flex-row items-center">
-                      <div className="flex-1">
-                        <CardTitle className="text-base">
-                          {analysis.title}
-                        </CardTitle>
-                        <CardDescription>
-                          {new Date(analysis.created_at).toLocaleString(
-                            "pt-BR"
-                          )}
-                          {analysis.creator && (
-                            <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded">
-                              por {analysis.creator.name}
-                            </span>
-                          )}
-                        </CardDescription>
-                      </div>
-                      <Badge
-                        variant={
-                          analysis.type === "account" ? "outline" : "secondary"
-                        }
-                      >
-                        {analysis.type === "account" ? "Conta" : "Anúncios"}
-                      </Badge>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <div className="flex justify-end gap-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewAnalysis(analysis.id)}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          Visualizar
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadPDF(analysis.id)}
-                        >
-                          <Download className="mr-2 h-4 w-4" />
-                          PDF
-                        </Button>
-                      </div>
-                    </CardContent>
-                    <CardFooter className="pt-0">
+
+              {selectedAnalysis && selectedAnalysisContent && (
+                <Card className="mt-8">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Visualização da Análise</CardTitle>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 w-full"
-                        onClick={() => handleDeleteAnalysis(analysis.id)}
+                        onClick={() => {
+                          setSelectedAnalysis(null);
+                          setSelectedAnalysisContent(null);
+                        }}
                       >
-                        Excluir Análise
+                        Fechar
                       </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </>
-            )}
-          </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      <div
+                        dangerouslySetInnerHTML={renderMarkdown(
+                          selectedAnalysisContent
+                        )}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
 
-          {selectedAnalysis && selectedAnalysisContent && (
-            <Card className="mt-8">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle>Visualização da Análise</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedAnalysis(null);
-                      setSelectedAnalysisContent(null);
-                    }}
-                  >
-                    Fechar
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none dark:prose-invert">
-                  <div
-                    dangerouslySetInnerHTML={renderMarkdown(
-                      selectedAnalysisContent
-                    )}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="historical" className="space-y-4 mt-6">
+            <TabsContent value="historical" className="space-y-4 mt-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -1215,6 +1228,8 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
             </Card>
           )}
         </TabsContent>
+        </>
+        )}
 
         <TabsContent value="edit" className="mt-6">
           <Card>
@@ -1236,22 +1251,24 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
         </TabsContent>
 
         {/* +++ INÍCIO DA NOVA ABA DE INTEGRAÇÕES */}
+        {client.platform !== 'tiktok' && (
         <TabsContent value="integrations" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Image width={24} height={24} src={shopeeLogo} alt="Shopee" />
-                Integração com Shopee
-              </CardTitle>
-              <CardDescription>
-                Vincule a conta Shopee deste cliente para sincronizar dados de vendas e produtos automaticamente.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ShopeeIntegration clientId={clientId} />
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Image width={24} height={24} src={shopeeLogo} alt="Shopee" />
+                  Integração com Shopee
+                </CardTitle>
+                <CardDescription>
+                  Vincule a conta Shopee deste cliente para sincronizar dados de vendas e produtos automaticamente.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ShopeeIntegration clientId={clientId} />
+              </CardContent>
+            </Card>
         </TabsContent>
+        )}
         {/* +++ FIM DA NOVA ABA DE INTEGRAÇÕES */}
       </Tabs>
     </div>

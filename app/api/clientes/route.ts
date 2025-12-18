@@ -30,21 +30,23 @@ export async function GET(request: Request) {
     const page = Number(searchParams.get('page')) || 1;
     const pageSize = Number(searchParams.get('pageSize')) || 10;
     const search = searchParams.get('search') || '';
+    const platform = searchParams.get('platform') || 'shopee'; // Padrão shopee
 
-    console.log('Parâmetros:', { page, pageSize, search });
+    console.log('Parâmetros:', { page, pageSize, search, platform });
 
     // Calcular o offset para paginação
     const skip = (page - 1) * pageSize;
 
     // Construir a condição de busca
-    const where: Prisma.clientsWhereInput = search
-      ? {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
-            { owner_name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
-          ],
-        }
-      : {};
+    const where: Prisma.clientsWhereInput = {
+      platform: platform, // Filtrar por plataforma
+      ...(search ? {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+          { owner_name: { contains: search, mode: 'insensitive' as Prisma.QueryMode } },
+        ],
+      } : {})
+    };
 
     console.log('Condição WHERE:', where);
 
@@ -65,6 +67,7 @@ export async function GET(request: Request) {
         registration_date: true,
         product_count: true,
         response_rate: true,
+        platform: true,
         created_at: true,
         updated_at: true,
       },
@@ -87,6 +90,7 @@ export async function GET(request: Request) {
       registrationDate: client.registration_date,
       productCount: client.product_count,
       responseRate: client.response_rate,
+      platform: client.platform,
       createdAt: client.created_at,
       updatedAt: client.updated_at,
     }));
@@ -153,6 +157,7 @@ export async function POST(request: Request) {
         registration_date: body.registrationDate,
         product_count: body.productCount,
         response_rate: body.responseRate,
+        platform: body.platform || 'shopee', // Salvar plataforma
       },
     });
     
@@ -166,6 +171,7 @@ export async function POST(request: Request) {
       registrationDate: newClient.registration_date,
       productCount: newClient.product_count,
       responseRate: newClient.response_rate,
+      platform: newClient.platform, // Retornar plataforma
       createdAt: newClient.created_at,
       updatedAt: newClient.updated_at,
     };
@@ -211,6 +217,7 @@ export async function PATCH(request: Request) {
         registration_date: body.registrationDate,
         product_count: body.productCount,
         response_rate: body.responseRate,
+        platform: body.platform,
       },
     });
 
@@ -224,6 +231,7 @@ export async function PATCH(request: Request) {
       registrationDate: updatedClient.registration_date,
       productCount: updatedClient.product_count,
       responseRate: updatedClient.response_rate,
+      platform: updatedClient.platform,
       createdAt: updatedClient.created_at,
       updatedAt: updatedClient.updated_at,
     };

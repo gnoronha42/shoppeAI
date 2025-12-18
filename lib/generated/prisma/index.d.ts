@@ -11197,6 +11197,7 @@ export namespace Prisma {
     registration_date: Date | null
     product_count: number | null
     response_rate: Decimal | null
+    platform: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -11211,6 +11212,7 @@ export namespace Prisma {
     registration_date: Date | null
     product_count: number | null
     response_rate: Decimal | null
+    platform: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -11225,6 +11227,7 @@ export namespace Prisma {
     registration_date: number
     product_count: number
     response_rate: number
+    platform: number
     created_at: number
     updated_at: number
     _all: number
@@ -11255,6 +11258,7 @@ export namespace Prisma {
     registration_date?: true
     product_count?: true
     response_rate?: true
+    platform?: true
     created_at?: true
     updated_at?: true
   }
@@ -11269,6 +11273,7 @@ export namespace Prisma {
     registration_date?: true
     product_count?: true
     response_rate?: true
+    platform?: true
     created_at?: true
     updated_at?: true
   }
@@ -11283,6 +11288,7 @@ export namespace Prisma {
     registration_date?: true
     product_count?: true
     response_rate?: true
+    platform?: true
     created_at?: true
     updated_at?: true
     _all?: true
@@ -11384,6 +11390,7 @@ export namespace Prisma {
     registration_date: Date | null
     product_count: number | null
     response_rate: Decimal | null
+    platform: string | null
     created_at: Date | null
     updated_at: Date | null
     _count: ClientsCountAggregateOutputType | null
@@ -11417,6 +11424,7 @@ export namespace Prisma {
     registration_date?: boolean
     product_count?: boolean
     response_rate?: boolean
+    platform?: boolean
     created_at?: boolean
     updated_at?: boolean
     activity_log?: boolean | clients$activity_logArgs<ExtArgs>
@@ -11443,6 +11451,7 @@ export namespace Prisma {
     registration_date?: boolean
     product_count?: boolean
     response_rate?: boolean
+    platform?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["clients"]>
@@ -11457,6 +11466,7 @@ export namespace Prisma {
     registration_date?: boolean
     product_count?: boolean
     response_rate?: boolean
+    platform?: boolean
     created_at?: boolean
     updated_at?: boolean
   }, ExtArgs["result"]["clients"]>
@@ -11471,11 +11481,12 @@ export namespace Prisma {
     registration_date?: boolean
     product_count?: boolean
     response_rate?: boolean
+    platform?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type clientsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "owner_name" | "shop_url" | "followers" | "rating" | "registration_date" | "product_count" | "response_rate" | "created_at" | "updated_at", ExtArgs["result"]["clients"]>
+  export type clientsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "owner_name" | "shop_url" | "followers" | "rating" | "registration_date" | "product_count" | "response_rate" | "platform" | "created_at" | "updated_at", ExtArgs["result"]["clients"]>
   export type clientsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     activity_log?: boolean | clients$activity_logArgs<ExtArgs>
     ad_metrics?: boolean | clients$ad_metricsArgs<ExtArgs>
@@ -11518,6 +11529,7 @@ export namespace Prisma {
       registration_date: Date | null
       product_count: number | null
       response_rate: Prisma.Decimal | null
+      platform: string | null
       created_at: Date | null
       updated_at: Date | null
     }, ExtArgs["result"]["clients"]>
@@ -11963,6 +11975,7 @@ export namespace Prisma {
     readonly registration_date: FieldRef<"clients", 'DateTime'>
     readonly product_count: FieldRef<"clients", 'Int'>
     readonly response_rate: FieldRef<"clients", 'Decimal'>
+    readonly platform: FieldRef<"clients", 'String'>
     readonly created_at: FieldRef<"clients", 'DateTime'>
     readonly updated_at: FieldRef<"clients", 'DateTime'>
   }
@@ -26782,6 +26795,7 @@ export namespace Prisma {
     registration_date: 'registration_date',
     product_count: 'product_count',
     response_rate: 'response_rate',
+    platform: 'platform',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
@@ -27642,6 +27656,7 @@ export namespace Prisma {
     registration_date?: DateTimeNullableFilter<"clients"> | Date | string | null
     product_count?: IntNullableFilter<"clients"> | number | null
     response_rate?: DecimalNullableFilter<"clients"> | Decimal | DecimalJsLike | number | string | null
+    platform?: StringNullableFilter<"clients"> | string | null
     created_at?: DateTimeNullableFilter<"clients"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"clients"> | Date | string | null
     activity_log?: Activity_logListRelationFilter
@@ -27667,6 +27682,7 @@ export namespace Prisma {
     registration_date?: SortOrderInput | SortOrder
     product_count?: SortOrderInput | SortOrder
     response_rate?: SortOrderInput | SortOrder
+    platform?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     activity_log?: activity_logOrderByRelationAggregateInput
@@ -27695,6 +27711,7 @@ export namespace Prisma {
     registration_date?: DateTimeNullableFilter<"clients"> | Date | string | null
     product_count?: IntNullableFilter<"clients"> | number | null
     response_rate?: DecimalNullableFilter<"clients"> | Decimal | DecimalJsLike | number | string | null
+    platform?: StringNullableFilter<"clients"> | string | null
     created_at?: DateTimeNullableFilter<"clients"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"clients"> | Date | string | null
     activity_log?: Activity_logListRelationFilter
@@ -27720,6 +27737,7 @@ export namespace Prisma {
     registration_date?: SortOrderInput | SortOrder
     product_count?: SortOrderInput | SortOrder
     response_rate?: SortOrderInput | SortOrder
+    platform?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     _count?: clientsCountOrderByAggregateInput
@@ -27742,6 +27760,7 @@ export namespace Prisma {
     registration_date?: DateTimeNullableWithAggregatesFilter<"clients"> | Date | string | null
     product_count?: IntNullableWithAggregatesFilter<"clients"> | number | null
     response_rate?: DecimalNullableWithAggregatesFilter<"clients"> | Decimal | DecimalJsLike | number | string | null
+    platform?: StringNullableWithAggregatesFilter<"clients"> | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"clients"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"clients"> | Date | string | null
   }
@@ -29230,6 +29249,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -29255,6 +29275,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -29280,6 +29301,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -29305,6 +29327,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -29330,6 +29353,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -29344,6 +29368,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -29358,6 +29383,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -31095,6 +31121,7 @@ export namespace Prisma {
     registration_date?: SortOrder
     product_count?: SortOrder
     response_rate?: SortOrder
+    platform?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -31116,6 +31143,7 @@ export namespace Prisma {
     registration_date?: SortOrder
     product_count?: SortOrder
     response_rate?: SortOrder
+    platform?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -31130,6 +31158,7 @@ export namespace Prisma {
     registration_date?: SortOrder
     product_count?: SortOrder
     response_rate?: SortOrder
+    platform?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -33859,6 +33888,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     ad_metrics?: ad_metricsCreateNestedManyWithoutClientsInput
@@ -33883,6 +33913,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     ad_metrics?: ad_metricsUncheckedCreateNestedManyWithoutClientsInput
@@ -33968,6 +33999,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ad_metrics?: ad_metricsUpdateManyWithoutClientsNestedInput
@@ -33992,6 +34024,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     ad_metrics?: ad_metricsUncheckedUpdateManyWithoutClientsNestedInput
@@ -34067,6 +34100,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -34091,6 +34125,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -34168,6 +34203,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -34192,6 +34228,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -34259,6 +34296,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -34283,6 +34321,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -34368,6 +34407,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -34392,6 +34432,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -34467,6 +34508,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -34491,6 +34533,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -34666,6 +34709,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -34690,6 +34734,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -34913,6 +34958,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -34937,6 +34983,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -35050,6 +35097,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -35074,6 +35122,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -35178,6 +35227,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -35202,6 +35252,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -35310,6 +35361,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -35334,6 +35386,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -36378,6 +36431,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -36402,6 +36456,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -36458,6 +36513,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -36482,6 +36538,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -36655,6 +36712,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -36679,6 +36737,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -36797,6 +36856,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -36821,6 +36881,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -37532,6 +37593,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -37556,6 +37618,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -37639,6 +37702,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -37663,6 +37727,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -37687,6 +37752,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -37711,6 +37777,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -37823,6 +37890,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -37847,6 +37915,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput
@@ -38051,6 +38120,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logCreateNestedManyWithoutClientsInput
@@ -38075,6 +38145,7 @@ export namespace Prisma {
     registration_date?: Date | string | null
     product_count?: number | null
     response_rate?: Decimal | DecimalJsLike | number | string | null
+    platform?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     activity_log?: activity_logUncheckedCreateNestedManyWithoutClientsInput
@@ -38115,6 +38186,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUpdateManyWithoutClientsNestedInput
@@ -38139,6 +38211,7 @@ export namespace Prisma {
     registration_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     product_count?: NullableIntFieldUpdateOperationsInput | number | null
     response_rate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    platform?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     activity_log?: activity_logUncheckedUpdateManyWithoutClientsNestedInput

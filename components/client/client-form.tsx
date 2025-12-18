@@ -15,6 +15,13 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAddClientMutation, useUpdateClientMutation } from "@/lib/api";
 import { useDispatch } from "react-redux";
@@ -31,6 +38,7 @@ const clientSchema = z.object({
   ownerName: z.string().min(2, {
     message: "O nome do proprietário deve ter pelo menos 2 caracteres.",
   }),
+  platform: z.enum(["shopee", "tiktok"]).default("shopee"),
   shopUrl: z
     .string()
     .url({ message: "URL da loja inválida" })
@@ -64,6 +72,7 @@ export function ClientForm({ client, onSuccess }: ClientFormProps) {
     defaultValues: {
       name: client?.name || "",
       ownerName: client?.ownerName || "",
+      platform: (client?.platform as "shopee" | "tiktok") || "shopee",
     },
   });
 
@@ -72,6 +81,7 @@ export function ClientForm({ client, onSuccess }: ClientFormProps) {
       form.reset({
         name: client.name || "",
         ownerName: client.ownerName || "",
+        platform: (client.platform as "shopee" | "tiktok") || "shopee",
       });
     }
   }, [client, form]);
@@ -153,6 +163,33 @@ export function ClientForm({ client, onSuccess }: ClientFormProps) {
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="platform"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plataforma</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a plataforma" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="shopee">Shopee</SelectItem>
+                    <SelectItem value="tiktok">TikTok</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  A plataforma onde a loja opera.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
