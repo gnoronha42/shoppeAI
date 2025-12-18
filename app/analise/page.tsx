@@ -664,98 +664,50 @@ export default function AnalisePage() {
     }
     try {
       setIsAnalyzing(true);
-      const statusRes = await fetch(`/api/shopee/status?client_id=${selectedClientId}`, { cache: 'no-store' });
-      const statusData = await statusRes.json();
-      if (!statusRes.ok || !statusData?.connected) {
-        throw new Error("Cliente não está conectado à Shopee");
-      }
       
-      const params = new URLSearchParams({
-        client_id: selectedClientId,
-      });
-      
-      
-      if (dateRange?.from) {
-        params.append('date_from', dateRange.from.toISOString());
-      }
-      if (dateRange?.to) {
-        params.append('date_to', dateRange.to.toISOString());
-      }
-      
-      const dataRes = await fetch(`/api/shopee/data?${params.toString()}`, { cache: 'no-store' });
-      const dataJson = await dataRes.json();
-      if (!dataRes.ok) {
-        if (dataRes.status === 401 && dataJson?.reconnect_required) {
-          toast({
-            title: "Sessão Shopee expirada",
-            description: "É necessário reconectar a conta na aba Integrações do cliente.",
-            variant: "destructive",
-          });
-          try {
-            const successUrl = new URL(`/clientes/${selectedClientId}`, window.location.origin);
-            successUrl.searchParams.set('tab', 'integrations');
-            window.location.href = successUrl.toString();
-          } catch (_) {}
-          return;
-        }
-        throw new Error(dataJson?.error || "Falha ao obter dados da Shopee");
-      }
-      const agg = dataJson?.data || {};
-      const pedidos = Number(agg?.totalOrdersLast30Days) || 0;
-      const gmv = Number(agg?.gmvLast30Days) || 0;
-      const ticketMedio = Number(agg?.ticketMedioLast30Days) || (pedidos > 0 ? gmv / pedidos : 0);
-
-      const dados = {
-        gmv,
-        pedidos,
-        ticketMedio,
-        visitantes: Number(agg?.visitors) || 0,
-        roas: Number(agg?.ads?.roas) || 0,
-        conversao: Number(agg?.conversionRate) || 0,
-        adsSpend: Number(agg?.ads?.spend) || 0,
-        pageViews: Number(agg?.pageViews) || 0,
-      };
       const baseUrl = getBaseUrl();
-      const extras = {
-        shopName: agg?.shopName || selectedClient?.name || 'Loja',
-        period: agg?.period || null,
-        topProducts: agg?.topProductsLast30Days || [],
-        totalProducts: agg?.totalProducts || 0,
-        activeProducts: agg?.activeProducts || 0
-      };
-      const mdRes = await fetch(`${baseUrl}/api/relatorio-shopee-markdown`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      
+      console.log(`[FRONTEND] Solicitando análise completa ao Render: ${baseUrl}/analise-conta-shopee`);
+      
+      const response = await fetch(`${baseUrl}/analise-conta-shopee`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          dados,
-          clientName: selectedClient?.name || 'Cliente',
-          analysisType,
-          extras
+          clientId: selectedClientId,
+          clientName: selectedClient?.name,
+          timeFrom: dateRange?.from ? Math.floor(dateRange.from.getTime() / 1000) : undefined,
+          timeTo: dateRange?.to ? Math.floor(dateRange.to.getTime() / 1000) : undefined
         })
       });
-      if (!mdRes.ok) {
-        const errText = await mdRes.text();
-        throw new Error(`Falha ao gerar markdown no microserviço: ${errText}`);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erro ${response.status}: Falha ao gerar análise`);
       }
-      const mdJson = await mdRes.json();
-      const markdown = mdJson?.markdown;
-      if (!markdown || typeof markdown !== 'string') {
-        throw new Error("Resposta inválida do microserviço");
+
+      const data = await response.json();
+      
+      if (!data.markdown) {
+        throw new Error("Resposta inválida do servidor (markdown ausente)");
       }
-      setCustomMarkdown(markdown);
+
+      setCustomMarkdown(data.markdown);
+      
       toast({
         title: "Relatório gerado com dados reais!",
-        description: "Conteúdo pronto para visualização e PDF",
+        description: "Análise completa baseada nas vendas reais dos últimos 30 dias.",
         variant: "default",
       });
+      
       try {
-        await saveAnalysisToDatabase(markdown);
+        await saveAnalysisToDatabase(data.markdown);
       } catch (_) {}
+
     } catch (error: any) {
       console.error(" Erro ao gerar com integração Shopee:", error);
       toast({
-        title: "Erro ao gerar com dados reais",
-        description: error?.message || "Não foi possível usar os dados da Shopee",
+        title: "Erro ao gerar análise",
+        description: error?.message || "Não foi possível conectar ao servidor de análise.",
         variant: "destructive",
       });
     } finally {

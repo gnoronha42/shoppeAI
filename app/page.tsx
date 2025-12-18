@@ -26,8 +26,8 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
-const formatCurrency = (value: number) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-const formatNumber = (value: number) => value.toLocaleString('pt-BR');
+const formatCurrency = (value: number) => `R$ ${(value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatNumber = (value: number) => (value || 0).toLocaleString('pt-BR');
 
 const calculateAdsMetrics = (stores: any[]) => {
   const totalSpend = stores.reduce((acc, store) => acc + (store.ads?.spend || 0), 0);
