@@ -196,7 +196,166 @@ function ShopeeIntegration({ clientId }: { clientId: string }) {
     </div>
   );
 }
-// +++ FIM DO NOVO COMPONENTE DE INTEGRAÇÃO
+// +++ FIM DO COMPONENTE DE INTEGRAÇÃO SHOPEE (VENDAS)
+
+// +++ INÍCIO DO COMPONENTE DE INTEGRAÇÃO SHOPEE ADS
+function ShopeeAdsIntegration({ clientId }: { clientId: string }) {
+  const { toast } = useToast();
+  const [status, setStatus] = useState<{ 
+    connected: boolean; 
+    shop_id?: string; 
+    token_expiry?: string | null;
+    is_expired?: boolean;
+    partner_id?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStatus = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/shopee-ads/status?client_id=${clientId}`, { cache: 'no-store' });
+        const data = await res.json();
+        if(res.ok) {
+          setStatus(data);
+        } else {
+          throw new Error(data.error || 'Falha ao buscar status de Ads');
+        }
+      } catch (e: any) {
+        console.error(e);
+        // Não mostrar toast de erro se simplesmente não existe integração
+        if (!e.message?.includes('não encontrada')) {
+          toast({ title: 'Erro', description: e.message || 'Falha ao consultar status de Ads', variant: 'destructive' });
+        }
+        setStatus({ connected: false });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStatus();
+  }, [clientId, toast]);
+
+  const handleConnect = async () => {
+    try {
+      setLoading(true);
+      const successUrl = new URL(`/clientes/${clientId}`, window.location.origin);
+      successUrl.searchParams.set('tab', 'integrations');
+      successUrl.searchParams.set('ads_connected', '1');
+
+      const connectUrl = new URL('/api/shopee-ads/connect', window.location.origin);
+      connectUrl.searchParams.set('client_id', clientId);
+      connectUrl.searchParams.set('redirect', '1');
+      connectUrl.searchParams.set('redirect_success', successUrl.toString());
+
+      // Redireciona para OAuth da Shopee (App de Ads)
+      window.location.href = connectUrl.toString();
+      
+    } catch (e: any) {
+      console.error(e);
+      toast({ title: 'Erro ao conectar Ads', description: e.message || 'Tente novamente', variant: 'destructive' });
+      setLoading(false);
+    }
+  };
+
+  // Gera link de conexão para compartilhar com o cliente
+  const handleGenerateConnectLink = async () => {
+    try {
+      setLoading(true);
+      const successUrl = new URL(`/obrigado`, window.location.origin);
+      successUrl.searchParams.set('integracao', 'shopee-ads');
+      successUrl.searchParams.set('status', 'ok');
+      successUrl.searchParams.set('client_id', clientId);
+
+      const url = new URL('/api/shopee-ads/connect', window.location.origin);
+      url.searchParams.set('client_id', clientId);
+      url.searchParams.set('redirect_success', successUrl.toString());
+
+      const res = await fetch(url.toString(), { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok || !data?.url) {
+        throw new Error(data?.error || 'Falha ao gerar link de Ads');
+      }
+
+      await navigator.clipboard.writeText(data.url);
+      toast({
+        title: 'Link de conexão Ads gerado',
+        description: 'O link foi copiado para a área de transferência',
+        variant: 'default',
+      });
+    } catch (e: any) {
+      console.error('Erro ao gerar link de conexão Ads:', e);
+      toast({
+        title: 'Erro ao gerar link',
+        description: e?.message || 'Tente novamente',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verificando status de Ads...
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <p className="font-medium">
+            Status: {' '}
+            <Badge 
+              variant={status?.connected ? (status?.is_expired ? 'destructive' : 'default') : 'destructive'} 
+              className={status?.connected && !status?.is_expired ? 'bg-blue-600' : ''}
+            >
+              {status?.connected 
+                ? (status?.is_expired ? 'Token Expirado' : 'Conectado') 
+                : 'Desconectado'}
+            </Badge>
+          </p>
+          {status?.connected && status.shop_id && (
+            <p className="text-sm text-muted-foreground">Shop ID: {status.shop_id}</p>
+          )}
+          {status?.partner_id && (
+            <p className="text-sm text-muted-foreground">Partner ID: {status.partner_id}</p>
+          )}
+          {status?.token_expiry && (
+            <p className="text-sm text-muted-foreground">
+              Token expira em: {new Date(status.token_expiry).toLocaleString('pt-BR')}
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleConnect} 
+            disabled={loading} 
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <BarChart className="mr-2 h-4 w-4" />
+            {status?.connected ? 'Reconectar Ads' : 'Conectar App de Ads'}
+          </Button>
+          <Button onClick={handleGenerateConnectLink} disabled={loading} variant="outline">
+            Gerar link de conexão
+          </Button>
+        </div>
+      </div>
+      
+      {/* Informações sobre o App de Ads */}
+      <div className="bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+        <p className="text-sm text-blue-700 dark:text-blue-300">
+          <strong>ℹ️ App de Métricas de Ads:</strong> Esta integração é separada da integração principal 
+          e permite acessar dados de campanhas publicitárias como ROAS, investimento, CPA e performance diária.
+        </p>
+      </div>
+    </div>
+  );
+}
+// +++ FIM DO COMPONENTE DE INTEGRAÇÃO SHOPEE ADS
 
 interface StoredAnalysis {
   id: string;
@@ -1250,26 +1409,68 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
           <ClientChecklist clientId={clientId} clientName={client.name} />
         </TabsContent>
 
-        {/* +++ INÍCIO DA NOVA ABA DE INTEGRAÇÕES */}
+        {/* +++ INÍCIO DA ABA DE INTEGRAÇÕES */}
         {client.platform !== 'tiktok' && (
-        <TabsContent value="integrations" className="mt-6">
+        <TabsContent value="integrations" className="mt-6 space-y-6">
+            {/* Integração Principal - Vendas/Orders */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Image width={24} height={24} src={shopeeLogo} alt="Shopee" />
-                  Integração com Shopee
+                  Integração Shopee (Vendas)
+                  <Badge variant="outline" className="ml-2 bg-orange-100 text-orange-800">
+                    Principal
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Vincule a conta Shopee deste cliente para sincronizar dados de vendas e produtos automaticamente.
+                  Vincule a conta Shopee para sincronizar dados de vendas, pedidos e produtos automaticamente.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ShopeeIntegration clientId={clientId} />
               </CardContent>
             </Card>
+
+            {/* Integração de Ads - Métricas de Campanhas */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart className="h-6 w-6 text-blue-600" />
+                  Integração Shopee Ads (Métricas)
+                  <Badge variant="outline" className="ml-2 bg-blue-100 text-blue-800">
+                    Anúncios
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Vincule o app de Ads para acessar métricas de campanhas: ROAS, investimento, CPA, cliques e performance diária.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ShopeeAdsIntegration clientId={clientId} />
+              </CardContent>
+            </Card>
+
+            {/* Card informativo */}
+            <Card className="bg-muted/50">
+              <CardContent className="pt-6">
+                <div className="space-y-3">
+                  <h4 className="font-medium">📌 Por que duas integrações?</h4>
+                  <p className="text-sm text-muted-foreground">
+                    A Shopee Open Platform separa as permissões de API em diferentes tipos de aplicativos:
+                  </p>
+                  <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1">
+                    <li><strong>App de Vendas (ERP):</strong> Acessa pedidos, produtos, informações da loja</li>
+                    <li><strong>App de Ads:</strong> Acessa métricas de campanhas publicitárias, saldo, ROAS</li>
+                  </ul>
+                  <p className="text-sm text-muted-foreground">
+                    Para ter acesso completo aos dados, é necessário conectar ambos os apps com a loja.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
         </TabsContent>
         )}
-        {/* +++ FIM DA NOVA ABA DE INTEGRAÇÕES */}
+        {/* +++ FIM DA ABA DE INTEGRAÇÕES */}
       </Tabs>
     </div>
   );

@@ -1,0 +1,126 @@
+name: 🔄 Refresh Shopee Ads Tokens
+
+on:
+  schedule:
+    # Executa a cada 3 horas: 00:30, 03:30, 06:30, 09:30, 12:30, 15:30, 18:30, 21:30 UTC
+    # Offset de 30 minutos do refresh principal para evitar conflitos
+    - cron: '30 */3 * * *'
+  
+  # Permite execução manual do workflow
+  workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: 'Forçar refresh de todos os tokens de Ads'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  refresh-ads-tokens:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 🔄 Refresh Shopee Ads Tokens
+        run: |
+          echo "🚀 Iniciando refresh de tokens Shopee Ads..."
+          echo "⏰ Horário: $(date)"
+          echo "🌐 URL: ${{ secrets.APPURL }}"
+          
+          # Verificar se APPURL está configurado
+          if [ -z "${{ secrets.APPURL }}" ]; then
+            echo "❌ ERRO: Secret APPURL não configurado!"
+            echo "🔧 Configure em: Settings → Secrets → Actions → New repository secret"
+            echo "📝 Name: APPURL"
+            echo "📝 Value: https://seu-dominio.com (sem barra no final)"
+            exit 1
+          fi
+          
+          # Fazer chamada para o endpoint de refresh de Ads
+          response=$(curl -s -w "\nHTTP_CODE:%{http_code}" \
+            -X POST "${{ secrets.APPURL }}/api/shopee-ads/refresh" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: GitHub-Actions-Cron/1.0")
+          
+          # Extrair código HTTP
+          http_code=$(echo "$response" | grep "HTTP_CODE:" | cut -d: -f2)
+          body=$(echo "$response" | sed '/HTTP_CODE:/d')
+          
+          echo "📊 Resposta do servidor:"
+          echo "$body" | jq . 2>/dev/null || echo "$body"
+          
+          echo "🔍 Status HTTP: $http_code"
+          
+          # Verificar se foi bem-sucedido
+          if [ "$http_code" = "200" ]; then
+            # Extrair informações do resumo
+            total=$(echo "$body" | jq -r '.summary.total_integrations // 0')
+            successful=$(echo "$body" | jq -r '.summary.successful_refreshes // 0')
+            failed=$(echo "$body" | jq -r '.summary.failed_refreshes // 0')
+            skipped=$(echo "$body" | jq -r '.summary.skipped // 0')
+            partner_id=$(echo "$body" | jq -r '.summary.partner_id // "N/A"')
+            
+            echo ""
+            echo "📊 Resumo do Processamento de Ads:"
+            echo "   🏷️  Partner ID: $partner_id"
+            echo "   🔍 Total de integrações: $total"
+            echo "   ✅ Refreshs bem sucedidos: $successful"
+            echo "   ❌ Falhas: $failed"
+            echo "   ⏭️  Pulados (token válido): $skipped"
+            
+            # Verificar se houve erros no JSON de resposta
+            if echo "$body" | jq -e '.success == false' >/dev/null 2>&1; then
+              echo ""
+              echo "⚠️ Refresh de Ads executado mas com alguns erros"
+              
+              # Verificar se todos os erros são de tokens expirados
+              all_errors_expired=$(echo "$body" | jq -r '[.results[]? | select(.status == "failed") | select(.error | test("REFRESH_TOKEN_EXPIRED|expirado|expired"; "i"))] | length' 2>/dev/null || echo "0")
+              
+              if [ "$all_errors_expired" = "$failed" ] && [ "$failed" -gt 0 ]; then
+                echo ""
+                echo "ℹ️ Todos os erros são de refresh tokens expirados"
+                echo "   As contas precisam ser reconectadas com o App de Ads"
+                echo "   Isso NÃO é um erro crítico do sistema"
+              else
+                echo ""
+                echo "❌ Erros críticos encontrados - falhando o workflow"
+                exit 1
+              fi
+            fi
+            
+            # Se total é 0, pode ser normal
+            if [ "$total" = "0" ]; then
+              echo ""
+              echo "ℹ️ Nenhuma integração de Ads encontrada para renovar."
+              echo "   Isso é normal se:"
+              echo "   - Não há integrações Shopee Ads conectadas"
+              echo "   - Todos os tokens são válidos por mais de 6 horas"
+              echo ""
+              echo "💡 Dica: Para conectar Ads, vá em Clientes → Integrações → Conectar App de Ads"
+            else
+              echo ""
+              echo "✅ Refresh de tokens de Ads executado com sucesso!"
+            fi
+          else
+            echo "❌ Falha no refresh de Ads! Status: $http_code"
+            echo "Resposta: $body"
+            exit 1
+          fi
+
+      - name: 📊 Log Summary
+        if: always()
+        run: |
+          echo "📋 Resumo da execução (Ads):"
+          echo "⏰ Executado em: $(date)"
+          echo "🔄 Próxima execução: $(date -d '+3 hours')"
+          echo "📍 Timezone: UTC"
+          echo "🌐 Endpoint: ${{ secrets.APPURL }}/api/shopee-ads/refresh"
+
+      - name: 🚨 Notify on Failure
+        if: failure()
+        run: |
+          echo "🚨 ATENÇÃO: Falha no refresh de tokens de Ads!"
+          echo "🔧 Ações recomendadas:"
+          echo "   1. Verificar se a aplicação está online"
+          echo "   2. Verificar logs da aplicação"
+          echo "   3. Verificar status em: GET /api/shopee-ads/refresh (método GET)"
+          echo "   4. Se necessário, reconectar contas com o App de Ads"

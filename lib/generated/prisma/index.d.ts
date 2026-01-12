@@ -24536,12 +24536,14 @@ export namespace Prisma {
     id: string | null
     client_id: string | null
     provider: string | null
+    app_type: string | null
     shop_id: string | null
     merchant_id: string | null
     region: string | null
     access_token: string | null
     refresh_token: string | null
     token_expiry: Date | null
+    partner_id: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -24550,12 +24552,14 @@ export namespace Prisma {
     id: string | null
     client_id: string | null
     provider: string | null
+    app_type: string | null
     shop_id: string | null
     merchant_id: string | null
     region: string | null
     access_token: string | null
     refresh_token: string | null
     token_expiry: Date | null
+    partner_id: string | null
     created_at: Date | null
     updated_at: Date | null
   }
@@ -24564,12 +24568,14 @@ export namespace Prisma {
     id: number
     client_id: number
     provider: number
+    app_type: number
     shop_id: number
     merchant_id: number
     region: number
     access_token: number
     refresh_token: number
     token_expiry: number
+    partner_id: number
     created_at: number
     updated_at: number
     _all: number
@@ -24580,12 +24586,14 @@ export namespace Prisma {
     id?: true
     client_id?: true
     provider?: true
+    app_type?: true
     shop_id?: true
     merchant_id?: true
     region?: true
     access_token?: true
     refresh_token?: true
     token_expiry?: true
+    partner_id?: true
     created_at?: true
     updated_at?: true
   }
@@ -24594,12 +24602,14 @@ export namespace Prisma {
     id?: true
     client_id?: true
     provider?: true
+    app_type?: true
     shop_id?: true
     merchant_id?: true
     region?: true
     access_token?: true
     refresh_token?: true
     token_expiry?: true
+    partner_id?: true
     created_at?: true
     updated_at?: true
   }
@@ -24608,12 +24618,14 @@ export namespace Prisma {
     id?: true
     client_id?: true
     provider?: true
+    app_type?: true
     shop_id?: true
     merchant_id?: true
     region?: true
     access_token?: true
     refresh_token?: true
     token_expiry?: true
+    partner_id?: true
     created_at?: true
     updated_at?: true
     _all?: true
@@ -24695,12 +24707,14 @@ export namespace Prisma {
     id: string
     client_id: string
     provider: string
+    app_type: string | null
     shop_id: string | null
     merchant_id: string | null
     region: string | null
     access_token: string | null
     refresh_token: string | null
     token_expiry: Date | null
+    partner_id: string | null
     created_at: Date | null
     updated_at: Date | null
     _count: Client_integrationsCountAggregateOutputType | null
@@ -24726,12 +24740,14 @@ export namespace Prisma {
     id?: boolean
     client_id?: boolean
     provider?: boolean
+    app_type?: boolean
     shop_id?: boolean
     merchant_id?: boolean
     region?: boolean
     access_token?: boolean
     refresh_token?: boolean
     token_expiry?: boolean
+    partner_id?: boolean
     created_at?: boolean
     updated_at?: boolean
     clients?: boolean | clientsDefaultArgs<ExtArgs>
@@ -24741,12 +24757,14 @@ export namespace Prisma {
     id?: boolean
     client_id?: boolean
     provider?: boolean
+    app_type?: boolean
     shop_id?: boolean
     merchant_id?: boolean
     region?: boolean
     access_token?: boolean
     refresh_token?: boolean
     token_expiry?: boolean
+    partner_id?: boolean
     created_at?: boolean
     updated_at?: boolean
     clients?: boolean | clientsDefaultArgs<ExtArgs>
@@ -24756,12 +24774,14 @@ export namespace Prisma {
     id?: boolean
     client_id?: boolean
     provider?: boolean
+    app_type?: boolean
     shop_id?: boolean
     merchant_id?: boolean
     region?: boolean
     access_token?: boolean
     refresh_token?: boolean
     token_expiry?: boolean
+    partner_id?: boolean
     created_at?: boolean
     updated_at?: boolean
     clients?: boolean | clientsDefaultArgs<ExtArgs>
@@ -24771,17 +24791,19 @@ export namespace Prisma {
     id?: boolean
     client_id?: boolean
     provider?: boolean
+    app_type?: boolean
     shop_id?: boolean
     merchant_id?: boolean
     region?: boolean
     access_token?: boolean
     refresh_token?: boolean
     token_expiry?: boolean
+    partner_id?: boolean
     created_at?: boolean
     updated_at?: boolean
   }
 
-  export type client_integrationsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "client_id" | "provider" | "shop_id" | "merchant_id" | "region" | "access_token" | "refresh_token" | "token_expiry" | "created_at" | "updated_at", ExtArgs["result"]["client_integrations"]>
+  export type client_integrationsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "client_id" | "provider" | "app_type" | "shop_id" | "merchant_id" | "region" | "access_token" | "refresh_token" | "token_expiry" | "partner_id" | "created_at" | "updated_at", ExtArgs["result"]["client_integrations"]>
   export type client_integrationsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     clients?: boolean | clientsDefaultArgs<ExtArgs>
   }
@@ -24801,12 +24823,14 @@ export namespace Prisma {
       id: string
       client_id: string
       provider: string
+      app_type: string | null
       shop_id: string | null
       merchant_id: string | null
       region: string | null
       access_token: string | null
       refresh_token: string | null
       token_expiry: Date | null
+      partner_id: string | null
       created_at: Date | null
       updated_at: Date | null
     }, ExtArgs["result"]["client_integrations"]>
@@ -25236,12 +25260,14 @@ export namespace Prisma {
     readonly id: FieldRef<"client_integrations", 'String'>
     readonly client_id: FieldRef<"client_integrations", 'String'>
     readonly provider: FieldRef<"client_integrations", 'String'>
+    readonly app_type: FieldRef<"client_integrations", 'String'>
     readonly shop_id: FieldRef<"client_integrations", 'String'>
     readonly merchant_id: FieldRef<"client_integrations", 'String'>
     readonly region: FieldRef<"client_integrations", 'String'>
     readonly access_token: FieldRef<"client_integrations", 'String'>
     readonly refresh_token: FieldRef<"client_integrations", 'String'>
     readonly token_expiry: FieldRef<"client_integrations", 'DateTime'>
+    readonly partner_id: FieldRef<"client_integrations", 'String'>
     readonly created_at: FieldRef<"client_integrations", 'DateTime'>
     readonly updated_at: FieldRef<"client_integrations", 'DateTime'>
   }
@@ -26953,12 +26979,14 @@ export namespace Prisma {
     id: 'id',
     client_id: 'client_id',
     provider: 'provider',
+    app_type: 'app_type',
     shop_id: 'shop_id',
     merchant_id: 'merchant_id',
     region: 'region',
     access_token: 'access_token',
     refresh_token: 'refresh_token',
     token_expiry: 'token_expiry',
+    partner_id: 'partner_id',
     created_at: 'created_at',
     updated_at: 'updated_at'
   };
@@ -28571,12 +28599,14 @@ export namespace Prisma {
     id?: UuidFilter<"client_integrations"> | string
     client_id?: UuidFilter<"client_integrations"> | string
     provider?: StringFilter<"client_integrations"> | string
+    app_type?: StringNullableFilter<"client_integrations"> | string | null
     shop_id?: StringNullableFilter<"client_integrations"> | string | null
     merchant_id?: StringNullableFilter<"client_integrations"> | string | null
     region?: StringNullableFilter<"client_integrations"> | string | null
     access_token?: StringNullableFilter<"client_integrations"> | string | null
     refresh_token?: StringNullableFilter<"client_integrations"> | string | null
     token_expiry?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    partner_id?: StringNullableFilter<"client_integrations"> | string | null
     created_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
     clients?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
@@ -28586,12 +28616,14 @@ export namespace Prisma {
     id?: SortOrder
     client_id?: SortOrder
     provider?: SortOrder
+    app_type?: SortOrderInput | SortOrder
     shop_id?: SortOrderInput | SortOrder
     merchant_id?: SortOrderInput | SortOrder
     region?: SortOrderInput | SortOrder
     access_token?: SortOrderInput | SortOrder
     refresh_token?: SortOrderInput | SortOrder
     token_expiry?: SortOrderInput | SortOrder
+    partner_id?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     clients?: clientsOrderByWithRelationInput
@@ -28605,12 +28637,14 @@ export namespace Prisma {
     NOT?: client_integrationsWhereInput | client_integrationsWhereInput[]
     client_id?: UuidFilter<"client_integrations"> | string
     provider?: StringFilter<"client_integrations"> | string
+    app_type?: StringNullableFilter<"client_integrations"> | string | null
     shop_id?: StringNullableFilter<"client_integrations"> | string | null
     merchant_id?: StringNullableFilter<"client_integrations"> | string | null
     region?: StringNullableFilter<"client_integrations"> | string | null
     access_token?: StringNullableFilter<"client_integrations"> | string | null
     refresh_token?: StringNullableFilter<"client_integrations"> | string | null
     token_expiry?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    partner_id?: StringNullableFilter<"client_integrations"> | string | null
     created_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
     clients?: XOR<ClientsScalarRelationFilter, clientsWhereInput>
@@ -28620,12 +28654,14 @@ export namespace Prisma {
     id?: SortOrder
     client_id?: SortOrder
     provider?: SortOrder
+    app_type?: SortOrderInput | SortOrder
     shop_id?: SortOrderInput | SortOrder
     merchant_id?: SortOrderInput | SortOrder
     region?: SortOrderInput | SortOrder
     access_token?: SortOrderInput | SortOrder
     refresh_token?: SortOrderInput | SortOrder
     token_expiry?: SortOrderInput | SortOrder
+    partner_id?: SortOrderInput | SortOrder
     created_at?: SortOrderInput | SortOrder
     updated_at?: SortOrderInput | SortOrder
     _count?: client_integrationsCountOrderByAggregateInput
@@ -28640,12 +28676,14 @@ export namespace Prisma {
     id?: UuidWithAggregatesFilter<"client_integrations"> | string
     client_id?: UuidWithAggregatesFilter<"client_integrations"> | string
     provider?: StringWithAggregatesFilter<"client_integrations"> | string
+    app_type?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     shop_id?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     merchant_id?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     region?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     access_token?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     refresh_token?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     token_expiry?: DateTimeNullableWithAggregatesFilter<"client_integrations"> | Date | string | null
+    partner_id?: StringNullableWithAggregatesFilter<"client_integrations"> | string | null
     created_at?: DateTimeNullableWithAggregatesFilter<"client_integrations"> | Date | string | null
     updated_at?: DateTimeNullableWithAggregatesFilter<"client_integrations"> | Date | string | null
   }
@@ -30245,12 +30283,14 @@ export namespace Prisma {
   export type client_integrationsCreateInput = {
     id?: string
     provider: string
+    app_type?: string | null
     shop_id?: string | null
     merchant_id?: string | null
     region?: string | null
     access_token?: string | null
     refresh_token?: string | null
     token_expiry?: Date | string | null
+    partner_id?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
     clients: clientsCreateNestedOneWithoutIntegrationsInput
@@ -30260,12 +30300,14 @@ export namespace Prisma {
     id?: string
     client_id: string
     provider: string
+    app_type?: string | null
     shop_id?: string | null
     merchant_id?: string | null
     region?: string | null
     access_token?: string | null
     refresh_token?: string | null
     token_expiry?: Date | string | null
+    partner_id?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -30273,12 +30315,14 @@ export namespace Prisma {
   export type client_integrationsUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clients?: clientsUpdateOneRequiredWithoutIntegrationsNestedInput
@@ -30288,12 +30332,14 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     client_id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -30302,12 +30348,14 @@ export namespace Prisma {
     id?: string
     client_id: string
     provider: string
+    app_type?: string | null
     shop_id?: string | null
     merchant_id?: string | null
     region?: string | null
     access_token?: string | null
     refresh_token?: string | null
     token_expiry?: Date | string | null
+    partner_id?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -30315,12 +30363,14 @@ export namespace Prisma {
   export type client_integrationsUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -30329,12 +30379,14 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     client_id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -31756,12 +31808,14 @@ export namespace Prisma {
     id?: SortOrder
     client_id?: SortOrder
     provider?: SortOrder
+    app_type?: SortOrder
     shop_id?: SortOrder
     merchant_id?: SortOrder
     region?: SortOrder
     access_token?: SortOrder
     refresh_token?: SortOrder
     token_expiry?: SortOrder
+    partner_id?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -31770,12 +31824,14 @@ export namespace Prisma {
     id?: SortOrder
     client_id?: SortOrder
     provider?: SortOrder
+    app_type?: SortOrder
     shop_id?: SortOrder
     merchant_id?: SortOrder
     region?: SortOrder
     access_token?: SortOrder
     refresh_token?: SortOrder
     token_expiry?: SortOrder
+    partner_id?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -31784,12 +31840,14 @@ export namespace Prisma {
     id?: SortOrder
     client_id?: SortOrder
     provider?: SortOrder
+    app_type?: SortOrder
     shop_id?: SortOrder
     merchant_id?: SortOrder
     region?: SortOrder
     access_token?: SortOrder
     refresh_token?: SortOrder
     token_expiry?: SortOrder
+    partner_id?: SortOrder
     created_at?: SortOrder
     updated_at?: SortOrder
   }
@@ -35816,12 +35874,14 @@ export namespace Prisma {
   export type client_integrationsCreateWithoutClientsInput = {
     id?: string
     provider: string
+    app_type?: string | null
     shop_id?: string | null
     merchant_id?: string | null
     region?: string | null
     access_token?: string | null
     refresh_token?: string | null
     token_expiry?: Date | string | null
+    partner_id?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -35829,12 +35889,14 @@ export namespace Prisma {
   export type client_integrationsUncheckedCreateWithoutClientsInput = {
     id?: string
     provider: string
+    app_type?: string | null
     shop_id?: string | null
     merchant_id?: string | null
     region?: string | null
     access_token?: string | null
     refresh_token?: string | null
     token_expiry?: Date | string | null
+    partner_id?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -36153,12 +36215,14 @@ export namespace Prisma {
     id?: UuidFilter<"client_integrations"> | string
     client_id?: UuidFilter<"client_integrations"> | string
     provider?: StringFilter<"client_integrations"> | string
+    app_type?: StringNullableFilter<"client_integrations"> | string | null
     shop_id?: StringNullableFilter<"client_integrations"> | string | null
     merchant_id?: StringNullableFilter<"client_integrations"> | string | null
     region?: StringNullableFilter<"client_integrations"> | string | null
     access_token?: StringNullableFilter<"client_integrations"> | string | null
     refresh_token?: StringNullableFilter<"client_integrations"> | string | null
     token_expiry?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
+    partner_id?: StringNullableFilter<"client_integrations"> | string | null
     created_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
     updated_at?: DateTimeNullableFilter<"client_integrations"> | Date | string | null
   }
@@ -38489,12 +38553,14 @@ export namespace Prisma {
   export type client_integrationsCreateManyClientsInput = {
     id?: string
     provider: string
+    app_type?: string | null
     shop_id?: string | null
     merchant_id?: string | null
     region?: string | null
     access_token?: string | null
     refresh_token?: string | null
     token_expiry?: Date | string | null
+    partner_id?: string | null
     created_at?: Date | string | null
     updated_at?: Date | string | null
   }
@@ -38842,12 +38908,14 @@ export namespace Prisma {
   export type client_integrationsUpdateWithoutClientsInput = {
     id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -38855,12 +38923,14 @@ export namespace Prisma {
   export type client_integrationsUncheckedUpdateWithoutClientsInput = {
     id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -38868,12 +38938,14 @@ export namespace Prisma {
   export type client_integrationsUncheckedUpdateManyWithoutClientsInput = {
     id?: StringFieldUpdateOperationsInput | string
     provider?: StringFieldUpdateOperationsInput | string
+    app_type?: NullableStringFieldUpdateOperationsInput | string | null
     shop_id?: NullableStringFieldUpdateOperationsInput | string | null
     merchant_id?: NullableStringFieldUpdateOperationsInput | string | null
     region?: NullableStringFieldUpdateOperationsInput | string | null
     access_token?: NullableStringFieldUpdateOperationsInput | string | null
     refresh_token?: NullableStringFieldUpdateOperationsInput | string | null
     token_expiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    partner_id?: NullableStringFieldUpdateOperationsInput | string | null
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     updated_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }

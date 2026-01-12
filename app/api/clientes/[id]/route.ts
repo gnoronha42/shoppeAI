@@ -43,7 +43,7 @@ export async function GET(
         { status: 404 }
       );
     }
-
+    
     const mappedClient = {
       id: client.id,
       name: client.name,
