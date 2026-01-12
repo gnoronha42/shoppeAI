@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
 import { getAdsAccessToken, getShopeeAdsEnv } from '@/lib/shopee-ads-auth';
 
 function fromBase64<T = unknown>(b64: string): T {
