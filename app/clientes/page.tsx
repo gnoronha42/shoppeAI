@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ export default function ClientesPage() {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState<string>("shopee"); // Padrão shopee
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const { hasPermission, user } = useAuth();
   
@@ -41,7 +42,7 @@ export default function ClientesPage() {
   const { data: response, isLoading, error } = useGetClientsQuery({
     page,
     pageSize: CLIENTS_PER_PAGE,
-    search: searchTerm,
+    search: debouncedSearchTerm,
     platform: platformFilter
   });
 
@@ -53,6 +54,15 @@ export default function ClientesPage() {
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
 
+  // Debounce do termo de busca
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500); // Aguarda 500ms após parar de digitar
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   useEffect(() => {
     if (clients && clients.length > 0) {
       dispatch(setClients(clients));
@@ -62,25 +72,25 @@ export default function ClientesPage() {
   // Resetar para primeira página quando buscar ou trocar aba
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, activeTab]);
+  }, [debouncedSearchTerm, activeTab]);
   
-  const handlePageChange = (newPage: number) => {
+  const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
-  };
+  }, []);
 
-  const navigateToClientDetails = (clientId: string) => {
+  const navigateToClientDetails = useCallback((clientId: string) => {
     router.push(`/clientes/${clientId}`);
-  };
+  }, [router]);
 
-  const handleClientFormSuccess = () => {
+  const handleClientFormSuccess = useCallback(() => {
     setActiveTab("shopee"); // Voltar para shopee após cadastro
-  };
+  }, []);
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
-  };
+  }, []);
 
-  const ClientList = () => (
+  const ClientList = useMemo(() => (
     <div className="space-y-6 mt-6">
           {/* Campo de busca */}
           <div className="flex items-center space-x-2">
@@ -113,7 +123,7 @@ export default function ClientesPage() {
                   ? "Nenhum cliente encontrado" 
                   : `Mostrando ${startIndex + 1}-${Math.min(endIndex, total)} de ${total} cliente${total !== 1 ? 's' : ''}`
                 }
-                {searchTerm && ` para "${searchTerm}"`}
+                {debouncedSearchTerm && ` para "${debouncedSearchTerm}"`}
               </span>
               {totalPages > 1 && (
                 <span>Página {currentPage} de {totalPages}</span>
@@ -124,7 +134,7 @@ export default function ClientesPage() {
           {/* Lista de clientes */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {isLoading ? (
-              <div className="col-span-full flex justify-center py-10">
+              <div className="col-span-full flex justify-center  py-10">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : error ? (
@@ -133,14 +143,17 @@ export default function ClientesPage() {
               </div>
             ) : clients.length === 0 ? (
               <div className="col-span-full text-center py-10">
-                {searchTerm ? (
+                {debouncedSearchTerm ? (
                   <div>
                     <p className="text-muted-foreground mb-2">
-                      Nenhum cliente encontrado para "{searchTerm}"
+                      Nenhum cliente encontrado para "{debouncedSearchTerm}"
                     </p>
                     <Button 
                       variant="outline" 
-                      onClick={() => setSearchTerm("")}
+                      onClick={() => {
+                        setSearchTerm("");
+                        setDebouncedSearchTerm("");
+                      }}
                     >
                       Limpar busca
                     </Button>
@@ -244,7 +257,23 @@ export default function ClientesPage() {
             </div>
           )}
     </div>
-  );
+  ), [
+    isLoading,
+    error,
+    clients,
+    searchTerm,
+    debouncedSearchTerm,
+    activeTab,
+    user,
+    startIndex,
+    endIndex,
+    total,
+    totalPages,
+    currentPage,
+    handlePageChange,
+    navigateToClientDetails,
+    handleSearchChange
+  ]);
 
   return (
     <div className="space-y-6">
@@ -272,11 +301,11 @@ export default function ClientesPage() {
         </TabsList>
         
         <TabsContent value="shopee">
-          <ClientList />
+          {ClientList}
         </TabsContent>
 
         <TabsContent value="tiktok">
-          <ClientList />
+          {ClientList}
         </TabsContent>
         
         <TabsContent value="cadastro" className="mt-6">

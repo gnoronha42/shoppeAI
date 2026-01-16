@@ -13,7 +13,7 @@
 // Credenciais do App de Ads (separadas do app principal de vendas)
 const SHOPEE_BASE_URL = process.env.SHOPEE_BASE_URL || 'https://partner.shopeemobile.com';
 const SHOPEE_ADS_PARTNER_ID = process.env.SHOPEE_ADS_PARTNER_ID || '2014411';
-const SHOPEE_ADS_PARTNER_KEY = process.env.SHOPEE_ADS_PARTNER_KEY || '';
+const SHOPEE_ADS_PARTNER_KEY = process.env.SHOPEE_ADS_PARTNER_KEY || 'shpk556366795377766741534a765372484141456e44527a79694b5a62457161';
 const SHOPEE_ADS_REDIRECT_URL = process.env.SHOPEE_ADS_REDIRECT_URL || '';
 
 async function toHexHmacSHA256(payload: string, secret: string): Promise<string> {
