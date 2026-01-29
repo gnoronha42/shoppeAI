@@ -31,13 +31,15 @@ import {
   TrendingUp,
   Plus,
   ShoppingBag,
-  Video
+  Video,
+  Info
 } from "lucide-react";
 import {
   useGetClientQuery,
   useGetClientReportsQuery,
   useDeleteClientMutation,
   useGetClientAnalysesQuery,
+  useGetShopeeShopInfoQuery,
 } from "@/lib/api";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -357,6 +359,155 @@ function ShopeeAdsIntegration({ clientId }: { clientId: string }) {
 }
 // +++ FIM DO COMPONENTE DE INTEGRAÇÃO SHOPEE ADS
 
+// +++ INÍCIO DO COMPONENTE DE INFORMAÇÕES DA LOJA SHOPEE
+function ShopeeShopInfo({ clientId }: { clientId: string }) {
+  const {
+    data: shopeeInfo,
+    isLoading,
+    error,
+  } = useGetShopeeShopInfoQuery(clientId);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Carregando informações da loja...
+      </div>
+    );
+  }
+
+  if (error || !shopeeInfo) {
+    return (
+      <div className="bg-yellow-50 dark:bg-yellow-950/30 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+          <strong>⚠️ Informações não disponíveis:</strong> Não foi possível carregar os dados da loja. 
+          Verifique se a integração está ativa e funcionando corretamente.
+        </p>
+      </div>
+    );
+  }
+
+  const { shop_info } = shopeeInfo;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Nome da Loja */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Nome da Loja</label>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="font-medium">{shop_info.shop_name || 'Não informado'}</p>
+          </div>
+        </div>
+
+        {/* Email da Loja */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Email</label>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            {shop_info.shop_email ? (
+              <p className="font-medium">{shop_info.shop_email}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Não disponível via API Shopee
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Telefone */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Telefone</label>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            {shop_info.phone ? (
+              <p className="font-medium">{shop_info.phone}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Não disponível via API Shopee
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* País */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">País</label>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            {shop_info.country ? (
+              <p className="font-medium">{shop_info.country}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">
+                Não disponível via API Shopee
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Descrição da Loja */}
+      {shop_info.shop_description && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Descrição da Loja</label>
+          <div className="p-3 bg-muted/50 rounded-lg">
+            <p className="text-sm">{shop_info.shop_description}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Badges de Status */}
+      <div className="flex flex-wrap gap-2">
+        {shop_info.is_cb && (
+          <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+            Cross Border
+          </Badge>
+        )}
+        {shop_info.is_cnsc && (
+          <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+            CNSC
+          </Badge>
+        )}
+      </div>
+
+      {/* Informações de Autenticação */}
+      {(shop_info.auth_time || shop_info.expire_time) && (
+        <div className="bg-muted/30 p-3 rounded-lg">
+          <p className="text-xs text-muted-foreground mb-2">Informações de Integração:</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+            {shop_info.auth_time && (
+              <div>
+                <span className="font-medium">Autorizado em:</span>{' '}
+                {new Date(shop_info.auth_time * 1000).toLocaleString('pt-BR')}
+              </div>
+            )}
+            {shop_info.expire_time && (
+              <div>
+                <span className="font-medium">Expira em:</span>{' '}
+                {new Date(shop_info.expire_time * 1000).toLocaleString('pt-BR')}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Nota sobre limitações da API */}
+      {(!shop_info.shop_email || !shop_info.phone || !shop_info.country) && (
+        <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+            <div className="text-xs text-blue-800 dark:text-blue-200">
+              <p className="font-medium mb-1">ℹ️ Sobre Email, Telefone e País:</p>
+              <p>
+                A API Shopee Open Platform não fornece email e telefone do seller por questões de privacidade e segurança. 
+                Esses dados estão disponíveis apenas no painel Seller Center da Shopee. 
+                Para obter essas informações, acesse diretamente o painel do seller.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+// +++ FIM DO COMPONENTE DE INFORMAÇÕES DA LOJA SHOPEE
+
 interface StoredAnalysis {
   id: string;
   title: string;
@@ -408,6 +559,15 @@ export default function ClientDetailsPage() {
     refetch: refetchAnalyses,
     error: analysesError,
   } = useGetClientAnalysesQuery(clientId);
+
+  // Buscar informações da loja Shopee (apenas para clientes Shopee integrados)
+  const {
+    data: shopeeInfo,
+    isLoading: isShopeeInfoLoading,
+    error: shopeeInfoError,
+  } = useGetShopeeShopInfoQuery(clientId, {
+    skip: client?.platform !== 'shopee', // Só buscar para clientes Shopee
+  });
 
   useEffect(() => {
     // Checa se a URL tem um parâmetro para abrir uma aba específica
@@ -983,7 +1143,19 @@ Durante o período analisado, identificamos **${Math.floor(Math.random() * 5) + 
 
                   <Separator />
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                  {/* Informações da Loja Shopee (se integrada) */}
+                  {client.platform === 'shopee' && (
+                    <>
+                      <Separator />
+                      <div className="space-y-3">
+                        <h4 className="font-medium flex items-center gap-2">
+                          <ShoppingBag className="h-4 w-4 text-orange-600" />
+                          Informações da Loja Shopee
+                        </h4>
+                        <ShopeeShopInfo clientId={clientId} />
+                      </div>
+                    </>
+                  )}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">

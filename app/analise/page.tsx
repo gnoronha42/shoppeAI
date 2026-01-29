@@ -143,8 +143,39 @@ export default function AnalisePage() {
     });
   };
 
+  // Função para ler arquivo XLSX como base64
+  const readXLSXFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const result = reader.result as string;
+        // Remover prefixo data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  // Função auxiliar para detectar se é XLSX
+  const isXLSXFile = (fileName: string): boolean => {
+    return fileName.toLowerCase().endsWith('.xlsx') || fileName.toLowerCase().endsWith('.xls');
+  };
+
+  // Função unificada para ler arquivo (CSV ou XLSX)
+  const readDataFile = async (file: File): Promise<{ content: string; isBase64: boolean }> => {
+    if (isXLSXFile(file.name)) {
+      const base64 = await readXLSXFile(file);
+      return { content: base64, isBase64: true };
+    } else {
+      const text = await readCSVFile(file);
+      return { content: text, isBase64: false };
+    }
+  };
+
   
-  const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType) => {
+  const analyzeCSVWithOpenAI = async (csvContent: string, type: AnalysisType, fileName?: string) => {
     setApiError(null);
 
     
@@ -152,6 +183,7 @@ export default function AnalisePage() {
       csvContent: csvContent,
       analysisType: type,
       clientName: selectedClient?.name || "Cliente",
+      fileName: fileName,
     };
 
     
@@ -200,10 +232,10 @@ export default function AnalisePage() {
      
       const csvFilesContent = await Promise.all(
         csvFiles.map(async (file) => {
-          const content = await readCSVFile(file);
+          const fileData = await readDataFile(file);
           return {
             nome: file.name,
-            conteudo: content
+            conteudo: fileData.content
           };
         })
       );
@@ -264,10 +296,10 @@ export default function AnalisePage() {
     
     const csvFilesContent = await Promise.all(
       csvFiles.map(async (file) => {
-        const content = await readCSVFile(file);
+        const fileData = await readDataFile(file);
         return {
           nome: file.name,
-          conteudo: content
+          conteudo: fileData.content
         };
       })
     );
@@ -378,7 +410,14 @@ export default function AnalisePage() {
 
   
   const hasCSVFiles = () => {
-    return files.some(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+    return files.some(file => 
+      file.type === 'text/csv' || 
+      file.name.toLowerCase().endsWith('.csv') ||
+      file.name.toLowerCase().endsWith('.xlsx') ||
+      file.name.toLowerCase().endsWith('.xls') ||
+      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.type === 'application/vnd.ms-excel'
+    );
   };
 
   const hasImageFiles = () => {
@@ -571,25 +610,32 @@ export default function AnalisePage() {
       setIsAnalyzing(true);
 
   
-      const csvFiles = files.filter(file => file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv'));
+      const dataFiles = files.filter(file => 
+        file.type === 'text/csv' || 
+        file.name.toLowerCase().endsWith('.csv') ||
+        file.name.toLowerCase().endsWith('.xlsx') ||
+        file.name.toLowerCase().endsWith('.xls') ||
+        file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        file.type === 'application/vnd.ms-excel'
+      );
       const imageFiles = files.filter(file => file.type.startsWith('image/'));
 
       let analysisResult: string;
 
-      if (csvFiles.length > 0) {
+      if (dataFiles.length > 0) {
         
         if (analysisType === "ads") {
  
-          if (csvFiles.length > 1) {
-            toast({ title: "Múltiplos CSVs", description: "Para análise de Ads, use apenas 1 arquivo CSV", variant: "destructive" });
+          if (dataFiles.length > 1) {
+            toast({ title: "Múltiplos arquivos", description: "Para análise de Ads, use apenas 1 arquivo CSV/XLSX", variant: "destructive" });
             setIsAnalyzing(false);
             return;
           }
-          const csvContent = await readCSVFile(csvFiles[0]);
-          analysisResult = await analyzeCSVWithOpenAI(csvContent, analysisType);
+          const fileData = await readDataFile(dataFiles[0]);
+          analysisResult = await analyzeCSVWithOpenAI(fileData.content, analysisType, dataFiles[0].name);
         } else if (analysisType === "account") {
         
-          analysisResult = await analyzeMultipleCSVsWithOpenAI(csvFiles, analysisType);
+          analysisResult = await analyzeMultipleCSVsWithOpenAI(dataFiles, analysisType);
         } else if (analysisType === "whatsapp-consultivo") {
         
           if (imageFiles.length === 0) {
@@ -600,7 +646,7 @@ export default function AnalisePage() {
           const ocrTexts = await ocrAllImages(imageFiles);
           analysisResult = await analyzeImagesWithOpenAI(base64Images, analysisType, ocrTexts);
         } else {
-          toast({ title: "Tipo de análise inválido", description: "Análise CSV disponível para 'ads' e 'account'. Para outros tipos, use imagens.", variant: "destructive" });
+          toast({ title: "Tipo de análise inválido", description: "Análise CSV/XLSX disponível para 'ads' e 'account'. Para outros tipos, use imagens.", variant: "destructive" });
           setIsAnalyzing(false);
           return;
         }
@@ -611,7 +657,7 @@ export default function AnalisePage() {
         
         analysisResult = await analyzeImagesWithOpenAI(base64Images, analysisType, ocrTexts);
       } else {
-        throw new Error("Nenhum arquivo válido encontrado. Faça upload de imagens ou CSV.");
+        throw new Error("Nenhum arquivo válido encontrado. Faça upload de imagens, CSV ou XLSX.");
       }
 
       setCustomMarkdown(analysisResult);
@@ -880,7 +926,14 @@ export default function AnalisePage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => testAllSystems(files.filter(f => f.type === 'text/csv' || f.name.toLowerCase().endsWith('.csv')))}
+                    onClick={() => testAllSystems(files.filter(f => 
+                      f.type === 'text/csv' || 
+                      f.name.toLowerCase().endsWith('.csv') ||
+                      f.name.toLowerCase().endsWith('.xlsx') ||
+                      f.name.toLowerCase().endsWith('.xls') ||
+                      f.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                      f.type === 'application/vnd.ms-excel'
+                    ))}
                     disabled={isTestingSystem}
                     className="w-full"
                   >
@@ -892,39 +945,7 @@ export default function AnalisePage() {
           </Card>
         )} */}
 
-        {testResults && (
-          <Card className="border-green-200 bg-green-50 dark:bg-green-950/30">
-            <CardHeader>
-              <CardTitle className="text-green-700 dark:text-green-400 flex items-center">
-                <AlertCircle className="mr-2 h-5 w-5" />
-                Resultado dos Testes ({testResults.sistemasComSucesso}/{testResults.totalSistemas} funcionando)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {Object.entries(testResults.resultados).map(([system, result]: [string, any]) => (
-                  <div key={system} className="flex items-center justify-between p-2 rounded border">
-                    <span className="font-medium">
-                      {/* {system === 'debugSystem' && '🔍 Sistema Debug'} */}
-                      {/* {system === 'bypassSystem' && '⚡ Sistema Bypass'} */}
-                      {/* {system === 'robustSystem' && '🔄 Sistema Robusto'} */}
-                    </span>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      result.sucesso 
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' 
-                        : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                    }`}>
-                      {result.sucesso ? 'Funcionando' : ' Falhou'}
-                    </span>
-                  </div>
-                ))}
-                <p className="text-xs text-muted-foreground mt-2">
-                  <strong>Recomendação:</strong> {testResults.recomendacao}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+       
 
         <Card>
           <CardHeader>
@@ -942,11 +963,11 @@ export default function AnalisePage() {
             <FileUpload
               onFilesChange={handleFileChange}
               maxFiles={10}
-              accept="image/*, text/csv"
+              accept="image/*, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xlsx, .xls"
             />
             <p className="text-xs text-muted-foreground mt-2">
               {analysisType === "account"
-                ? "Faça upload de prints da sua conta Shopee OU múltiplos arquivos CSV (shop-stats, parentskudetail, productoverview, dados de anúncios) para análise completa"
+                ? "Faça upload de prints da sua conta Shopee OU múltiplos arquivos CSV/XLSX (shop-stats, parentskudetail, productoverview, dados de anúncios) para análise completa"
                 : analysisType === "ads"
                 ? "✅ RECOMENDADO: 1 arquivo CSV de anúncios para dados 100% precisos (ROAS, investimento, GMV corretos) OU prints das campanhas Shopee Ads (pode ter imprecisões matemáticas)"
                 : analysisType === "whatsapp-consultivo"

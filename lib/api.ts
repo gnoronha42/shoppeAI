@@ -191,6 +191,32 @@ export const api = createApi({
             ]
           : [{ type: 'Analyses', id: clientId }],
     }),
+    
+    getShopeeShopInfo: builder.query<{
+      success: boolean;
+      client_id: string;
+      client_name: string;
+      shop_info: {
+        shop_name: string;
+        shop_email: string;
+        phone: string;
+        shop_description: string;
+        country: string;
+        shop_logo: string;
+        is_cb: boolean;
+        is_cnsc: boolean;
+        auth_time: number | null;
+        expire_time: number | null;
+      };
+    }, string>({
+      query: (clientId) => {
+        return `shopee/shop-info?client_id=${clientId}`;
+      },
+      providesTags: (result, error, clientId) => [
+        { type: 'Clients', id: clientId },
+        'Clients'
+      ],
+    }),
   }),
 });
 
@@ -202,5 +228,6 @@ export const {
   useUpdateClientMutation,
   useDeleteClientMutation,
   useGenerateReportMutation,
-  useGetClientAnalysesQuery
+  useGetClientAnalysesQuery,
+  useGetShopeeShopInfoQuery
 } = api;
