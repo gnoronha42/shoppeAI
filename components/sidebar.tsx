@@ -32,6 +32,11 @@ const regularItems = [
     href: "/calculadora",
     icon: <Calculator className="mr-2 h-5 w-5" />,
   },
+  {
+    title: "Calculadora 2026",
+    href: "/calculadora-2026",
+    icon: <Calculator className="mr-2 h-5 w-5" />,
+  },
  // {
    // title: "Pergunte a IA",
     //href: "/ia",
