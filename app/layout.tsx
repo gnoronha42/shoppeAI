@@ -19,9 +19,10 @@ export default function RootLayout({
   const isObrigadoPage = pathname === "/obrigado";
   const isCalculadoraPage = pathname === "/calculadora";
   const isCalculadora2026Page = pathname === "/calculadora-2026";
+  const isCalculadoraUnificadaPage = pathname === "/calculadora-unificada";
   const isHomePage = pathname === "/";
 
-  const showSidebar = !isLoginPage && !isSelleriaPage && !isObrigadoPage && !isCalculadoraPage && !isCalculadora2026Page;
+  const showSidebar = !isLoginPage && !isSelleriaPage && !isObrigadoPage && !isCalculadoraPage && !isCalculadora2026Page && !isCalculadoraUnificadaPage;
   const useStandardLayout = showSidebar && !isHomePage;
 
   return (
