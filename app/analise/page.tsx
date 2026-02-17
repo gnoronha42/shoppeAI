@@ -409,15 +409,17 @@ export default function AnalisePage() {
   };
 
   
-  const hasCSVFiles = () => {
-    return files.some(file => 
-      file.type === 'text/csv' || 
+  const isDataFile = (file: File) => {
+    return file.type === 'text/csv' || 
       file.name.toLowerCase().endsWith('.csv') ||
       file.name.toLowerCase().endsWith('.xlsx') ||
       file.name.toLowerCase().endsWith('.xls') ||
       file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-      file.type === 'application/vnd.ms-excel'
-    );
+      file.type === 'application/vnd.ms-excel';
+  };
+
+  const hasCSVFiles = () => {
+    return files.some(isDataFile);
   };
 
   const hasImageFiles = () => {
@@ -625,19 +627,16 @@ export default function AnalisePage() {
       if (dataFiles.length > 0) {
         
         if (analysisType === "ads") {
- 
           if (dataFiles.length > 1) {
-            toast({ title: "Múltiplos arquivos", description: "Para análise de Ads, use apenas 1 arquivo CSV/XLSX", variant: "destructive" });
+            toast({ title: "Análise de Ads", description: "Use apenas 1 arquivo CSV/XLSX de anúncios.", variant: "destructive" });
             setIsAnalyzing(false);
             return;
           }
           const fileData = await readDataFile(dataFiles[0]);
           analysisResult = await analyzeCSVWithOpenAI(fileData.content, analysisType, dataFiles[0].name);
         } else if (analysisType === "account") {
-        
           analysisResult = await analyzeMultipleCSVsWithOpenAI(dataFiles, analysisType);
         } else if (analysisType === "whatsapp-consultivo") {
-        
           if (imageFiles.length === 0) {
             toast({ title: "Erro", description: "Para análise WhatsApp Consultivo, é necessário pelo menos uma imagem", variant: "destructive" });
             return;
@@ -967,37 +966,26 @@ export default function AnalisePage() {
             />
             <p className="text-xs text-muted-foreground mt-2">
               {analysisType === "account"
-                ? "Faça upload de prints da sua conta Shopee OU múltiplos arquivos CSV/XLSX (shop-stats, parentskudetail, productoverview, dados de anúncios) para análise completa"
+                ? "Upload de prints da conta OU múltiplos CSV/XLSX (shop-stats, anúncios, etc.) para análise completa"
                 : analysisType === "ads"
-                ? "✅ RECOMENDADO: 1 arquivo CSV de anúncios para dados 100% precisos (ROAS, investimento, GMV corretos) OU prints das campanhas Shopee Ads (pode ter imprecisões matemáticas)"
+                ? "1 arquivo CSV/XLSX de anúncios para dados precisos, ou prints das campanhas"
                 : analysisType === "whatsapp-consultivo"
-                ? "Faça upload de prints da performance da sua loja dos últimos 7 dias: métricas principais, funil de vendas e produtos em destaque para análise consultiva"
-                : "Faça upload de prints da sua loja Shopee para análise semanal: métricas principais, vendas e performance geral (máximo 10 imagens)"}
+                ? "Upload de prints para análise consultiva"
+                : "Upload de prints para análise semanal"}
             </p>
-            
             {hasCSVFiles() && analysisType === "ads" && (
               <div className="mt-2 p-2 bg-green-50 dark:bg-green-950/30 rounded border border-green-200">
                 <p className="text-xs text-green-700 dark:text-green-300">
-                  ✅ <strong>CSV detectado!</strong> Análise será feita com dados extraídos diretamente do CSV - precisão matemática garantida!
-                </p>
-              </div>
-            )}
-            
-            {hasImageFiles() && !hasCSVFiles() && analysisType === "ads" && (
-              <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/30 rounded border border-yellow-200">
-                <p className="text-xs text-yellow-700 dark:text-yellow-300">
-                  ⚠️ <strong>Apenas imagens detectadas.</strong> Para dados 100% precisos, recomendamos usar o arquivo CSV de anúncios da Shopee.
+                  CSV/XLSX detectado — análise com dados extraídos do arquivo
                 </p>
               </div>
             )}
             {files.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm font-medium">
-                  Arquivos selecionados ({files.length}):
-                </p>
+                <p className="text-sm font-medium">Arquivos ({files.length}):</p>
                 <ul className="mt-1 text-xs text-muted-foreground">
-                  {files.map((file, index) => (
-                    <li key={index}>{file.name}</li>
+                  {files.map((file, i) => (
+                    <li key={i}>{file.name}</li>
                   ))}
                 </ul>
               </div>
@@ -1019,13 +1007,13 @@ export default function AnalisePage() {
           >
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             {isLoading || isAnalyzing
-              ? "Analisando com IA..."
+              ? "Analisando..."
               : isTestingSystem
               ? "Testando sistemas..."
               : hasCSVFiles()
-              ? "Gerar com CSV (Dados Precisos)"
+              ? "Gerar com CSV/Planilha"
               : hasImageFiles()
-              ? "Gerar com Imagens (Pode ter imprecisões)"
+              ? "Gerar com Imagens"
               : "Gerar Relatório com IA"}
           </Button>
 

@@ -360,56 +360,57 @@ export async function POST(request: NextRequest) {
         <style>
           body {
             font-family: 'Inter', Arial, sans-serif;
-            color: #222;
+            color: #1a1a1a;
             margin: 0;
             padding: 0;
             font-size: 12px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           #content {
             max-width: 180mm;
             margin: 0 auto;
-            padding: 0 0 16mm 0;
+            padding: 0 0 24mm 0;
             background: transparent;
             box-sizing: border-box;
-            min-height: calc(297mm - 60mm);
+            min-height: 0;
             display: block;
             text-align: left;
+          }
+          #content p, #content li, #content td, #content th {
+            color: #1a1a1a;
           }
           
           /* Títulos principais centralizados */
           h1 {
-            color: #ff6b35;
+            color: #c2410c;
             font-weight: bold;
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             text-align: center;
             margin-top: 0;
-            margin-bottom: 20px;
-            text-transform: uppercase;
+            margin-bottom: 12px;
             page-break-inside: avoid;
             page-break-after: avoid;
-            background: linear-gradient(135deg, #ff6b35, #f7931e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            padding: 10px 0;
+            padding: 8px 0;
+            border-bottom: 2px solid #ea580c;
           }
           
           /* Seções principais */
           h2 {
-            color: #1976d2;
+            color: #c2410c;
             font-weight: bold;
             font-size: 1.1rem;
-            margin-top: 18px;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #1976d2;
-            padding-bottom: 3px;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #ea580c;
+            padding-bottom: 4px;
             page-break-inside: avoid;
             page-break-after: avoid;
-            text-align: center;
+            text-align: left;
           }
           
           h3 {
-            color: #1976d2;
+            color: #9a3412;
             font-weight: bold;
             font-size: 1rem;
             margin-top: 12px;
@@ -418,13 +419,26 @@ export async function POST(request: NextRequest) {
             page-break-after: avoid;
           }
           
+          /* Listas: cor consistente (evita azul só em alguns itens) */
+          #content ul, #content ol {
+            color: #1a1a1a;
+          }
+          #content ul li, #content ol li {
+            color: #1a1a1a;
+            margin-bottom: 4px;
+          }
+          
           /* Parágrafos e listas */
           p, ul, ol {
             text-align: justify;
             font-size: 0.9rem;
             line-height: 1.5;
-            margin-bottom: 10px;
-            page-break-inside: avoid;
+            margin-bottom: 8px;
+            page-break-inside: auto;
+          }
+          
+          p:last-child, li:last-child {
+            margin-bottom: 0;
           }
           
           /* Métricas em destaque */
@@ -447,49 +461,50 @@ export async function POST(request: NextRequest) {
             page-break-inside: avoid;
           }
           
-          /* Tabelas centralizadas e bem formatadas */
+          /* Tabelas: bordas visíveis em todas as células */
           table {
             border-collapse: collapse;
             font-size: 0.8rem;
             background: #fff;
             width: 100%;
-            margin: 20px auto;
-            page-break-inside: avoid;
-            border: 2px solid #1976d2;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 16px 0;
+            page-break-inside: auto;
+            border: 1px solid #64748b;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
           }
           
           th {
-            background: linear-gradient(135deg, #1976d2, #1565c0);
+            background: #ea580c;
             color: #fff;
-            text-align: center;
+            text-align: left;
             font-weight: bold;
-            padding: 10px 6px;
-            border: 1px solid #0d47a1;
+            padding: 8px 10px;
+            border: 1px solid #c2410c;
             font-size: 0.75rem;
           }
           
           td {
-            border: 1px solid #bbdefb;
-            padding: 8px 6px;
+            border: 1px solid #cbd5e1;
+            padding: 8px 10px;
             text-align: left;
             vertical-align: top;
             font-size: 0.75rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
           }
           
-          /* Zebra striping para tabelas */
-          tr:nth-child(even) {
-            background-color: #f8f9fa;
+          /* Zebra suave para legibilidade */
+          tbody tr:nth-child(even) {
+            background-color: #f8fafc;
           }
           
-          tr:hover {
-            background-color: #e3f2fd;
+          tbody tr:nth-child(odd) {
+            background-color: #fff;
           }
           
-          /* Células numéricas alinhadas à direita */
-          td:contains("R$"), td:contains("%"), td:contains("↑"), td:contains("↓") {
-            text-align: right;
-            font-weight: 500;
+          /* Células com "Dado não disponível" menos chamativas */
+          td:not([class]) {
+            color: #1a1a1a;
           }
           
           /* Seções de diagnóstico */
@@ -523,31 +538,28 @@ export async function POST(request: NextRequest) {
             page-break-inside: avoid;
           }
           
-          /* Cabeçalho da loja */
+          /* Cabeçalho da loja / Identificação */
           .loja-info {
-            text-align: center;
-            margin-bottom: 20px;
+            text-align: left;
+            margin-bottom: 12px;
             page-break-after: avoid;
           }
           
           .loja-info p {
-            margin: 5px 0;
-            font-size: 1rem;
-            color: #666;
+            margin: 4px 0;
+            font-size: 0.95rem;
+            color: #1a1a1a;
           }
           
           /* Título principal customizado */
           .titulo-principal {
-            background: linear-gradient(135deg, #ff6b35, #f7931e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: 1.5rem !important;
-            font-weight: 900;
+            color: #c2410c;
+            font-size: 1.4rem !important;
+            font-weight: 800;
             text-align: center;
-            margin: 20px 0 30px 0;
-            padding: 15px 0;
-            border-bottom: 3px solid #ff6b35;
+            margin: 12px 0 16px 0;
+            padding: 10px 0;
+            border-bottom: 2px solid #ea580c;
             page-break-after: avoid;
           }
           
@@ -595,49 +607,47 @@ export async function POST(request: NextRequest) {
           
           /* Container de tabelas */
           .table-container {
-            margin: 15px 0;
-            page-break-inside: avoid;
+            margin: 12px 0;
+            page-break-inside: auto;
             overflow-x: auto;
           }
           
           .tabela-analise {
             width: 100%;
             margin: 0 auto;
-            border: 2px solid #1976d2;
-            border-radius: 6px;
+            border: 1px solid #64748b;
+            border-collapse: collapse;
             overflow: hidden;
-            box-shadow: 0 3px 6px rgba(25, 118, 210, 0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
           }
           
           .tabela-analise th {
-            background: linear-gradient(135deg, #1976d2, #1565c0);
-            color: white;
+            background: #ea580c;
+            color: #fff;
             font-weight: 600;
             font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            padding: 8px 4px;
-            text-align: center;
+            padding: 8px 10px;
+            text-align: left;
             line-height: 1.2;
+            border: 1px solid #c2410c;
           }
           
           .tabela-analise td {
-            padding: 6px 4px;
-            font-size: 0.65rem;
-            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 10px;
+            font-size: 0.75rem;
+            border: 1px solid #cbd5e1;
             vertical-align: top;
-            line-height: 1.3;
+            line-height: 1.35;
             word-wrap: break-word;
-            max-width: 120px;
+            overflow-wrap: break-word;
           }
           
-          .tabela-analise tr:nth-child(even) {
-            background: #f8f9fa;
+          .tabela-analise tbody tr:nth-child(even) {
+            background: #f8fafc;
           }
           
-          .tabela-analise tr:hover {
-            background: #e3f2fd;
-            transition: background-color 0.2s ease;
+          .tabela-analise tbody tr:nth-child(odd) {
+            background: #fff;
           }
           
           /* Tabela específica para diagnóstico de produtos (mais compacta) */
@@ -804,13 +814,30 @@ export async function POST(request: NextRequest) {
             page-break-after: avoid;
           }
           
-          /* Layout responsivo para tabelas grandes */
+          /* Snapshot e seções vazias: evitar espaço excessivo */
+          h2 + p, h3 + p, h2 + ul, h3 + ul {
+            margin-top: 0;
+          }
+          
+          /* Plano tático: títulos de semana consistentes */
+          #content strong {
+            color: #1a1a1a;
+          }
+          
+          /* Layout para impressão */
           @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             table {
-              font-size: 0.7rem;
+              font-size: 0.75rem;
+              border: 1px solid #64748b;
             }
             th, td {
-              padding: 6px 4px;
+              padding: 6px 8px;
+              border: 1px solid #cbd5e1;
+            }
+            th {
+              background: #ea580c !important;
+              color: #fff !important;
             }
           }
           

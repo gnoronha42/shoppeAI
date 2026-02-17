@@ -28,6 +28,11 @@ const regularItems = [
     icon: <BarChart2 className="mr-2 h-5 w-5" />,
   },
   {
+    title: "Análise Gemini",
+    href: "/analise/gemini",
+    icon: <BrainCircuit className="mr-2 h-5 w-5" />,
+  },
+  {
     title: "Calculadora",
     href: "/calculadora",
     icon: <Calculator className="mr-2 h-5 w-5" />,
