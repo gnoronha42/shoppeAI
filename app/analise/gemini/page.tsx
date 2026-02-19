@@ -183,11 +183,10 @@ export default function AnaliseGeminiPage() {
       return;
     }
     const dataFiles = files.filter(isDataFile);
-    if (dataFiles.length < 2) {
+    if (dataFiles.length === 0) {
       toast({
-        title: "Mínimo 2 planilhas",
-        description:
-          "Envie pelo menos 2 planilhas (mês anterior + mês atual) para análise comparativa com Gemini.",
+        title: "Nenhuma planilha enviada",
+        description: "Envie pelo menos 1 planilha para análise com Gemini.",
         variant: "destructive",
       });
       return;
@@ -232,14 +231,14 @@ export default function AnaliseGeminiPage() {
 
   const dataFiles = files.filter(isDataFile);
   const canSubmit =
-    selectedClientId && dataFiles.length >= 2 && dataFiles.length <= 4 && !isAnalyzing;
+    selectedClientId && dataFiles.length >= 1 && dataFiles.length <= 4 && !isAnalyzing;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Análise Gemini</h1>
         <p className="text-muted-foreground">
-          Análise comparativa por planilhas (mês anterior + atual) com Gemini
+          Análise inteligente de planilhas com Gemini (comparativa quando possível)
         </p>
       </div>
 
@@ -280,15 +279,15 @@ export default function AnaliseGeminiPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload de planilhas (2 a 4 arquivos)</CardTitle>
+          <CardTitle>Upload de planilhas (1 a 4 arquivos)</CardTitle>
           <CardDescription>
-            Anúncios e/ou Shop-Stats: mês anterior + mês atual
+            Anúncios e/ou Shop-Stats: análise flexível com Gemini
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200">
             <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
-              Envie 2 a 4 planilhas exportadas da Shopee
+              Envie 1 a 4 planilhas exportadas da Shopee
             </p>
             <ul className="text-xs text-blue-600 dark:text-blue-400 mt-1 ml-3 list-disc">
               <li>Planilha de Anúncios – mês anterior</li>
