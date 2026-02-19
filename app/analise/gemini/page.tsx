@@ -19,6 +19,7 @@ import {
 } from "@/features/clients/clientSlice";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisType } from "@/types";
+import { AnalysisTypeSelector } from "@/components/analysis/analysis-type-selector";
 import { MarkdownReport } from "@/components/analysis/markdown-report";
 import { PDFGenerator } from "@/components/analysis/pdf-generator";
 
@@ -68,6 +69,7 @@ function extractPeriodFromName(name: string): string {
 }
 
 export default function AnaliseGeminiPage() {
+  const [analysisType, setAnalysisType] = useState<AnalysisType>("account");
   const [files, setFiles] = useState<File[]>([]);
   const selectedClientId = useSelector(selectSelectedClientId);
   const selectedClient = useSelector(selectSelectedClient);
@@ -119,10 +121,7 @@ export default function AnaliseGeminiPage() {
     return { content: text, isBase64: false };
   };
 
-  const analyzePlanilhasWithGemini = async (
-    dataFiles: File[],
-    type: AnalysisType
-  ) => {
+  const analyzePlanilhasWithGemini = async (dataFiles: File[]) => {
     setApiError(null);
     const csvFilesContent = await Promise.all(
       dataFiles.map(async (file) => {
@@ -136,7 +135,7 @@ export default function AnaliseGeminiPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         csvFiles: csvFilesContent,
-        analysisType: type,
+        analysisType,
         clientName: selectedClient?.name || "Cliente",
       }),
     });
@@ -162,7 +161,7 @@ export default function AnaliseGeminiPage() {
         clientId: selectedClientId,
         clientName: selectedClient?.name,
         markdown,
-        analysisType: "account",
+        analysisType,
       }),
     });
     if (!response.ok) throw new Error(`Erro ${response.status}`);
@@ -204,7 +203,7 @@ export default function AnaliseGeminiPage() {
     try {
       setIsAnalyzing(true);
       setApiError(null);
-      const result = await analyzePlanilhasWithGemini(dataFiles, "account");
+      const result = await analyzePlanilhasWithGemini(dataFiles);
       setCustomMarkdown(result);
       toast({
         title: "Análise concluída",
@@ -264,6 +263,18 @@ export default function AnaliseGeminiPage() {
         </CardHeader>
         <CardContent>
           <ClientSelector />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Tipo de análise</CardTitle>
+          <CardDescription>
+            Mesmo modelo de relatório da página Análise (por planilhas)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AnalysisTypeSelector value={analysisType} onChange={setAnalysisType} />
         </CardContent>
       </Card>
 
@@ -350,7 +361,7 @@ export default function AnaliseGeminiPage() {
               <PDFGenerator
                 markdown={customMarkdown}
                 clientName={selectedClient?.name || "Cliente"}
-                analysisType="account"
+                analysisType={analysisType}
                 images={[]}
                 ocrTexts={[]}
               />
