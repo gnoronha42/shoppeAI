@@ -261,12 +261,68 @@ const isPageHealthy = async (page: any) => {
   }
 };
 
+const PDF_MICRO_PATH = "/analisepdf";
+const DEFAULT_PDF_MICRO_URL = "https://analysis-micro.onrender.com";
+
+function getPdfMicroUrl(): string | null {
+  const env = process.env.ANALYSIS_MICROSERVICE_URL;
+  if (env && env.length > 0) return env.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production") return DEFAULT_PDF_MICRO_URL;
+  return null;
+}
+
+async function generatePdfViaMicro(
+  markdown: string,
+  clientName: string,
+  analysisType: string
+): Promise<NextResponse> {
+  const base = getPdfMicroUrl();
+  if (!base) throw new Error("PDF micro URL not configured");
+  const pdfUrl = `${base}${PDF_MICRO_PATH}`;
+  const microRes = await fetch(pdfUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ markdown, clientName, analysisType }),
+  });
+  if (!microRes.ok) {
+    const errText = await microRes.text();
+    console.error("PDF microservice error:", microRes.status, errText);
+    return NextResponse.json(
+      {
+        message: "Error generating PDF",
+        error: `Microservice returned ${microRes.status}: ${errText.slice(0, 200)}`,
+      },
+      { status: 500 }
+    );
+  }
+  const pdfBuffer = Buffer.from(await microRes.arrayBuffer());
+  const sanitizedClientName = clientName
+    .replace(/[áàãâä]/gi, "a")
+    .replace(/[éèêë]/gi, "e")
+    .replace(/[íìîï]/gi, "i")
+    .replace(/[óòõôö]/gi, "o")
+    .replace(/[úùûü]/gi, "u")
+    .replace(/[ç]/gi, "c")
+    .replace(/[^a-z0-9]/gi, "_")
+    .substring(0, 50)
+    .trim();
+  const response = new NextResponse(pdfBuffer);
+  response.headers.set("Content-Type", "application/pdf");
+  response.headers.set(
+    "Content-Disposition",
+    `attachment; filename="relatorio_${sanitizedClientName}.pdf"`
+  );
+  return response;
+}
+
 export async function POST(request: NextRequest) {
   let browser = null;
   let page = null;
 
   try {
-    const { markdown, clientName } = await request.json();
+    const body = await request.json();
+    const { markdown, clientName, analysisType = "account" } = body;
+    const analysisTypeStr = typeof analysisType === "string" ? analysisType : "account";
 
     if (!markdown || typeof markdown !== 'string') {
       return NextResponse.json(
@@ -282,8 +338,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    
-    // Calcular CPA antes de converter para HTML
+    // Em produção não há Chrome. Usar microserviço (Browserless) quando a URL estiver definida ou em NODE_ENV=production.
+    if (getPdfMicroUrl()) {
+      return generatePdfViaMicro(markdown, clientName, analysisTypeStr);
+    }
+
+    // Calcular CPA antes de converter para HTML (fluxo local com Puppeteer)
     const markdownComCPA = calcularCPA(markdown);
 
     let htmlContent = await marked(markdownComCPA);
@@ -1149,11 +1209,29 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : String(error);
+    const isChromeMissing = /Could not find Chrome|Chrome.*not found|executable path/i.test(errMessage);
+
+    // Fallback: se Puppeteer falhou por falta de Chrome, tentar microserviço (ex.: em produção sem env).
+    if (isChromeMissing && getPdfMicroUrl()) {
+      try {
+        const body = await request.clone().json() as { markdown?: string; clientName?: string; analysisType?: string };
+        const md = body?.markdown;
+        const name = body?.clientName;
+        const type = body?.analysisType ?? "account";
+        if (typeof md === "string" && typeof name === "string") {
+          return generatePdfViaMicro(md, name, typeof type === "string" ? type : "account");
+        }
+      } catch (fallbackErr) {
+        console.error("PDF fallback to micro failed:", fallbackErr);
+      }
+    }
+
     console.error('Error generating PDF:', error);
     return NextResponse.json(
       { 
         message: 'Error generating PDF', 
-        error: error instanceof Error ? error.message : String(error),
+        error: errMessage,
         stack: error instanceof Error ? error.stack : undefined
       },
       { status: 500 }

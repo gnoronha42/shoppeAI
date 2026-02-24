@@ -339,14 +339,22 @@ export default function AnalisePage() {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData: { error?: string; message?: string; details?: string[] | string } = {};
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { error: `Erro ${response.status}` };
+      }
       console.error("Erro da API:", errorData);
-      setApiError(errorData.error || errorData.message || "Erro desconhecido");
-      throw new Error(
-        `Erro na análise ${method}: ${
-          errorData.error || errorData.message || "Erro desconhecido"
-        }`
-      );
+      const msg = errorData.error || errorData.message || "Erro desconhecido";
+      const detailsStr = Array.isArray(errorData.details)
+        ? errorData.details.join("; ")
+        : typeof errorData.details === "string"
+          ? errorData.details
+          : "";
+      const fullMsg = detailsStr ? `${msg}: ${detailsStr}` : msg;
+      setApiError(fullMsg);
+      throw new Error(`Erro na análise ${method}: ${fullMsg}`);
     }
 
     const data = await response.json();
@@ -373,8 +381,10 @@ export default function AnalisePage() {
         const testData = await testAllSystems(csvFiles);
         
         if (testData.sistemasComSucesso > 0) {
-          const bestMethod = Object.keys(testData.resultados).find(
-            key => testData.resultados[key].sucesso
+          // Prioridade: sistemas que extraem dos arquivos primeiro; bypass só como último recurso
+          const ordemPreferencia = ['debugSystem', 'robustSystem', 'bypassSystem'];
+          const bestMethod = ordemPreferencia.find(
+            key => testData.resultados[key]?.sucesso
           );
           
           let methodMap: { [key: string]: string } = {
@@ -383,7 +393,7 @@ export default function AnalisePage() {
             'debugSystem': 'debug'
           };
           
-          const method = methodMap[bestMethod!] || 'bypass';
+          const method = bestMethod ? methodMap[bestMethod] : 'bypass';
          
           
           toast({
@@ -398,9 +408,18 @@ export default function AnalisePage() {
         }
       } catch (error) {
         console.error(' Erro no modo automático:', error);
-      
-        
-        return await analyzeWithSpecificMethod(csvFiles, 'bypass', type);
+        // Tentar método robusto antes do bypass
+        try {
+          toast({
+            title: "Fallback",
+            description: "Tentando método robusto após falha do método principal",
+            variant: "default",
+          });
+          return await analyzeWithSpecificMethod(csvFiles, 'robust', type);
+        } catch (robustError) {
+          console.error(' Método robusto também falhou:', robustError);
+          return await analyzeWithSpecificMethod(csvFiles, 'bypass', type);
+        }
       }
     } else {
     
