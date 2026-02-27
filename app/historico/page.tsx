@@ -138,7 +138,8 @@ export default function HistoricoPage() {
       }
       
       // Gerar PDF
-      const pdfResponse = await fetch('https://analysis-micro.onrender.com/analisepdf', {
+      const baseUrl = process.env.NEXT_PUBLIC_ANALYSIS_MICRO_URL || 'https://analysis-micro.onrender.com';
+      const pdfResponse = await fetch(`${baseUrl}/analisepdf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

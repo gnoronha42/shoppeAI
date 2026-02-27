@@ -71,6 +71,7 @@ function extractPeriodFromName(name: string): string {
 export default function AnaliseGeminiPage() {
   const [analysisType, setAnalysisType] = useState<AnalysisType>("account");
   const [files, setFiles] = useState<File[]>([]);
+  const [useRawData, setUseRawData] = useState(true);
   const selectedClientId = useSelector(selectSelectedClientId);
   const selectedClient = useSelector(selectSelectedClient);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -137,6 +138,7 @@ export default function AnaliseGeminiPage() {
         csvFiles: csvFilesContent,
         analysisType,
         clientName: selectedClient?.name || "Cliente",
+        rawData: useRawData,
       }),
     });
     if (!response.ok) {
@@ -301,6 +303,17 @@ export default function AnaliseGeminiPage() {
             maxFiles={6}
             accept={ACCEPT_DATA_FILES}
           />
+          <label className="mt-4 flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useRawData}
+              onChange={(e) => setUseRawData(e.target.checked)}
+              className="rounded border-input"
+            />
+            <span className="text-sm">
+              Enviar dados brutos à IA (mais preciso: a IA lê as planilhas inteiras e calcula os totais; sem camada de extração)
+            </span>
+          </label>
           {files.length > 0 && (
             <div className="mt-4">
               <p className="text-sm font-medium">

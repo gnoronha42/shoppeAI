@@ -27,7 +27,8 @@ export function PDFGenerator({
   }, []);
 
   const baixarPdf = async () => {
-    const response = await fetch('https://analysis-micro.onrender.com/analisepdf', {
+    const baseUrl = process.env.NEXT_PUBLIC_ANALYSIS_MICRO_URL || 'https://analysis-micro.onrender.com';
+    const response = await fetch(`${baseUrl}/analisepdf`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ markdown, analysisType, clientName }),
