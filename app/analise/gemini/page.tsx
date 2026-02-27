@@ -281,13 +281,13 @@ export default function AnaliseGeminiPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload de planilhas (1 a 4 arquivos)</CardTitle>
-          <CardDescription>
+          <CardTitle>Upload de planilhas</CardTitle>
+          {/* <CardDescription>
             Anúncios e/ou Shop-Stats: análise flexível com Gemini
-          </CardDescription>
+          </CardDescription> */}
         </CardHeader>
         <CardContent>
-          <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200">
+          {/* <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200">
             <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
               Envie 1 a 4 planilhas exportadas da Shopee
             </p>
@@ -297,7 +297,7 @@ export default function AnaliseGeminiPage() {
               <li>Planilha Shop-Stats – mês anterior (opcional)</li>
               <li>Planilha Shop-Stats – mês atual (opcional)</li>
             </ul>
-          </div>
+          </div> */}
           <FileUpload
             onFilesChange={setFiles}
             maxFiles={6}

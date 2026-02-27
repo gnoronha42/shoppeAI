@@ -869,7 +869,7 @@ export default function AnalisePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Período de Análise</CardTitle>
             <CardDescription>
@@ -886,7 +886,7 @@ export default function AnalisePage() {
               Este período será usado para buscar dados de vendas, visitantes e métricas da integração Shopee
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* {hasCSVFiles() && analysisType === "account" && (
           <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/30">
