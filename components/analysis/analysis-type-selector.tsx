@@ -25,10 +25,10 @@ export function AnalysisTypeSelector({ value, onChange }: AnalysisTypeSelectorPr
         <RadioGroupItem value="ads" id="ads" />
         <Label htmlFor="ads" className="cursor-pointer">Análise de Ads</Label>
       </div>
-      {/* <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2">
         <RadioGroupItem value="express" id="express" />
         <Label htmlFor="express" className="cursor-pointer">Análise Semanal</Label>
-      </div> */}
+      </div>
       <div className="flex items-center space-x-2">
         <RadioGroupItem value="whatsapp-consultivo" id="whatsapp-consultivo" />
         <Label htmlFor="whatsapp-consultivo" className="cursor-pointer">Análise  Consultiva</Label>
