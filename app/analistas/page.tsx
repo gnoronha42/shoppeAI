@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Search, UserPlus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Search, UserPlus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -70,6 +70,10 @@ export default function AnalistasPage() {
   const [analysts, setAnalysts] = useState<Analyst[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalAnalysts, setTotalAnalysts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const PAGE_SIZE = 10;
   const [newAnalyst, setNewAnalyst] = useState({
     name: "",
     email: "",
@@ -79,15 +83,24 @@ export default function AnalistasPage() {
   const { toast } = useToast();
 
   
-  const loadAnalysts = async () => {
+  const loadAnalysts = async (pageToLoad?: number, searchToUse?: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/analistas", {
-        credentials: 'include', 
+      const page = pageToLoad ?? currentPage;
+      const search = searchToUse ?? searchTerm;
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("pageSize", String(PAGE_SIZE));
+      if (search.trim()) params.set("search", search.trim());
+      const response = await fetch(`/api/analistas?${params.toString()}`, {
+        credentials: "include",
       });
       if (!response.ok) throw new Error("Erro ao carregar analistas");
-      const data = await response.json();
-      setAnalysts(data.data);
+      const json = await response.json();
+      setAnalysts(json.data);
+      setTotalAnalysts(json.meta?.total ?? json.data.length);
+      setTotalPages(Math.max(1, json.meta?.totalPages ?? 1));
+      setCurrentPage(json.meta?.page ?? 1);
     } catch (error) {
       toast({
         title: "Erro",
@@ -200,14 +213,18 @@ export default function AnalistasPage() {
   };
 
   useEffect(() => {
-    loadAnalysts();
+    loadAnalysts(1, searchTerm);
   }, []);
 
-  // Filtrar analistas baseado no termo de busca
-  const filteredAnalysts = analysts.filter(analyst =>
-    analyst.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    analyst.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearch = () => {
+    setCurrentPage(1);
+    loadAnalysts(1, searchTerm);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    loadAnalysts(newPage, searchTerm);
+  };
 
   return (
     <div className="space-y-6">
@@ -219,15 +236,19 @@ export default function AnalistasPage() {
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="relative flex-1 max-w-sm flex gap-2">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             type="text"
             placeholder="Buscar usuários..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="pl-8"
           />
+          <Button variant="outline" size="sm" onClick={handleSearch}>
+            Buscar
+          </Button>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -367,7 +388,7 @@ export default function AnalistasPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAnalysts.map((analyst) => (
+                {analysts.map((analyst) => (
                   <TableRow key={analyst.id}>
                     <TableCell>{analyst.name}</TableCell>
                     <TableCell>{analyst.email}</TableCell>
@@ -459,6 +480,34 @@ export default function AnalistasPage() {
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {!isLoading && totalAnalysts > 0 && (
+            <div className="flex items-center justify-between border-t px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                {totalAnalysts} usuário(s) no total — página {currentPage} de {totalPages}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Anterior
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  Próxima
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>

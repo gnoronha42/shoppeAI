@@ -23,6 +23,8 @@ import { AnalysisType } from "@/types";
 import { AnalysisTypeSelector } from "@/components/analysis/analysis-type-selector";
 import { MarkdownReport } from "@/components/analysis/markdown-report";
 import { PDFGenerator } from "@/components/analysis/pdf-generator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const ACCEPT_DATA_FILES =
   "text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xlsx, .xls";
@@ -80,7 +82,113 @@ export default function AnaliseGeminiPage() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [customMarkdown, setCustomMarkdown] = useState<string>("");
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [overridePedidosAds, setOverridePedidosAds] = useState<string>("");
+  const [overridePedidosAdsAnterior, setOverridePedidosAdsAnterior] = useState<string>("");
   const { toast } = useToast();
+
+  function parseBRL(s: string): number {
+    return parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0;
+  }
+
+  function parseMetricasFromMarkdown(md: string) {
+    // Tabela: | Investimento Ads | R$ 1.234,56 | (1ª = mês atual, 2ª = mês anterior)
+    const invMatches = Array.from(md.matchAll(/\|\s*Investimento\s+Ads\s*\|\s*R\$\s*([\d.,]+)\s*\|/gi));
+    const inv0 = invMatches[0] ? parseBRL(invMatches[0][1]) : 0;
+    const inv1 = invMatches[1] ? parseBRL(invMatches[1][1]) : 0;
+    const investimentoAtual = inv0;
+    const investimentoAnterior = inv1 || inv0; // se só houver um bloco, reutiliza para "anterior"
+
+    const ppMatches = Array.from(md.matchAll(/\|\s*Pedidos\s+Pagos\s*\|\s*(\d+)\s*\|/gi));
+    const pp0 = ppMatches[0] ? parseInt(ppMatches[0][1], 10) || 0 : 0;
+    const pp1 = ppMatches[1] ? parseInt(ppMatches[1][1], 10) || 0 : 0;
+    const pedidosPagosAtual = pp0;
+    const pedidosPagosAnterior = pp1 || pp0;
+
+    const paMatches = Array.from(md.matchAll(/\|\s*Pedidos\s+Ads\s*\|\s*(\d+)\s*\|/gi));
+    const pa0 = paMatches[0] ? parseInt(paMatches[0][1], 10) || 0 : 0;
+    const pa1 = paMatches[1] ? parseInt(paMatches[1][1], 10) || 0 : 0;
+    const pedidosAdsAtual = pa0;
+    const pedidosAdsAnterior = pa1 || pa0;
+
+    return {
+      investimentoAtual,
+      investimentoAnterior,
+      pedidosPagosAtual,
+      pedidosPagosAnterior,
+      pedidosAdsAtual,
+      pedidosAdsAnterior,
+    };
+  }
+
+  function formatBR(value: number): string {
+    return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function applyPedidosAdsAndCpaInMarkdown(
+    md: string,
+    novoPedidosAdsAtual: number,
+    novoPedidosAdsAnterior: number
+  ): string {
+    const m = parseMetricasFromMarkdown(md);
+    let out = md;
+
+    // 1) Pedidos Ads: 1ª ocorrência = atual, 2ª = anterior
+    let countPedidos = 0;
+    out = out.replace(/\|\s*Pedidos Ads\s*\|\s*\d+\s*\|/gi, () => {
+      countPedidos++;
+      return countPedidos === 1
+        ? `| Pedidos Ads | ${novoPedidosAdsAtual} |`
+        : `| Pedidos Ads | ${novoPedidosAdsAnterior} |`;
+    });
+
+    // 2) CPA Ads: Investimento ÷ Pedidos Ads (1ª ocorrência = atual, 2ª = anterior)
+    let countCpa = 0;
+    out = out.replace(/\|\s*CPA Ads\s*\|\s*R\$\s*[\d.,]+\s*\|/gi, () => {
+      countCpa++;
+      if (countCpa === 1) {
+        const cpa = novoPedidosAdsAtual > 0 ? m.investimentoAtual / novoPedidosAdsAtual : 0;
+        return `| CPA Ads | R$ ${formatBR(cpa)} |`;
+      }
+      const cpa = novoPedidosAdsAnterior > 0 ? m.investimentoAnterior / novoPedidosAdsAnterior : 0;
+      return `| CPA Ads | R$ ${formatBR(cpa)} |`;
+    });
+
+    // 3) CPA Geral (Loja): Investimento ÷ Pedidos pagos (1ª = atual, 2ª = anterior)
+    let countCpaGeral = 0;
+    out = out.replace(/\|\s*CPA Geral \(Loja\)\s*\|\s*R\$\s*[\d.,]+\s*\|/gi, () => {
+      countCpaGeral++;
+      if (countCpaGeral === 1) {
+        const cpa = m.pedidosPagosAtual > 0 ? m.investimentoAtual / m.pedidosPagosAtual : 0;
+        return `| CPA Geral (Loja) | R$ ${formatBR(cpa)} |`;
+      }
+      const cpa = m.pedidosPagosAnterior > 0 ? m.investimentoAnterior / m.pedidosPagosAnterior : 0;
+      return `| CPA Geral (Loja) | R$ ${formatBR(cpa)} |`;
+    });
+
+    return out;
+  }
+
+  const handleApplyPedidosAds = () => {
+    const numAtual = parseInt(overridePedidosAds.trim(), 10);
+    const numAnterior = parseInt(overridePedidosAdsAnterior.trim(), 10);
+    if (isNaN(numAtual) || numAtual < 0) {
+      toast({ title: "Valor inválido", description: "Informe um número válido para Pedidos Ads (mês atual).", variant: "destructive" });
+      return;
+    }
+    if (overridePedidosAdsAnterior.trim() !== "" && (isNaN(numAnterior) || numAnterior < 0)) {
+      toast({ title: "Valor inválido", description: "Informe um número válido para Pedidos Ads (mês anterior).", variant: "destructive" });
+      return;
+    }
+    const anterior = overridePedidosAdsAnterior.trim() === "" ? parseMetricasFromMarkdown(customMarkdown).pedidosAdsAnterior : numAnterior;
+    const updated = applyPedidosAdsAndCpaInMarkdown(customMarkdown, numAtual, anterior);
+    setCustomMarkdown(updated);
+    if (overridePedidosAdsAnterior.trim() !== "") setOverridePedidosAdsAnterior(String(anterior));
+    toast({
+      title: "Relatório atualizado",
+      description: "Pedidos Ads (atual e anterior) e CPA Geral atualizados na análise.",
+      variant: "default",
+    });
+  };
 
   const getBaseUrl = () => {
     const baseUrl = process.env.NEXT_PUBLIC_ANALYSIS_BASE_URL;
@@ -208,6 +316,9 @@ export default function AnaliseGeminiPage() {
       setApiError(null);
       const result = await analyzePlanilhasWithGemini(dataFiles);
       setCustomMarkdown(result);
+      const { pedidosAdsAtual, pedidosAdsAnterior } = parseMetricasFromMarkdown(result);
+      setOverridePedidosAds(pedidosAdsAtual > 0 ? String(pedidosAdsAtual) : "");
+      setOverridePedidosAdsAnterior(pedidosAdsAnterior > 0 ? String(pedidosAdsAnterior) : "");
       toast({
         title: "Análise concluída",
         description: "Relatório gerado com Gemini.",
@@ -407,7 +518,69 @@ export default function AnaliseGeminiPage() {
       )}
 
       {customMarkdown && (
-        <Card>
+        <>
+          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+            <CardHeader>
+              <CardTitle className="text-base">Ajuste — Pedidos Ads e CPA</CardTitle>
+              <CardDescription>
+                Altere o número de Pedidos Ads e aplique para atualizar o relatório. O CPA Geral (Loja) será recalculado como Investimento ÷ Pedidos pagos.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-end gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="gemini-pedidos-ads">Pedidos Ads (mês atual)</Label>
+                  <Input
+                    id="gemini-pedidos-ads"
+                    type="number"
+                    min={0}
+                    placeholder="Ex: 323"
+                    value={overridePedidosAds}
+                    onChange={(e) => setOverridePedidosAds(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="w-32"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="gemini-pedidos-ads-ant">Pedidos Ads (mês anterior)</Label>
+                  <Input
+                    id="gemini-pedidos-ads-ant"
+                    type="number"
+                    min={0}
+                    placeholder="Ex: 301"
+                    value={overridePedidosAdsAnterior}
+                    onChange={(e) => setOverridePedidosAdsAnterior(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="w-32"
+                  />
+                </div>
+                <Button onClick={handleApplyPedidosAds}>
+                  Aplicar e recalcular CPA
+                </Button>
+              </div>
+              {(() => {
+                const m = parseMetricasFromMarkdown(customMarkdown);
+                const cpaAdsAtual = m.pedidosAdsAtual > 0 ? m.investimentoAtual / m.pedidosAdsAtual : 0;
+                const cpaGeralAtual = m.pedidosPagosAtual > 0 ? m.investimentoAtual / m.pedidosPagosAtual : 0;
+                return (
+                  <div className="space-y-1 text-sm text-muted-foreground">
+                    <p>
+                      <strong>Mês atual:</strong> CPA Ads = R$ {formatBR(m.investimentoAtual)} ÷ {m.pedidosAdsAtual} = <strong>R$ {formatBR(cpaAdsAtual)}</strong> &nbsp;|&nbsp; CPA Geral (Loja) = R$ {formatBR(m.investimentoAtual)} ÷ {m.pedidosPagosAtual} = <strong>R$ {formatBR(cpaGeralAtual)}</strong>
+                    </p>
+                    {m.pedidosAdsAnterior > 0 && (() => {
+                      const cpaAdsAnt = m.investimentoAnterior / m.pedidosAdsAnterior;
+                      const cpaGeralAnt = m.pedidosPagosAnterior > 0 ? m.investimentoAnterior / m.pedidosPagosAnterior : 0;
+                      return (
+                        <p>
+                          <strong>Mês anterior:</strong> CPA Ads = R$ {formatBR(m.investimentoAnterior)} ÷ {m.pedidosAdsAnterior} = <strong>R$ {formatBR(cpaAdsAnt)}</strong> &nbsp;|&nbsp; CPA Geral (Loja) = R$ {formatBR(m.investimentoAnterior)} ÷ {m.pedidosPagosAnterior} = <strong>R$ {formatBR(cpaGeralAnt)}</strong>
+                        </p>
+                      );
+                    })()}
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+
+          <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Relatório</CardTitle>
@@ -430,6 +603,7 @@ export default function AnaliseGeminiPage() {
             <MarkdownReport markdown={customMarkdown} />
           </CardContent>
         </Card>
+        </>
       )}
     </div>
   );

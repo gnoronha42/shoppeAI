@@ -20,6 +20,8 @@ import {
 import { ClientSelector } from "@/components/client/client-selector";
 import { AnalysisTypeSelector } from "@/components/analysis/analysis-type-selector";
 import { FileUpload } from "@/components/analysis/file-upload";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { DateRangePicker } from "@/components/analysis/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
@@ -66,6 +68,7 @@ export default function AnalisePage() {
   const [testResults, setTestResults] = useState<any>(null);
   const [isTestingSystem, setIsTestingSystem] = useState(false);
   const [selectedAnalysisMethod, setSelectedAnalysisMethod] = useState<'auto' | 'debug' | 'bypass' | 'robust'>('auto');
+  const [overridePedidosAds, setOverridePedidosAds] = useState<string>("");
 
   useEffect(() => {
     setIsClient(true);
@@ -304,11 +307,17 @@ export default function AnalisePage() {
       })
     );
 
-    const requestBody = {
+    const requestBody: Record<string, unknown> = {
       csvFiles: csvFilesContent,
       analysisType: type,
       clientName: selectedClient?.name || "Cliente",
     };
+    if (type === "account" && overridePedidosAds.trim()) {
+      const num = parseInt(overridePedidosAds.trim(), 10);
+      if (!isNaN(num) && num > 0) {
+        requestBody.overridePedidosAds = num;
+      }
+    }
 
     let endpoint = "/analise-csv"; // padrão
     
@@ -1011,6 +1020,30 @@ export default function AnalisePage() {
             )}
           </CardContent>
         </Card>
+
+        {analysisType === "account" && hasCSVFiles() && (
+          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+            <CardHeader>
+              <CardTitle className="text-base">Ajuste opcional — Pedidos Ads</CardTitle>
+              <CardDescription>
+                Se o número de Pedidos Ads do painel Shopee for diferente do extraído das planilhas, informe aqui para usar na análise. Deixe vazio para usar o valor extraído.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-w-xs">
+                <Label htmlFor="override-pedidos-ads">Pedidos Ads (mês atual)</Label>
+                <Input
+                  id="override-pedidos-ads"
+                  type="number"
+                  min={0}
+                  placeholder="Ex: 323"
+                  value={overridePedidosAds}
+                  onChange={(e) => setOverridePedidosAds(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4">
           <Button
