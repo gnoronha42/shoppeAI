@@ -317,16 +317,28 @@ export default function AnaliseGeminiPage() {
         return { nome: file.name, conteudo: fileData.content };
       })
     );
+
+    const payload: Record<string, unknown> = {
+      csvFiles: csvFilesContent,
+      analysisType,
+      clientName: selectedClient?.name || "Cliente",
+      rawData: useRawData,
+    };
+
+    const adsAtual = overridePedidosAds.trim();
+    const adsAnterior = overridePedidosAdsAnterior.trim();
+    if (adsAtual && !isNaN(Number(adsAtual)) && Number(adsAtual) > 0) {
+      payload.overridePedidosAdsAtual = Number(adsAtual);
+    }
+    if (adsAnterior && !isNaN(Number(adsAnterior)) && Number(adsAnterior) > 0) {
+      payload.overridePedidosAdsAnterior = Number(adsAnterior);
+    }
+
     const baseUrl = getBaseUrl();
     const response = await fetch(`${baseUrl}/analise-planilhas`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        csvFiles: csvFilesContent,
-        analysisType,
-        clientName: selectedClient?.name || "Cliente",
-        rawData: useRawData,
-      }),
+      body: JSON.stringify(payload),
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -541,6 +553,46 @@ export default function AnaliseGeminiPage() {
         </CardContent>
       </Card>
 
+      {analysisType === "account" && dataFiles.length > 0 && (
+        <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+          <CardHeader>
+            <CardTitle className="text-base">Ajuste de Pedidos Ads (opcional)</CardTitle>
+            <CardDescription>
+              Informe os valores corretos do painel da Shopee. Eles serão usados no cálculo de CPA e na análise da IA.
+              Se deixar em branco, o sistema usará os valores extraídos das planilhas.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pre-pedidos-ads">Pedidos Ads (mês atual)</Label>
+                <Input
+                  id="pre-pedidos-ads"
+                  type="number"
+                  min={0}
+                  placeholder="Ex: 100"
+                  value={overridePedidosAds}
+                  onChange={(e) => setOverridePedidosAds(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-40"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pre-pedidos-ads-ant">Pedidos Ads (mês anterior)</Label>
+                <Input
+                  id="pre-pedidos-ads-ant"
+                  type="number"
+                  min={0}
+                  placeholder="Ex: 100"
+                  value={overridePedidosAdsAnterior}
+                  onChange={(e) => setOverridePedidosAdsAnterior(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-40"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="flex flex-col md:flex-row gap-3">
         <Button
           onClick={handleSubmit}
@@ -596,11 +648,11 @@ export default function AnaliseGeminiPage() {
 
       {customMarkdown && (
         <>
-          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+          <Card className="border-zinc-200 dark:border-zinc-700">
             <CardHeader>
-              <CardTitle className="text-base">Ajuste — Pedidos Ads e CPA</CardTitle>
+              <CardTitle className="text-base">Ajuste pós-geração — Pedidos Ads e CPA</CardTitle>
               <CardDescription>
-                Altere o número de Pedidos Ads e aplique para atualizar o relatório. O CPA Geral (Loja) será recalculado como Investimento ÷ Pedidos pagos.
+                Ajuste fino na tabela do relatório (não reprocessa o texto da IA). Para uma análise completa com números corretos, preencha os campos antes de gerar.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
