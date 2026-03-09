@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogOut } from "lucide-react";
 
 // ====== Utilitários numéricos (alinhados com o modelo HTML 2026) ======
 
@@ -60,6 +62,9 @@ interface CalculoResult {
 }
 
 export default function Calculadora2026Page() {
+  const { user, logout } = useAuth();
+  const isCliente = user?.role === "cliente";
+
   const [form, setForm] = useState<FormData>({
     nome: "",
     custo: "",
@@ -448,6 +453,39 @@ export default function Calculadora2026Page() {
         minHeight: "100vh",
       }}
     >
+      {isCliente && (
+        <div
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <span style={{ fontSize: "0.85rem", color: "#888" }}>{user?.name}</span>
+          <button
+            type="button"
+            onClick={logout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "8px 14px",
+              background: "transparent",
+              border: "1px solid #555",
+              borderRadius: "8px",
+              color: "#ccc",
+              cursor: "pointer",
+              fontSize: "0.9rem",
+            }}
+          >
+            <LogOut size={16} />
+            Sair
+          </button>
+        </div>
+      )}
       <h1 style={{ color: colors.primary, textAlign: "center", fontSize: "1.8rem", marginBottom: "20px" }}>
         Calculadora Shopee 2026 📈
       </h1>

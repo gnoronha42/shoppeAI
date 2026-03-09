@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileSpreadsheet, AlertCircle } from "lucide-react";
@@ -72,6 +73,7 @@ export default function AnaliseGeminiPage() {
   const [analysisType, setAnalysisType] = useState<AnalysisType>("account");
   const [files, setFiles] = useState<File[]>([]);
   const [useRawData, setUseRawData] = useState(true);
+  const [showMarkdownImport, setShowMarkdownImport] = useState(false);
   const selectedClientId = useSelector(selectSelectedClientId);
   const selectedClient = useSelector(selectSelectedClient);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -351,16 +353,58 @@ export default function AnaliseGeminiPage() {
         </CardContent>
       </Card>
 
-      <Button
-        onClick={handleSubmit}
-        disabled={!canSubmit}
-        className="w-full bg-orange-600 hover:bg-orange-700 text-white"
-      >
-        <FileSpreadsheet className="mr-2 h-4 w-4" />
-        {isAnalyzing
-          ? "Analisando com Gemini..."
-          : "Gerar análise comparativa (Gemini)"}
-      </Button>
+      <div className="flex flex-col md:flex-row gap-3">
+        <Button
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+        >
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          {isAnalyzing
+            ? "Analisando com Gemini..."
+            : "Gerar análise comparativa (Gemini)"}
+        </Button>
+
+        <Button
+          onClick={() => setShowMarkdownImport(!showMarkdownImport)}
+          variant="outline"
+          className="flex-1"
+        >
+          <FileSpreadsheet className="mr-2 h-4 w-4" />
+          {showMarkdownImport
+            ? "Fechar Editor de Markdown"
+            : "Editar Markdown Manualmente"}
+        </Button>
+      </div>
+
+      {showMarkdownImport && (
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Editor de Markdown</CardTitle>
+            <CardDescription>
+              Edite o conteúdo do relatório em formato Markdown
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4">
+              <textarea
+                className="w-full h-60 p-3 border rounded"
+                value={customMarkdown}
+                onChange={(e) => setCustomMarkdown(e.target.value)}
+                placeholder="Edite o conteúdo Markdown..."
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowMarkdownImport(false)}
+            >
+              Fechar
+            </Button>
+          </CardFooter>
+        </Card>
+      )}
 
       {customMarkdown && (
         <Card>

@@ -32,7 +32,7 @@ export async function GET(request: Request) {
 
     const where: Prisma.usersWhereInput = {
       role: {
-        in: ['analyst', 'superuser', 'inactive_analyst']
+        in: ['analyst', 'superuser', 'inactive_analyst', 'cliente', 'inactive_cliente']
       },
       ...(search ? {
         OR: [
@@ -79,7 +79,7 @@ export async function GET(request: Request) {
       name: analyst.name,
       email: analyst.email,
       role: analyst.role,
-      active: analyst.role !== 'inactive_analyst', // ativo se role não for 'inactive_analyst'
+      active: analyst.role !== 'inactive_analyst' && analyst.role !== 'inactive_cliente', // ativo se não for inativo
       created_at: analyst.created_at?.toISOString() || new Date().toISOString(),
       last_login: null, // Por enquanto null, implementar depois
       analyses_count: analyst.created_analyses.length,
@@ -135,9 +135,9 @@ export async function POST(request: Request) {
     }
 
     // Validar role
-    if (!['analyst', 'superuser'].includes(role)) {
+    if (!['analyst', 'superuser', 'cliente'].includes(role)) {
       return NextResponse.json(
-        { error: 'Tipo de usuário inválido. Deve ser "analyst" ou "superuser"' },
+        { error: 'Tipo de usuário inválido. Deve ser "analyst", "superuser" ou "cliente"' },
         { status: 400 }
       );
     }
@@ -305,20 +305,33 @@ export async function DELETE(request: Request) {
           message: `${originalRole === 'superuser' ? 'Super usuário' : 'Analista'} reativado com sucesso`,
           action: 'reactivated'
         });
-      } else if (currentUser.role && ['analyst', 'superuser'].includes(currentUser.role)) {
-        // Desativar usuário
+      } else if (currentUser.role === 'inactive_cliente') {
+        // Reativar cliente
         await prisma.users.update({
           where: { id },
-          data: { role: 'inactive_analyst' },
+          data: { role: 'cliente' },
         });
 
         return NextResponse.json({
-          message: `${currentUser.role === 'superuser' ? 'Super usuário' : 'Analista'} desativado com sucesso. O usuário não poderá mais fazer login.`,
+          message: 'Cliente reativado com sucesso',
+          action: 'reactivated'
+        });
+      } else if (currentUser.role && ['analyst', 'superuser', 'cliente'].includes(currentUser.role)) {
+        // Desativar usuário
+        const newRole = currentUser.role === 'cliente' ? 'inactive_cliente' : 'inactive_analyst';
+        await prisma.users.update({
+          where: { id },
+          data: { role: newRole },
+        });
+
+        const label = currentUser.role === 'superuser' ? 'Super usuário' : currentUser.role === 'cliente' ? 'Cliente' : 'Analista';
+        return NextResponse.json({
+          message: `${label} desativado com sucesso. O usuário não poderá mais fazer login.`,
           action: 'deactivated'
         });
       } else {
         return NextResponse.json(
-          { error: 'Usuário não é um analista ou super usuário' },
+          { error: 'Usuário não é um analista, super usuário ou cliente' },
           { status: 400 }
         );
       }

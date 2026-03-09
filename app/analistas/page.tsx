@@ -74,7 +74,7 @@ export default function AnalistasPage() {
     name: "",
     email: "",
     password: "",
-    role: "analyst" as "analyst" | "superuser",
+    role: "analyst" as "analyst" | "superuser" | "cliente",
   });
   const { toast } = useToast();
 
@@ -131,7 +131,7 @@ export default function AnalistasPage() {
       });
 
       setIsDialogOpen(false);
-      setNewAnalyst({ name: "", email: "", password: "", role: "analyst" });
+      setNewAnalyst({ name: "", email: "", password: "", role: "analyst" as const });
       loadAnalysts();
     } catch (error: any) {
       toast({
@@ -281,7 +281,7 @@ export default function AnalistasPage() {
                 <Label htmlFor="role">Tipo de Usuário</Label>
                 <Select
                   value={newAnalyst.role}
-                  onValueChange={(value: "analyst" | "superuser") =>
+                  onValueChange={(value: "analyst" | "superuser" | "cliente") =>
                     setNewAnalyst({ ...newAnalyst, role: value })
                   }
                 >
@@ -305,6 +305,14 @@ export default function AnalistasPage() {
                         </span>
                       </div>
                     </SelectItem>
+                    <SelectItem value="cliente">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Cliente</span>
+                        <span className="text-xs text-muted-foreground">
+                          Acesso apenas à Calculadora 2026
+                        </span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -324,7 +332,7 @@ export default function AnalistasPage() {
                     Criando...
                   </>
                 ) : (
-                  `Criar ${newAnalyst.role === 'superuser' ? 'Super Usuário' : 'Analista'}`
+                  `Criar ${newAnalyst.role === 'superuser' ? 'Super Usuário' : newAnalyst.role === 'cliente' ? 'Cliente' : 'Analista'}`
                 )}
               </Button>
             </DialogFooter>
@@ -368,10 +376,18 @@ export default function AnalistasPage() {
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                           analyst.role === "superuser"
                             ? "bg-purple-100 text-purple-700"
+                            : analyst.role === "cliente" || analyst.role === "inactive_cliente"
+                            ? "bg-amber-100 text-amber-700"
                             : "bg-blue-100 text-blue-700"
                         }`}
                       >
-                        {analyst.role === "superuser" ? "Super Usuário" : "Analista"}
+                        {analyst.role === "superuser"
+                          ? "Super Usuário"
+                          : analyst.role === "cliente" || analyst.role === "inactive_cliente"
+                          ? analyst.role === "inactive_cliente"
+                            ? "Cliente (Inativo)"
+                            : "Cliente"
+                          : "Analista"}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -388,7 +404,7 @@ export default function AnalistasPage() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <span>{analyst.analyses_count}</span>
-                        {analyst.analyses_count > 0 && (
+                        {analyst.analyses_count > 0 && analyst.role !== "cliente" && analyst.role !== "inactive_cliente" && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button

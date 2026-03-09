@@ -25,10 +25,13 @@ export const PERMISSIONS = {
   
   // Configurações
   manage_settings: 'Gerenciar configurações',
+
+  // Calculadora (acesso exclusivo para perfil cliente)
+  use_calculator: 'Usar calculadora 2026',
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;
-export type Role = 'superuser' | 'admin' | 'analyst' | 'inactive_analyst' | 'user';
+export type Role = 'superuser' | 'admin' | 'analyst' | 'inactive_analyst' | 'user' | 'cliente' | 'inactive_cliente';
 
 // Permissões por role
 export const ROLE_PERMISSIONS = {
@@ -75,6 +78,10 @@ export const ROLE_PERMISSIONS = {
     'view_dashboard',
     'view_history',
   ],
+  cliente: [
+    'use_calculator',
+  ],
+  inactive_cliente: [], // sem permissões; usado quando cliente é desativado
 } as const;
 
 // Permissões padrão para cada tipo de usuário
@@ -84,6 +91,8 @@ export const DEFAULT_PERMISSIONS = {
   analyst: ROLE_PERMISSIONS.analyst,
   inactive_analyst: ROLE_PERMISSIONS.inactive_analyst,
   user: ROLE_PERMISSIONS.user,
+  cliente: ROLE_PERMISSIONS.cliente,
+  inactive_cliente: ROLE_PERMISSIONS.inactive_cliente,
 } as const;
 
 // Descrições amigáveis das permissões
@@ -99,6 +108,7 @@ export const PERMISSION_DESCRIPTIONS: Record<Permission, string> = {
   manage_client_checklist: 'Gerenciar Checklist de Clientes',
   manage_users: 'Gerenciar Usuários',
   manage_settings: 'Gerenciar Configurações',
+  use_calculator: 'Usar Calculadora 2026',
 };
 
 // Descrições dos tipos de usuário
@@ -108,6 +118,8 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   analyst: 'Analista - Pode criar análises e visualizar dados',
   inactive_analyst: 'Analista Inativo - Acesso limitado apenas para visualização',
   user: 'Usuário - Pode visualizar dados básicos',
+  cliente: 'Cliente - Acesso apenas à Calculadora 2026',
+  inactive_cliente: 'Cliente Inativo - Acesso bloqueado',
 };
 
 // Grupos de permissões para organização na UI
@@ -137,5 +149,9 @@ export const PERMISSION_GROUPS = {
   data: {
     name: 'Dados',
     permissions: [PERMISSIONS.view_history]
+  },
+  calculator: {
+    name: 'Calculadora',
+    permissions: [PERMISSIONS.use_calculator]
   }
 } as const;

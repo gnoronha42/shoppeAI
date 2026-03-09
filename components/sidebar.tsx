@@ -69,14 +69,26 @@ const adminItems = [
   },
 ];
 
+// Cliente vê apenas a Calculadora 2026
+const clienteItems = [
+  {
+    title: "Calculadora 2026",
+    href: "/calculadora-2026",
+    icon: <Calculator className="mr-2 h-5 w-5" />,
+  },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
 
   const isSuperUser = user?.role === 'superuser';
+  const isCliente = user?.role === 'cliente';
 
-  const sidebarItems = [...regularItems, ...(isSuperUser ? adminItems : [])];
+  const sidebarItems = isCliente
+    ? clienteItems
+    : [...regularItems, ...(isSuperUser ? adminItems : [])];
 
   return (
     <>

@@ -80,7 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Salvar dados do usuário no localStorage
       localStorage.setItem('user', JSON.stringify(data.user));
       
-      router.push('/');
+      // Cliente vai direto para a Calculadora 2026
+      router.push(data.user?.role === 'cliente' ? '/calculadora-2026' : '/');
     } catch (error) {
       console.error('Erro no login:', error);
       throw error;
