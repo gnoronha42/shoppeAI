@@ -90,25 +90,83 @@ export default function AnaliseGeminiPage() {
     return parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0;
   }
 
+  function parseIntBR(s: string): number {
+    return parseInt(s.replace(/\./g, ""), 10) || 0;
+  }
+
+  function formatBR(value: number): string {
+    return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function calcVariacao(atual: number, anterior: number): string {
+    if (anterior === 0) return atual > 0 ? "Novo" : "—";
+    const pct = ((atual - anterior) / anterior) * 100;
+    const sinal = pct >= 0 ? "+" : "";
+    return `${sinal}${pct.toFixed(2).replace(".", ",")}%`;
+  }
+
+  // O Gemini gera tabelas comparativas numa única linha:
+  //   | Pedidos Ads | 233 | 287 | +79,44% |
+  // (métrica | mês atual | mês anterior | variação)
+  // OU em linhas separadas:
+  //   | Pedidos Ads | 233 |
+  // Precisamos lidar com ambos os formatos.
+
+  // Captura linha inteira da métrica na tabela (todos os campos até o fim da linha)
+  function findRowValues(md: string, metricName: RegExp): { raw: string; values: string[] }[] {
+    const results: { raw: string; values: string[] }[] = [];
+    const lineRegex = new RegExp(`^\\|[^|]*${metricName.source}[^|]*\\|(.+)$`, "gim");
+    let match: RegExpExecArray | null;
+    while ((match = lineRegex.exec(md)) !== null) {
+      const rest = match[1];
+      const cells = rest.split("|").map((c) => c.trim()).filter((c) => c !== "");
+      results.push({ raw: match[0], values: cells });
+    }
+    return results;
+  }
+
   function parseMetricasFromMarkdown(md: string) {
-    // Tabela: | Investimento Ads | R$ 1.234,56 | (1ª = mês atual, 2ª = mês anterior)
-    const invMatches = Array.from(md.matchAll(/\|\s*Investimento\s+Ads\s*\|\s*R\$\s*([\d.,]+)\s*\|/gi));
-    const inv0 = invMatches[0] ? parseBRL(invMatches[0][1]) : 0;
-    const inv1 = invMatches[1] ? parseBRL(invMatches[1][1]) : 0;
-    const investimentoAtual = inv0;
-    const investimentoAnterior = inv1 || inv0; // se só houver um bloco, reutiliza para "anterior"
+    // Investimento Ads: valor em R$ (pode ter 1 ou 2 colunas)
+    const invRows = findRowValues(md, /Investimento\s+Ads/);
+    let investimentoAtual = 0;
+    let investimentoAnterior = 0;
+    if (invRows.length > 0) {
+      const vals = invRows[0].values.map((v) => parseBRL(v.replace(/R\$\s*/g, "")));
+      investimentoAtual = vals[0] || 0;
+      investimentoAnterior = vals[1] || vals[0] || 0;
+    }
+    if (invRows.length > 1) {
+      const vals = invRows[1].values.map((v) => parseBRL(v.replace(/R\$\s*/g, "")));
+      investimentoAnterior = vals[0] || investimentoAnterior;
+    }
 
-    const ppMatches = Array.from(md.matchAll(/\|\s*Pedidos\s+Pagos\s*\|\s*(\d+)\s*\|/gi));
-    const pp0 = ppMatches[0] ? parseInt(ppMatches[0][1], 10) || 0 : 0;
-    const pp1 = ppMatches[1] ? parseInt(ppMatches[1][1], 10) || 0 : 0;
-    const pedidosPagosAtual = pp0;
-    const pedidosPagosAnterior = pp1 || pp0;
+    // Pedidos Pagos
+    const ppRows = findRowValues(md, /Pedidos\s+Pagos/);
+    let pedidosPagosAtual = 0;
+    let pedidosPagosAnterior = 0;
+    if (ppRows.length > 0) {
+      const vals = ppRows[0].values.map((v) => parseIntBR(v));
+      pedidosPagosAtual = vals[0] || 0;
+      pedidosPagosAnterior = vals[1] || vals[0] || 0;
+    }
+    if (ppRows.length > 1) {
+      const vals = ppRows[1].values.map((v) => parseIntBR(v));
+      pedidosPagosAnterior = vals[0] || pedidosPagosAnterior;
+    }
 
-    const paMatches = Array.from(md.matchAll(/\|\s*Pedidos\s+Ads\s*\|\s*(\d+)\s*\|/gi));
-    const pa0 = paMatches[0] ? parseInt(paMatches[0][1], 10) || 0 : 0;
-    const pa1 = paMatches[1] ? parseInt(paMatches[1][1], 10) || 0 : 0;
-    const pedidosAdsAtual = pa0;
-    const pedidosAdsAnterior = pa1 || pa0;
+    // Pedidos Ads
+    const paRows = findRowValues(md, /Pedidos\s+Ads/);
+    let pedidosAdsAtual = 0;
+    let pedidosAdsAnterior = 0;
+    if (paRows.length > 0) {
+      const vals = paRows[0].values.map((v) => parseIntBR(v));
+      pedidosAdsAtual = vals[0] || 0;
+      pedidosAdsAnterior = vals[1] || 0;
+    }
+    if (paRows.length > 1) {
+      const vals = paRows[1].values.map((v) => parseIntBR(v));
+      pedidosAdsAnterior = vals[0] || pedidosAdsAnterior;
+    }
 
     return {
       investimentoAtual,
@@ -120,8 +178,23 @@ export default function AnaliseGeminiPage() {
     };
   }
 
-  function formatBR(value: number): string {
-    return value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function replaceRowMetric(
+    md: string,
+    metricRegex: RegExp,
+    buildNewValues: (rowIndex: number, oldValues: string[]) => string[] | null
+  ): string {
+    let out = md;
+    const rows = findRowValues(md, metricRegex);
+    rows.forEach((row, idx) => {
+      const newVals = buildNewValues(idx, row.values);
+      if (!newVals) return;
+      const newCells = newVals.map((v) => ` ${v} `).join("|");
+      const metricMatch = row.raw.match(/^\|([^|]+)\|/);
+      const metricCell = metricMatch ? metricMatch[1] : "";
+      const newRow = `|${metricCell}|${newCells}|`;
+      out = out.replace(row.raw, newRow);
+    });
+    return out;
   }
 
   function applyPedidosAdsAndCpaInMarkdown(
@@ -132,60 +205,64 @@ export default function AnaliseGeminiPage() {
     const m = parseMetricasFromMarkdown(md);
     let out = md;
 
-    // 1) Pedidos Ads: 1ª ocorrência = atual, 2ª = anterior
-    let countPedidos = 0;
-    out = out.replace(/\|\s*Pedidos Ads\s*\|\s*\d+\s*\|/gi, () => {
-      countPedidos++;
-      return countPedidos === 1
-        ? `| Pedidos Ads | ${novoPedidosAdsAtual} |`
-        : `| Pedidos Ads | ${novoPedidosAdsAnterior} |`;
+    // Pedidos Ads
+    out = replaceRowMetric(out, /Pedidos\s+Ads/, (idx, oldVals) => {
+      if (oldVals.length >= 3) {
+        const variacao = calcVariacao(novoPedidosAdsAtual, novoPedidosAdsAnterior);
+        return [String(novoPedidosAdsAtual), String(novoPedidosAdsAnterior), variacao];
+      }
+      if (oldVals.length >= 2) return [String(novoPedidosAdsAtual), String(novoPedidosAdsAnterior)];
+      return [String(idx === 0 ? novoPedidosAdsAtual : novoPedidosAdsAnterior)];
     });
 
-    // 2) CPA Ads: Investimento ÷ Pedidos Ads (1ª ocorrência = atual, 2ª = anterior)
-    let countCpa = 0;
-    out = out.replace(/\|\s*CPA Ads\s*\|\s*R\$\s*[\d.,]+\s*\|/gi, () => {
-      countCpa++;
-      if (countCpa === 1) {
-        const cpa = novoPedidosAdsAtual > 0 ? m.investimentoAtual / novoPedidosAdsAtual : 0;
-        return `| CPA Ads | R$ ${formatBR(cpa)} |`;
+    // CPA Ads (Investimento ÷ Pedidos Ads)
+    const cpaAdsAtual = novoPedidosAdsAtual > 0 ? m.investimentoAtual / novoPedidosAdsAtual : 0;
+    const cpaAdsAnterior = novoPedidosAdsAnterior > 0 ? m.investimentoAnterior / novoPedidosAdsAnterior : 0;
+    out = replaceRowMetric(out, /CPA\s+Ads/, (idx, oldVals) => {
+      if (oldVals.length >= 3) {
+        const variacao = calcVariacao(cpaAdsAtual, cpaAdsAnterior);
+        return [`R$ ${formatBR(cpaAdsAtual)}`, `R$ ${formatBR(cpaAdsAnterior)}`, variacao];
       }
-      const cpa = novoPedidosAdsAnterior > 0 ? m.investimentoAnterior / novoPedidosAdsAnterior : 0;
-      return `| CPA Ads | R$ ${formatBR(cpa)} |`;
+      if (oldVals.length >= 2) return [`R$ ${formatBR(cpaAdsAtual)}`, `R$ ${formatBR(cpaAdsAnterior)}`];
+      return [`R$ ${formatBR(idx === 0 ? cpaAdsAtual : cpaAdsAnterior)}`];
     });
 
-    // 3) CPA Geral (Loja): Investimento ÷ Pedidos pagos (1ª = atual, 2ª = anterior)
-    let countCpaGeral = 0;
-    out = out.replace(/\|\s*CPA Geral \(Loja\)\s*\|\s*R\$\s*[\d.,]+\s*\|/gi, () => {
-      countCpaGeral++;
-      if (countCpaGeral === 1) {
-        const cpa = m.pedidosPagosAtual > 0 ? m.investimentoAtual / m.pedidosPagosAtual : 0;
-        return `| CPA Geral (Loja) | R$ ${formatBR(cpa)} |`;
+    // CPA Geral (Loja) (Investimento ÷ Pedidos pagos)
+    const cpaGeralAtual = m.pedidosPagosAtual > 0 ? m.investimentoAtual / m.pedidosPagosAtual : 0;
+    const cpaGeralAnterior = m.pedidosPagosAnterior > 0 ? m.investimentoAnterior / m.pedidosPagosAnterior : 0;
+    out = replaceRowMetric(out, /CPA\s+Geral\s*\(Loja\)/, (idx, oldVals) => {
+      if (oldVals.length >= 3) {
+        const variacao = calcVariacao(cpaGeralAtual, cpaGeralAnterior);
+        return [`R$ ${formatBR(cpaGeralAtual)}`, `R$ ${formatBR(cpaGeralAnterior)}`, variacao];
       }
-      const cpa = m.pedidosPagosAnterior > 0 ? m.investimentoAnterior / m.pedidosPagosAnterior : 0;
-      return `| CPA Geral (Loja) | R$ ${formatBR(cpa)} |`;
+      if (oldVals.length >= 2) return [`R$ ${formatBR(cpaGeralAtual)}`, `R$ ${formatBR(cpaGeralAnterior)}`];
+      return [`R$ ${formatBR(idx === 0 ? cpaGeralAtual : cpaGeralAnterior)}`];
     });
 
     return out;
   }
 
+  function getEffectivePedidosAds(): { atual: number; anterior: number } {
+    const m = parseMetricasFromMarkdown(customMarkdown);
+    const a = overridePedidosAds.trim();
+    const b = overridePedidosAdsAnterior.trim();
+    return {
+      atual: a !== "" && !isNaN(Number(a)) && Number(a) >= 0 ? Number(a) : m.pedidosAdsAtual,
+      anterior: b !== "" && !isNaN(Number(b)) && Number(b) >= 0 ? Number(b) : m.pedidosAdsAnterior,
+    };
+  }
+
   const handleApplyPedidosAds = () => {
-    const numAtual = parseInt(overridePedidosAds.trim(), 10);
-    const numAnterior = parseInt(overridePedidosAdsAnterior.trim(), 10);
-    if (isNaN(numAtual) || numAtual < 0) {
-      toast({ title: "Valor inválido", description: "Informe um número válido para Pedidos Ads (mês atual).", variant: "destructive" });
+    const { atual, anterior } = getEffectivePedidosAds();
+    if (atual <= 0 && overridePedidosAds.trim() !== "") {
+      toast({ title: "Valor inválido", description: "Informe um número > 0 para Pedidos Ads (mês atual).", variant: "destructive" });
       return;
     }
-    if (overridePedidosAdsAnterior.trim() !== "" && (isNaN(numAnterior) || numAnterior < 0)) {
-      toast({ title: "Valor inválido", description: "Informe um número válido para Pedidos Ads (mês anterior).", variant: "destructive" });
-      return;
-    }
-    const anterior = overridePedidosAdsAnterior.trim() === "" ? parseMetricasFromMarkdown(customMarkdown).pedidosAdsAnterior : numAnterior;
-    const updated = applyPedidosAdsAndCpaInMarkdown(customMarkdown, numAtual, anterior);
+    const updated = applyPedidosAdsAndCpaInMarkdown(customMarkdown, atual, anterior);
     setCustomMarkdown(updated);
-    if (overridePedidosAdsAnterior.trim() !== "") setOverridePedidosAdsAnterior(String(anterior));
     toast({
       title: "Relatório atualizado",
-      description: "Pedidos Ads (atual e anterior) e CPA Geral atualizados na análise.",
+      description: "Pedidos Ads e CPA atualizados na análise.",
       variant: "default",
     });
   };
@@ -558,22 +635,31 @@ export default function AnaliseGeminiPage() {
               </div>
               {(() => {
                 const m = parseMetricasFromMarkdown(customMarkdown);
-                const cpaAdsAtual = m.pedidosAdsAtual > 0 ? m.investimentoAtual / m.pedidosAdsAtual : 0;
+                const { atual: paAtual, anterior: paAnterior } = getEffectivePedidosAds();
+                const cpaAdsAtual = paAtual > 0 ? m.investimentoAtual / paAtual : 0;
                 const cpaGeralAtual = m.pedidosPagosAtual > 0 ? m.investimentoAtual / m.pedidosPagosAtual : 0;
+                const cpaAdsAnt = paAnterior > 0 ? m.investimentoAnterior / paAnterior : 0;
+                const cpaGeralAnt = m.pedidosPagosAnterior > 0 ? m.investimentoAnterior / m.pedidosPagosAnterior : 0;
                 return (
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>
-                      <strong>Mês atual:</strong> CPA Ads = R$ {formatBR(m.investimentoAtual)} ÷ {m.pedidosAdsAtual} = <strong>R$ {formatBR(cpaAdsAtual)}</strong> &nbsp;|&nbsp; CPA Geral (Loja) = R$ {formatBR(m.investimentoAtual)} ÷ {m.pedidosPagosAtual} = <strong>R$ {formatBR(cpaGeralAtual)}</strong>
-                    </p>
-                    {m.pedidosAdsAnterior > 0 && (() => {
-                      const cpaAdsAnt = m.investimentoAnterior / m.pedidosAdsAnterior;
-                      const cpaGeralAnt = m.pedidosPagosAnterior > 0 ? m.investimentoAnterior / m.pedidosPagosAnterior : 0;
-                      return (
-                        <p>
-                          <strong>Mês anterior:</strong> CPA Ads = R$ {formatBR(m.investimentoAnterior)} ÷ {m.pedidosAdsAnterior} = <strong>R$ {formatBR(cpaAdsAnt)}</strong> &nbsp;|&nbsp; CPA Geral (Loja) = R$ {formatBR(m.investimentoAnterior)} ÷ {m.pedidosPagosAnterior} = <strong>R$ {formatBR(cpaGeralAnt)}</strong>
-                        </p>
-                      );
-                    })()}
+                  <div className="space-y-2 text-sm">
+                    <div className="rounded border p-3 bg-white dark:bg-zinc-900 space-y-1">
+                      <p className="font-medium text-foreground">Mês atual</p>
+                      <p className="text-muted-foreground">
+                        CPA Ads = R$ {formatBR(m.investimentoAtual)} ÷ {paAtual || "—"} = <strong className="text-foreground">{paAtual > 0 ? `R$ ${formatBR(cpaAdsAtual)}` : "—"}</strong>
+                      </p>
+                      <p className="text-muted-foreground">
+                        CPA Geral (Loja) = R$ {formatBR(m.investimentoAtual)} ÷ {m.pedidosPagosAtual || "—"} = <strong className="text-foreground">{m.pedidosPagosAtual > 0 ? `R$ ${formatBR(cpaGeralAtual)}` : "—"}</strong>
+                      </p>
+                    </div>
+                    <div className="rounded border p-3 bg-white dark:bg-zinc-900 space-y-1">
+                      <p className="font-medium text-foreground">Mês anterior</p>
+                      <p className="text-muted-foreground">
+                        CPA Ads = R$ {formatBR(m.investimentoAnterior)} ÷ {paAnterior || "—"} = <strong className="text-foreground">{paAnterior > 0 ? `R$ ${formatBR(cpaAdsAnt)}` : "—"}</strong>
+                      </p>
+                      <p className="text-muted-foreground">
+                        CPA Geral (Loja) = R$ {formatBR(m.investimentoAnterior)} ÷ {m.pedidosPagosAnterior || "—"} = <strong className="text-foreground">{m.pedidosPagosAnterior > 0 ? `R$ ${formatBR(cpaGeralAnt)}` : "—"}</strong>
+                      </p>
+                    </div>
                   </div>
                 );
               })()}
