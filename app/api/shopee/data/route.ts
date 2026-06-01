@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma';
 import { shopeeFetch, refreshAccessToken } from '@/lib/shopee';
 import { calcularPedidosPagos30Dias } from '@/lib/shopee-vendas';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -125,6 +127,8 @@ async function getValidAccessToken(integration: any) {
 
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
     const dateFromParam = searchParams.get('date_from');

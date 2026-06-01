@@ -21,6 +21,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const startTime = Date.now();
     console.log('\n===== CRON JOB: RENOVAÇÃO AUTOMÁTICA DE TOKENS =====');
     console.log(` Iniciado em: ${new Date().toISOString()}`);
@@ -290,3 +292,5 @@ export async function GET(request: Request) {
     }, { status: 500 });
   }
 }
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

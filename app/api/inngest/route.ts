@@ -7,3 +7,5 @@ export const { GET, POST, PUT } = serve({
   functions: [processarVendasReais],
 });
 
+
+export const dynamic = 'force-dynamic';

@@ -16,6 +16,8 @@ import { refreshAccessToken } from '@/lib/shopee';
  */
 export async function POST(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const body = await request.json();
     const { action, client_id } = body;
 
@@ -334,3 +336,7 @@ async function fixSpecificIntegration(results: any, clientId: string) {
 
   return NextResponse.json(results);
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

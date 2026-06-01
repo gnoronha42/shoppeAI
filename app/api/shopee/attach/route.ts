@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const body = await request.json().catch(() => ({}))
     const { client_id, shop_id, from_client_id } = body || {}
 

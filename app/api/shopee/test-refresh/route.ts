@@ -11,6 +11,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { refresh_token, client_id } = await request.json();
 
     if (!refresh_token && !client_id) {
@@ -142,3 +144,5 @@ export async function POST(request: Request) {
     }, { status: 500 });
   }
 }
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

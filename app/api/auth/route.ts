@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { sign, verify } from 'jsonwebtoken';
 import { PERMISSIONS, DEFAULT_PERMISSIONS, type Role, type Permission } from '@/lib/permissions';
 
+export const dynamic = 'force-dynamic';
+
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 interface User {

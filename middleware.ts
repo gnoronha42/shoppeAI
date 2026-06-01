@@ -1,36 +1,27 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-
-
-const publicRoutes = ['/login', '/api/auth', '/api/analysts', '/api/shopee', '/selleria', '/obrigado', '/calculadora'];
+const SHOPEE_PREFIXES = ['/api/shopee', '/api/shopee-ads'];
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  
-  if (publicRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.next();
-  }
+  const path = request.nextUrl.pathname;
+  const isShopeeApi = SHOPEE_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));
+  if (!isShopeeApi) return NextResponse.next();
 
-  
-  const token =
-    request.cookies.get('auth_token')?.value ||
-    request.headers.get('authorization')?.split(' ')[1];
-
-  if (!token) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
-    }
-
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('from', pathname);
-    return NextResponse.redirect(loginUrl);
+  if (process.env.SHOPEE_INTEGRATION_ENABLED === 'false') {
+    return NextResponse.json(
+      {
+        ok: false,
+        disabled: true,
+        message:
+          'Integração Shopee temporariamente desativada (SHOPEE_INTEGRATION_ENABLED=false).',
+      },
+      { status: 503 },
+    );
   }
 
   return NextResponse.next();
 }
 
-
 export const config = {
-  matcher: ['/((?!_next|fonts|favicon.ico|sitemap.xml).*)'],
+  matcher: ['/api/shopee/:path*', '/api/shopee-ads/:path*'],
 };

@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const access_token = searchParams.get('access_token');
     const shop_id = searchParams.get('shop_id');
@@ -127,3 +129,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

@@ -16,6 +16,8 @@ import { shopeeFetch} from '@/lib/shopee';
 export async function GET(request: Request) {
   try {
     
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     // 1. Buscar lista de lojas autorizadas na Shopee
     // Nota: Este endpoint é público e usa autenticação de parceiro, não de loja
     const response = await shopeeFetch<any>({
@@ -93,3 +95,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

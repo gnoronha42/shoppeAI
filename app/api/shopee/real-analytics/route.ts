@@ -16,6 +16,8 @@ import { shopeeFetch } from '@/lib/shopee';
  */
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
     const dateFromParam = searchParams.get('date_from');
@@ -291,3 +293,7 @@ export async function GET(request: Request) {
     }, { status: 500 });
   }
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

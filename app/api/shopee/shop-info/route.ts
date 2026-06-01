@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
     const shopId = searchParams.get('shop_id');
@@ -45,3 +47,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

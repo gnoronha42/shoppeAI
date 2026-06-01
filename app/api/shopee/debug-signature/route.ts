@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const testTimestamp = searchParams.get('timestamp') || Math.floor(Date.now() / 1000).toString();
     

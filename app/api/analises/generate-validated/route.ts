@@ -4,6 +4,8 @@ import {
   ADVANCED_ACCOUNT_PROMPT,
 } from "../../../../components/analysis/analysis";
 
+export const dynamic = 'force-dynamic';
+
 interface AnalysisRequest {
   images: string[];
   analysisType: "ads" | "account";

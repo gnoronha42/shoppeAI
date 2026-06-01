@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -11,6 +13,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const sixHoursFromNow = new Date(Date.now() + 6 * 60 * 60 * 1000);
     
     // Buscar TODAS as integrações Shopee

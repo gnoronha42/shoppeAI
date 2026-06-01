@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server';
 import { buildAdsAuthUrlAsync, ensureShopeeAdsEnv, getShopeeAdsEnv } from '@/lib/shopee-ads-auth';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 function toBase64(obj: unknown) {
   return Buffer.from(JSON.stringify(obj)).toString('base64');
 }
 
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     ensureShopeeAdsEnv();
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');

@@ -41,6 +41,8 @@ async function getValidAccessToken(integration: any) {
 
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
     const dateFromParam = searchParams.get('date_from') || '2025-11-25';
@@ -258,3 +260,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: err.message || 'Erro interno' }, { status: 500 });
   }
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

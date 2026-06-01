@@ -4,6 +4,8 @@ import { validatePermissions } from '@/lib/middleware';
 import { PERMISSIONS } from '@/lib/permissions';
 
 // GET - Retorna o checklist do cliente
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }

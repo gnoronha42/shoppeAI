@@ -8,6 +8,8 @@ function fromBase64<T = unknown>(b64: string): T {
 
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get('code');
     const shop_id = searchParams.get('shop_id');
@@ -118,3 +120,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(errorUrl);
   }
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

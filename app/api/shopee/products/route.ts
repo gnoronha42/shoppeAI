@@ -76,6 +76,8 @@ async function getValidAccessToken(integration: ShopeeIntegration) {
 
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     ensureShopeeEnv();
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
@@ -245,3 +247,7 @@ export async function GET(request: Request) {
 }
 
 
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

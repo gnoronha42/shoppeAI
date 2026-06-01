@@ -4,6 +4,8 @@ import { shopeeFetch } from '@/lib/shopee';
 
 export async function POST(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { client_id, shop_id } = await request.json();
 
     if (!client_id || !shop_id) {
@@ -98,3 +100,7 @@ export async function POST(request: Request) {
     }, { status: 500 });
   }
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

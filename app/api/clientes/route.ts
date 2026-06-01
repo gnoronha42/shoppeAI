@@ -6,6 +6,8 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { Prisma } from "@/lib/generated/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     console.log('\n=== INICIANDO GET /api/clients ===');

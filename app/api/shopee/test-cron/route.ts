@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
 export const dynamic = 'force-dynamic';
 
 /**
@@ -14,6 +16,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const testResults = {
       timestamp: new Date().toISOString(),
       tests: [] as any[],

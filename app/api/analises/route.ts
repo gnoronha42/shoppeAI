@@ -654,3 +654,4 @@ export async function DELETE(request: Request) {
     );
   }
 } 
+export const dynamic = 'force-dynamic';

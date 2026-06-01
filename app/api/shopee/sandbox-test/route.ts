@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import { shopeeFetch } from '@/lib/shopee';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     console.log(' [SANDBOX-TEST] Testando conectividade com Shopee Sandbox...');
     
     const testResults: {

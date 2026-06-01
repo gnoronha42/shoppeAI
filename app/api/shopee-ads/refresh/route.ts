@@ -123,6 +123,8 @@ export async function POST(request: Request) {
 // GET para verificar status das integrações de Ads
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const integrations = await prisma.client_integrations.findMany({
       where: {
         provider: 'shopee_ads',
@@ -162,3 +164,7 @@ export async function GET(request: Request) {
     }, { status: 500 });
   }
 }
+
+export const dynamic = 'force-dynamic';
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

@@ -3,12 +3,18 @@ import prisma from '@/lib/prisma';
 import { ensureShopeeEnv, getAccessToken, shopeeFetch } from '@/lib/shopee';
 import { headers } from 'next/headers';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 function fromBase64<T = any>(state: string): T {
   return JSON.parse(Buffer.from(state, 'base64url').toString('utf8'));
 }
 
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     ensureShopeeEnv();
 
     const headersList = headers();

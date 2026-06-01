@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { shopeeFetch } from '@/lib/shopee';
 
 // Função auxiliar para processar chunks em paralelo
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 async function processInParallel<T, R>(
   items: T[],
   processor: (item: T, index: number) => Promise<R>,
@@ -72,6 +76,8 @@ async function fetchChunkOrders(
 
 export async function GET(request: NextRequest) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const access_token = searchParams.get('access_token');
     const shop_id = searchParams.get('shop_id');

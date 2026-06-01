@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
+
 /**
  * 🔍 ENDPOINT DE MONITORAMENTO - Verifica status das integrações Shopee
  * 
@@ -14,6 +18,8 @@ import prisma from '@/lib/prisma';
  */
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
 

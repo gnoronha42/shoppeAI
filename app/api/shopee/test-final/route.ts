@@ -1,8 +1,14 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { shopeeFetch } from '@/lib/shopee';
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  const guard = guardShopeeRoute();
+  if (guard) return guard;
+
   const { searchParams } = new URL(request.url);
   const clientId = searchParams.get('client_id');
 

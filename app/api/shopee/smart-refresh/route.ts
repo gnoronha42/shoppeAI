@@ -12,6 +12,8 @@ export const dynamic = 'force-dynamic';
  */
 export async function POST(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { client_id, force = false } = await request.json();
 
     if (!client_id) {
@@ -160,6 +162,8 @@ export async function POST(request: Request) {
  */
 export async function GET(request: Request) {
   try {
+    const _shopeeGuard = guardShopeeRoute();
+    if (_shopeeGuard) return _shopeeGuard;
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('client_id');
 
@@ -236,3 +240,5 @@ export async function GET(request: Request) {
     }, { status: 500 });
   }
 }
+
+import { guardShopeeRoute } from '@/lib/shopee-route-guard';

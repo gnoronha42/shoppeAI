@@ -1,9 +1,21 @@
+import { isNextBuildPhase } from '@/lib/is-next-build';
+import { isShopeeIntegrationEnabled } from '@/lib/shopee-route-guard';
+
 const SHOPEE_BASE_URL = process.env.SHOPEE_BASE_URL || '';
 const SHOPEE_PARTNER_ID = process.env.SHOPEE_PARTNER_ID || '';
 const SHOPEE_PARTNER_KEY = process.env.SHOPEE_PARTNER_KEY || '';
 const SHOPEE_REDIRECT_URL = process.env.SHOPEE_REDIRECT_URL || '';
 
 const SHOPEE_SECRET = SHOPEE_PARTNER_KEY;
+
+function assertShopeeApiCallable(): void {
+  if (isNextBuildPhase()) {
+    throw new Error('SHOPEE_BUILD_SKIP');
+  }
+  if (!isShopeeIntegrationEnabled()) {
+    throw new Error('SHOPEE_INTEGRATION_DISABLED');
+  }
+}
 
 async function toHexHmacSHA256(payload: string, secret: string): Promise<string> {
   const enc = new TextEncoder();
@@ -199,6 +211,7 @@ export async function shopeeFetch<T = unknown>(args: {
   access_token: string;
   shop_id: string | number;
 }) {
+  assertShopeeApiCallable();
   const path = args.path.startsWith('/') ? args.path : `/${args.path}`;
   const method = args.method || 'GET';
   const timestamp = await getShopeeServerTimestamp();
