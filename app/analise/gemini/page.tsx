@@ -84,6 +84,8 @@ export default function AnaliseGeminiPage() {
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [overridePedidosAds, setOverridePedidosAds] = useState<string>("");
   const [overridePedidosAdsAnterior, setOverridePedidosAdsAnterior] = useState<string>("");
+  const [useMockScenario, setUseMockScenario] = useState(false);
+  const [mockScenarioJson, setMockScenarioJson] = useState("");
   const { toast } = useToast();
 
   function parseBRL(s: string): number {
@@ -317,28 +319,33 @@ export default function AnaliseGeminiPage() {
         return { nome: file.name, conteudo: fileData.content };
       })
     );
-
-    const payload: Record<string, unknown> = {
-      csvFiles: csvFilesContent,
-      analysisType,
-      clientName: selectedClient?.name || "Cliente",
-      rawData: useRawData,
-    };
-
-    const adsAtual = overridePedidosAds.trim();
-    const adsAnterior = overridePedidosAdsAnterior.trim();
-    if (adsAtual && !isNaN(Number(adsAtual)) && Number(adsAtual) > 0) {
-      payload.overridePedidosAdsAtual = Number(adsAtual);
-    }
-    if (adsAnterior && !isNaN(Number(adsAnterior)) && Number(adsAnterior) > 0) {
-      payload.overridePedidosAdsAnterior = Number(adsAnterior);
-    }
-
     const baseUrl = getBaseUrl();
+    let parsedMockScenario: Record<string, unknown> | null = null;
+    if (useMockScenario && mockScenarioJson.trim()) {
+      try {
+        const parsed = JSON.parse(mockScenarioJson);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("Formato inválido");
+        }
+        parsedMockScenario = parsed as Record<string, unknown>;
+      } catch {
+        throw new Error("JSON do cenário mock inválido. Revise o conteúdo antes de gerar.");
+      }
+    }
+
     const response = await fetch(`${baseUrl}/analise-planilhas`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        csvFiles: csvFilesContent,
+        analysisType,
+        clientName: selectedClient?.name || "Cliente",
+        rawData: useRawData,
+        ...(overridePedidosAds.trim() !== "" && { overridePedidosAdsAtual: Number(overridePedidosAds) }),
+        ...(overridePedidosAdsAnterior.trim() !== "" && { overridePedidosAdsAnterior: Number(overridePedidosAdsAnterior) }),
+        useMockScenario,
+        ...(parsedMockScenario && { mockScenarioData: parsedMockScenario }),
+      }),
     });
     if (!response.ok) {
       const errorData = await response.json();
@@ -553,13 +560,49 @@ export default function AnaliseGeminiPage() {
         </CardContent>
       </Card>
 
-      {analysisType === "account" && dataFiles.length > 0 && (
-        <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
+      <Card className="border-indigo-200 bg-indigo-50/40 dark:bg-indigo-950/20 dark:border-indigo-800">
+        <CardHeader>
+          <CardTitle className="text-base">Cenário mock para apresentação (opcional)</CardTitle>
+          <CardDescription>
+            Quando ativo, os dados mockados são enviados para a IA como cenário prioritário de apresentação.
+            As planilhas continuam sendo usadas como base de contexto.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useMockScenario}
+              onChange={(e) => setUseMockScenario(e.target.checked)}
+              className="rounded border-input"
+            />
+            <span className="text-sm">Usar cenário mock na análise Gemini</span>
+          </label>
+
+          {useMockScenario && (
+            <div className="space-y-2">
+              <Label htmlFor="mock-scenario-json">JSON do cenário mock</Label>
+              <textarea
+                id="mock-scenario-json"
+                className="w-full min-h-44 p-3 border rounded text-xs font-mono"
+                value={mockScenarioJson}
+                onChange={(e) => setMockScenarioJson(e.target.value)}
+                placeholder='Cole aqui o JSON (ex.: mock-apresentacao-ideal-sallen7.json)'
+              />
+              <p className="text-xs text-muted-foreground">
+                Dica: cole o conteúdo completo do JSON de mock. Se o JSON for inválido, a geração é bloqueada.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {dataFiles.length > 0 && analysisType === "account" && (
+        <Card className="border-blue-200 bg-blue-50/50 dark:bg-blue-950/20 dark:border-blue-800">
           <CardHeader>
-            <CardTitle className="text-base">Ajuste de Pedidos Ads (opcional)</CardTitle>
+            <CardTitle className="text-base">Pedidos Ads (opcional)</CardTitle>
             <CardDescription>
-              Informe os valores corretos do painel da Shopee. Eles serão usados no cálculo de CPA e na análise da IA.
-              Se deixar em branco, o sistema usará os valores extraídos das planilhas.
+              Se o número de Pedidos Ads das planilhas estiver incorreto, informe aqui o valor correto. Serão usados nos TOTAIS OFICIAIS enviados à IA.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -570,10 +613,10 @@ export default function AnaliseGeminiPage() {
                   id="pre-pedidos-ads"
                   type="number"
                   min={0}
-                  placeholder="Ex: 100"
+                  placeholder="Ex: 323"
                   value={overridePedidosAds}
                   onChange={(e) => setOverridePedidosAds(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-40"
+                  className="w-36"
                 />
               </div>
               <div className="space-y-2">
@@ -582,13 +625,16 @@ export default function AnaliseGeminiPage() {
                   id="pre-pedidos-ads-ant"
                   type="number"
                   min={0}
-                  placeholder="Ex: 100"
+                  placeholder="Ex: 301"
                   value={overridePedidosAdsAnterior}
                   onChange={(e) => setOverridePedidosAdsAnterior(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-40"
+                  className="w-36"
                 />
               </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Deixe em branco para usar o valor extraído automaticamente das planilhas.
+            </p>
           </CardContent>
         </Card>
       )}
@@ -648,11 +694,11 @@ export default function AnaliseGeminiPage() {
 
       {customMarkdown && (
         <>
-          <Card className="border-zinc-200 dark:border-zinc-700">
+          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800">
             <CardHeader>
-              <CardTitle className="text-base">Ajuste pós-geração — Pedidos Ads e CPA</CardTitle>
+              <CardTitle className="text-base">Ajuste fino — Pedidos Ads (pós-geração)</CardTitle>
               <CardDescription>
-                Ajuste fino na tabela do relatório (não reprocessa o texto da IA). Para uma análise completa com números corretos, preencha os campos antes de gerar.
+                Os valores informados antes da geração já foram aplicados nos TOTAIS OFICIAIS. Use esta seção apenas se precisar corrigir o markdown já gerado.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
