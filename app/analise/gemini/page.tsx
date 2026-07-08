@@ -25,9 +25,10 @@ import { MarkdownReport } from "@/components/analysis/markdown-report";
 import { PDFGenerator } from "@/components/analysis/pdf-generator";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Tesseract from "tesseract.js";
 
-const ACCEPT_DATA_FILES =
-  "text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xlsx, .xls";
+const ACCEPT_FILES =
+  "image/*, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xlsx, .xls";
 
 function isDataFile(file: File) {
   return (
@@ -38,6 +39,10 @@ function isDataFile(file: File) {
     file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
     file.type === "application/vnd.ms-excel"
   );
+}
+
+function isImageFile(file: File) {
+  return file.type.startsWith("image/");
 }
 
 function classifyFileName(name: string): string {
@@ -311,7 +316,41 @@ export default function AnaliseGeminiPage() {
     return { content: text, isBase64: false };
   };
 
-  const analyzePlanilhasWithGemini = async (dataFiles: File[]) => {
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        const base64String = reader.result as string;
+        resolve(base64String.split(",")[1]);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const ocrImage = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        try {
+          const {
+            data: { text },
+          } = await Tesseract.recognize(reader.result as string, "por");
+          resolve(text.trim());
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const ocrAllImages = async (imageFiles: File[]): Promise<string[]> => {
+    return Promise.all(imageFiles.map(ocrImage));
+  };
+
+  const analyzeWithGemini = async (dataFiles: File[], imageFiles: File[]) => {
     setApiError(null);
     const csvFilesContent = await Promise.all(
       dataFiles.map(async (file) => {
@@ -319,6 +358,12 @@ export default function AnaliseGeminiPage() {
         return { nome: file.name, conteudo: fileData.content };
       })
     );
+    const base64Images =
+      imageFiles.length > 0
+        ? await Promise.all(imageFiles.map(convertImageToBase64))
+        : [];
+    const ocrTexts =
+      imageFiles.length > 0 ? await ocrAllImages(imageFiles) : [];
     const baseUrl = getBaseUrl();
     let parsedMockScenario: Record<string, unknown> | null = null;
     if (useMockScenario && mockScenarioJson.trim()) {
@@ -337,10 +382,12 @@ export default function AnaliseGeminiPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        csvFiles: csvFilesContent,
+        ...(csvFilesContent.length > 0 && { csvFiles: csvFilesContent }),
+        ...(base64Images.length > 0 && { images: base64Images }),
+        ...(ocrTexts.length > 0 && { ocrTexts }),
         analysisType,
         clientName: selectedClient?.name || "Cliente",
-        rawData: useRawData,
+        rawData: useRawData && dataFiles.length > 0,
         ...(overridePedidosAds.trim() !== "" && { overridePedidosAdsAtual: Number(overridePedidosAds) }),
         ...(overridePedidosAdsAnterior.trim() !== "" && { overridePedidosAdsAnterior: Number(overridePedidosAdsAnterior) }),
         useMockScenario,
@@ -391,10 +438,11 @@ export default function AnaliseGeminiPage() {
       return;
     }
     const dataFiles = files.filter(isDataFile);
-    if (dataFiles.length === 0) {
+    const imageFiles = files.filter(isImageFile);
+    if (dataFiles.length === 0 && imageFiles.length === 0) {
       toast({
-        title: "Nenhuma planilha enviada",
-        description: "Envie pelo menos 1 planilha para análise com Gemini.",
+        title: "Nenhum arquivo enviado",
+        description: "Envie pelo menos 1 planilha ou imagem para análise com Gemini.",
         variant: "destructive",
       });
       return;
@@ -402,7 +450,7 @@ export default function AnaliseGeminiPage() {
     if (dataFiles.length > 4) {
       toast({
         title: "Máximo 4 planilhas",
-        description: "Use no máximo 4 arquivos: 2 de anúncios + 2 de shop-stats.",
+        description: "Use no máximo 4 planilhas: 2 de anúncios + 2 de shop-stats.",
         variant: "destructive",
       });
       return;
@@ -410,7 +458,7 @@ export default function AnaliseGeminiPage() {
     try {
       setIsAnalyzing(true);
       setApiError(null);
-      const result = await analyzePlanilhasWithGemini(dataFiles);
+      const result = await analyzeWithGemini(dataFiles, imageFiles);
       setCustomMarkdown(result);
       const { pedidosAdsAtual, pedidosAdsAnterior } = parseMetricasFromMarkdown(result);
       setOverridePedidosAds(pedidosAdsAtual > 0 ? String(pedidosAdsAtual) : "");
@@ -441,15 +489,19 @@ export default function AnaliseGeminiPage() {
   };
 
   const dataFiles = files.filter(isDataFile);
+  const imageFiles = files.filter(isImageFile);
   const canSubmit =
-    selectedClientId && dataFiles.length >= 1 && dataFiles.length <= 4 && !isAnalyzing;
+    selectedClientId &&
+    (dataFiles.length >= 1 || imageFiles.length >= 1) &&
+    dataFiles.length <= 4 &&
+    !isAnalyzing;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Análise Gemini</h1>
         <p className="text-muted-foreground">
-          Análise inteligente de planilhas com Gemini (comparativa quando possível)
+          Análise inteligente de planilhas e imagens com Gemini (comparativa quando possível)
         </p>
       </div>
 
@@ -490,7 +542,7 @@ export default function AnaliseGeminiPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload de planilhas</CardTitle>
+          <CardTitle>Upload de arquivos</CardTitle>
           {/* <CardDescription>
             Anúncios e/ou Shop-Stats: análise flexível com Gemini
           </CardDescription> */}
@@ -510,17 +562,18 @@ export default function AnaliseGeminiPage() {
           <FileUpload
             onFilesChange={setFiles}
             maxFiles={6}
-            accept={ACCEPT_DATA_FILES}
+            accept={ACCEPT_FILES}
           />
           <label className="mt-4 flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={useRawData}
               onChange={(e) => setUseRawData(e.target.checked)}
-              className="rounded border-input"
+              disabled={dataFiles.length === 0}
+              className="rounded border-input disabled:opacity-50"
             />
             <span className="text-sm">
-              Enviar dados brutos à IA (mais preciso: a IA lê as planilhas inteiras e calcula os totais; sem camada de extração)
+              Enviar dados brutos à IA (planilhas: a IA lê as tabelas inteiras e calcula os totais; não se aplica a imagens)
             </span>
           </label>
           {files.length > 0 && (
@@ -530,8 +583,9 @@ export default function AnaliseGeminiPage() {
               </p>
               <ul className="mt-1 space-y-1">
                 {files.map((file, i) => {
-                  const tipo = classifyFileName(file.name);
-                  const periodo = extractPeriodFromName(file.name);
+                  const isImage = isImageFile(file);
+                  const tipo = isImage ? "Imagem" : classifyFileName(file.name);
+                  const periodo = isImage ? "" : extractPeriodFromName(file.name);
                   return (
                     <li key={i} className="text-xs flex items-center gap-2">
                       <span
@@ -540,6 +594,8 @@ export default function AnaliseGeminiPage() {
                             ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
                             : tipo === "Shop-Stats"
                             ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                            : tipo === "Imagem"
+                            ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
                             : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                         }`}
                       >
