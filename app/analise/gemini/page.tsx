@@ -332,22 +332,40 @@ export default function AnaliseGeminiPage() {
     });
   };
 
-  const ocrImage = async (file: File): Promise<string> => {
+  const preprocessImageForOcr = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = async () => {
-        try {
-          const {
-            data: { text },
-          } = await Tesseract.recognize(reader.result as string, "por");
-          resolve(text.trim());
-        } catch (err) {
-          reject(err);
-        }
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(2, Math.max(1, 1800 / Math.max(img.width, img.height)));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(reader.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/png"));
+        };
+        img.onerror = () => resolve(reader.result as string);
+        img.src = reader.result as string;
       };
       reader.onerror = (error) => reject(error);
     });
+  };
+
+  const ocrImage = async (file: File): Promise<string> => {
+    const dataUrl = await preprocessImageForOcr(file);
+    const {
+      data: { text },
+    } = await Tesseract.recognize(dataUrl, "por", {
+      tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT,
+    });
+    return text.trim();
   };
 
   const ocrAllImages = async (imageFiles: File[]): Promise<string[]> => {
