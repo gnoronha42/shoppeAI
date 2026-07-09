@@ -30,6 +30,10 @@ import Tesseract from "tesseract.js";
 const ACCEPT_FILES =
   "image/*, text/csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, .xlsx, .xls";
 
+const MAX_IMAGES = 9;
+const MAX_PLANILHAS = 4;
+const MAX_FILES = MAX_IMAGES + MAX_PLANILHAS;
+
 function isDataFile(file: File) {
   return (
     file.type === "text/csv" ||
@@ -447,10 +451,18 @@ export default function AnaliseGeminiPage() {
       });
       return;
     }
-    if (dataFiles.length > 4) {
+    if (dataFiles.length > MAX_PLANILHAS) {
       toast({
-        title: "Máximo 4 planilhas",
-        description: "Use no máximo 4 planilhas: 2 de anúncios + 2 de shop-stats.",
+        title: `Máximo ${MAX_PLANILHAS} planilhas`,
+        description: `Use no máximo ${MAX_PLANILHAS} planilhas: 2 de anúncios + 2 de shop-stats.`,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (imageFiles.length > MAX_IMAGES) {
+      toast({
+        title: `Máximo ${MAX_IMAGES} imagens`,
+        description: `Envie até ${MAX_IMAGES} prints por análise.`,
         variant: "destructive",
       });
       return;
@@ -493,7 +505,8 @@ export default function AnaliseGeminiPage() {
   const canSubmit =
     selectedClientId &&
     (dataFiles.length >= 1 || imageFiles.length >= 1) &&
-    dataFiles.length <= 4 &&
+    dataFiles.length <= MAX_PLANILHAS &&
+    imageFiles.length <= MAX_IMAGES &&
     !isAnalyzing;
 
   return (
@@ -561,7 +574,7 @@ export default function AnaliseGeminiPage() {
           </div> */}
           <FileUpload
             onFilesChange={setFiles}
-            maxFiles={6}
+            maxFiles={MAX_FILES}
             accept={ACCEPT_FILES}
           />
           <label className="mt-4 flex items-center gap-2 cursor-pointer">
