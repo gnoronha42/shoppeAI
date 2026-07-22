@@ -358,18 +358,32 @@ export default function AnaliseGeminiPage() {
     });
   };
 
-  const ocrImage = async (file: File): Promise<string> => {
+  const ocrImageWithWorker = async (
+    worker: Tesseract.Worker,
+    file: File
+  ): Promise<string> => {
     const dataUrl = await preprocessImageForOcr(file);
     const {
       data: { text },
-    } = await Tesseract.recognize(dataUrl, "por", {
-      tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT,
-    });
+    } = await worker.recognize(dataUrl);
     return text.trim();
   };
 
   const ocrAllImages = async (imageFiles: File[]): Promise<string[]> => {
-    return Promise.all(imageFiles.map(ocrImage));
+    // tesseract.js v6: pageseg_mode é WorkerParams (setParameters), não WorkerOptions
+    const worker = await Tesseract.createWorker("por");
+    try {
+      await worker.setParameters({
+        tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT,
+      });
+      const texts: string[] = [];
+      for (const file of imageFiles) {
+        texts.push(await ocrImageWithWorker(worker, file));
+      }
+      return texts;
+    } finally {
+      await worker.terminate();
+    }
   };
 
   const analyzeWithGemini = async (dataFiles: File[], imageFiles: File[]) => {
