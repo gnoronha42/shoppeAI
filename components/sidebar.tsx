@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./theme-toggle";
-import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users, LogOut, UserPlus, Calculator } from "lucide-react";
+import { ShoppingBag, BarChart2, BrainCircuit, Settings, Clock, Menu, X, Users, LogOut, UserPlus, Calculator, CalendarCheck } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import Image from "next/image";
@@ -31,6 +31,11 @@ const regularItems = [
     title: "Análise Gemini",
     href: "/analise/gemini",
     icon: <BrainCircuit className="mr-2 h-5 w-5" />,
+  },
+  {
+    title: "Fechamento Mensal",
+    href: "/analise/fechamento",
+    icon: <CalendarCheck className="mr-2 h-5 w-5" />,
   },
   {
     title: "Calculadora",

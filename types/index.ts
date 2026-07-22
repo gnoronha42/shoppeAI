@@ -15,7 +15,7 @@ export interface Client {
 }
 
 // Analysis types
-export type AnalysisType = 'account' | 'ads' | 'express' | 'whatsapp-consultivo';
+export type AnalysisType = 'account' | 'ads' | 'express' | 'whatsapp-consultivo' | 'fechamento-mensal';
 
 export interface Report {
   id: string;
