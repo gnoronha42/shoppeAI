@@ -51,14 +51,6 @@ function isImageFile(file: File) {
   return file.type.startsWith("image/");
 }
 
-function sortImagesByImName(files: File[]) {
-  return [...files].sort((a, b) => {
-    const na = parseInt(a.name.match(/im(\d+)/i)?.[1] || "999", 10);
-    const nb = parseInt(b.name.match(/im(\d+)/i)?.[1] || "999", 10);
-    return na - nb;
-  });
-}
-
 function extractPeriodFromName(name: string): string {
   const m = name.match(/(\d{8})[_-](\d{8})/);
   if (!m) return "";
@@ -104,7 +96,7 @@ export default function AnaliseFechamentoPage() {
     const baseUrl = getBaseUrl();
 
     const images = await Promise.all(
-      sortImagesByImName(imageFiles).map(async (file) => ({
+      imageFiles.map(async (file) => ({
         name: file.name,
         contentBase64: await readFileAsBase64(file),
         mimeType: file.type || "image/png",
@@ -180,7 +172,7 @@ export default function AnaliseFechamentoPage() {
       toast({
         title: "Nenhum arquivo enviado",
         description:
-          "Envie a planilha parentskudetail.xlsx e os prints (im1…im9).",
+          "Envie a planilha parentskudetail.xlsx e os prints do painel Shopee.",
         variant: "destructive",
       });
       return;
@@ -189,7 +181,7 @@ export default function AnaliseFechamentoPage() {
     if (imageFiles.length > MAX_IMAGES) {
       toast({
         title: `Máximo ${MAX_IMAGES} imagens`,
-        description: `Envie até ${MAX_IMAGES} prints (im1…im9).`,
+        description: `Envie até ${MAX_IMAGES} prints por fechamento.`,
         variant: "destructive",
       });
       return;
@@ -286,21 +278,21 @@ export default function AnaliseFechamentoPage() {
           <CardTitle>Upload</CardTitle>
           <CardDescription>
             Envie 1 planilha <strong>parentskudetail.YYYYMMDD_YYYYMMDD.xlsx</strong>{" "}
-            e até 9 prints nomeados <strong>im1.png … im9.png</strong> (ordem
-            importa para o mapa de imagens).
+            e até 9 prints do painel Shopee. Nome e ordem das imagens não importam —
+            o Gemini identifica cada tela pelo conteúdo (Métricas, Fontes, Funil, Ads…).
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/30 rounded border border-blue-200 dark:border-blue-800">
             <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
-              Mapa esperado dos prints
+              Prints recomendados (qualquer nome/ordem)
             </p>
             <ul className="text-xs text-blue-600 dark:text-blue-400 ml-3 list-disc space-y-0.5">
-              <li>im1–im3 → Métricas Principais</li>
-              <li>im4–im5 → Fontes de Tráfego</li>
-              <li>im6 → Visão Geral do Produto (funil)</li>
-              <li>im7 → Top produtos</li>
-              <li>im8 → Ads mês atual · im9 → Ads mês anterior</li>
+              <li>Métricas Principais (pode ser mais de um print)</li>
+              <li>Fontes de Tráfego</li>
+              <li>Visão Geral do Produto (funil)</li>
+              <li>Produtos com Melhor Desempenho (opcional)</li>
+              <li>Desempenho de Anúncios — mês atual e mês anterior</li>
             </ul>
           </div>
 
