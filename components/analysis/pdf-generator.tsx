@@ -28,26 +28,37 @@ export function PDFGenerator({
 
   const baixarPdf = async () => {
     const baseUrl = process.env.NEXT_PUBLIC_ANALYSIS_MICRO_URL || 'https://analysis-micro.onrender.com';
-    const response = await fetch(`${baseUrl}/analisepdf`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ markdown, analysisType, clientName }),
-    });
-  
-    if (!response.ok) {
-      alert('Erro ao gerar PDF');
-      return;
+    try {
+      const response = await fetch(`${baseUrl}/analisepdf`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markdown, analysisType, clientName }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        const msg = err.error || `Erro HTTP ${response.status}`;
+        alert(`Erro ao gerar PDF: ${msg}`);
+        return;
+      }
+
+      const blob = await response.blob();
+      if (!blob || blob.size === 0 || blob.type.includes('json')) {
+        alert('Erro ao gerar PDF: resposta vazia ou inválida do servidor');
+        return;
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${clientName}-${analysisType}-relatorio.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      onAfterDownload?.();
+    } catch (e: unknown) {
+      alert(`Erro ao gerar PDF: ${e instanceof Error ? e.message : 'falha de rede'}`);
     }
-  
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${clientName}-${analysisType}-relatorio.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
   };
   
   

@@ -59,6 +59,192 @@ function extractPeriodFromName(name: string): string {
   return `${fmt(m[1])} a ${fmt(m[2])}`;
 }
 
+// ────────────────────────────────────────────────────────────────
+// Conversor determinístico: JSON dashboard → Markdown legível
+// (usado enquanto o painel Seller.IA principal não renderiza esse endpoint diretamente)
+// ────────────────────────────────────────────────────────────────
+function relatorioJsonToMarkdown(rel: any): string {
+  const brl = (n: any) =>
+    typeof n === "number"
+      ? n.toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
+      : String(n ?? "—");
+  const int = (n: any) =>
+    typeof n === "number" ? n.toLocaleString("pt-BR") : String(n ?? "—");
+  const pct = (v: any) =>
+    v == null || v === "" ? "—" : String(v).endsWith("%") ? String(v) : `${v}%`;
+
+  const ident = rel?.identificacao || {};
+  const snapLoja = rel?.snapshot_executivo?.conta_loja || {};
+  const snapAds = rel?.snapshot_executivo?.ads || {};
+  const snapInt = rel?.snapshot_executivo?.integradas || {};
+  const kpis = rel?.analise_detalhada_kpis || {};
+  const prods = rel?.analise_produtos || {};
+
+  const lines: string[] = [];
+
+  lines.push(`# Fechamento Mensal — ${ident.loja || "Cliente"}`);
+  lines.push(`Período atual: **${ident.periodo_atual || "—"}**`);
+  if (ident.periodo_anterior && ident.periodo_anterior !== "—")
+    lines.push(`Período anterior: **${ident.periodo_anterior}**`);
+  lines.push("");
+
+  // 1. KPIs da Loja
+  lines.push("## 1. KPIs da Loja");
+  lines.push("");
+  lines.push("| Métrica | Atual | Anterior | Variação |");
+  lines.push("| :--- | ---: | ---: | ---: |");
+  const rowLoja = (label: string, k: string, isMoney = true) => {
+    const v = snapLoja[k];
+    if (!v) return;
+    const atual = isMoney && typeof v.atual === "number" ? `R$ ${brl(v.atual)}` : `${v.atual ?? "—"}`;
+    const anterior =
+      isMoney && typeof v.anterior === "number" ? `R$ ${brl(v.anterior)}` : `${v.anterior ?? "—"}`;
+    lines.push(`| ${label} | ${atual} | ${anterior} | ${v.variacao || "—"} |`);
+  };
+  rowLoja("Vendas (GMV pago)", "gmv_pago", true);
+  rowLoja("Pedidos", "pedidos_pagos", false);
+  rowLoja("Visitantes", "visitantes", false);
+  if (snapLoja.conversao_real_pago) {
+    lines.push(
+      `| Taxa de Conversão | ${pct(snapLoja.conversao_real_pago.atual)} | ${pct(snapLoja.conversao_real_pago.anterior)} | ${snapLoja.conversao_real_pago.variacao || "—"} |`,
+    );
+  }
+  rowLoja("Ticket Médio", "ticket_medio_pago", true);
+  rowLoja("Pedidos Cancelados", "cancelamentos_quantidade", false);
+  lines.push("");
+
+  // 2. ADS
+  lines.push("## 2. Anúncios de Produtos (Shopee Ads)");
+  lines.push("");
+  lines.push("| Métrica | Atual | Anterior | Variação |");
+  lines.push("| :--- | ---: | ---: | ---: |");
+  const rowAds = (label: string, k: string, isMoney = true) => {
+    const v = snapAds[k];
+    if (!v) return;
+    const atual = isMoney && typeof v.atual === "number" ? `R$ ${brl(v.atual)}` : `${v.atual ?? "—"}`;
+    const anterior =
+      isMoney && typeof v.anterior === "number" ? `R$ ${brl(v.anterior)}` : `${v.anterior ?? "—"}`;
+    lines.push(`| ${label} | ${atual} | ${anterior} | ${v.variacao || "—"} |`);
+  };
+  rowAds("Investimento Ads", "investimento_ads", true);
+  rowAds("Impressões", "impressoes_ads", false);
+  rowAds("Cliques", "cliques_ads", false);
+  if (snapAds.ctr_ads) {
+    lines.push(
+      `| CTR Ads | ${pct(snapAds.ctr_ads.atual)} | ${pct(snapAds.ctr_ads.anterior)} | ${snapAds.ctr_ads.variacao || "—"} |`,
+    );
+  }
+  rowAds("GMV Ads (Painel)", "gmv_ads_painel", true);
+  rowAds("Pedidos Ads", "pedidos_ads", false);
+  rowAds("ROAS Ads", "roas_ads_painel", false);
+  rowAds("CPA Ads", "cpa_ads", true);
+  if (snapInt?.tacos) {
+    lines.push(
+      `| TACoS | ${pct(snapInt.tacos.atual)} | ${pct(snapInt.tacos.anterior)} | ${snapInt.tacos.variacao || "—"} |`,
+    );
+  }
+  lines.push("");
+
+  // 3. Top produtos
+  const top5 = prods?.top5_por_gmv_pago?.dados || [];
+  if (Array.isArray(top5) && top5.length) {
+    lines.push("## 3. Top 5 Produtos por GMV pago (planilha)");
+    lines.push("");
+    lines.push("| # | Produto | GMV pago | Participação |");
+    lines.push("| ---: | :--- | ---: | ---: |");
+    top5.forEach((p: any, i: number) => {
+      lines.push(
+        `| ${i + 1} | ${p.produto || "—"} | R$ ${brl(p.gmv)} | ${p.participacao || "—"} |`,
+      );
+    });
+    lines.push("");
+  }
+
+  // 4. Visão geral (Gemini)
+  const vg = rel?.visao_geral_desempenho || {};
+  if (vg.resumo || vg.diagnostico_principal) {
+    lines.push("## 4. Visão Geral do Desempenho");
+    if (vg.resumo) lines.push(vg.resumo);
+    if (vg.diagnostico_principal) {
+      lines.push("");
+      lines.push(`**Diagnóstico principal:** ${vg.diagnostico_principal}`);
+    }
+    if (Array.isArray(vg.causas_provaveis) && vg.causas_provaveis.length) {
+      lines.push("");
+      lines.push("**Causas prováveis:**");
+      vg.causas_provaveis.forEach((c: string) => lines.push(`- ${c}`));
+    }
+    if (vg.prioridade_execucao) {
+      lines.push("");
+      lines.push(`**Prioridade de execução:** ${vg.prioridade_execucao}`);
+    }
+    lines.push("");
+  }
+
+  // 5. Pontos positivos / atenção
+  const pos = rel?.pontos_positivos || [];
+  const atn = rel?.pontos_de_atencao || [];
+  if (pos.length) {
+    lines.push("## 5. Pontos Positivos");
+    pos.forEach((p: any) => lines.push(`- ${typeof p === "string" ? p : p.descricao || JSON.stringify(p)}`));
+    lines.push("");
+  }
+  if (atn.length) {
+    lines.push("## 6. Pontos de Atenção");
+    atn.forEach((p: any) => lines.push(`- ${typeof p === "string" ? p : p.descricao || JSON.stringify(p)}`));
+    lines.push("");
+  }
+
+  // 7. Plano tático 30 dias
+  const plano = rel?.plano_tatico_30_dias;
+  if (plano) {
+    const semanas = ["semana_1", "semana_2", "semana_3", "semana_4"];
+    const hasContent = semanas.some((s) => (plano[s]?.acoes || []).length);
+    if (hasContent) {
+      lines.push("## 7. Plano Tático — 30 dias");
+      semanas.forEach((s, i) => {
+        const w = plano[s];
+        if (!w?.titulo && (!w?.acoes || !w.acoes.length)) return;
+        lines.push("");
+        lines.push(`### Semana ${i + 1}${w.titulo ? ` — ${w.titulo}` : ""}`);
+        (w.acoes || []).forEach((a: any) =>
+          lines.push(`- ${typeof a === "string" ? a : a.acao || JSON.stringify(a)}`),
+        );
+      });
+      lines.push("");
+    }
+  }
+
+  // 8. KPIs detalhados (crescimento absoluto) — só se houver dado
+  const has41 = kpis["4_1_gmv_pago"]?.dados;
+  if (has41) {
+    lines.push("## 8. Detalhamento por KPI");
+    lines.push("");
+    Object.entries(kpis).forEach(([k, v]: [string, any]) => {
+      if (!v?.dados) return;
+      const nome = k
+        .replace(/^\d+_\d+_/, "")
+        .replace(/_/g, " ")
+        .toUpperCase();
+      lines.push(`**${nome}**`);
+      const d = v.dados;
+      const linha: string[] = [];
+      if (d.atual !== undefined) linha.push(`Atual: ${typeof d.atual === "number" ? int(d.atual) : d.atual}`);
+      if (d.anterior !== undefined) linha.push(`Anterior: ${typeof d.anterior === "number" ? int(d.anterior) : d.anterior}`);
+      if (d.variacao) linha.push(`Variação: ${d.variacao}`);
+      if (d.crescimento_absoluto !== undefined) linha.push(`Crescimento absoluto: ${int(d.crescimento_absoluto)}`);
+      lines.push(`- ${linha.join(" | ")}`);
+      if (v.analise) lines.push(`  ${v.analise}`);
+      lines.push("");
+    });
+  }
+
+  return lines.join("\n");
+}
+
 export default function AnaliseFechamentoPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -130,9 +316,16 @@ export default function AnaliseFechamentoPage() {
     }
 
     const data = await response.json();
-    if (!data.analysis)
-      throw new Error("Formato de resposta inesperado do servidor");
-    return data.analysis as string;
+    // Backend v2 devolve `analysis` (markdown) + `data.relatorio` (JSON).
+    // Preferir markdown pronto do servidor (igual às outras telas) — evita
+    // depender só do conversor no browser.
+    if (typeof data.analysis === "string" && data.analysis.trim()) {
+      return data.analysis as string;
+    }
+    if (data?.data?.relatorio) {
+      return relatorioJsonToMarkdown(data.data.relatorio);
+    }
+    throw new Error("Formato de resposta inesperado do servidor");
   };
 
   const saveAnalysisToDatabase = async (markdown: string) => {
@@ -204,9 +397,16 @@ export default function AnaliseFechamentoPage() {
       setCustomMarkdown(result);
       toast({
         title: "Fechamento concluído",
-        description: "Relatório mensal gerado com Gemini.",
+        description: "Relatório mensal gerado. Use Baixar PDF para obter o arquivo.",
         variant: "default",
       });
+      // Scroll até o relatório (igual às outras telas de análise)
+      setTimeout(() => {
+        document.getElementById("fechamento-relatorio")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
       try {
         await saveAnalysisToDatabase(result);
       } catch {
@@ -408,7 +608,7 @@ export default function AnaliseFechamentoPage() {
       )}
 
       {customMarkdown && (
-        <Card>
+        <Card id="fechamento-relatorio">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle>Relatório de Fechamento</CardTitle>
