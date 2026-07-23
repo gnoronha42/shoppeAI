@@ -620,7 +620,7 @@ export default function AnaliseFechamentoPage() {
               <PDFGenerator
                 markdown={customMarkdown}
                 clientName={selectedClient?.name || "Cliente"}
-                analysisType="fechamento-mensal"
+                analysisType="account"
                 images={[]}
                 ocrTexts={[]}
               />
